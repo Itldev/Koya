@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    Koya is an alfresco module that provides a corporate orientated dataroom.
+
+    Copyright (C) Itl Developpement 2014
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+
+-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans>
+    
+    <!--service général de gestion des noeuds Suivi Dossier-->
+    <bean name="koyaNodeService" class="fr.itldev.koya.alfservice.KoyaNodeService">
+        <property name="nodeService" ref="nodeService"/>
+    </bean>
+    
+    <!--service de gestion des sociétés-->
+    <bean name="societeService" class="fr.itldev.koya.alfservice.SocieteService">
+        <property name="siteService" ref="siteService"/>
+        <property name="nodeService" ref="nodeService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+    </bean>     
+    
+    <!--service de gestion des espaces-->
+    <bean name="espaceService" class="fr.itldev.koya.alfservice.EspaceService">
+        <property name="nodeService" ref="nodeService"/>
+        <property name="searchService" ref="searchService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+    </bean> 
+    
+    <!--service de gestion des dossiers-->
+    <bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
+        <property name="nodeService" ref="nodeService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+    </bean>
+
+    <!--service de gestion des contenus-->
+    <bean name="contenuService" class="fr.itldev.koya.alfservice.ContenuService">
+        <property name="nodeService" ref="nodeService"/>
+    </bean>
+   
+    
+    
+    <!--service de gestion des Offres Commerciales-->
+    <bean name="offreCommercialeService" class="fr.itldev.koya.alfservice.OffreCommercialeService">
+        <property name="nodeService" ref="nodeService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+    </bean>
+    
+    <!--service de gestion des Utilisateurs et de leurs droits-->
+    <bean name="userService" class="fr.itldev.koya.alfservice.UserService"/>
+   
+    <!--service de gestion des imports/exports-->
+    <bean name="importExportService" class="fr.itldev.koya.alfservice.ImportExportService"/>
+    <!--service de gestion des modeles-->
+    <bean name="modeleService" class="fr.itldev.koya.alfservice.ModeleService">
+        <property name="nodeService" ref="nodeService"/>
+    </bean>
+    
+    <!--service de gestion des profils Applicatifs-->
+    <bean name="profilsAppService" class="fr.itldev.koya.alfservice.ProfilsAppService"/>    
+    <!--service de gestion des Questions/Réponses-->
+    <bean name="qrService" class="fr.itldev.koya.alfservice.QrService"/>
+    <!--service de gestion des Statistiques-->
+    <bean name="statService" class="fr.itldev.koya.alfservice.StatService"/>
+    
+    <!--service de gestion des Alertes-->
+    <bean name="alertService" class="fr.itldev.koya.alfservice.AlertService"/>
+    
+    <!--service de gestion des Mails-->
+    <bean name="mailingService" class="fr.itldev.koya.alfservice.MailingService"/>
+   
+</beans>

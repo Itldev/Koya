@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Koya is an alfresco module that provides a corporate orientated dataroom.
+
+    Copyright (C) Itl Developpement 2014
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+
+-->
+
+<!-- Definition of new Model -->
+<model name="itlsd:koyamodel" xmlns="http://www.alfresco.org/model/dictionary/1.0"
+       schemaLocation="http://alfresco-model-editor.googlecode.com/svn/trunk/spring-surf-alfresco-embedded/config/alfresco/model/modelSchema.xsd">
+    <!-- Optional meta-data about the model -->
+    <description>Modele de données Suivi Dossier</description>
+    <author>Christophe Le Roux</author>
+    <version>0.1</version>
+    <!-- Imports are required to allow references to definitions in other models
+    -->
+    
+    <imports>
+        <!-- Import Alfresco Dictionary Definitions -->
+        <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+        <!-- Import Alfresco Content Domain Model Definitions -->
+        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />    
+    </imports>
+    <!-- Introduction of new namespaces defined by this model -->
+    <namespaces>
+        <namespace uri="http://www.itldev.fr/koyamodel/content/1.0" prefix="itlsd" />
+    </namespaces>
+
+    <!-- TODO définir des dates de validité pour les différents element-->
+    <types>
+        <type name="itlsd:conteneur">
+            <title>espace</title>
+            <parent>cm:folder</parent>
+        </type>        
+        
+        
+        <!--les sociétés se rapportent au type site-->
+                       
+        <type name="itlsd:espace">
+            <title>espace</title>
+            <parent>itlsd:conteneur</parent>            
+        </type>        
+        
+        <type name="itlsd:dossier">
+            <title>dossier</title> <!-- numero de dossier ??-->
+            <parent>itlsd:conteneur</parent>           
+        </type>        
+        
+    </types>
+    
+    <aspects>
+        <!--cet aspect s'applique sur tous les elements de type conteneur 
+        pour gérer leur état d'activation-->
+        <aspect name="itlsd:activable">
+            <title>Indicateur d'activité</title>
+            <properties>
+                <property name="itlsd:isActif">
+                    <type>d:boolean</type>
+                    <default>true</default>
+                </property>                        
+            </properties>  
+        </aspect>        
+    </aspects>
+
+</model>

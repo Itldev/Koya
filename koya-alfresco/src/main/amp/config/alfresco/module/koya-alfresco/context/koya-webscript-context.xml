@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    Koya is an alfresco module that provides a corporate orientated dataroom.
+
+    Copyright (C) Itl Developpement 2014
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+
+-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans>
+    
+    
+    <!--
+    ==================================================================
+    ========================== Sociétés ==============================
+    ==================================================================
+    -->
+    <!--création de société-->
+    <bean id="webscript.fr.itldev.koya.societe.add.get" 
+          class="fr.itldev.koya.webscript.societe.AddSociete"
+          parent="webscript">                
+        <property name="societeService" ref="societeService" />
+        
+    </bean>
+    <!--liste des sociétés-->
+    <bean id="webscript.fr.itldev.koya.societe.list.get" 
+          class="fr.itldev.koya.webscript.societe.ListSociete"
+          parent="webscript">                
+        <property name="societeService" ref="societeService" />
+        
+    </bean>
+    
+    <!--
+    ==================================================================
+    ========================== Offres Commerciales ==================
+    ==================================================================
+    -->
+    <!--liste des Offres commerciales -->
+    <bean id="webscript.fr.itldev.koya.offrecommerciale.list.get" 
+          class="fr.itldev.koya.webscript.offrecommerciale.ListOffres"
+          parent="webscript">                
+         <property name="offreCommercialeService" ref="offreCommercialeService" />
+    </bean>
+    <!--
+    ==================================================================
+    ========================== Espaces ==============================
+    ==================================================================
+    -->
+    
+    <!--création d'un espace-->
+    <bean id="webscript.fr.itldev.koya.espace.add.post" 
+          class="fr.itldev.koya.webscript.espace.AddEspace"
+          parent="webscript">                
+        <property name="espaceService" ref="espaceService" /> 
+    </bean>
+    <!--liste les espaces-->
+    <bean id="webscript.fr.itldev.koya.espace.list.post" 
+          class="fr.itldev.koya.webscript.espace.ListEspace"
+          parent="webscript">                
+        <property name="espaceService" ref="espaceService" />
+        
+    </bean>
+    
+    <!--suppression d'un espace-->
+    <bean id="webscript.fr.itldev.koya.espace.del.del" 
+          class="fr.itldev.koya.webscript.espace.DelEspace"
+          parent="webscript">                
+        <property name="espaceService" ref="espaceService" />
+        
+    </bean>
+    
+    
+    <!--
+    ==================================================================
+    ========================== Dossiers ==============================
+    ==================================================================
+    -->
+    
+    <!--création d'un dossier-->
+    <bean id="webscript.fr.itldev.koya.dossier.add.post" 
+          class="fr.itldev.koya.webscript.dossier.AddDossier"
+          parent="webscript">                
+        <property name="dossierService" ref="dossierService" />
+    </bean>
+    <!--liste les dossiers-->
+    <bean id="webscript.fr.itldev.koya.dossier.list.post" 
+          class="fr.itldev.koya.webscript.dossier.ListDossier"
+          parent="webscript">                
+        <property name="dossierService" ref="dossierService" />
+    </bean>
+       
+    <!--
+    ==================================================================
+    ========================== Contenus ============================
+    ==================================================================
+    -->
+ 
+    <!--création d'un contenu-->
+    <bean id="webscript.fr.itldev.koya.contenu.add.post" 
+          class="fr.itldev.koya.webscript.contenu.AddContenu"
+          parent="webscript">                
+        <property name="contenuService" ref="contenuService" />
+    </bean>
+    <!--liste les contenus-->
+    <bean id="webscript.fr.itldev.koya.contenu.list.post" 
+          class="fr.itldev.koya.webscript.contenu.ListContenu"
+          parent="webscript">                
+        <property name="contenuService" ref="contenuService" />
+    </bean>
+    
+     <!--déplacer des contenus-->
+    <bean id="webscript.fr.itldev.koya.contenu.move.post" 
+          class="fr.itldev.koya.webscript.contenu.MoveContenu"
+          parent="webscript">                
+        <property name="contenuService" ref="contenuService" />
+    </bean>
+ 
+ 
+    <!--
+    ==================================================================
+    ========================== Global ============================
+    ==================================================================
+    -->
+    
+    <!--Changement du status d'activité-->
+    <bean id="webscript.fr.itldev.koya.global.toggleactive.post" 
+          class="fr.itldev.koya.webscript.global.ToggleActive"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" />        
+    </bean>
+    
+    <!--Détermination de la taille disque occupée par tous les éléments d'un conteneur-->
+    <bean id="webscript.fr.itldev.koya.global.espacedisque.post" 
+          class="fr.itldev.koya.webscript.global.EspaceDisque"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" />        
+    </bean>
+    
+    
+    
+ 
+</beans>

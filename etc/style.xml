@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF8"?>
+<additionalHeaders>
+    <js_style>
+        <firstLine>// --</firstLine>
+        <beforeEachLine>//  </beforeEachLine>
+        <endLine>// --</endLine>        
+        <skipLine><![CDATA[<.*import.*$]]></skipLine>
+        <firstLineDetectionPattern>// --$</firstLineDetectionPattern>
+        <lastLineDetectionPattern>.// --$</lastLineDetectionPattern>
+        <allowBlankLines>false</allowBlankLines>
+        <isMultiline>true</isMultiline>
+    </js_style>
+</additionalHeaders>
