@@ -11,6 +11,7 @@ rebel.xml
 .metadata
 .project
 .settings
+.classpath
 
 target
 nbproject
