@@ -36,28 +36,4 @@
             </list>
         </property>    
     </bean>
-   
-    <!--Bootstraping des données de base koya dans acp-->
-<!--    <bean id="koya-data.bootstrap" 
-          class="org.alfresco.repo.module.ImporterModuleComponent" 
-          parent="module.baseComponent">
-   
-        <property name="moduleId" value="${artifactId}" />
-        <property name="name" value="koyaBootstrap" />
-        <property name="description" value="koya initialisation des données de base" /></properties>  
-        <property name="sinceVersion" value="0.1" />
-        <property name="appliesFromVersion" value="0.1.1" />
-        
-        <property name="importer" ref="spacesBootstrap"/>
-        <property name="bootstrapViews">
-            <list>
-                <props>
-                    <prop key="path">/${spaces.company_home.childname}</prop>
-                    <prop key="location">alfresco/module/${artifactId}/koya-init.acp</prop>
-                </props>
-            </list>
-        </property>
-
-    </bean>-->
-
 </beans>

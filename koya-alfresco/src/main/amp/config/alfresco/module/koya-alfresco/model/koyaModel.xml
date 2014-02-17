@@ -21,7 +21,7 @@
 -->
 
 <!-- Definition of new Model -->
-<model name="itlsd:koyamodel" xmlns="http://www.alfresco.org/model/dictionary/1.0"
+<model name="koya:koyamodel" xmlns="http://www.alfresco.org/model/dictionary/1.0"
        schemaLocation="http://alfresco-model-editor.googlecode.com/svn/trunk/spring-surf-alfresco-embedded/config/alfresco/model/modelSchema.xsd">
     <!-- Optional meta-data about the model -->
     <description>Modele de données Suivi Dossier</description>
@@ -38,27 +38,25 @@
     </imports>
     <!-- Introduction of new namespaces defined by this model -->
     <namespaces>
-        <namespace uri="http://www.itldev.fr/koyamodel/content/1.0" prefix="itlsd" />
+        <namespace uri="http://www.itldev.fr/koyamodel/content/1.0" prefix="koya" />
     </namespaces>
 
     <!-- TODO définir des dates de validité pour les différents element-->
     <types>
-        <type name="itlsd:conteneur">
-            <title>espace</title>
+        <type name="koya:conteneur">
             <parent>cm:folder</parent>
         </type>        
         
-        
         <!--les sociétés se rapportent au type site-->
                        
-        <type name="itlsd:espace">
+        <type name="koya:espace">
             <title>espace</title>
-            <parent>itlsd:conteneur</parent>            
+            <parent>koya:conteneur</parent>            
         </type>        
         
-        <type name="itlsd:dossier">
+        <type name="koya:dossier">
             <title>dossier</title> <!-- numero de dossier ??-->
-            <parent>itlsd:conteneur</parent>           
+            <parent>koya:conteneur</parent>           
         </type>        
         
     </types>
@@ -66,10 +64,10 @@
     <aspects>
         <!--cet aspect s'applique sur tous les elements de type conteneur 
         pour gérer leur état d'activation-->
-        <aspect name="itlsd:activable">
+        <aspect name="koya:activable">
             <title>Indicateur d'activité</title>
             <properties>
-                <property name="itlsd:isActif">
+                <property name="koya:isActif">
                     <type>d:boolean</type>
                     <default>true</default>
                 </property>                        
