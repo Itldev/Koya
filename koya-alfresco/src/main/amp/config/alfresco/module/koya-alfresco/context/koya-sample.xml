@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    Koya is an alfresco module that provides a corporate orientated dataroom.
+
+    Copyright (C) Itl Developpement 2014
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+
+-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans>
+    <!-- Bootstrap sample koya company-->
+     <bean id="patch.siteLoadPatch.koyacompany" class="org.alfresco.repo.admin.patch.impl.SiteLoadPatch" parent="basePatch">
+        <property name="id"><value>patch.siteLoadPatch.koyacompany</value></property>
+        <property name="description"><value>patch.siteLoadPatch.koyacompany</value></property>
+        <property name="fixesFromSchema"><value>0</value></property>
+        <property name="fixesToSchema"><value>${version.schema}</value></property>
+        <property name="targetSchema"><value>10000</value></property> 
+        <property name="disabled"><value>${koya.sample.site.disabled}</value></property>
+        <property name="dependsOn" >
+            <list>
+                <ref bean="patch.updateDmPermissions" />
+            </list>
+        </property>
+        <property name="spacesBootstrap" ref="siteLoadBootstrap-Spaces" />
+        <property name="usersBootstrap" ref="siteLoadBootstrap-Users" />
+        <property name="siteService" ref="siteService" />
+        <property name="descriptorService" ref="descriptorComponent" />
+        <property name="authorityService" ref="authorityService" />
+        <property name="behaviourFilter" ref="policyBehaviourFilter" />
+        <property name="siteName">
+            <value>koya-company</value>
+        </property>
+        <property name="bootstrapViews">
+            <map>               
+                <entry key="contents">
+                    <props>
+                        <prop key="location">alfresco/module/${artifactId}/sample/koya-company.acp</prop>
+                    </props>
+                </entry>
+            </map>
+        </property>
+    </bean>   
+</beans>
