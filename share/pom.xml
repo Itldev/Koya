@@ -50,7 +50,7 @@
                             <excludes/>
                         </overlay>
                         <!-- Add / order here the Share AMPs declared above -->
-			<overlay>
+                        <overlay>
                             <groupId>fr.itldev</groupId>
                             <artifactId>koya-share</artifactId>
                             <type>amp</type>

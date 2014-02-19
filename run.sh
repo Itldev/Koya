@@ -19,11 +19,46 @@
 #
 
 
-OPTS="-Xms512m -Xmx4096m -XX:MaxPermSize=512m -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
+OPTS="-Xms512m -Xmx4096m -XX:MaxPermSize=512m "
+PROFILES="run"
+MVNOPTS="-DskipTests=true"
 
-if [ -n "$JREBEL_LIB" ];then
-    OPTS="$OPTS -javaagent:$JREBEL_LIB"
-fi
+#
+# Arguments processing. Possible values are :
+#
+# - debug : activates java debug options
+# - rad   : activates jrebel if jrebel lib exists in $JREBEL_LIB
+# - mysql : use mysql database instead of H2 
+#           You MUST give -Denv.dbrootpassword=*******
+#           AND Have an alfresco database in your mysql server (or modify alfresco pom profile)
+#
+
+
+for var in "$@"
+do
+    if [ "$var" == "debug" ];then
+        OPTS="$OPTS -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
+    fi
+
+    if [ "$var" == "jrebel" ];then
+        if [ -n "$JREBEL_LIB" ];then
+            if [ -f $JREBEL_LIB ];then
+                OPTS="$OPTS -javaagent:$JREBEL_LIB"
+                PROFILES="$PROFILES,rad"
+            fi
+        fi        
+    fi
+
+    if [ "$var" == "mysql" ];then
+        PROFILES="$PROFILES,mysql"
+    fi
+
+    #env var added directly in options
+    if [[ $var == -D* ]];then
+        MVNOPTS="$MVNOPTS $var"    
+    fi
+
+done
 
 
 if [ -n "$ALFRESCO_HOME" ];then
@@ -32,6 +67,5 @@ else
         OPTS="$OPTS -Dalfresco.home="
 fi
 
-
-MAVEN_OPTS="$OPTS" mvn clean install -Prun,rad -DskipTests=true
+MAVEN_OPTS="$OPTS" mvn clean install -P $PROFILES $MVNOPTS
 
