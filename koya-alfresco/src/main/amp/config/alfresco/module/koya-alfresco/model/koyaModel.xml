@@ -24,8 +24,8 @@
 <model name="koya:koyamodel" xmlns="http://www.alfresco.org/model/dictionary/1.0"
        schemaLocation="http://alfresco-model-editor.googlecode.com/svn/trunk/spring-surf-alfresco-embedded/config/alfresco/model/modelSchema.xsd">
     <!-- Optional meta-data about the model -->
-    <description>Modele de données Suivi Dossier</description>
-    <author>Christophe Le Roux</author>
+    <description>Modele de données Koya</description>
+    <author>Itldev</author>
     <version>0.1</version>
     <!-- Imports are required to allow references to definitions in other models
     -->
@@ -41,33 +41,31 @@
         <namespace uri="http://www.itldev.fr/koyamodel/content/1.0" prefix="koya" />
     </namespaces>
 
-    <!-- TODO définir des dates de validité pour les différents element-->
     <types>
-        <type name="koya:conteneur">
+        <type name="koya:container">
             <parent>cm:folder</parent>
         </type>        
-        
-        <!--les sociétés se rapportent au type site-->
                        
-        <type name="koya:espace">
-            <title>espace</title>
-            <parent>koya:conteneur</parent>            
+        <!--Societies are sites-->                       
+
+        <type name="koya:space">
+            <title>space</title>
+            <parent>koya:container</parent>            
         </type>        
         
-        <type name="koya:dossier">
-            <title>dossier</title> <!-- numero de dossier ??-->
-            <parent>koya:conteneur</parent>           
+        <type name="koya:case">
+            <title>case</title> 
+            <parent>koya:container</parent>           
         </type>        
         
     </types>
     
     <aspects>
-        <!--cet aspect s'applique sur tous les elements de type conteneur 
-        pour gérer leur état d'activation-->
+        <!--Aspect available on containers to trigger active status-->
         <aspect name="koya:activable">
-            <title>Indicateur d'activité</title>
+            <title>Active trigger</title>
             <properties>
-                <property name="koya:isActif">
+                <property name="koya:isActive">
                     <type>d:boolean</type>
                     <default>true</default>
                 </property>                        

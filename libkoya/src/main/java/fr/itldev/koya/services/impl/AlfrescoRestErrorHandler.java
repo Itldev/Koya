@@ -41,7 +41,7 @@ public class AlfrescoRestErrorHandler implements ResponseErrorHandler {
     public void handleError(ClientHttpResponse clienthttpresponse) throws IOException {
 
         if (clienthttpresponse.getStatusCode() == HttpStatus.FORBIDDEN) {
-            throw new AlfrescoAuthenticationException("Erreur 403 : Acces refusé ");
+            throw new AlfrescoAuthenticationException("Erreur 403 : Acces Denied ");
         }
 
         if (!statusOK.contains(clienthttpresponse.getStatusCode())) {

@@ -34,7 +34,7 @@ public final class Preferences extends HashMap<String, Object> {
         StringBuilder ts = new StringBuilder(" ==== Preferences ===== \n");
 
         for (String k : this.keySet()) {
-            ts.append(k + " = " + this.get(k).toString()+"\n");
+            ts.append(k).append(" = ").append(this.get(k).toString()).append("\n");
         }
 
         return ts.toString();

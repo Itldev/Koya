@@ -20,8 +20,9 @@
 package fr.itldev.koya.model;
 
 /**
- * Interface définissant les Objets koya pouvant etre désactivé. Cela
- * correspond à l'aspect itlsd:activable dans le modèle alfresco.
+ * Defines Koya object That may be activated.
+ *
+ * Alfresco aspect koya:activable equivalent
  *
  */
 public interface Activable {

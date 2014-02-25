@@ -19,8 +19,8 @@
 
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.ElementSecurise;
-import fr.itldev.koya.model.impl.Utilisateur;
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.AlfrescoService;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class AlfrescoRestService implements AlfrescoService {
 
-    protected static final String DESERIALISATION_ERROR = "Erreur de déserialisation de l'objet";
+    protected static final String DESERIALISATION_ERROR = "Object deserialisation error";
     protected static final String REST_DEL_NODE = "/s/api/node/{store_type}/{store_id}/{id}/tree";
 
     private String alfrescoServerUrl;
@@ -64,7 +64,7 @@ public class AlfrescoRestService implements AlfrescoService {
      * @param element
      */
     @Override
-    public void supprimer(Utilisateur user, ElementSecurise element) {
+    public void delete(User user, SecuredItem element) {
         user.getRestTemplate().delete(alfrescoServerUrl + REST_DEL_NODE, explodeNodeRef(element.getNodeRef()));
     }
 

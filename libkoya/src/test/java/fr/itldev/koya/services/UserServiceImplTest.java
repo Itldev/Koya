@@ -19,7 +19,7 @@
 
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.impl.Utilisateur;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoAuthenticationException;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class UserServiceImplTest extends TestCase {
 
     @Test
     public void testAdminLogin() {
-        Utilisateur admin = null;
+        User admin = null;
         try {
             admin = userService.login("admin", "admin");
         } catch (RestClientException ex) {
@@ -55,13 +55,13 @@ public class UserServiceImplTest extends TestCase {
 
     @Test(expected = AlfrescoAuthenticationException.class)
     public void testUnknownLogin() throws Exception {
-        Utilisateur userUnknown = userService.login("unknown", "unknown");
+        User userUnknown = userService.login("unknown", "unknown");
     }
 
     @Test
     public void testGetPrefs() throws IOException {
 
-        Utilisateur admin = null;
+        User admin = null;
         try {
             admin = userService.login("admin", "admin");
         } catch (RestClientException ex) {
@@ -74,7 +74,7 @@ public class UserServiceImplTest extends TestCase {
     @Test
     public void testSetPrefs() throws IOException, AlfrescoServiceException {
         String testKey = "fr.itldev.test";
-        Utilisateur admin = null;
+        User admin = null;
         try {
             admin = userService.login("admin", "admin");
         } catch (RestClientException ex) {

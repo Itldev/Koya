@@ -19,23 +19,23 @@
 
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.Contenu;
+import fr.itldev.koya.model.Content;
 
-public final class Document extends Contenu {
+public final class Document extends Content {
 
     public Document() {
     }
 
-    public Document(String nom, Repertoire pere) {
-        super(nom, pere);
+    public Document(String name, Directory parent) {
+        super(name, parent);
     }
 
-    public Document(String nom, Dossier pere) {
-        super(nom, pere);
+    public Document(String name, Case parent) {
+        super(name, parent);
     }
 
-    public Document(String nodeRef, String path, String nom, String parentNodeRef) {
-        super(nodeRef, path, nom, parentNodeRef);
+    public Document(String nodeRef, String path, String name, String parentNodeRef) {
+        super(nodeRef, path, name, parentNodeRef);
     }
 
 }

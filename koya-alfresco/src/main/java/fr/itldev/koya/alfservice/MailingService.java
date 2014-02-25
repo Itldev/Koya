@@ -20,7 +20,7 @@
 package fr.itldev.koya.alfservice;
 
 /**
- * Service de Gestion des Mails envoyés aux utilisateurs.
+ *
  */
 public class MailingService {
 

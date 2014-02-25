@@ -29,18 +29,18 @@
     ========================== Sociétés ==============================
     ==================================================================
     -->
-    <!--création de société-->
-    <bean id="webscript.fr.itldev.koya.societe.add.get" 
-          class="fr.itldev.koya.webscript.societe.AddSociete"
+    <!--create company-->
+    <bean id="webscript.fr.itldev.koya.company.add.get" 
+          class="fr.itldev.koya.webscript.company.AddCompany"
           parent="webscript">                
-        <property name="societeService" ref="societeService" />
+        <property name="companyService" ref="companyService" />
         
     </bean>
-    <!--liste des sociétés-->
-    <bean id="webscript.fr.itldev.koya.societe.list.get" 
-          class="fr.itldev.koya.webscript.societe.ListSociete"
+    <!--list companies-->
+    <bean id="webscript.fr.itldev.koya.company.list.get" 
+          class="fr.itldev.koya.webscript.company.ListCompany"
           parent="webscript">                
-        <property name="societeService" ref="societeService" />
+        <property name="companyService" ref="companyService" />
         
     </bean>
     
@@ -50,10 +50,10 @@
     ==================================================================
     -->
     <!--liste des Offres commerciales -->
-    <bean id="webscript.fr.itldev.koya.offrecommerciale.list.get" 
-          class="fr.itldev.koya.webscript.offrecommerciale.ListOffres"
+    <bean id="webscript.fr.itldev.koya.salesoffer.list.get" 
+          class="fr.itldev.koya.webscript.salesoffer.ListOffer"
           parent="webscript">                
-         <property name="offreCommercialeService" ref="offreCommercialeService" />
+        <property name="salesOfferService" ref="salesOfferService" />
     </bean>
     <!--
     ==================================================================
@@ -61,25 +61,25 @@
     ==================================================================
     -->
     
-    <!--création d'un espace-->
-    <bean id="webscript.fr.itldev.koya.espace.add.post" 
-          class="fr.itldev.koya.webscript.espace.AddEspace"
+    <!--space creation-->
+    <bean id="webscript.fr.itldev.koya.space.add.post" 
+          class="fr.itldev.koya.webscript.space.AddSpace"
           parent="webscript">                
-        <property name="espaceService" ref="espaceService" /> 
+        <property name="spaceService" ref="spaceService" /> 
     </bean>
-    <!--liste les espaces-->
-    <bean id="webscript.fr.itldev.koya.espace.list.post" 
-          class="fr.itldev.koya.webscript.espace.ListEspace"
+    <!--liste les spaces-->
+    <bean id="webscript.fr.itldev.koya.space.list.post" 
+          class="fr.itldev.koya.webscript.space.ListSpace"
           parent="webscript">                
-        <property name="espaceService" ref="espaceService" />
+        <property name="spaceService" ref="spaceService" />
         
     </bean>
     
-    <!--suppression d'un espace-->
-    <bean id="webscript.fr.itldev.koya.espace.del.del" 
-          class="fr.itldev.koya.webscript.espace.DelEspace"
+    <!--suppression d'un space-->
+    <bean id="webscript.fr.itldev.koya.space.del.del" 
+          class="fr.itldev.koya.webscript.space.DelSpace"
           parent="webscript">                
-        <property name="espaceService" ref="espaceService" />
+        <property name="spaceService" ref="spaceService" />
         
     </bean>
     
@@ -91,16 +91,16 @@
     -->
     
     <!--création d'un dossier-->
-    <bean id="webscript.fr.itldev.koya.dossier.add.post" 
-          class="fr.itldev.koya.webscript.dossier.AddDossier"
+    <bean id="webscript.fr.itldev.koya.koyacase.add.post" 
+          class="fr.itldev.koya.webscript.koyacase.AddCase"
           parent="webscript">                
-        <property name="dossierService" ref="dossierService" />
+        <property name="caseService" ref="caseService" />
     </bean>
     <!--liste les dossiers-->
-    <bean id="webscript.fr.itldev.koya.dossier.list.post" 
-          class="fr.itldev.koya.webscript.dossier.ListDossier"
+    <bean id="webscript.fr.itldev.koya.koyacase.list.post" 
+          class="fr.itldev.koya.webscript.koyacase.ListCase"
           parent="webscript">                
-        <property name="dossierService" ref="dossierService" />
+        <property name="caseService" ref="caseService" />
     </bean>
        
     <!--
@@ -109,24 +109,24 @@
     ==================================================================
     -->
  
-    <!--création d'un contenu-->
-    <bean id="webscript.fr.itldev.koya.contenu.add.post" 
-          class="fr.itldev.koya.webscript.contenu.AddContenu"
+    <!--content creation-->
+    <bean id="webscript.fr.itldev.koya.content.add.post" 
+          class="fr.itldev.koya.webscript.content.AddContent"
           parent="webscript">                
-        <property name="contenuService" ref="contenuService" />
+        <property name="koyaContentService" ref="koyaContentService" />
     </bean>
-    <!--liste les contenus-->
-    <bean id="webscript.fr.itldev.koya.contenu.list.post" 
-          class="fr.itldev.koya.webscript.contenu.ListContenu"
+    <!--content listing-->
+    <bean id="webscript.fr.itldev.koya.content.list.post" 
+          class="fr.itldev.koya.webscript.content.ListContent"
           parent="webscript">                
-        <property name="contenuService" ref="contenuService" />
+        <property name="koyaContentService" ref="koyaContentService" />    
     </bean>
     
-     <!--déplacer des contenus-->
-    <bean id="webscript.fr.itldev.koya.contenu.move.post" 
-          class="fr.itldev.koya.webscript.contenu.MoveContenu"
+    <!--content move-->
+    <bean id="webscript.fr.itldev.koya.content.move.post" 
+          class="fr.itldev.koya.webscript.content.MoveContent"
           parent="webscript">                
-        <property name="contenuService" ref="contenuService" />
+        <property name="koyaContentService" ref="koyaContentService" />    
     </bean>
  
  
@@ -144,8 +144,8 @@
     </bean>
     
     <!--Détermination de la taille disque occupée par tous les éléments d'un conteneur-->
-    <bean id="webscript.fr.itldev.koya.global.espacedisque.post" 
-          class="fr.itldev.koya.webscript.global.EspaceDisque"
+    <bean id="webscript.fr.itldev.koya.global.disksize.post" 
+          class="fr.itldev.koya.webscript.global.DiskSize"
           parent="webscript">                
         <property name="koyaNodeService" ref="koyaNodeService" />        
     </bean>

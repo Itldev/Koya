@@ -20,7 +20,7 @@
 package fr.itldev.koya.alfservice;
 
 /**
- * Service ge gestion des Alertes utilisateurs.
+ * 
  */
 public class AlertService {
 

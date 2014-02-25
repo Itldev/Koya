@@ -23,65 +23,65 @@
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <beans>
     
-    <!--service général de gestion des noeuds Suivi Dossier-->
+    <!--Global Koya nodes util services-->
     <bean name="koyaNodeService" class="fr.itldev.koya.alfservice.KoyaNodeService">
         <property name="nodeService" ref="nodeService"/>
     </bean>
     
-    <!--service de gestion des sociétés-->
-    <bean name="societeService" class="fr.itldev.koya.alfservice.SocieteService">
+    <!--Companies handling service-->
+    <bean name="companyService" class="fr.itldev.koya.alfservice.CompanyService">
         <property name="siteService" ref="siteService"/>
         <property name="nodeService" ref="nodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>     
     
-    <!--service de gestion des espaces-->
-    <bean name="espaceService" class="fr.itldev.koya.alfservice.EspaceService">
+    <!--Spaces Handling service-->
+    <bean name="spaceService" class="fr.itldev.koya.alfservice.SpaceService">
         <property name="nodeService" ref="nodeService"/>
         <property name="searchService" ref="searchService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean> 
     
-    <!--service de gestion des dossiers-->
-    <bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
+    <!--Cases handling service-->
+    <bean name="caseService" class="fr.itldev.koya.alfservice.CaseService">
         <property name="nodeService" ref="nodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
 
-    <!--service de gestion des contenus-->
-    <bean name="contenuService" class="fr.itldev.koya.alfservice.ContenuService">
+    <!--Contents handling service-->
+    <bean name="koyaContentService" class="fr.itldev.koya.alfservice.KoyaContentService">
         <property name="nodeService" ref="nodeService"/>
     </bean>
    
     
     
-    <!--service de gestion des Offres Commerciales-->
-    <bean name="offreCommercialeService" class="fr.itldev.koya.alfservice.OffreCommercialeService">
+    <!--Sales Offer Handling service-->
+    <bean name="salesOfferService" class="fr.itldev.koya.alfservice.SalesOfferService">
         <property name="nodeService" ref="nodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
     
-    <!--service de gestion des Utilisateurs et de leurs droits-->
+    <!--Users handling service-->
     <bean name="userService" class="fr.itldev.koya.alfservice.UserService"/>
    
-    <!--service de gestion des imports/exports-->
+    <!--Data Import/Export Service-->
     <bean name="importExportService" class="fr.itldev.koya.alfservice.ImportExportService"/>
-    <!--service de gestion des modeles-->
-    <bean name="modeleService" class="fr.itldev.koya.alfservice.ModeleService">
+    <!--Model Handling service-->
+    <bean name="modelService" class="fr.itldev.koya.alfservice.ModelService">
         <property name="nodeService" ref="nodeService"/>
     </bean>
     
-    <!--service de gestion des profils Applicatifs-->
-    <bean name="profilsAppService" class="fr.itldev.koya.alfservice.ProfilsAppService"/>    
-    <!--service de gestion des Questions/Réponses-->
-    <bean name="qrService" class="fr.itldev.koya.alfservice.QrService"/>
-    <!--service de gestion des Statistiques-->
+    <!--Profiles Handling Service-->
+    <bean name="profileService" class="fr.itldev.koya.alfservice.ProfileService"/>    
+    <!--Question/Answer Handling service-->
+    <bean name="qaService" class="fr.itldev.koya.alfservice.QaService"/>
+    <!--Statistics Handling Service-->
     <bean name="statService" class="fr.itldev.koya.alfservice.StatService"/>
     
-    <!--service de gestion des Alertes-->
+    <!--Alerts Handling Service-->
     <bean name="alertService" class="fr.itldev.koya.alfservice.AlertService"/>
     
-    <!--service de gestion des Mails-->
+    <!--Mailing Service-->
     <bean name="mailingService" class="fr.itldev.koya.alfservice.MailingService"/>
    
 </beans>

@@ -19,8 +19,8 @@
 
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.ElementSecurise;
-import fr.itldev.koya.model.impl.Utilisateur;
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.User;
 
 public interface AlfrescoService {
 
@@ -30,7 +30,7 @@ public interface AlfrescoService {
      * @param user
      * @param elementSecurise
      */
-    void supprimer(Utilisateur user, ElementSecurise elementSecurise);
+    void delete(User user, SecuredItem elementSecurise);
 
     
 }

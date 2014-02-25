@@ -20,7 +20,7 @@
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.impl.Preferences;
-import fr.itldev.koya.model.impl.Utilisateur;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -65,11 +65,11 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      * @return
      */
     @Override
-    public Utilisateur login(String login, String password) throws RestClientException {
+    public User login(String login, String password) throws RestClientException {
         //appel rest ticket
         AuthTicket ticket = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LOGIN, AuthTicket.class, login, password);
         //appel rest infos utilisateur
-        Utilisateur user = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_PERSONDETAILS, Utilisateur.class, login, ticket.toString());
+        User user = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_PERSONDETAILS, User.class, login, ticket.toString());
         //intégration du ticket d'authentification
         user.setTicketAlfresco(ticket.toString());
         //mise en place du template rest authentifié pour cet utilisateur
@@ -83,7 +83,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     }
 
     @Override
-    public Boolean logout(Utilisateur user) {
+    public Boolean logout(User user) {
 
         getTemplate().delete(REST_DEL_LOGOUT, user.getTicketAlfresco());
 
@@ -93,7 +93,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     }
 
     @Override
-    public void creerUtilisateur(Utilisateur userAdmin, Utilisateur userACreer) {
+    public void creerUtilisateur(User userAdmin, User userACreer) {
         //retour en exception si ca ne marche pas
     }
 
@@ -130,12 +130,12 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      * @param user
      */
     @Override
-    public void updatePreferences(Utilisateur user) {
+    public void updatePreferences(User user) {
         updatePreferences(user, user);
     }
 
     @Override
-    public void updatePreferences(Utilisateur userLog, Utilisateur userToGetPrefs) {
+    public void updatePreferences(User userLog, User userToGetPrefs) {
         Preferences preferences = userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, Preferences.class, userToGetPrefs.getLogin());
         userToGetPrefs.setPreferences(preferences);
     }
@@ -148,12 +148,12 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      * fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
     @Override
-    public void commitPreferences(Utilisateur user) throws AlfrescoServiceException {
+    public void commitPreferences(User user) throws AlfrescoServiceException {
         commitPreferences(user, user);
     }
 
     @Override
-    public void commitPreferences(Utilisateur userLog, Utilisateur userToCommitPrefs) throws AlfrescoServiceException {
+    public void commitPreferences(User userLog, User userToCommitPrefs) throws AlfrescoServiceException {
 
         if (userToCommitPrefs.getPreferences() != null) {
             // 1 - envoyer les nouvelles clés et celles modifiées 

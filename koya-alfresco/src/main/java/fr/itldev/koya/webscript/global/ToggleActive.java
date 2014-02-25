@@ -26,11 +26,9 @@ import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
 
 /**
- * Changement du status d'activité d'u conteneur
+ * Toggle container active status webscript
  *
- * TODO définir clairement le mode fct : ie inverse la valeur actuelle du noeud
- * OU fixe la valeur données par active ????
- *
+ 
  *
  *
  */
@@ -45,10 +43,10 @@ public class ToggleActive extends KoyaWebscript {
    
 
     @Override
-    public ItlAlfrescoServiceWrapper sdExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         Boolean active = (Boolean) jsonPostMap.get("active");
         NodeRef conteneur = new NodeRef((String) jsonPostMap.get("nodeRef"));
-        koyaNodeService.setActifStatus(conteneur, active);
+        koyaNodeService.setActiveStatus(conteneur, active);
         return wrapper;
     }
 

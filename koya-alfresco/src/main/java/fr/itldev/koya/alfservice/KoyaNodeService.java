@@ -28,20 +28,20 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 
 /**
- * Service général relatifs aux noeuds pris en charge par koya
+ * Koya Nodes Util Service.
  */
 public class KoyaNodeService {
 
     private NodeService nodeService;
 
     /**
-     * Méthode qui retourne un objet typé koya à partir d'un NodeRef
+     * Gets Koya Typed Object from NodeRef
      *
      * @param n
      * @return
      */
-    public Object getTypedSdObject(NodeRef n) {
-        //TODO
+    public Object getKoyaTypedObject(NodeRef n) {
+        // TODO impl
 
         return null;
     }
@@ -50,42 +50,32 @@ public class KoyaNodeService {
         this.nodeService = nodeService;
     }
 
-    public void setActifStatus(NodeRef n, Boolean activeValue) {
+    public void setActiveStatus(NodeRef n, Boolean activeValue) {
 
-        //TODO vérifier le champ d'application des noeuds activables (ou limiter dans le modele ??)
-        if (nodeService.hasAspect(n, KoyaModel.QNAME_ITL_SDCONTENEURACTIF)) {
-            //si le noeud existe déja, on met la valeur à jour
-            nodeService.setProperty(n, KoyaModel.QNAME_PROPASPECT_ITL_ISACTIF, activeValue);
+        //TODO limit actions to activable nodes (check model)
+        if (nodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE)) {
+            //if node exists with activable aspect, update value.
+            nodeService.setProperty(n, KoyaModel.QNAME_PROPASPECT_KOYA_ISACTIVE, activeValue);
         } else {
-            //sinon on ajoute l'aspect avec la valeur correcte
+            //add aspect with value
             Map<QName, Serializable> props = new HashMap<>();
-            props.put(KoyaModel.QNAME_PROPASPECT_ITL_ISACTIF, activeValue);
-            nodeService.addAspect(n, KoyaModel.QNAME_ITL_SDCONTENEURACTIF, props);
+            props.put(KoyaModel.QNAME_PROPASPECT_KOYA_ISACTIVE, activeValue);
+            nodeService.addAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE, props);
         }
     }
 
     /**
-     * Un noeud est actif s'il contient l'aspect
-     * SdModel.QNAME_ITL_SDCONTENEURACTIF ET que sa valeur est vraie.
+     *
+     * Active Node has aspect KoyaModel.QNAME_KOYA_ACTIVABLE AND active property
+     * is true.
      *
      * @param n
      * @return
      */
-    public Boolean isActif(NodeRef n) {
-        return nodeService.hasAspect(n, KoyaModel.QNAME_ITL_SDCONTENEURACTIF)
-                && (Boolean) nodeService.getProperty(n, KoyaModel.QNAME_PROPASPECT_ITL_ISACTIF);
+    public Boolean isActive(NodeRef n) {
+        return nodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE)
+                && (Boolean) nodeService.getProperty(n, KoyaModel.QNAME_PROPASPECT_KOYA_ISACTIVE);
     }
 
-    /**
-     * Un site suivi dossier est un site ayant l'aspect sdConteneurActif
-     *
-     * @param n
-     * @return
-     */
-    public Boolean isSdSite(NodeRef n) {
-
-        //TODO verifier que le noeud en question est un site !!!!
-        return nodeService.hasAspect(n, KoyaModel.QNAME_ITL_SDCONTENEURACTIF);
-    }
 
 }

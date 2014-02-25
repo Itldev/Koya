@@ -90,12 +90,12 @@
     
     <bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl" parent="abstractRestService"/>
         
-    <bean id="societeService" class="fr.itldev.koya.services.impl.SocieteServiceImpl" parent="abstractRestService"/>
+    <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService"/>
     
-    <bean id="espaceService" class="fr.itldev.koya.services.impl.EspaceServiceImpl" parent="abstractRestService"/>
+    <bean id="spaceService" class="fr.itldev.koya.services.impl.SpaceServiceImpl" parent="abstractRestService"/>
     
-    <bean id="dossierService" class="fr.itldev.koya.services.impl.DossierServiceImpl" parent="abstractRestService"/>
+    <bean id="caseService" class="fr.itldev.koya.services.impl.CaseServiceImpl" parent="abstractRestService"/>
     
-    <bean id="contenuService" class="fr.itldev.koya.services.impl.ContenuServiceImpl" parent="abstractRestService"/>
+    <bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl" parent="abstractRestService"/>
     
 </beans>

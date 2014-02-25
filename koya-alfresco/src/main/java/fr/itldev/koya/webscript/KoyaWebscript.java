@@ -37,7 +37,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 public abstract class KoyaWebscript extends AbstractWebScript {
 
     /**
-     * Méthode chargée d'extraire les données POST json.
+     * Extracts JSON POST data.
      *
      * @param req
      * @return
@@ -60,9 +60,8 @@ public abstract class KoyaWebscript extends AbstractWebScript {
     }
 
     /**
-     * Méthode chargée d'extraire l'ensemble des paramètres passés dans l'url.
+     * Extracts URL paramters.
      *
-     * A la fois en template et dans les options.
      *
      * @param req
      * @return
@@ -82,7 +81,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
 
         //TODO url params et url template
         try {
-            wrapper = sdExecute(wrapper, getUrlParamsMap(req), getJsonMap(req));
+            wrapper = koyaExecute(wrapper, getUrlParamsMap(req), getJsonMap(req));
             wrapper.setStatusOK();
         } catch (Exception ex) {
             wrapper.setStatusFail(ex.toString());
@@ -92,6 +91,6 @@ public abstract class KoyaWebscript extends AbstractWebScript {
         res.getWriter().write(wrapper.getAsJSON());
     }
 
-    public abstract ItlAlfrescoServiceWrapper sdExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception;
+    public abstract ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception;
 
 }

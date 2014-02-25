@@ -19,24 +19,24 @@
 
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.impl.Utilisateur;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import org.springframework.web.client.RestClientException;
 
 public interface UserService {
 
-    Utilisateur login(String login, String md5password) throws RestClientException;
+    User login(String login, String md5password) throws RestClientException;
 
-    Boolean logout(Utilisateur user);
+    Boolean logout(User user);
 
-    void creerUtilisateur(Utilisateur userAdmin, Utilisateur userACreer);
+    void creerUtilisateur(User userAdmin, User userACreer);
 
-    void updatePreferences(Utilisateur user);
+    void updatePreferences(User user);
 
-    void updatePreferences(Utilisateur userLog, Utilisateur userToGetPrefs);
+    void updatePreferences(User userLog, User userToGetPrefs);
 
-    void commitPreferences(Utilisateur user) throws AlfrescoServiceException;
+    void commitPreferences(User user) throws AlfrescoServiceException;
 
-    void commitPreferences(Utilisateur userLog, Utilisateur userToCommitPrefs) throws AlfrescoServiceException;
+    void commitPreferences(User userLog, User userToCommitPrefs) throws AlfrescoServiceException;
 
 }
