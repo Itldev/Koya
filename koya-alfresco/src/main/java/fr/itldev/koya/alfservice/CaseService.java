@@ -24,6 +24,7 @@ import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Case;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,10 +133,10 @@ public class CaseService {
      * @return
      */
     private Case nodeCaseBuilder(NodeRef caseNodeRef) {
-        Case d = new Case();
+        Case c = new Case();
 
-        d.setNodeRef(caseNodeRef.toString());
-        d.setName((String) nodeService.getProperty(caseNodeRef, ContentModel.PROP_NAME));
+        c.setNodeRef(caseNodeRef.toString());
+        c.setName((String) nodeService.getProperty(caseNodeRef, ContentModel.PROP_NAME));
        
         NodeRef directParent = nodeService.getPrimaryParent(caseNodeRef).getParentRef();
         NodeRef realParent = null;
@@ -145,10 +146,10 @@ public class CaseService {
             logger.warn("Erreur de hiérachie des parent d'espace");
             //TODO exception      
         }
-        d.setParentNodeRefasObject(realParent);
-        
-        d.setActive(koyaNodeService.isActive(caseNodeRef));
+        c.setParentNodeRefasObject(realParent);
+        c.setLastModifiedDate((Date) nodeService.getProperty(caseNodeRef,ContentModel.PROP_MODIFIED));
+        c.setActive(koyaNodeService.isActive(caseNodeRef));
 
-        return d;
+        return c;
     }
 }

@@ -25,6 +25,7 @@ import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.SubSpace;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -38,6 +39,8 @@ public final class Case extends SubSpace implements Container, Activable {
     private List<Content> children = new ArrayList<>();
 
     private Long byteSize;
+
+    private Date lastModifiedDate;
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     @Override
@@ -68,8 +71,16 @@ public final class Case extends SubSpace implements Container, Activable {
     public void setChildren(List<? extends SecuredItem> children) {
         this.children = (List<Content>) children;
     }
-    // </editor-fold>
 
+    public Date getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(Date lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
+
+    // </editor-fold>
     // <editor-fold defaultstate="collapsed" desc="constructeurs">
     public Case(String name, Space parentSpace) {
         setName(name);
