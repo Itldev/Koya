@@ -29,7 +29,7 @@ import java.util.Date;
 import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
-public final class Case extends SubSpace implements Container, Activable {
+public final class Dossier extends SubSpace implements Container, Activable {
 
     private Boolean active = Boolean.TRUE;
     @JsonIgnore
@@ -82,12 +82,12 @@ public final class Case extends SubSpace implements Container, Activable {
 
     // </editor-fold>
     // <editor-fold defaultstate="collapsed" desc="constructeurs">
-    public Case(String name, Space parentSpace) {
+    public Dossier(String name, Space parentSpace) {
         setName(name);
         setParentSpace(parentSpace);
     }
 
-    public Case() {
+    public Dossier() {
     }
 
     // </editor-fold>

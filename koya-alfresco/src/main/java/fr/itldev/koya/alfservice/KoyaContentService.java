@@ -50,7 +50,7 @@ public class KoyaContentService {
 
     public Directory createDir(String name, NodeRef parent) {
 
-        //TODO parent must be a dir ao a Case
+        //TODO parent must be a dir or a dossier
         //TODO check dir name unicity
         //node properties building
         final Map<QName, Serializable> properties = new HashMap<>();

@@ -21,7 +21,7 @@ package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Case;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -34,12 +34,12 @@ public interface KoyaContentService extends AlfrescoService {
 
     Document upload(User user, Resource r, Directory repertoire) throws AlfrescoServiceException;
 
-    Document upload(User user, Resource r, Case dossier) throws AlfrescoServiceException;
+    Document upload(User user, Resource r, Dossier dossier) throws AlfrescoServiceException;
 
     Content move(User user, Content aDeplacer, Directory desination) throws AlfrescoServiceException;
 
-    Content move(User user, Content aDeplacer, Case desination) throws AlfrescoServiceException;
+    Content move(User user, Content aDeplacer, Dossier desination) throws AlfrescoServiceException;
 
-    List<Content> list(User user, Case dossier) throws AlfrescoServiceException;
+    List<Content> list(User user, Dossier dossier) throws AlfrescoServiceException;
 
 }

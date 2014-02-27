@@ -42,8 +42,8 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean> 
     
-    <!--Cases handling service-->
-    <bean name="caseService" class="fr.itldev.koya.alfservice.CaseService">
+    <!--Dossiers handling service-->
+    <bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
         <property name="nodeService" ref="nodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>

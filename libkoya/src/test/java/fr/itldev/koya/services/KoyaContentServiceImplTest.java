@@ -21,7 +21,7 @@ package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Case;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Company;
@@ -58,7 +58,7 @@ public class KoyaContentServiceImplTest extends TestCase {
     private SpaceService spaceService;
 
     @Autowired
-    private CaseService caseService;
+    private DossierService dossierService;
 
     @Autowired
     private KoyaContentService koyaContentService;
@@ -68,7 +68,7 @@ public class KoyaContentServiceImplTest extends TestCase {
 
     private Company companyTests;
     private Space spaceTests;
-    private Case caseTests;
+    private Dossier dossierTests;
     private User admin;
 
     @Before
@@ -76,7 +76,7 @@ public class KoyaContentServiceImplTest extends TestCase {
         admin = userService.login("admin", "admin");
         companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)));
         spaceTests = spaceService.create(admin, new Space("Esptests", companyTests));
-        caseTests = caseService.create(admin, new Case("doss1", spaceTests));
+        dossierTests = dossierService.create(admin, new Dossier("doss1", spaceTests));
     }
 
     @After
@@ -87,18 +87,18 @@ public class KoyaContentServiceImplTest extends TestCase {
     @Test
     public void testCreateDir() throws AlfrescoServiceException {
 
-        Content rep = koyaContentService.create(admin, new Directory("rep", caseTests));
+        Content rep = koyaContentService.create(admin, new Directory("rep", dossierTests));
         assertNotNull("erreur de creation du répertoire", rep);
         koyaContentService.delete(admin, rep);
     }
 
     @Test
     public void testListDir() throws AlfrescoServiceException {
-        Content rep = koyaContentService.create(admin, new Directory("rep", caseTests));
+        Content rep = koyaContentService.create(admin, new Directory("rep", dossierTests));
         koyaContentService.create(admin, new Directory("sousrep", (Directory) rep));
-        koyaContentService.create(admin, new Directory("rep2", caseTests));
+        koyaContentService.create(admin, new Directory("rep2", dossierTests));
 
-        List<Content> lst = koyaContentService.list(admin, caseTests);
+        List<Content> lst = koyaContentService.list(admin, dossierTests);
 
         assertEquals(3, lst.size());
 
@@ -107,12 +107,12 @@ public class KoyaContentServiceImplTest extends TestCase {
     @Test
     public void testUpload() throws AlfrescoServiceException {
 
-        Integer sizeBefore = koyaContentService.list(admin, caseTests).size();
+        Integer sizeBefore = koyaContentService.list(admin, dossierTests).size();
 
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
-        koyaContentService.upload(admin, toUpload, caseTests);
+        koyaContentService.upload(admin, toUpload, dossierTests);
 
-        List<Content> lstC = koyaContentService.list(admin, caseTests);
+        List<Content> lstC = koyaContentService.list(admin, dossierTests);
         //il doit y avoir un element en plus
         assertEquals(sizeBefore + 1, lstC.size());
 
@@ -120,22 +120,22 @@ public class KoyaContentServiceImplTest extends TestCase {
     @Test
     public void testMoveFile() throws AlfrescoServiceException {
 
-        Directory rep = (Directory) koyaContentService.create(admin, new Directory("rep1", caseTests));
+        Directory rep = (Directory) koyaContentService.create(admin, new Directory("rep1", dossierTests));
 
-        Integer sizeBefore = koyaContentService.list(admin, caseTests).size();
+        Integer sizeBefore = koyaContentService.list(admin, dossierTests).size();
 
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
         Document doc = koyaContentService.upload(admin, toUpload, rep);
 
-        assertEquals(1 + sizeBefore, koyaContentService.list(admin, caseTests).size());
+        assertEquals(1 + sizeBefore, koyaContentService.list(admin, dossierTests).size());
 
         //deplacement du doc dans la racine
-        koyaContentService.move(admin, doc, caseTests);
+        koyaContentService.move(admin, doc, dossierTests);
 
         //il doit y avoir un element en plus
         //TODO pas probant car la liste retourne l'ensemble des elements recursivement
         //et donc ca ne change rien .... TODO idem avec structure hiérarchique
-        assertEquals(sizeBefore + 1, koyaContentService.list(admin, caseTests).size());
+        assertEquals(sizeBefore + 1, koyaContentService.list(admin, dossierTests).size());
 
     }
 }

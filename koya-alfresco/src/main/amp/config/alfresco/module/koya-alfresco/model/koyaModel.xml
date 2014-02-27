@@ -53,8 +53,8 @@
             <parent>koya:container</parent>            
         </type>        
         
-        <type name="koya:case">
-            <title>case</title> 
+        <type name="koya:dossier">
+            <title>dossier</title> 
             <parent>koya:container</parent>           
         </type>        
         

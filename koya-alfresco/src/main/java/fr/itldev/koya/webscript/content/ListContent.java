@@ -28,14 +28,11 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * Case Listing Webscript
+ * Dossier Listing Webscript
  * 
  * TODO option de récursivité qui permet d'obtenir tous les contenu ou le
  * contenu descendant direct
  *
- *
- * Dans la pratique, ce WS rique d'etre peu utilisée car ces appels serons
- * directement fait en JS depuis l'interface vers les services natifs alfresco
  *
  */
 public class ListContent extends KoyaWebscript {

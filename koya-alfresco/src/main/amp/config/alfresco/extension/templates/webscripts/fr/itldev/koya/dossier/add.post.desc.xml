@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>List Case</shortname>
-    <description>Liste available Cases in Space</description>
+    <shortname>Add Dossier</shortname>
+    <description>Add Cas in space</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/case/list</url>
+    <url>/fr/itldev/koya/dossier/add</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>

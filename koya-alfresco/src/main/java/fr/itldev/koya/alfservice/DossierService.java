@@ -21,7 +21,7 @@ package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.impl.Case;
+import fr.itldev.koya.model.impl.Dossier;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,11 +37,11 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 
 /**
- * Cases Handling Service
+ * Dossiers Handling Service
  *
  *
  */
-public class CaseService {
+public class DossierService {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
@@ -66,9 +66,9 @@ public class CaseService {
      * @return
      * @throws KoyaServiceException
      */
-    public Case create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
+    public Dossier create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
 
-        //Case must have a name
+        //Dossier must have a name
         if (name == null || name.isEmpty()) {
             throw new KoyaServiceException();
         }
@@ -77,7 +77,7 @@ public class CaseService {
         if (!nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
             throw new KoyaServiceException();
         }
-        //checks if case name already exists
+        //checks if dossier's name already exists
         for (ChildAssociationRef car : nodeService.getChildAssocs(parent)) {
             if (nodeService.getProperty(car.getChildRef(), ContentModel.PROP_NAME).equals(name)) {
                 throw new KoyaServiceException();
@@ -90,11 +90,11 @@ public class CaseService {
 
         ChildAssociationRef childAssociationRef = nodeService.createNode(parent, ContentModel.ASSOC_CONTAINS,
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
-                KoyaModel.QNAME_KOYA_CASE,
+                KoyaModel.QNAME_KOYA_DOSSIER,
                 properties);
         nodeService.addAspect(childAssociationRef.getChildRef(), KoyaModel.QNAME_KOYA_ACTIVABLE, null);
 
-        return nodeCaseBuilder(childAssociationRef.getChildRef());
+        return nodeDossierBuilder(childAssociationRef.getChildRef());
     }
 
     /**
@@ -103,12 +103,12 @@ public class CaseService {
      * @return
      * @throws KoyaServiceException
      */
-    public List<Case> list(NodeRef parent) throws KoyaServiceException {
-        List<Case> dossiers = new ArrayList<>();
+    public List<Dossier> list(NodeRef parent) throws KoyaServiceException {
+        List<Dossier> dossiers = new ArrayList<>();
 
         for (ChildAssociationRef child : nodeService.getChildAssocs(parent)) {
-            if (nodeService.getType(child.getChildRef()).equals(KoyaModel.QNAME_KOYA_CASE)) {
-                dossiers.add(nodeCaseBuilder(child.getChildRef()));
+            if (nodeService.getType(child.getChildRef()).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+                dossiers.add(nodeDossierBuilder(child.getChildRef()));
             }
         }
         return dossiers;
@@ -129,26 +129,26 @@ public class CaseService {
      */
     /**
      *
-     * @param caseNodeRef
+     * @param dossierNodeRef
      * @return
      */
-    private Case nodeCaseBuilder(NodeRef caseNodeRef) {
-        Case c = new Case();
+    private Dossier nodeDossierBuilder(NodeRef dossierNodeRef) {
+        Dossier c = new Dossier();
 
-        c.setNodeRef(caseNodeRef.toString());
-        c.setName((String) nodeService.getProperty(caseNodeRef, ContentModel.PROP_NAME));
+        c.setNodeRef(dossierNodeRef.toString());
+        c.setName((String) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_NAME));
        
-        NodeRef directParent = nodeService.getPrimaryParent(caseNodeRef).getParentRef();
+        NodeRef directParent = nodeService.getPrimaryParent(dossierNodeRef).getParentRef();
         NodeRef realParent = null;
         if (nodeService.getType(directParent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
             realParent = directParent;
         } else {
-            logger.warn("Erreur de hiérachie des parent d'espace");
+            logger.warn("Error in space parent hierarchy");
             //TODO exception      
         }
         c.setParentNodeRefasObject(realParent);
-        c.setLastModifiedDate((Date) nodeService.getProperty(caseNodeRef,ContentModel.PROP_MODIFIED));
-        c.setActive(koyaNodeService.isActive(caseNodeRef));
+        c.setLastModifiedDate((Date) nodeService.getProperty(dossierNodeRef,ContentModel.PROP_MODIFIED));
+        c.setActive(koyaNodeService.isActive(dossierNodeRef));
 
         return c;
     }

@@ -30,7 +30,7 @@ public final class Document extends Content {
         super(name, parent);
     }
 
-    public Document(String name, Case parent) {
+    public Document(String name, Dossier parent) {
         super(name, parent);
     }
 

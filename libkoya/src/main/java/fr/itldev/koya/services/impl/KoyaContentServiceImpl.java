@@ -22,7 +22,7 @@ package fr.itldev.koya.services.impl;
 import fr.itldev.koya.model.Container;
 import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Case;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AlfrescoUploadReturn;
@@ -64,7 +64,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     @Override
-    public Document upload(User user, Resource r, Case dossier) throws AlfrescoServiceException {
+    public Document upload(User user, Resource r, Dossier dossier) throws AlfrescoServiceException {
         return uploadPrivate(user, r, dossier);
     }
 
@@ -74,12 +74,12 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     @Override
-    public Content move(User user, Content aDeplacer, Case desination) throws AlfrescoServiceException {
+    public Content move(User user, Content aDeplacer, Dossier desination) throws AlfrescoServiceException {
         return movePrivate(user, aDeplacer, desination);
     }
 
     @Override
-    public List<Content> list(User user, Case dossier) throws AlfrescoServiceException {
+    public List<Content> list(User user, Dossier dossier) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTCONTENT, dossier, ItlAlfrescoServiceWrapper.class);
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
@@ -106,8 +106,8 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         AlfrescoUploadReturn upReturn = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
 
         Document docUpload;
-        if (Case.class.isAssignableFrom(parent.getClass())) {
-            docUpload = new Document(upReturn.getFileName(), (Case) parent);
+        if (Dossier.class.isAssignableFrom(parent.getClass())) {
+            docUpload = new Document(upReturn.getFileName(), (Dossier) parent);
         } else if (Directory.class.isAssignableFrom(parent.getClass())) {
             docUpload = new Document(upReturn.getFileName(), (Directory) parent);
         } else {

@@ -20,7 +20,7 @@
 package fr.itldev.koya.model;
 
 import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.impl.Case;
+import fr.itldev.koya.model.impl.Dossier;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 public abstract class Content extends SecuredItem {
@@ -47,7 +47,7 @@ public abstract class Content extends SecuredItem {
         this.setParent(parent);
     }
 
-    public Content(String name, Case parent) {
+    public Content(String name, Dossier parent) {
         this.setName(name);
         this.setParent(parent);
     }

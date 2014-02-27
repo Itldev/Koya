@@ -19,7 +19,7 @@
 
 package fr.itldev.koya.testsuite;
 
-import fr.itldev.koya.services.CaseServiceImplTest;
+import fr.itldev.koya.services.DossierServiceImplTest;
 import fr.itldev.koya.services.CompanyServiceImplTest;
 import fr.itldev.koya.services.KoyaContentServiceImplTest;
 import fr.itldev.koya.services.SpaceServiceImplTest;
@@ -31,7 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @RunWith(Suite.class)
 @SuiteClasses({UserServiceImplTest.class, CompanyServiceImplTest.class,
-    SpaceServiceImplTest.class, CaseServiceImplTest.class, KoyaContentServiceImplTest.class})
+    SpaceServiceImplTest.class, DossierServiceImplTest.class, KoyaContentServiceImplTest.class})
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 
 public class AllTests {

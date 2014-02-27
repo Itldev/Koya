@@ -50,7 +50,7 @@ public final class Directory extends Content implements Container {
         super(name, pere);
     }
 
-    public Directory(String name, Case pere) {
+    public Directory(String name, Dossier pere) {
         super(name, pere);
     }
 

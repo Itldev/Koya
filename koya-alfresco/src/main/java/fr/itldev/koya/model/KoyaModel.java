@@ -39,9 +39,9 @@ public class KoyaModel {
     public static final QName QNAME_KOYA_SPACE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, TYPE_KOYA_SPACE);
     public static final String TYPESHORTPREFIX_KOYA_SPACE = "koya:space";
     //
-    public static final String TYPE_KOYA_CASE = "case";
-    public static final QName QNAME_KOYA_CASE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, TYPE_KOYA_CASE);
-    public static final String TYPESHORTPREFIX_KOYA_CASE = "koya:case";
+    public static final String TYPE_KOYA_DOSSIER = "dossier";
+    public static final QName QNAME_KOYA_DOSSIER = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, TYPE_KOYA_DOSSIER);
+    public static final String TYPESHORTPREFIX_KOYA_DOSSIER = "koya:dossier";
     //================ Aspects ==========================
     public static final String ASPECT_KOYA_ACTIVABLE = "activable";
     public static final QName QNAME_KOYA_ACTIVABLE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, ASPECT_KOYA_ACTIVABLE);

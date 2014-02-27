@@ -94,7 +94,7 @@
     
     <bean id="spaceService" class="fr.itldev.koya.services.impl.SpaceServiceImpl" parent="abstractRestService"/>
     
-    <bean id="caseService" class="fr.itldev.koya.services.impl.CaseServiceImpl" parent="abstractRestService"/>
+    <bean id="dossierService" class="fr.itldev.koya.services.impl.DossierServiceImpl" parent="abstractRestService"/>
     
     <bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl" parent="abstractRestService"/>
     

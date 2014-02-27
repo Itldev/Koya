@@ -91,16 +91,16 @@
     -->
     
     <!--création d'un dossier-->
-    <bean id="webscript.fr.itldev.koya.koyacase.add.post" 
-          class="fr.itldev.koya.webscript.koyacase.AddCase"
+    <bean id="webscript.fr.itldev.koya.dossier.add.post" 
+          class="fr.itldev.koya.webscript.dossier.AddDossier"
           parent="webscript">                
-        <property name="caseService" ref="caseService" />
+        <property name="dossierService" ref="dossierService" />
     </bean>
     <!--liste les dossiers-->
-    <bean id="webscript.fr.itldev.koya.koyacase.list.post" 
-          class="fr.itldev.koya.webscript.koyacase.ListCase"
+    <bean id="webscript.fr.itldev.koya.dossier.list.post" 
+          class="fr.itldev.koya.webscript.dossier.ListDossier"
           parent="webscript">                
-        <property name="caseService" ref="caseService" />
+        <property name="dossierService" ref="dossierService" />
     </bean>
        
     <!--

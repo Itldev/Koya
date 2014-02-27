@@ -19,32 +19,32 @@
 
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.impl.Case;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.services.CaseService;
+import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
 
-public class CaseServiceImpl extends AlfrescoRestService implements CaseService {
+public class DossierServiceImpl extends AlfrescoRestService implements DossierService {
 
-    private static final String REST_POST_ADDCASE = "/s/fr/itldev/koya/case/add";
-    private static final String REST_POST_LISTCHILD = "/s/fr/itldev/koya/case/list?filter={filter}";
+    private static final String REST_POST_ADDDOSSIER = "/s/fr/itldev/koya/dossier/add";
+    private static final String REST_POST_LISTCHILD = "/s/fr/itldev/koya/dossier/list?filter={filter}";
 
     @Override
-    public Case create(User user, Case koyaCase) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_ADDCASE, koyaCase, ItlAlfrescoServiceWrapper.class);
+    public Dossier create(User user, Dossier dossier) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_ADDDOSSIER, dossier, ItlAlfrescoServiceWrapper.class);
 
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (Case) ret.getItems().get(0);
+            return (Dossier) ret.getItems().get(0);
         } else {
             throw new AlfrescoServiceException(ret.getMessage());
         }
     }
 
     @Override
-    public Case edit(User user, Case koyaCase) throws AlfrescoServiceException {
+    public Dossier edit(User user, Dossier dossier) throws AlfrescoServiceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -56,7 +56,7 @@ public class CaseServiceImpl extends AlfrescoRestService implements CaseService 
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<Case> list(User user, Space space, String... filter) throws AlfrescoServiceException {
+    public List<Dossier> list(User user, Space space, String... filter) throws AlfrescoServiceException {
         String filtre = "";
         if (filter.length == 1) {
             filtre = filter[0];

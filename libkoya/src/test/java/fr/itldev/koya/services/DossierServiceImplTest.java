@@ -19,7 +19,7 @@
 
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.impl.Case;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
@@ -38,7 +38,7 @@ import org.springframework.web.client.RestClientException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
-public class CaseServiceImplTest extends TestCase {
+public class DossierServiceImplTest extends TestCase {
 
     private Logger logger = Logger.getLogger(this.getClass());
 
@@ -52,7 +52,7 @@ public class CaseServiceImplTest extends TestCase {
     private SpaceService spaceService;
 
     @Autowired
-    private CaseService caseService;
+    private DossierService dossierService;
 
     private Company companyTests;
     private Space spaceTests;
@@ -71,33 +71,33 @@ public class CaseServiceImplTest extends TestCase {
     }
 
     @Test
-    public void testCreateCase() throws AlfrescoServiceException {
-        Case cree = caseService.create(admin, new Case("doss1", spaceTests));
+    public void testCreateDossier() throws AlfrescoServiceException {
+        Dossier cree = dossierService.create(admin, new Dossier("doss1", spaceTests));
         assertNotNull("erreur de creation de l'espace 'espace Enfant'", cree);
 
-        caseService.list(admin, spaceTests);
-        //  caseService.supprimer(admin, cree);
+        dossierService.list(admin, spaceTests);
+        //  dossierService.supprimer(admin, cree);
     }
 
     @Test
-    public void testListCases() throws AlfrescoServiceException {
-        caseService.create(admin, new Case("doss1", spaceTests));
-        caseService.create(admin, new Case("doss2", spaceTests));
-        caseService.create(admin, new Case("doss3", spaceTests));
-        caseService.create(admin, new Case("doss4", spaceTests));
-        assertEquals(4, caseService.list(admin, spaceTests).size());
+    public void testListDossierss() throws AlfrescoServiceException {
+        dossierService.create(admin, new Dossier("doss1", spaceTests));
+        dossierService.create(admin, new Dossier("doss2", spaceTests));
+        dossierService.create(admin, new Dossier("doss3", spaceTests));
+        dossierService.create(admin, new Dossier("doss4", spaceTests));
+        assertEquals(4, dossierService.list(admin, spaceTests).size());
     }
 
 //    @Test
 //    public void testTaille() throws AlfrescoServiceException, AlfrescoFtpException {
-//        Dossier doss1 = caseService.creerNouveau(admin, new Dossier("doss1", espaceTests));
+//        Dossier doss1 = dossierService.creerNouveau(admin, new Dossier("doss1", espaceTests));
 //
 //        //verifier la taille des fichiers a envoyer
 //        long fileSize = 0;
 //
 //        //TODO quand le service d'upload de fichiers sera actif
 //        //verifier que taille dossier = Somme taille fichier uploadés
-//        assertEquals(fileSize, caseService.getTailleOctet(admin, doss1));
+//        assertEquals(fileSize, dossierService.getTailleOctet(admin, doss1));
 //
 //        System.out.println("le dossier '" + doss1 + "' fait " + societeService.getTailleString(admin, doss1));
 //    }

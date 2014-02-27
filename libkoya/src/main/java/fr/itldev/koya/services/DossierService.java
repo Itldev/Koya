@@ -19,35 +19,35 @@
 
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.impl.Case;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
 
-public interface CaseService extends AlfrescoService {
+public interface DossierService extends AlfrescoService {
 
     /**
-     * Creates a new case
+     * Creates a new Dossier
      *
      * @param user
-     * @param koyaCase
+     * @param dossier
      * @return
      * @throws AlfrescoServiceException
      */
-    Case create(User user, Case koyaCase) throws AlfrescoServiceException;
+    Dossier create(User user, Dossier dossier) throws AlfrescoServiceException;
 
     /**
      *
      * @param user
-     * @param koyaCase
+     * @param dossier
      * @return
      * @throws AlfrescoServiceException
      */
-    Case edit(User user, Case koyaCase) throws AlfrescoServiceException;
+    Dossier edit(User user, Dossier dossier) throws AlfrescoServiceException;
 
     /**
-     * List all Space Cases
+     * List all Space Dossiers
      *
      * @param user
      * @param space
@@ -55,6 +55,6 @@ public interface CaseService extends AlfrescoService {
      * @return
      * @throws AlfrescoServiceException
      */
-    List<Case> list(User user, Space space, String... filter) throws AlfrescoServiceException;
+    List<Dossier> list(User user, Space space, String... filter) throws AlfrescoServiceException;
 
 }

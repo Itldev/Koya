@@ -75,8 +75,8 @@ public final class SalesOffer extends SecuredItem implements Activable{
     }
 
     @JsonIgnore
-    public Integer getLimitCases() {
-        return Integer.valueOf(data.get("limitCases"));
+    public Integer getLimitDossiers() {
+        return Integer.valueOf(data.get("limitDossiers"));
     }
 
     @JsonIgnore
