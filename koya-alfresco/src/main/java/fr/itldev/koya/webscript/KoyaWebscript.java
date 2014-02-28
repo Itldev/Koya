@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.webscript;
 
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -35,6 +35,8 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  *
  */
 public abstract class KoyaWebscript extends AbstractWebScript {
+    
+    private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 
     /**
      * Extracts JSON POST data.
@@ -44,7 +46,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
      * @throws java.io.IOException
      */
     protected Map<String, Object> getJsonMap(WebScriptRequest req) throws IOException {
-
+        
         JSONParser parser = new JSONParser();
         Reader reader = req.getContent().getReader();
         JSONObject jsonConteneur = null;
@@ -54,9 +56,9 @@ public abstract class KoyaWebscript extends AbstractWebScript {
             } catch (ParseException ex) {
             }
         }
-
+        
         return new HashMap<>();
-
+        
     }
 
     /**
@@ -74,7 +76,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
         }
         return params;
     }
-
+    
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
@@ -86,11 +88,12 @@ public abstract class KoyaWebscript extends AbstractWebScript {
         } catch (Exception ex) {
             wrapper.setStatusFail(ex.toString());
         }
-
+        
         res.setContentType("application/json");
         res.getWriter().write(wrapper.getAsJSON());
+        logger.trace(wrapper.getAsJSON());
     }
-
+    
     public abstract ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception;
-
+    
 }

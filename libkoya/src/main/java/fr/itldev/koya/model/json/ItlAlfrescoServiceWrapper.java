@@ -3,22 +3,22 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.model.json;
 
+import fr.itldev.koya.model.Content;
 import fr.itldev.koya.services.impl.util.ItlAlfrescoServiceWrapperDeserializer;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
- * Classe de modele pour le retour des services alfresco
+ * Model class for koya rest interactions
  *
  */
 @JsonDeserialize(using = ItlAlfrescoServiceWrapperDeserializer.class)
@@ -99,11 +99,17 @@ public class ItlAlfrescoServiceWrapper {
     public void setStatusOK() {
         this.status = STATUS_OK;
 
-        //Suppression des items null
+        //delete null items
         this.nbitems = this.items.size();
-        //TODO vérifier que tous les items sont du meme type !!! sinon exception
         if (this.nbitems > 0) {
-            this.typeItems = items.get(0).getClass().getCanonicalName();
+            //TODO check all items class instead of only first one
+            //TODO if items are from different types use common super class (in koya types)          
+            if (Content.class.isAssignableFrom(items.get(0).getClass())) {
+                this.typeItems = Content.class.getCanonicalName();
+            } else {
+                this.typeItems = items.get(0).getClass().getCanonicalName();
+            }
+
         }
     }
 

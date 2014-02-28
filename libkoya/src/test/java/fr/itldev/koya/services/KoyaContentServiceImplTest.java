@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.Content;
@@ -100,7 +99,24 @@ public class KoyaContentServiceImplTest extends TestCase {
 
         List<Content> lst = koyaContentService.list(admin, dossierTests);
 
+        assertEquals(2, lst.size());
+
+    }
+
+    @Test
+    public void testListDirectChildren() throws AlfrescoServiceException {
+        Content rep = koyaContentService.create(admin, new Directory("rep", dossierTests));
+        koyaContentService.create(admin, new Directory("sousrep", (Directory) rep));
+        koyaContentService.create(admin, new Directory("rep2", dossierTests));
+
+        Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
+        koyaContentService.upload(admin, toUpload, dossierTests);
+
+        List<Content> lst = koyaContentService.list(admin, dossierTests, 2);
+
         assertEquals(3, lst.size());
+
+        assertEquals(1, koyaContentService.list(admin, (Directory) rep, 2).size());
 
     }
 
@@ -117,6 +133,7 @@ public class KoyaContentServiceImplTest extends TestCase {
         assertEquals(sizeBefore + 1, lstC.size());
 
     }
+
     @Test
     public void testMoveFile() throws AlfrescoServiceException {
 
@@ -127,7 +144,7 @@ public class KoyaContentServiceImplTest extends TestCase {
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
         Document doc = koyaContentService.upload(admin, toUpload, rep);
 
-        assertEquals(1 + sizeBefore, koyaContentService.list(admin, dossierTests).size());
+        assertEquals(sizeBefore.intValue(), koyaContentService.list(admin, dossierTests).size());
 
         //deplacement du doc dans la racine
         koyaContentService.move(admin, doc, dossierTests);

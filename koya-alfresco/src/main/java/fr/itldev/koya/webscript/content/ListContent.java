@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.webscript.content;
 
 import fr.itldev.koya.alfservice.KoyaContentService;
@@ -29,13 +28,14 @@ import org.apache.log4j.Logger;
 /**
  *
  * Dossier Listing Webscript
- * 
- * TODO option de récursivité qui permet d'obtenir tous les contenu ou le
- * contenu descendant direct
+ *
  *
  *
  */
 public class ListContent extends KoyaWebscript {
+
+    private String URL_PARAM_MAXDEPTH = "maxdepth";
+    private Integer DEFAULT_MAX_DEPTH = 50;
 
     private final Logger logger = Logger.getLogger(ListContent.class);
 
@@ -46,12 +46,19 @@ public class ListContent extends KoyaWebscript {
         this.koyaContentService = koyaContentService;
     }
 
-   
-
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         NodeRef parent = new NodeRef((String) jsonPostMap.get("nodeRef"));
-        wrapper.addItems(koyaContentService.list(parent));
+
+        Integer depth;
+
+        if (urlParams.containsKey("maxdepth")) {
+            depth = new Integer((String) urlParams.get("maxdepth"));
+        } else {
+            depth = DEFAULT_MAX_DEPTH;
+        }
+
+        wrapper.addItems(koyaContentService.list(parent, depth));
         return wrapper;
     }
 

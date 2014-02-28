@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
@@ -56,7 +55,7 @@ public class AlfrescoRestService implements AlfrescoService {
 
     // </editor-fold>
     /**
-     * Supprime l'element passé en argument
+     * Deletes element.
      *
      * TODO protection pour la suppression de tous les sous elements ?
      *
@@ -79,7 +78,7 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     protected Map<String, String> explodeNodeRef(String nodeRef) {
 
-        Map exploded = new HashMap<String, String>();
+        Map exploded = new HashMap<>();
 
         Pattern p = Pattern.compile("(\\w+):\\/\\/(\\w+)\\/(.*)");
         Matcher m = p.matcher(nodeRef);
@@ -95,8 +94,7 @@ public class AlfrescoRestService implements AlfrescoService {
     }
 
     /**
-     * Méthode qui Convertis un taille de données fournie en octets sous forme
-     * lisible.
+     * Converts byte datasize to human readable
      *
      * @param bytes
      * @param si
@@ -105,7 +103,7 @@ public class AlfrescoRestService implements AlfrescoService {
     protected String getHumanReadableByteCount(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
         if (bytes < unit) {
-            return bytes + " o";
+            return bytes + " b";
         }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");

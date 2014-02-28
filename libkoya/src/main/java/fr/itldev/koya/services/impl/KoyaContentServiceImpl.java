@@ -3,24 +3,24 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.Container;
 import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Directory;
@@ -40,6 +40,7 @@ import org.springframework.util.MultiValueMap;
 public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService {
 
     private static final String REST_POST_ADDCONTENT = "/s/fr/itldev/koya/content/add";//+/{typeClass}
+    private static final String REST_POST_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list?maxdepth={maxdepth}";
     private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list";
     private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move";
     private static final String REST_POST_UPLOAD = "/s/api/upload";
@@ -79,8 +80,23 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     @Override
-    public List<Content> list(User user, Dossier dossier) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTCONTENT, dossier, ItlAlfrescoServiceWrapper.class);
+    public List<Content> list(User user, Dossier dossier, Integer... depth) throws AlfrescoServiceException {
+        return listContent(user, dossier, depth);
+    }
+
+    @Override
+    public List<Content> list(User user, Directory dir, Integer... depth) throws AlfrescoServiceException {
+        return listContent(user, dir, depth);
+    }
+
+    private List<Content> listContent(User user, SecuredItem container, Integer... depth) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret;
+        if (depth.length > 0) {
+            ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTCONTENT_DEPTH_OPTION, container, ItlAlfrescoServiceWrapper.class, depth[0]);
+        } else {
+            ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTCONTENT, container, ItlAlfrescoServiceWrapper.class);
+        }
+
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
@@ -97,12 +113,12 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
      * @throws AlfrescoServiceException
      */
     private Document uploadPrivate(User user, Resource resource, Container parent) throws AlfrescoServiceException {
-        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
         parts.add("filedata", resource);
         parts.add("destination", parent.getNodeRef());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(parts, headers);
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
         AlfrescoUploadReturn upReturn = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
 
         Document docUpload;
