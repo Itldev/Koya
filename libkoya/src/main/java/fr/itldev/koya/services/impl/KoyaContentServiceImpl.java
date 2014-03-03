@@ -43,6 +43,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_POST_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list?maxdepth={maxdepth}";
     private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list";
     private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move";
+    private static final String REST_POST_GETPARENT = "/s/fr/itldev/koya/content/getparent";
     private static final String REST_POST_UPLOAD = "/s/api/upload";
 
     /*TODO mettre en place un proxy pour l'upload/download de contenus comme ce qui est
@@ -88,6 +89,18 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     public List<Content> list(User user, Directory dir, Integer... depth) throws AlfrescoServiceException {
         return listContent(user, dir, depth);
     }
+    
+    
+     @Override
+    public SecuredItem getParent(User user, Content content) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_GETPARENT , content, ItlAlfrescoServiceWrapper.class);
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
+            return (Content) ret.getItems().get(0);
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
+    }
+
 
     private List<Content> listContent(User user, SecuredItem container, Integer... depth) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret;
@@ -145,4 +158,5 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         }
     }
 
+   
 }

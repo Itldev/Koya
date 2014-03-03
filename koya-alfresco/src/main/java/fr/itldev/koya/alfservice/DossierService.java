@@ -124,15 +124,10 @@ public class DossierService {
 
     /**
      *
-     * =============== private Methods =================
-     *
-     */
-    /**
-     *
      * @param dossierNodeRef
      * @return
      */
-    private Dossier nodeDossierBuilder(NodeRef dossierNodeRef) {
+    public Dossier nodeDossierBuilder(NodeRef dossierNodeRef) {
         Dossier c = new Dossier();
 
         c.setNodeRef(dossierNodeRef.toString());

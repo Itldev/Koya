@@ -19,6 +19,7 @@
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Directory;
@@ -42,5 +43,7 @@ public interface KoyaContentService extends AlfrescoService {
     List<Content> list(User user, Dossier dossier, Integer... depth) throws AlfrescoServiceException;
 
     List<Content> list(User user, Directory dir, Integer... depth) throws AlfrescoServiceException;
+
+    SecuredItem getParent(User user, Content content) throws AlfrescoServiceException;
 
 }

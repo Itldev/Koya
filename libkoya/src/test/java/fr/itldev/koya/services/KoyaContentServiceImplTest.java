@@ -155,4 +155,12 @@ public class KoyaContentServiceImplTest extends TestCase {
         assertEquals(sizeBefore + 1, koyaContentService.list(admin, dossierTests).size());
 
     }
+
+    @Test
+    public void testGetParent() throws AlfrescoServiceException {
+        Content rep3 = koyaContentService.create(admin, new Directory("rep3", dossierTests));
+        Content srep = koyaContentService.create(admin, new Directory("sousrep", (Directory) rep3));
+
+        assertEquals(rep3, koyaContentService.getParent(admin, srep));
+    }
 }

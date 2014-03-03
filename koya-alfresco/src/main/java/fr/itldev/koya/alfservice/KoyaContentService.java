@@ -18,7 +18,10 @@
  */
 package fr.itldev.koya.alfservice;
 
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Directory;
 import java.io.Serializable;
@@ -27,7 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
@@ -42,9 +47,19 @@ public class KoyaContentService {
     private final Logger logger = Logger.getLogger(this.getClass());
 
     private NodeService nodeService;
+    private DictionaryService dictionaryService;
+    private DossierService dossierService;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
+    }
+
+    public void setDictionaryService(DictionaryService dictionaryService) {
+        this.dictionaryService = dictionaryService;
+    }
+
+    public void setDossierService(DossierService dossierService) {
+        this.dossierService = dossierService;
     }
 
     public Directory createDir(String name, NodeRef parent) {
@@ -72,11 +87,7 @@ public class KoyaContentService {
 
         nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
 
-        if (nodeService.getType(toMove).equals(ContentModel.TYPE_FOLDER)) {//TODO folder ou element héritant de folder !!! cf méthode pyramides dictionnary
-            return nodeDirBuilder(toMove);
-        } else {
-            return nodeDocumentBuilder(toMove);
-        }
+        return nodeContentBuilder(toMove);
     }
 
     /**
@@ -102,9 +113,7 @@ public class KoyaContentService {
         for (ChildAssociationRef car : nodeService.getChildAssocs(parent)) {
             NodeRef childNr = car.getChildRef();
             //
-            if (nodeService.getType(childNr).equals(ContentModel.TYPE_FOLDER)) {
-                //TODO folder ou element héritant de folder !!! cf méthode pyramides dictionnary
-
+            if (nodeIsFolder(childNr)) {
                 Directory dir = nodeDirBuilder(childNr);
                 dir.setChildren(list(childNr, depth - 1));
                 contents.add(dir);
@@ -113,6 +122,76 @@ public class KoyaContentService {
             }
         }
         return contents;
+    }
+
+    /**
+     * Returns node (assumed is a content) parent
+     *
+     * @param currentNode
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public SecuredItem getParent(NodeRef currentNode) throws KoyaServiceException {
+
+        NodeRef parentNr = nodeService.getPrimaryParent(currentNode).getParentRef();
+
+        if (nodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+            return dossierService.nodeDossierBuilder(parentNr);
+        } else if (nodeIsChildOfDossier(parentNr)) {
+            return nodeContentBuilder(parentNr);
+        } else {
+            throw new KoyaServiceException("Invalid Content node passed to get parent.");
+        }
+
+    }
+
+    /**
+     *
+     * @param nodeRef
+     * @return
+     */
+    private Boolean nodeIsChildOfDossier(NodeRef nodeRef) {
+
+        try {
+            NodeRef parent = nodeService.getPrimaryParent(nodeRef).getParentRef();
+
+            if (nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+                return true;
+            } else {
+                return nodeIsChildOfDossier(parent);
+            }
+        } catch (InvalidNodeRefException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Return true if node is type ContentModel.TYPE_FOLDER or subtype.
+     *
+     *
+     * @param nodeRef
+     * @return
+     */
+    private Boolean nodeIsFolder(NodeRef nodeRef) {
+        QName qNameType = nodeService.getType(nodeRef);
+        return Boolean.valueOf(qNameType.equals(ContentModel.TYPE_FOLDER)
+                || (dictionaryService.isSubClass(qNameType, ContentModel.TYPE_FOLDER)));
+//        return Boolean.valueOf((dictionaryService.isSubClass(qNameType, ContentModel.TYPE_FOLDER)
+//                && !dictionaryService.isSubClass(qNameType, ContentModel.TYPE_SYSTEM_FOLDER)));        
+    }
+
+    /**
+     * Builds Content according to the type.
+     *
+     * @param nodeRef
+     * @return
+     */
+    private Content nodeContentBuilder(NodeRef nodeRef) {
+        if (nodeIsFolder(nodeRef)) {
+            return nodeDirBuilder(nodeRef);
+        } else {
+            return nodeDocumentBuilder(nodeRef);
+        }
     }
 
     /**
