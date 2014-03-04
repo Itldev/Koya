@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -45,11 +44,11 @@ import org.apache.log4j.Logger;
  *
  */
 public class CompanyService {
-    
+
     private static final String SITE_PRESET = "site-dashboard";
     private static final String DESC = "Koya Company";
     private final Logger logger = Logger.getLogger(CompanyService.class);
-    
+
     private SiteService siteService;
     private NodeService nodeService;
     private KoyaNodeService koyaNodeService;
@@ -58,22 +57,22 @@ public class CompanyService {
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
-    
+
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-    
+
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
 
     // </editor-fold>
     public Company create(String title, SalesOffer sO) throws KoyaServiceException {
-        
+
         if (title == null || title.isEmpty()) {
             throw new KoyaServiceException();//TODO préciser l'exc
         }
-        
+
         String shortName = getShortNameFromTitle(title);
         SiteInfo sInfo = siteService.createSite(SITE_PRESET, shortName, title, DESC + " - " + shortName, SiteVisibility.PUBLIC);
         Company created = new Company(sInfo);
@@ -96,28 +95,34 @@ public class CompanyService {
          */
         return created;
     }
-    
-    public List<Company> list() {
+
+    /**
+     * List users available companies.
+     *
+     * @param userName
+     * @return
+     */
+    public List<Company> list(String userName) {
         //TODO limit user's available sites only
         //TODO active sites only
         List<Company> socs = new ArrayList<>();
-        
-        for (SiteInfo s : siteService.listSites("", SITE_PRESET)) {        
+
+        for (SiteInfo s : siteService.listSites("", SITE_PRESET)) {
             if (isKoyaCompany(s.getNodeRef())) {
-                socs.add(new Company(s));
+                socs.add(koyaNodeService.siteCompanyBuilder(s, userName));
             }
         }
         return socs;
     }
-    
+
     public List<SalesOffer> listSalesOffer() {
         return null;
-        
+
     }
-    
+
     public SalesOffer getSalesOffer(String offerName) {
         return null;
-        
+
     }
 
     /**
@@ -148,9 +153,9 @@ public class CompanyService {
      * @return
      */
     public Boolean isKoyaCompany(NodeRef n) {
-        
+
         return nodeService.getType(n).equals(KoyaModel.QNAME_KOYA_COMPANY)
                 && nodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE);
     }
-    
+
 }

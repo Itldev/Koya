@@ -30,6 +30,7 @@ public abstract class SecuredItem {
     private String name;
     private String parentNodeRef;
     private Long byteSize;
+    private Boolean userFavourite;
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 
     public String getNodeRef() {
@@ -72,6 +73,22 @@ public abstract class SecuredItem {
         this.parentNodeRef = parentNodeRef.toString();
     }
 
+    public Long getByteSize() {
+        return byteSize;
+    }
+
+    public void setByteSize(Long tailleOctets) {
+        this.byteSize = tailleOctets;
+    }
+
+    public Boolean isUserFavourite() {
+        return userFavourite;
+    }
+
+    public void setUserFavourite(Boolean userFavourite) {
+        this.userFavourite = userFavourite;
+    }
+
     // </editor-fold>
     public SecuredItem() {
     }
@@ -91,14 +108,6 @@ public abstract class SecuredItem {
     @JsonIgnore
     public NodeRef getParentNodeRefasObject() {
         return new NodeRef(this.parentNodeRef);
-    }
-
-    public Long getByteSize() {
-        return byteSize;
-    }
-
-    public void setByteSize(Long tailleOctets) {
-        this.byteSize = tailleOctets;
     }
 
     private static final Integer HASHCONST1 = 3;
@@ -130,6 +139,23 @@ public abstract class SecuredItem {
     public String getAsJSON() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(this);
+    }
+
+    /**
+     * Useful method to deserialize content.
+     *
+     * @return
+     */
+    public String getContentType() {
+        return this.getClass().getCanonicalName();
+    }
+
+    /**
+     * Implemented for deserialization compatibility
+     *
+     * @param contentType
+     */
+    public void setContentType(String contentType) {
     }
 
 }

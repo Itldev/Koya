@@ -61,13 +61,5 @@ public abstract class Content extends SecuredItem {
     }
 
    
-    /**
-     * Useful method to deserialize content.
-     *
-     * @return
-     */
-    public String getContentType() {
-        return this.getClass().getCanonicalName();
-    }
 
 }

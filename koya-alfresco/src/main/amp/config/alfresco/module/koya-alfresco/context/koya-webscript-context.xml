@@ -41,6 +41,7 @@
           class="fr.itldev.koya.webscript.company.ListCompany"
           parent="webscript">                
         <property name="companyService" ref="companyService" />
+        <property name="authenticationService" ref="authenticationService" />
         
     </bean>
     
@@ -66,12 +67,14 @@
           class="fr.itldev.koya.webscript.space.AddSpace"
           parent="webscript">                
         <property name="spaceService" ref="spaceService" /> 
+        <property name="authenticationService" ref="authenticationService" />
     </bean>
     <!--liste les spaces-->
     <bean id="webscript.fr.itldev.koya.space.list.post" 
           class="fr.itldev.koya.webscript.space.ListSpace"
           parent="webscript">                
         <property name="spaceService" ref="spaceService" />
+        <property name="authenticationService" ref="authenticationService" />
         
     </bean>
     
@@ -95,12 +98,14 @@
           class="fr.itldev.koya.webscript.dossier.AddDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
+        <property name="authenticationService" ref="authenticationService" />
     </bean>
     <!--liste les dossiers-->
     <bean id="webscript.fr.itldev.koya.dossier.list.post" 
           class="fr.itldev.koya.webscript.dossier.ListDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
+        <property name="authenticationService" ref="authenticationService" />
     </bean>
        
     <!--
@@ -114,26 +119,30 @@
           class="fr.itldev.koya.webscript.content.AddContent"
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />
+        <property name="authenticationService" ref="authenticationService" /> 
     </bean>
     <!--content listing-->
     <bean id="webscript.fr.itldev.koya.content.list.post" 
           class="fr.itldev.koya.webscript.content.ListContent"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />    
+        <property name="koyaContentService" ref="koyaContentService" />   
+        <property name="authenticationService" ref="authenticationService" /> 
     </bean>
     
     <!--content move-->
     <bean id="webscript.fr.itldev.koya.content.move.post" 
           class="fr.itldev.koya.webscript.content.MoveContent"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />    
+        <property name="koyaContentService" ref="koyaContentService" />   
+        <property name="authenticationService" ref="authenticationService" />  
     </bean>
  
     <!--get Parent-->
     <bean id="webscript.fr.itldev.koya.content.getparent.post" 
           class="fr.itldev.koya.webscript.content.GetParent"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />    
+        <property name="koyaContentService" ref="koyaContentService" />
+        <property name="authenticationService" ref="authenticationService" />      
     </bean>
  
     <!--
@@ -142,14 +151,32 @@
     ==================================================================
     -->
     
-    <!--Changement du status d'activité-->
+    <!--Change Activity Status-->
     <bean id="webscript.fr.itldev.koya.global.toggleactive.post" 
           class="fr.itldev.koya.webscript.global.ToggleActive"
           parent="webscript">                
         <property name="koyaNodeService" ref="koyaNodeService" />        
     </bean>
     
-    <!--Détermination de la taille disque occupée par tous les éléments d'un conteneur-->
+    
+    <!--Change Favourite Status-->
+    <bean id="webscript.fr.itldev.koya.global.togglefavourite.post" 
+          class="fr.itldev.koya.webscript.global.ToggleFavourite"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
+        <property name="authenticationService" ref="authenticationService" />        
+    </bean>
+    
+    
+     <!-- Get Users Favourites -->
+    <bean id="webscript.fr.itldev.koya.global.getfavourites.get" 
+          class="fr.itldev.koya.webscript.global.GetFavourites"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
+        <property name="authenticationService" ref="authenticationService" />        
+    </bean>
+    
+    <!--Get used disk siez-->
     <bean id="webscript.fr.itldev.koya.global.disksize.post" 
           class="fr.itldev.koya.webscript.global.DiskSize"
           parent="webscript">                

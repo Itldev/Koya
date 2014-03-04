@@ -22,7 +22,6 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Directory;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -47,22 +45,17 @@ public class KoyaContentService {
     private final Logger logger = Logger.getLogger(this.getClass());
 
     private NodeService nodeService;
-    private DictionaryService dictionaryService;
-    private DossierService dossierService;
+    KoyaNodeService koyaNodeService;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
 
-    public void setDictionaryService(DictionaryService dictionaryService) {
-        this.dictionaryService = dictionaryService;
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
     }
 
-    public void setDossierService(DossierService dossierService) {
-        this.dossierService = dossierService;
-    }
-
-    public Directory createDir(String name, NodeRef parent) {
+    public Directory createDir(String name, NodeRef parent, String userName) {
 
         //TODO parent must be a dir or a dossier
         //TODO check dir name unicity
@@ -77,17 +70,17 @@ public class KoyaContentService {
                 ContentModel.TYPE_FOLDER,
                 properties);
 
-        return nodeDirBuilder(car.getChildRef());
+        return koyaNodeService.nodeDirBuilder(car.getChildRef(), userName);
     }
 
-    public Content move(NodeRef toMove, NodeRef dest) {
+    public Content move(NodeRef toMove, NodeRef dest, String userName) {
 
         //TODO security check before moving OR exception catching ?
         String name = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
 
         nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
 
-        return nodeContentBuilder(toMove);
+        return koyaNodeService.nodeContentBuilder(toMove, userName);
     }
 
     /**
@@ -101,9 +94,10 @@ public class KoyaContentService {
      *
      * @param parent
      * @param depth
+     * @param userName
      * @return
      */
-    public List<Content> list(NodeRef parent, Integer depth) {
+    public List<Content> list(NodeRef parent, Integer depth, String userName) {
 
         List<Content> contents = new ArrayList<>();
 
@@ -113,12 +107,12 @@ public class KoyaContentService {
         for (ChildAssociationRef car : nodeService.getChildAssocs(parent)) {
             NodeRef childNr = car.getChildRef();
             //
-            if (nodeIsFolder(childNr)) {
-                Directory dir = nodeDirBuilder(childNr);
-                dir.setChildren(list(childNr, depth - 1));
+            if (koyaNodeService.nodeIsFolder(childNr)) {
+                Directory dir = koyaNodeService.nodeDirBuilder(childNr, userName);
+                dir.setChildren(list(childNr, depth - 1, userName));
                 contents.add(dir);
             } else {
-                contents.add(nodeDocumentBuilder(childNr));
+                contents.add(koyaNodeService.nodeDocumentBuilder(childNr, userName));
             }
         }
         return contents;
@@ -128,17 +122,18 @@ public class KoyaContentService {
      * Returns node (assumed is a content) parent
      *
      * @param currentNode
+     * @param userName
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public SecuredItem getParent(NodeRef currentNode) throws KoyaServiceException {
+    public SecuredItem getParent(NodeRef currentNode, String userName) throws KoyaServiceException {
 
         NodeRef parentNr = nodeService.getPrimaryParent(currentNode).getParentRef();
 
         if (nodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-            return dossierService.nodeDossierBuilder(parentNr);
+            return koyaNodeService.nodeDossierBuilder(parentNr, userName);
         } else if (nodeIsChildOfDossier(parentNr)) {
-            return nodeContentBuilder(parentNr);
+            return koyaNodeService.nodeContentBuilder(parentNr, userName);
         } else {
             throw new KoyaServiceException("Invalid Content node passed to get parent.");
         }
@@ -163,61 +158,6 @@ public class KoyaContentService {
         } catch (InvalidNodeRefException e) {
             return false;
         }
-    }
-
-    /**
-     * Return true if node is type ContentModel.TYPE_FOLDER or subtype.
-     *
-     *
-     * @param nodeRef
-     * @return
-     */
-    private Boolean nodeIsFolder(NodeRef nodeRef) {
-        QName qNameType = nodeService.getType(nodeRef);
-        return Boolean.valueOf(qNameType.equals(ContentModel.TYPE_FOLDER)
-                || (dictionaryService.isSubClass(qNameType, ContentModel.TYPE_FOLDER)));
-//        return Boolean.valueOf((dictionaryService.isSubClass(qNameType, ContentModel.TYPE_FOLDER)
-//                && !dictionaryService.isSubClass(qNameType, ContentModel.TYPE_SYSTEM_FOLDER)));        
-    }
-
-    /**
-     * Builds Content according to the type.
-     *
-     * @param nodeRef
-     * @return
-     */
-    private Content nodeContentBuilder(NodeRef nodeRef) {
-        if (nodeIsFolder(nodeRef)) {
-            return nodeDirBuilder(nodeRef);
-        } else {
-            return nodeDocumentBuilder(nodeRef);
-        }
-    }
-
-    /**
-     *
-     * @param dirNodeRef
-     * @return
-     */
-    private Directory nodeDirBuilder(NodeRef dirNodeRef) {
-        Directory r = new Directory();
-        r.setNodeRef(dirNodeRef.toString());
-        r.setName((String) nodeService.getProperty(dirNodeRef, ContentModel.PROP_NAME));
-        r.setParentNodeRefasObject(nodeService.getPrimaryParent(dirNodeRef).getParentRef());
-        return r;
-    }
-
-    /**
-     *
-     * @param docNodeRef
-     * @return
-     */
-    private Document nodeDocumentBuilder(NodeRef docNodeRef) {
-        Document d = new Document();
-        d.setNodeRef(docNodeRef.toString());
-        d.setName((String) nodeService.getProperty(docNodeRef, ContentModel.PROP_NAME));
-        d.setParentNodeRefasObject(nodeService.getPrimaryParent(docNodeRef).getParentRef());
-        return d;
     }
 
 }

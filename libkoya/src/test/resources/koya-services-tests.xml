@@ -48,7 +48,7 @@
                             <bean id="httpClientParams" class="org.apache.commons.httpclient.params.HttpClientParams">
                                 <property name="authenticationPreemptive" value="true"/>
                                 <property name="connectionManagerClass"
-                                  value="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager"/>
+                                          value="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager"/>
                             </bean>
                         </constructor-arg>
                     </bean>
@@ -95,7 +95,7 @@
     
     <bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl" parent="abstractRestService"/>
         
-     <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService"/>
+    <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService"/>
     
     <bean id="spaceService" class="fr.itldev.koya.services.impl.SpaceServiceImpl" parent="abstractRestService"/>
     
@@ -103,5 +103,6 @@
     
     <bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl" parent="abstractRestService"/>
         
+    <bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl" parent="abstractRestService"/>
     
 </beans>

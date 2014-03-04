@@ -18,7 +18,6 @@
  */
 package fr.itldev.koya.model.json;
 
-import fr.itldev.koya.model.Content;
 import fr.itldev.koya.services.impl.util.ItlAlfrescoServiceWrapperDeserializer;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,8 +41,7 @@ public class ItlAlfrescoServiceWrapper {
     private String message;
     private List items = new ArrayList();
     private Integer nbitems;
-    private String typeItems;
-
+    
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public String getStatus() {
         return status;
@@ -76,14 +74,7 @@ public class ItlAlfrescoServiceWrapper {
     public void setNbitems(Integer nbitems) {
         this.nbitems = nbitems;
     }
-
-    public String getTypeItems() {
-        return typeItems;
-    }
-
-    public void setTypeItems(String typeItems) {
-        this.typeItems = typeItems;
-    }
+ 
 
     // </editor-fold>
     public void addItem(Object item) {
@@ -100,17 +91,7 @@ public class ItlAlfrescoServiceWrapper {
         this.status = STATUS_OK;
 
         //delete null items
-        this.nbitems = this.items.size();
-        if (this.nbitems > 0) {
-            //TODO check all items class instead of only first one
-            //TODO if items are from different types use common super class (in koya types)          
-            if (Content.class.isAssignableFrom(items.get(0).getClass())) {
-                this.typeItems = Content.class.getCanonicalName();
-            } else {
-                this.typeItems = items.get(0).getClass().getCanonicalName();
-            }
-
-        }
+        this.nbitems = this.items.size();    
     }
 
     public void setStatusFail(String failMessage) {

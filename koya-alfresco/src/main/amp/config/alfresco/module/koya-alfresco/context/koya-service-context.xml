@@ -26,6 +26,10 @@
     <!--Global Koya nodes util services-->
     <bean name="koyaNodeService" class="fr.itldev.koya.alfservice.KoyaNodeService">
         <property name="nodeService" ref="nodeService"/>
+        <property name="favouritesService" ref="favouritesService"/>
+        <property name="preferenceService" ref="preferenceService"/>
+        <property name="dictionaryService" ref="dictionaryService"/>
+        <property name="siteService" ref="siteService"/>
     </bean>
     
     <!--Companies handling service-->
@@ -51,8 +55,7 @@
     <!--Contents handling service-->
     <bean name="koyaContentService" class="fr.itldev.koya.alfservice.KoyaContentService">
         <property name="nodeService" ref="nodeService"/>
-        <property name="dictionaryService" ref="dictionaryService"/>
-        <property name="dossierService" ref="dossierService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
    
     

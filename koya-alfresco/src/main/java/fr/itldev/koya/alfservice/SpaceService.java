@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -44,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public class SpaceService {
 
-    private static final String DOCLIB_NAME = "documentLibrary";
+    public static final String DOCLIB_NAME = "documentLibrary";
 
     private Logger logger = Logger.getLogger(this.getClass());
 
@@ -72,10 +71,11 @@ public class SpaceService {
      * @param name
      * @param parent
      * @param prop
+     * @param userName
      * @return
      * @throws KoyaServiceException
      */
-    public Space create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
+    public Space create(String name, NodeRef parent, Map<String, String> prop, String userName) throws KoyaServiceException {
 
         //Space must have a name
         if (name == null || name.isEmpty()) {
@@ -106,16 +106,17 @@ public class SpaceService {
                 properties);
         koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
 
-        return nodeSpaceBuilder(car.getChildRef());
+        return koyaNodeService.nodeSpaceBuilder(car.getChildRef(), userName);
     }
 
     /**
      * Returns Company Spaces flat list.
      *
      * @param companyShortName
+     * @param userName
      * @return
      */
-    public List<Space> list(String companyShortName) {
+    public List<Space> list(String companyShortName, String userName) {
         List<Space> espaces = new ArrayList<>();
 
         String listEspacesQuery = "PATH:\"/app:company_home/st:sites/cm:" + companyShortName + "/cm:documentLibrary//*\"";
@@ -124,7 +125,7 @@ public class SpaceService {
         ResultSet rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, listEspacesQuery);
 
         for (ResultSetRow r : rs) {
-            espaces.add(nodeSpaceBuilder(r.getNodeRef()));
+            espaces.add(koyaNodeService.nodeSpaceBuilder(r.getNodeRef(), userName));
         }
         return espaces;
     }
@@ -153,36 +154,7 @@ public class SpaceService {
      * =============== private Methods =================
      *
      */
-    /**
-     *
-     * @param spaceNodeRef
-     * @return
-     */
-    private Space nodeSpaceBuilder(NodeRef spaceNodeRef) {
-        Space e = new Space();
-        e.setNodeRef(spaceNodeRef.toString());
-        e.setName((String) nodeService.getProperty(spaceNodeRef, ContentModel.PROP_NAME));
-
-        //parent node ref definition
-        NodeRef directParent = nodeService.getPrimaryParent(spaceNodeRef).getParentRef();
-        NodeRef realParent = null;
-
-        if (nodeService.getType(directParent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
-            realParent = directParent;
-        } else if (nodeService.getProperty(directParent, ContentModel.PROP_NAME).equals(DOCLIB_NAME)) {
-            //parent's parent
-            realParent = nodeService.getPrimaryParent(directParent).getParentRef();
-        } else {
-            logger.warn("Erreur de hiérachie des parent d'espace");
-            //TODO throw exception
-        }
-
-        //activity status
-        e.setActive(koyaNodeService.isActive(spaceNodeRef));
-
-        e.setParentNodeRefasObject(realParent);
-        return e;
-    }
+  
 
     /**
      *

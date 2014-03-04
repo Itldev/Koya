@@ -23,6 +23,7 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
 
 /**
@@ -41,9 +42,14 @@ public class ListContent extends KoyaWebscript {
 
     /*services*/
     private KoyaContentService koyaContentService;
+    private AuthenticationService authenticationService;
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
+    }
+
+    public void setAuthenticationService(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -58,7 +64,7 @@ public class ListContent extends KoyaWebscript {
             depth = DEFAULT_MAX_DEPTH;
         }
 
-        wrapper.addItems(koyaContentService.list(parent, depth));
+        wrapper.addItems(koyaContentService.list(parent, depth, authenticationService.getCurrentUserName()));
         return wrapper;
     }
 

@@ -25,6 +25,7 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
 
 /**
@@ -41,11 +42,15 @@ public class AddContent extends KoyaWebscript {
     private static final String TYPECLASS_DIRECTORY = "Directory";
 
     private final Logger logger = Logger.getLogger(AddContent.class);
-    /*services*/
     private KoyaContentService koyaContentService;
+    private AuthenticationService authenticationService;
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
+    }
+
+    public void setAuthenticationService(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -57,7 +62,7 @@ public class AddContent extends KoyaWebscript {
         Content c = null;
 
         if (TYPECLASS_DIRECTORY.equals(urlParams.get(ARG_TYPECLASS))) {
-            c = koyaContentService.createDir(name, parent);
+            c = koyaContentService.createDir(name, parent,authenticationService.getCurrentUserName());
         } else {
             throw new Exception("Invalid Content type : '" + urlParams.get(ARG_TYPECLASS) + "'");
         }

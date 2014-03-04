@@ -98,4 +98,5 @@
     
     <bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl" parent="abstractRestService"/>
     
+    <bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl" parent="abstractRestService"/>
 </beans>

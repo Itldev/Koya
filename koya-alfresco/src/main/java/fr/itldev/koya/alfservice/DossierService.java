@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -66,7 +65,7 @@ public class DossierService {
      * @return
      * @throws KoyaServiceException
      */
-    public Dossier create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
+    public Dossier create(String name, NodeRef parent, Map<String, String> prop, String userName) throws KoyaServiceException {
 
         //Dossier must have a name
         if (name == null || name.isEmpty()) {
@@ -94,7 +93,7 @@ public class DossierService {
                 properties);
         nodeService.addAspect(childAssociationRef.getChildRef(), KoyaModel.QNAME_KOYA_ACTIVABLE, null);
 
-        return nodeDossierBuilder(childAssociationRef.getChildRef());
+        return koyaNodeService.nodeDossierBuilder(childAssociationRef.getChildRef(), userName);
     }
 
     /**
@@ -103,12 +102,12 @@ public class DossierService {
      * @return
      * @throws KoyaServiceException
      */
-    public List<Dossier> list(NodeRef parent) throws KoyaServiceException {
+    public List<Dossier> list(NodeRef parent, String userName) throws KoyaServiceException {
         List<Dossier> dossiers = new ArrayList<>();
 
         for (ChildAssociationRef child : nodeService.getChildAssocs(parent)) {
             if (nodeService.getType(child.getChildRef()).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-                dossiers.add(nodeDossierBuilder(child.getChildRef()));
+                dossiers.add(koyaNodeService.nodeDossierBuilder(child.getChildRef(), userName));
             }
         }
         return dossiers;
@@ -122,29 +121,5 @@ public class DossierService {
         //TODO 
     }
 
-    /**
-     *
-     * @param dossierNodeRef
-     * @return
-     */
-    public Dossier nodeDossierBuilder(NodeRef dossierNodeRef) {
-        Dossier c = new Dossier();
-
-        c.setNodeRef(dossierNodeRef.toString());
-        c.setName((String) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_NAME));
-       
-        NodeRef directParent = nodeService.getPrimaryParent(dossierNodeRef).getParentRef();
-        NodeRef realParent = null;
-        if (nodeService.getType(directParent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
-            realParent = directParent;
-        } else {
-            logger.warn("Error in space parent hierarchy");
-            //TODO exception      
-        }
-        c.setParentNodeRefasObject(realParent);
-        c.setLastModifiedDate((Date) nodeService.getProperty(dossierNodeRef,ContentModel.PROP_MODIFIED));
-        c.setActive(koyaNodeService.isActive(dossierNodeRef));
-
-        return c;
-    }
+   
 }

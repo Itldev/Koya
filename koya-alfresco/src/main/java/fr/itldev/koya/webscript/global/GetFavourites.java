@@ -16,27 +16,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.dossier;
+package fr.itldev.koya.webscript.global;
 
-import fr.itldev.koya.alfservice.DossierService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
+ * Get Users favourites
  *
  */
-public class ListDossier extends KoyaWebscript {
+public class GetFavourites extends KoyaWebscript {
 
-
-    /*services*/
-    private DossierService dossierService;
+    private KoyaNodeService koyaNodeService;
     private AuthenticationService authenticationService;
 
-    public void setDossierService(DossierService dossierService) {
-        this.dossierService = dossierService;
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
     }
 
     public void setAuthenticationService(AuthenticationService authenticationService) {
@@ -44,10 +42,10 @@ public class ListDossier extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef parent = new NodeRef((String) jsonPostMap.get("nodeRef"));
-        wrapper.addItems(dossierService.list(parent,authenticationService.getCurrentUserName()));
-        wrapper.setStatusOK();
+    public ItlAlfrescoServiceWrapper koyaExecute(
+            ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams,
+            Map<String, Object> jsonPostMap) throws Exception {
+        wrapper.addItems(koyaNodeService.getFavourites(authenticationService.getCurrentUserName()));
         return wrapper;
     }
 
