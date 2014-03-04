@@ -38,6 +38,7 @@ public class ContentDeserializer extends JsonDeserializer<Content> {
             content.setPath(node.get("path").getTextValue());
             content.setParentNodeRef(node.get("parentNodeRef").getTextValue());
             content.setByteSize(node.get("byteSize").getLongValue());
+            content.setUserFavourite(node.get("userFavourite").getBooleanValue());
 
             if (Directory.class.isAssignableFrom(content.getClass())) {
                 

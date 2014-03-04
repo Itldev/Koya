@@ -86,11 +86,21 @@ public class FavouriteServiceImplTest extends TestCase {
     }
 
     @Test
-    public void addDelFavouriteTest() throws AlfrescoServiceException {
+    public void addDelFavouriteDossierTest() throws AlfrescoServiceException {
         favouriteService.setFavouriteValue(admin, dossierTests, Boolean.TRUE);
         assertTrue(dossierService.list(admin, spaceTests).get(0).isUserFavourite());
         favouriteService.setFavouriteValue(admin, dossierTests, Boolean.FALSE);
         assertFalse(dossierService.list(admin, spaceTests).get(0).isUserFavourite());
+    }
+
+    @Test
+    public void addDelFavouriteDocTest() throws AlfrescoServiceException {
+        Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
+        Document doc = koyaContentService.upload(admin, toUpload, dossierTests);
+        favouriteService.setFavouriteValue(admin, doc, Boolean.TRUE);
+        assertTrue(koyaContentService.list(admin, dossierTests).get(0).isUserFavourite());
+        favouriteService.setFavouriteValue(admin, doc, Boolean.FALSE);
+        assertFalse(koyaContentService.list(admin, dossierTests).get(0).isUserFavourite());
     }
 
     @Test
