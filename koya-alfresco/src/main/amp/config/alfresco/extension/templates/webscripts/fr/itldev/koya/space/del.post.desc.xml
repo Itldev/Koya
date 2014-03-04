@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>List Space</shortname>
-    <description>List Company Spaces</description>
+    <shortname>Del Space</shortname>
+    <description>Del Space</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/space/list?maxdepth={maxdepth}</url>
+    <url>/fr/itldev/koya/space/del</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

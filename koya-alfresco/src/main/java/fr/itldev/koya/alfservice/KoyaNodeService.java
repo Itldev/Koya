@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.alfservice;
 
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
@@ -40,7 +41,6 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.site.SiteInfo;
-import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 
@@ -59,7 +59,7 @@ public class KoyaNodeService {
     private FavouritesService favouritesService;
     private PreferenceService preferenceService;
     private DictionaryService dictionaryService;
-    private SiteService siteService;
+    private CompanyService companyService;
 
     /**
      * Gets Koya Typed Object from NodeRef
@@ -73,6 +73,7 @@ public class KoyaNodeService {
         return null;
     }
 
+    // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
@@ -89,10 +90,11 @@ public class KoyaNodeService {
         this.dictionaryService = dictionaryService;
     }
 
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
+    public void setCompanyService(CompanyService companyService) {
+        this.companyService = companyService;
     }
 
+    // </editor-fold>
     public void setActiveStatus(NodeRef n, Boolean activeValue) {
 
         //TODO limit actions to activable nodes (check model)
@@ -128,7 +130,7 @@ public class KoyaNodeService {
      * @param userName
      * @return
      */
-    public List<SecuredItem> getFavourites(String userName) {
+    public List<SecuredItem> getFavourites(String userName) throws KoyaServiceException {
 
         List<SecuredItem> favourites = new ArrayList<>();
 
@@ -173,8 +175,8 @@ public class KoyaNodeService {
 
                 String compName = k.substring(FAVOURITES_PREF_COMPANIES.length() + 1);
                 try {
-                    SiteInfo s = siteService.getSite(compName);
-                    favourites.add(siteCompanyBuilder(s, userName));                   
+                    SiteInfo s = companyService.getSiteInfo(compName);
+                    favourites.add(siteCompanyBuilder(s, userName));
                 } catch (Exception e) {//In case of non existant company
                 }
 
@@ -236,7 +238,7 @@ public class KoyaNodeService {
      * @return
      */
     public Company nodeCompanyBuilder(NodeRef n, String userName) {
-        return siteCompanyBuilder(siteService.getSite(n), userName);
+        return siteCompanyBuilder(companyService.getSiteInfo(n), userName);
     }
 
     /**
@@ -244,8 +246,9 @@ public class KoyaNodeService {
      * @param spaceNodeRef
      * @param userName
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public Space nodeSpaceBuilder(NodeRef spaceNodeRef, String userName) {
+    public Space nodeSpaceBuilder(NodeRef spaceNodeRef, String userName) throws KoyaServiceException {
         Space e = new Space();
         e.setNodeRef(spaceNodeRef.toString());
         e.setName((String) nodeService.getProperty(spaceNodeRef, ContentModel.PROP_NAME));
@@ -260,8 +263,7 @@ public class KoyaNodeService {
             //parent's parent
             realParent = nodeService.getPrimaryParent(directParent).getParentRef();
         } else {
-            logger.warn("Erreur de hiérachie des parent d'espace");
-            //TODO throw exception
+            throw new KoyaServiceException("parent space hierarchy error");
         }
 
         //activity status

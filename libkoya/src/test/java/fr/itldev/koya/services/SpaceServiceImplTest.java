@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.Space;
@@ -66,7 +65,7 @@ public class SpaceServiceImplTest extends TestCase {
     }
 
     @Test
-    public void testCreteSpace() throws RestClientException, AlfrescoServiceException {
+    public void testCreateSpace() throws RestClientException, AlfrescoServiceException {
 
         Space eTocreate = new Space("espace1", companyTests);
         Space eCreated = spaceService.create(admin, eTocreate);
@@ -82,16 +81,6 @@ public class SpaceServiceImplTest extends TestCase {
 
         Space eEnfant = spaceService.create(admin, new Space("espaceEnfant", eCreated));
         assertNotNull("erreur de creation de l'espace 'espace Enfant'", eEnfant);
-
-    }
-
-    @Test
-    public void testListSpaces() throws RestClientException, AlfrescoServiceException {
-
-        Space eCreated = spaceService.create(admin, new Space("espaceParent", companyTests));
-        spaceService.create(admin, new Space("espaceEnfant", eCreated));
-
-        assertEquals("Aucun espace dans la société : " + companyTests.getName(), 2, spaceService.list(admin, companyTests).size());
 
     }
 
@@ -119,7 +108,7 @@ public class SpaceServiceImplTest extends TestCase {
     }
 
     @Test
-    public void testListeTreeSpace() throws RestClientException, AlfrescoServiceException {
+    public void testListSpaces() throws RestClientException, AlfrescoServiceException {
 
         Space eParent1 = spaceService.create(admin, new Space("espaceParent1", companyTests));
 
@@ -127,14 +116,13 @@ public class SpaceServiceImplTest extends TestCase {
 
         spaceService.create(admin, new Space("espaceEnfant12", eParent1));
 
-        System.out.println("Societe Node Ref = " + companyTests);
         Space eParent2 = spaceService.create(admin, new Space("espaceParent2", companyTests));
 
         spaceService.create(admin, new Space("espaceEnfant21", eParent2));
 
         spaceService.create(admin, new Space("espaceEnfant22", eParent2));
 
-        List<Space> lstArboEspaces = spaceService.listAsTree(admin, companyTests);
+        List<Space> lstArboEspaces = spaceService.list(admin, companyTests);
 
         assertEquals(2, lstArboEspaces.size());
 
@@ -142,6 +130,34 @@ public class SpaceServiceImplTest extends TestCase {
             assertEquals(2, e.getChildren().size());
         }
 
+    }
+
+    @Test
+    public void testMoveSpaces() throws RestClientException, AlfrescoServiceException {
+
+        Space parentSpace = spaceService.create(admin, new Space("parentSpace", companyTests));
+
+        Space childSpace = spaceService.create(admin, new Space("childSpace", parentSpace));
+
+        assertEquals(1, spaceService.list(admin, companyTests).size());
+        //move
+        spaceService.move(admin, childSpace, companyTests);
+
+        assertEquals(2, spaceService.list(admin, companyTests).size());
+    }
+
+    @Test
+    public void testDelSpace() throws RestClientException, AlfrescoServiceException {
+
+        Space space1 = spaceService.create(admin, new Space("space1", companyTests));
+
+        Space space2 = spaceService.create(admin, new Space("space2", companyTests));
+
+        assertEquals(2, spaceService.list(admin, companyTests).size());
+        //del
+        spaceService.del(admin, space2);
+
+        assertEquals(1, spaceService.list(admin, companyTests).size());
     }
 
 }

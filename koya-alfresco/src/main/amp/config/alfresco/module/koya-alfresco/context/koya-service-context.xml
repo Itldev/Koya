@@ -29,7 +29,7 @@
         <property name="favouritesService" ref="favouritesService"/>
         <property name="preferenceService" ref="preferenceService"/>
         <property name="dictionaryService" ref="dictionaryService"/>
-        <property name="siteService" ref="siteService"/>
+        <property name="companyService" ref="companyService"/>
     </bean>
     
     <!--Companies handling service-->
@@ -44,6 +44,7 @@
         <property name="nodeService" ref="nodeService"/>
         <property name="searchService" ref="searchService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="companyService" ref="companyService"/>
     </bean> 
     
     <!--Dossiers handling service-->

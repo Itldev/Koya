@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.impl.Space;
@@ -25,16 +24,16 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.SpaceService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SpaceServiceImpl extends AlfrescoRestService implements SpaceService {
 
     private static final String REST_POST_ADDSPACE = "/s/fr/itldev/koya/space/add";
     private static final String REST_POST_TOGGLEACTIVE = "/s/fr/itldev/koya/global/toggleactive";
     private static final String REST_POST_LISTSPACE = "/s/fr/itldev/koya/space/list";
+    private static final String REST_POST_LISTSPACE_DEPTH_OPTION = "/s/fr/itldev/koya/space/list?maxdepth={maxdepth}";
+    private static final String REST_POST_MOVESPACE = "/s/fr/itldev/koya/space/move";
+    private static final String REST_POST_DELSPACE = "/s/fr/itldev/koya/space/del";
 
     @Override
     public Space create(User user, Space space) throws AlfrescoServiceException {
@@ -50,7 +49,7 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
     public void enable(User user, Space space) throws AlfrescoServiceException {
         if (!space.getActive()) {
             space.setActive(Boolean.TRUE);
-            changerStatutActivite(user, space);
+            changeActivityStatus(user, space);
         }
     }
 
@@ -58,13 +57,19 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
     public void disable(User user, Space space) throws AlfrescoServiceException {
         if (space.getActive()) {
             space.setActive(Boolean.FALSE);
-            changerStatutActivite(user, space);
+            changeActivityStatus(user, space);
         }
     }
 
     @Override
-    public List<Space> list(User user, Company societe) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTSPACE, societe, ItlAlfrescoServiceWrapper.class);
+    public List<Space> list(User user, Company company, Integer... depth) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret;
+        if (depth.length > 0) {
+            ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTSPACE_DEPTH_OPTION, company, ItlAlfrescoServiceWrapper.class, depth[0]);
+        } else {
+            ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTSPACE, company, ItlAlfrescoServiceWrapper.class);
+        }
+
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
@@ -72,43 +77,39 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
         }
     }
 
-    /**
-     * Méthode qui assure la réorganisation de la liste plate des spaces afin
-     * d'offrir une vision arborescente.
-     *
-     * @param user
-     * @param societe
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    @Override
-    public List<Space> listAsTree(User user, Company societe) throws AlfrescoServiceException {
-
-        List<Space> lstArbo = new ArrayList<>();
-
-        Map<String, Space> mapNr = new HashMap<>();
-        for (Space e : list(user, societe)) {
-            mapNr.put(e.getNodeRef(), e);
-        }
-
-        for (Space esp : mapNr.values()) {
-
-            if (esp.getParentNodeRef().equals(societe.getNodeRef())) {
-                esp.setParent(societe);
-                lstArbo.add(esp);
-            } else {
-                esp.setParent(mapNr.get(esp.getParentNodeRef()));
-                mapNr.get(esp.getParentNodeRef()).getChildren().add(esp);
-
-            }
-        }
-
-        return lstArbo;
-    }
-
-    private void changerStatutActivite(User user, Space space) throws AlfrescoServiceException {
+    private void changeActivityStatus(User user, Space space) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_TOGGLEACTIVE, space, ItlAlfrescoServiceWrapper.class);
         if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
+    }
+
+    @Override
+    public Space move(User user, Space toMove, Space destination) throws AlfrescoServiceException {
+        toMove.setParent(destination);
+        return movePrivate(user, toMove);
+    }
+
+    @Override
+    public Space move(User user, Space toMove, Company destination) throws AlfrescoServiceException {
+        toMove.setParent(destination);
+        return movePrivate(user, toMove);
+    }
+
+    private Space movePrivate(User user, Space toMove) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MOVESPACE, toMove, ItlAlfrescoServiceWrapper.class);
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            return (Space) ret.getItems().get(0);
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
+    }
+
+    @Override
+    public void del(User user, Space toDel) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_DELSPACE, toDel, ItlAlfrescoServiceWrapper.class);
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+
             throw new AlfrescoServiceException(ret.getMessage());
         }
     }

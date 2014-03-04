@@ -35,8 +35,8 @@ import org.apache.log4j.Logger;
  */
 public class ListContent extends KoyaWebscript {
 
-    private String URL_PARAM_MAXDEPTH = "maxdepth";
-    private Integer DEFAULT_MAX_DEPTH = 50;
+    private static final String URL_PARAM_MAXDEPTH = "maxdepth";
+    private static final  Integer DEFAULT_MAX_DEPTH = 50;
 
     private final Logger logger = Logger.getLogger(ListContent.class);
 
@@ -58,8 +58,8 @@ public class ListContent extends KoyaWebscript {
 
         Integer depth;
 
-        if (urlParams.containsKey("maxdepth")) {
-            depth = new Integer((String) urlParams.get("maxdepth"));
+        if (urlParams.containsKey(URL_PARAM_MAXDEPTH)) {
+            depth = new Integer((String) urlParams.get(URL_PARAM_MAXDEPTH));
         } else {
             depth = DEFAULT_MAX_DEPTH;
         }

@@ -22,15 +22,13 @@ import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  *
  */
-public class ListSpace extends KoyaWebscript {
-
-    private static final String URL_PARAM_MAXDEPTH = "maxdepth";
-    private static final Integer DEFAULT_MAX_DEPTH = 50;
+public class MoveSpace extends KoyaWebscript {
 
     private SpaceService spaceService;
     private AuthenticationService authenticationService;
@@ -45,17 +43,10 @@ public class ListSpace extends KoyaWebscript {
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        String name = (String) jsonPostMap.get("name");
-
-        Integer depth;
-
-        if (urlParams.containsKey(URL_PARAM_MAXDEPTH)) {
-            depth = new Integer((String) urlParams.get(URL_PARAM_MAXDEPTH));
-        } else {
-            depth = DEFAULT_MAX_DEPTH;
-        }
-
-        wrapper.addItems(spaceService.list(name, depth, authenticationService.getCurrentUserName()));
+        NodeRef node = new NodeRef((String) jsonPostMap.get("nodeRef"));
+        NodeRef parent = new NodeRef((String) jsonPostMap.get("parentNodeRef"));
+                
+        wrapper.addItem(spaceService.move(node, parent, authenticationService.getCurrentUserName()));
         return wrapper;
     }
 

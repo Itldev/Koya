@@ -30,9 +30,6 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -42,26 +39,31 @@ import org.apache.log4j.Logger;
  * Spaces Handling service
  */
 public class SpaceService {
-
+    
     public static final String DOCLIB_NAME = "documentLibrary";
-
+    
     private Logger logger = Logger.getLogger(this.getClass());
-
+    
     private NodeService nodeService;
     private SearchService searchService;
     private KoyaNodeService koyaNodeService;
+    private CompanyService companyService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-
+    
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
     }
-
+    
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
+    }
+    
+    public void setCompanyService(CompanyService companyService) {
+        this.companyService = companyService;
     }
 
     // </editor-fold>
@@ -81,9 +83,9 @@ public class SpaceService {
         if (name == null || name.isEmpty()) {
             throw new KoyaServiceException();
         }
-
+        
         NodeRef nrParent = null;
-
+        
         if (nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
             //if parent is a space, select his node
             nrParent = parent;
@@ -91,62 +93,97 @@ public class SpaceService {
             //if it's a company, select documentLibrary's node
             nrParent = getDocLibNodeRef(parent);
         } else {
-            throw new KoyaServiceException();//TODO invalid parent type
+            throw new KoyaServiceException("invalid Space parent type");
         }
 
         //TODO check name unicity
         //build node properties
         final Map<QName, Serializable> properties = new HashMap<>();
         properties.put(ContentModel.PROP_NAME, name);
-
+        
         ChildAssociationRef car = nodeService.createNode(nrParent,
                 ContentModel.ASSOC_CONTAINS,
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
                 KoyaModel.QNAME_KOYA_SPACE,
                 properties);
         koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
-
+        
         return koyaNodeService.nodeSpaceBuilder(car.getChildRef(), userName);
     }
 
     /**
-     * Returns Company Spaces flat list.
+     * Returns Company Spaces recursive list.
      *
      * @param companyShortName
+     * @param depth
      * @param userName
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public List<Space> list(String companyShortName, String userName) {
-        List<Space> espaces = new ArrayList<>();
+    public List<Space> list(String companyShortName, Integer depth, String userName) throws KoyaServiceException {
+        NodeRef nodeDocLib = getDocLibNodeRef(companyService.getSiteInfo(companyShortName).getNodeRef());
+        return listRecursive(nodeDocLib, depth, userName);
+    }
 
-        String listEspacesQuery = "PATH:\"/app:company_home/st:sites/cm:" + companyShortName + "/cm:documentLibrary//*\"";
-        listEspacesQuery += " AND TYPE:\"" + KoyaModel.TYPESHORTPREFIX_KOYA_SPACE + "\"";
-
-        ResultSet rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, listEspacesQuery);
-
-        for (ResultSetRow r : rs) {
-            espaces.add(koyaNodeService.nodeSpaceBuilder(r.getNodeRef(), userName));
+    /**
+     * private recursive spaces list builder method.
+     *
+     * @param rootNodeRef
+     * @param depth
+     * @param userName
+     * @return
+     * @throws KoyaServiceException
+     */
+    private List<Space> listRecursive(NodeRef rootNodeRef, Integer depth, String userName) throws KoyaServiceException {
+        List<Space> spaces = new ArrayList<>();
+        if (depth <= 0) {
+            return spaces;//return empty list if max depth < = 0 : ie max depth reached
         }
-        return espaces;
+        for (ChildAssociationRef car : nodeService.getChildAssocs(rootNodeRef)) {
+            NodeRef childNr = car.getChildRef();
+            if (nodeService.getType(childNr).equals(KoyaModel.QNAME_KOYA_SPACE)) {
+                Space space = koyaNodeService.nodeSpaceBuilder(childNr, userName);
+                space.setChildSpaces(listRecursive(childNr, depth - 1, userName));
+                spaces.add(space);
+            }
+        }
+        return spaces;
     }
 
     /**
      * delete a Space
      *
-     * @param e
+     * @param toDel
+     * @param userName
      */
-    public void del(Space e) {
-        NodeRef n = new NodeRef(e.getNodeRef());
+    public void del(NodeRef toDel, String userName) {
+        nodeService.deleteNode(toDel);
         //TODO call global del method
     }
 
     /**
-     * move a Space
+     * move a space
      *
-     * @param e
+     * @param toMove
+     * @param dest
+     * @param userName
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public void move(Space e) {
-        //TODO call golbal move method
+    public Space move(NodeRef toMove, NodeRef dest, String userName) throws KoyaServiceException {
+        
+        String name = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
+        
+        
+        
+        if(nodeService.getType(dest).equals(KoyaModel.QNAME_KOYA_COMPANY)){
+            dest = getDocLibNodeRef(dest);
+        }
+        logger.error("move " + name + " to " + (String) nodeService.getProperty(dest, ContentModel.PROP_NAME));
+        
+        nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
+        return koyaNodeService.nodeSpaceBuilder(toMove, userName);
+        //TODO call global move method
     }
 
     /**
@@ -154,8 +191,6 @@ public class SpaceService {
      * =============== private Methods =================
      *
      */
-  
-
     /**
      *
      * Returns Company "documentLibrary" NodeRef (root spaces parent).
@@ -172,7 +207,7 @@ public class SpaceService {
                 return car.getChildRef();
             }
         }
-
+        
         throw new KoyaServiceException();//TODO erreur aucun doc lib
     }
 }

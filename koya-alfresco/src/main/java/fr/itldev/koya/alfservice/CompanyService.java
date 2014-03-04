@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.site.script.Site;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -113,6 +114,14 @@ public class CompanyService {
             }
         }
         return socs;
+    }
+    
+    public SiteInfo getSiteInfo(String shortName){
+        return siteService.getSite(shortName);
+    }
+    
+     public SiteInfo getSiteInfo(NodeRef nodeSite){
+        return siteService.getSite(nodeSite);
     }
 
     public List<SalesOffer> listSalesOffer() {

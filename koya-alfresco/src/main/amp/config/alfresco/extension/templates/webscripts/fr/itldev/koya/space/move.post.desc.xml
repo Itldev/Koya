@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Del Space</shortname>
-    <description>Del Space</description>
+    <shortname>Move Space</shortname>
+    <description>Move Company Spaces</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/space/del/{spaceNodeRef}</url>
+    <url>/fr/itldev/koya/space/move</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
