@@ -48,7 +48,7 @@ public final class Company extends SecuredItem implements Container, Activable {
     @JsonIgnore
     private List<Space> children = new ArrayList<>();
 
-    private Long byteSize;
+    
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     public String getTitle() {
@@ -126,15 +126,5 @@ public final class Company extends SecuredItem implements Container, Activable {
     public String toString() {
         return "Company {" + "name=" + getName() + ", title=" + title + ", nodeRef=" + getNodeRef() + '}';
     }
-
-    @Override
-    public Long getByteSize() {
-        return byteSize;
-    }
-
-    @Override
-    public void setByteSize(Long byteSize) {
-        this.byteSize = byteSize;
-    }
-
+   
 }

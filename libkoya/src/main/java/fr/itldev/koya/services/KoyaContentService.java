@@ -46,4 +46,5 @@ public interface KoyaContentService extends AlfrescoService {
 
     SecuredItem getParent(User user, Content content) throws AlfrescoServiceException;
 
+    Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException;
 }

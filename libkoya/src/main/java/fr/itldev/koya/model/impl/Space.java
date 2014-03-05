@@ -20,7 +20,6 @@ package fr.itldev.koya.model.impl;
 
 import fr.itldev.koya.model.Activable;
 import fr.itldev.koya.model.Container;
-import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.SubSpace;
 import java.util.ArrayList;
@@ -40,8 +39,6 @@ public final class Space extends SubSpace implements Container, Activable {
 
     @JsonProperty("childcontent")
     private List<Dossier> childDossiers = new ArrayList<>();
-
-    private Long byteSize;
 
     @Override
     @JsonIgnore
@@ -118,16 +115,6 @@ public final class Space extends SubSpace implements Container, Activable {
     @Override
     public String toString() {
         return "Space [ name = " + getName() + ", noderef=" + getNodeRef() + " , active =" + active + ", parentNoderef= " + getParentNodeRef() + "]";
-    }
-
-    @Override
-    public Long getByteSize() {
-        return byteSize;
-    }
-
-    @Override
-    public void setByteSize(Long byteSize) {
-        this.byteSize = byteSize;
     }
 
 }

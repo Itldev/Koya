@@ -89,7 +89,7 @@ public class UserServiceImplTest extends TestCase {
 
         //on a une préférence en +
         assertEquals(nbPrefs + 1, admin.getPreferences().size());
-        System.out.println(admin.getPreferences());
+     //   System.out.println(admin.getPreferences());
 
         /* =============== Suppression de la preference de tests =====*/
         admin.getPreferences().remove(testKey);
@@ -98,7 +98,7 @@ public class UserServiceImplTest extends TestCase {
         assertEquals(nbPrefs, admin.getPreferences().size());
         /* ============= etat final ============= */
         userService.updatePreferences(admin);
-        System.out.println(admin.getPreferences());
+     //   System.out.println(admin.getPreferences());
 
     }
 }

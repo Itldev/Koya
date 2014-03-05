@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.site.script.Site;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -109,7 +108,7 @@ public class CompanyService {
         List<Company> socs = new ArrayList<>();
 
         for (SiteInfo s : siteService.listSites("", SITE_PRESET)) {
-            if (isKoyaCompany(s.getNodeRef())) {
+            if (koyaNodeService.isKoyaCompany(s.getNodeRef())) {
                 socs.add(koyaNodeService.siteCompanyBuilder(s, userName));
             }
         }
@@ -155,16 +154,6 @@ public class CompanyService {
         return buildTitle;
     }
 
-    /**
-     * Koya company is a site with activable aspect.
-     *
-     * @param n
-     * @return
-     */
-    public Boolean isKoyaCompany(NodeRef n) {
-
-        return nodeService.getType(n).equals(KoyaModel.QNAME_KOYA_COMPANY)
-                && nodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE);
-    }
+    
 
 }

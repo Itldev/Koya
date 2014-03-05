@@ -26,6 +26,7 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AlfrescoUploadReturn;
+import fr.itldev.koya.model.json.DiskSizeWrapper;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -44,6 +45,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list";
     private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move";
     private static final String REST_POST_GETPARENT = "/s/fr/itldev/koya/content/getparent";
+    private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
+    private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
+
     private static final String REST_POST_UPLOAD = "/s/api/upload";
 
     /*TODO mettre en place un proxy pour l'upload/download de contenus comme ce qui est
@@ -89,18 +93,16 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     public List<Content> list(User user, Directory dir, Integer... depth) throws AlfrescoServiceException {
         return listContent(user, dir, depth);
     }
-    
-    
-     @Override
+
+    @Override
     public SecuredItem getParent(User user, Content content) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_GETPARENT , content, ItlAlfrescoServiceWrapper.class);
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_GETPARENT, content, ItlAlfrescoServiceWrapper.class);
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
             return (SecuredItem) ret.getItems().get(0);
         } else {
             throw new AlfrescoServiceException(ret.getMessage());
         }
     }
-
 
     private List<Content> listContent(User user, SecuredItem container, Integer... depth) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret;
@@ -134,18 +136,12 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
         AlfrescoUploadReturn upReturn = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
 
-        Document docUpload;
-        if (Dossier.class.isAssignableFrom(parent.getClass())) {
-            docUpload = new Document(upReturn.getFileName(), (Dossier) parent);
-        } else if (Directory.class.isAssignableFrom(parent.getClass())) {
-            docUpload = new Document(upReturn.getFileName(), (Directory) parent);
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_SECUREDITEM, ItlAlfrescoServiceWrapper.class, upReturn.getNodeRef());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
+            return (Document) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException("Type de conteneur incorrect pour le parent du document a uploader");
+            throw new AlfrescoServiceException(ret.getMessage());
         }
-
-        docUpload.setNodeRef(upReturn.getNodeRef());
-
-        return docUpload;
     }
 
     private Content movePrivate(User user, Content contenu, Container parent) throws AlfrescoServiceException {
@@ -158,5 +154,10 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         }
     }
 
-   
+    @Override
+    public Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException {
+        DiskSizeWrapper ret = user.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_DISKSIZE, DiskSizeWrapper.class, securedItem.getNodeRef());
+        return ret.getSize();
+    }
+
 }

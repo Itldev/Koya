@@ -30,6 +30,7 @@
         <property name="preferenceService" ref="preferenceService"/>
         <property name="dictionaryService" ref="dictionaryService"/>
         <property name="companyService" ref="companyService"/>
+        <property name="fileFolderService" ref="fileFolderService" />
     </bean>
     
     <!--Companies handling service-->

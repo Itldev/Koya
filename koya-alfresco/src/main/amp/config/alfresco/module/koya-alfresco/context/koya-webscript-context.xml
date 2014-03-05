@@ -173,7 +173,7 @@
     <bean id="webscript.fr.itldev.koya.global.togglefavourite.post" 
           class="fr.itldev.koya.webscript.global.ToggleFavourite"
           parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
+        <property name="koyaNodeService" ref="koyaNodeService" />
         <property name="authenticationService" ref="authenticationService" />        
     </bean>
     
@@ -186,11 +186,18 @@
         <property name="authenticationService" ref="authenticationService" />        
     </bean>
     
-    <!--Get used disk siez-->
-    <bean id="webscript.fr.itldev.koya.global.disksize.post" 
+    <!--Get used disk size-->
+    <bean id="webscript.fr.itldev.koya.global.disksize.get" 
           class="fr.itldev.koya.webscript.global.DiskSize"
           parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />        
+        <property name="koyaNodeService" ref="koyaNodeService" />  
+    </bean>
+    
+    <bean id="webscript.fr.itldev.koya.global.secureditem.get" 
+            class="fr.itldev.koya.webscript.global.GetSecuredItem"
+            parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
+        <property name="authenticationService" ref="authenticationService" />              
     </bean>
     
     

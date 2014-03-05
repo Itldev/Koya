@@ -28,8 +28,8 @@ public abstract class SecuredItem {
     private String nodeRef;
     private String path;
     private String name;
-    private String parentNodeRef;
-    private Long byteSize;
+    private String parentNodeRef;    
+   
     private Boolean userFavourite;
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 
@@ -71,14 +71,6 @@ public abstract class SecuredItem {
 
     public void setParentNodeRefasObject(NodeRef parentNodeRef) {
         this.parentNodeRef = parentNodeRef.toString();
-    }
-
-    public Long getByteSize() {
-        return byteSize;
-    }
-
-    public void setByteSize(Long tailleOctets) {
-        this.byteSize = tailleOctets;
     }
 
     public Boolean isUserFavourite() {

@@ -34,7 +34,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
  */
 public class ToggleActive extends KoyaWebscript {
 
-    private KoyaNodeService koyaNodeService;
+  private KoyaNodeService koyaNodeService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;

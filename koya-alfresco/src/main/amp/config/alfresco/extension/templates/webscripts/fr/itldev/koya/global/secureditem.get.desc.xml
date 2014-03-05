@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Used Disk Size</shortname>
-    <description>Used Disk Size</description>
+    <shortname>Get Secured Item</shortname>
+    <description>Get SecuredItem by NodeRef</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/global/disksize</url>
+    <url>/fr/itldev/koya/global/getsecureditem/{nodeRef}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

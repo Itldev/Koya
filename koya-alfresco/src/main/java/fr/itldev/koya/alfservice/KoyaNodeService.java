@@ -36,7 +36,10 @@ import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.favourites.FavouritesService;
+import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.preference.PreferenceService;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -60,18 +63,7 @@ public class KoyaNodeService {
     private PreferenceService preferenceService;
     private DictionaryService dictionaryService;
     private CompanyService companyService;
-
-    /**
-     * Gets Koya Typed Object from NodeRef
-     *
-     * @param n
-     * @return
-     */
-    public Object getKoyaTypedObject(NodeRef n) {
-        // TODO impl
-
-        return null;
-    }
+    private FileFolderService fileFolderService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -94,7 +86,48 @@ public class KoyaNodeService {
         this.companyService = companyService;
     }
 
+    public void setFileFolderService(FileFolderService fileFolderService) {
+        this.fileFolderService = fileFolderService;
+    }
+
     // </editor-fold>
+    /**
+     * Gets Koya Typed Object from NodeRef
+     *
+     * @param n
+     * @param userName
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public Object getKoyaTypedObject(NodeRef n, String userName) throws KoyaServiceException {
+
+        if (isKoyaCompany(n)) {
+            return nodeCompanyBuilder(n, userName);
+        } else {
+            QName typeNode = nodeService.getType(n);
+
+            if (typeNode.equals(KoyaModel.QNAME_KOYA_SPACE)) {
+                return nodeSpaceBuilder(n, userName);
+            } else if (typeNode.equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+                return nodeDossierBuilder(n, userName);
+            } else if (nodeIsFolder(n)) {
+                return nodeDirBuilder(n, userName);
+            } else {
+                return nodeDocumentBuilder(n, userName);
+            }
+        }
+
+    }
+
+    /**
+     * ===== Activity Handling methods ==========.
+     *
+     */
+    /**
+     *
+     * @param n
+     * @param activeValue
+     */
     public void setActiveStatus(NodeRef n, Boolean activeValue) {
 
         //TODO limit actions to activable nodes (check model)
@@ -123,12 +156,15 @@ public class KoyaNodeService {
     }
 
     /**
-     * Favourites Handling methods TODO add a ehcache cache.
+     * ====== Favourites Handling methods ======.
+     *
+     * TODO add a ehcache cache
      */
     /**
      *
      * @param userName
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public List<SecuredItem> getFavourites(String userName) throws KoyaServiceException {
 
@@ -216,7 +252,41 @@ public class KoyaNodeService {
 
     /**
      *
-     * ==== Objects Builder Methods =====
+     * ===== byte size methods =====.
+     *
+     */
+    /**
+     * Byte size getting method.
+     *
+     * returns Element size for Object.
+     *
+     * return recussive size for Containers Objects.
+     *
+     * @param n
+     * @return
+     */
+    public Long getByteSize(NodeRef n) {
+
+        try {
+            FileInfo fi = fileFolderService.getFileInfo(n);
+            
+            if (!fi.isFolder()) {
+                return new Long(fi.getContentData().getSize());                               
+            } else {//return recusive size
+                long size = 0;
+                for (ChildAssociationRef car : nodeService.getChildAssocs(n)) {
+                    size += getByteSize(car.getChildRef());
+                }
+                return new Long(size);
+            }
+        } catch (InvalidNodeRefException e) {
+            return new Long(0);
+        }
+    }
+
+    /**
+     *
+     * ==== Objects Builder Methods =====.
      *
      */
     /**
@@ -337,6 +407,7 @@ public class KoyaNodeService {
     /**
      *
      * @param docNodeRef
+     * @param userName
      * @return
      */
     public Document nodeDocumentBuilder(NodeRef docNodeRef, String userName) {
@@ -345,6 +416,7 @@ public class KoyaNodeService {
         d.setName((String) nodeService.getProperty(docNodeRef, ContentModel.PROP_NAME));
         d.setParentNodeRefasObject(nodeService.getPrimaryParent(docNodeRef).getParentRef());
         d.setUserFavourite(isFavourite(userName, docNodeRef));
+        d.setByteSize(getByteSize(docNodeRef));
         return d;
     }
 
@@ -366,6 +438,18 @@ public class KoyaNodeService {
                 || (dictionaryService.isSubClass(qNameType, ContentModel.TYPE_FOLDER)));
 //        return Boolean.valueOf((dictionaryService.isSubClass(qNameType, ContentModel.TYPE_FOLDER)
 //                && !dictionaryService.isSubClass(qNameType, ContentModel.TYPE_SYSTEM_FOLDER)));        
+    }
+
+    /**
+     * Koya company is a site with activable aspect.
+     *
+     * @param n
+     * @return
+     */
+    public Boolean isKoyaCompany(NodeRef n) {
+
+        return nodeService.getType(n).equals(KoyaModel.QNAME_KOYA_COMPANY)
+                && nodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE);
     }
 
 }

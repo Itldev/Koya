@@ -172,5 +172,28 @@ public class KoyaContentServiceImplTest extends TestCase {
 
         assertEquals(dossierTests, koyaContentService.getParent(admin, doc));
     }
+    @Test
+    public void testDocByteSize() throws AlfrescoServiceException {
+
+        Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
+        Document doc = koyaContentService.upload(admin, toUpload, dossierTests);
+
+        assertEquals(new Long(854), doc.getByteSize());
+    }
+
+    @Test
+    public void testDirDiskSize() throws AlfrescoServiceException {
+
+        Directory rep4 = (Directory) koyaContentService.create(admin, new Directory("rep4", dossierTests));
+
+        Directory rep5 = (Directory) koyaContentService.create(admin, new Directory("rep5", rep4));
+
+        Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
+        Document doc1 = koyaContentService.upload(admin, toUpload, rep4);
+
+        Document doc2 = koyaContentService.upload(admin, toUpload, rep5);
+
+        assertEquals(new Long(854 * 2), koyaContentService.getDiskSize(admin, rep4));
+    }
 
 }

@@ -16,35 +16,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.model.impl;
+package fr.itldev.koya.model.json;
 
-import fr.itldev.koya.model.Content;
+import java.io.IOException;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.ObjectMapper;
 
-public final class Document extends Content {
+public class DiskSizeWrapper {
 
-    private Long byteSize;
+    private Long size;
 
-    public Document() {
+    public Long getSize() {
+        return size;
     }
 
-    public Document(String name, Directory parent) {
-        super(name, parent);
+    public void setSize(Long size) {
+        this.size = size;
     }
 
-    public Document(String name, Dossier parent) {
-        super(name, parent);
-    }
-
-    public Document(String nodeRef, String path, String name, String parentNodeRef) {
-        super(nodeRef, path, name, parentNodeRef);
-    }
-
-    public Long getByteSize() {
-        return byteSize;
-    }
-
-    public void setByteSize(Long tailleOctets) {
-        this.byteSize = tailleOctets;
+    @JsonIgnore
+    public String getAsJSON() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(this);
     }
 
 }

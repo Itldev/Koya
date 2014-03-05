@@ -19,45 +19,36 @@
 package fr.itldev.koya.webscript.global;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.model.json.DiskSizeWrapper;
-import java.io.IOException;
-import java.util.HashMap;
+import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.springframework.extensions.webscripts.AbstractWebScript;
-import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.extensions.webscripts.WebScriptResponse;
+import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  *
  *
  */
-public class DiskSize extends AbstractWebScript {
-    /*services*/
+public class GetSecuredItem extends KoyaWebscript {
 
     private static final String URL_PARAM_NODEREF = "nodeRef";
+
     private KoyaNodeService koyaNodeService;
+    private AuthenticationService authenticationService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
 
-    protected Map<String, String> getUrlParamsMap(WebScriptRequest req) {
-        Map<String, String> params = new HashMap<>();
-        params.putAll(req.getServiceMatch().getTemplateVars());
-        for (String k : req.getParameterNames()) {
-            params.put(k, req.getParameter(k));
-        }
-        return params;
+    public void setAuthenticationService(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
     }
 
     @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        DiskSizeWrapper wrapper = new DiskSizeWrapper();
-        NodeRef nodeRef = new NodeRef((String) getUrlParamsMap(req).get(URL_PARAM_NODEREF));
-        wrapper.setSize(koyaNodeService.getByteSize(nodeRef));
-        res.setContentType("application/json");
-        res.getWriter().write(wrapper.getAsJSON());
+    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+        NodeRef nodeRef = new NodeRef((String) urlParams.get(URL_PARAM_NODEREF));
+        wrapper.addItem(koyaNodeService.getKoyaTypedObject(nodeRef, authenticationService.getCurrentUserName()));
+        return wrapper;
     }
 
 }
