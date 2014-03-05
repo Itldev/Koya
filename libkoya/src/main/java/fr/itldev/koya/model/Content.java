@@ -20,11 +20,9 @@ package fr.itldev.koya.model;
 
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.services.impl.util.ContentDeserializer;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
-@JsonDeserialize(using = ContentDeserializer.class)
 public abstract class Content extends SecuredItem {
 
     @JsonIgnore

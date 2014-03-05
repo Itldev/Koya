@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 public final class Dossier extends SubSpace implements Container, Activable {
 
@@ -34,8 +35,11 @@ public final class Dossier extends SubSpace implements Container, Activable {
     @JsonIgnore
     private Space parentSpace;
 
-    @JsonIgnore
-    private List<Content> children = new ArrayList<>();
+    @JsonProperty("childdir")
+    private List<Directory> childDir = new ArrayList<>();
+
+    @JsonProperty("childdoc")
+    private List<Document> childDoc = new ArrayList<>();
 
     private Date lastModifiedDate;
 
@@ -60,13 +64,39 @@ public final class Dossier extends SubSpace implements Container, Activable {
     }
 
     @Override
+    @JsonIgnore
     public List<Content> getChildren() {
-        return children;
+        List<Content> content = new ArrayList<>();
+        content.addAll(childDir);
+        content.addAll(childDoc);
+        return content;
     }
 
     @Override
     public void setChildren(List<? extends SecuredItem> children) {
-        this.children = (List<Content>) children;
+        for (SecuredItem s : children) {
+            if (Directory.class.isAssignableFrom(s.getClass())) {
+                childDir.add((Directory) s);
+            } else if (Document.class.isAssignableFrom(s.getClass())) {
+                childDoc.add((Document) s);
+            }
+        }
+    }
+
+    public List<Directory> getChildDir() {
+        return childDir;
+    }
+
+    public void setChildDir(List<Directory> childDir) {
+        this.childDir = childDir;
+    }
+
+    public List<Document> getChildDoc() {
+        return childDoc;
+    }
+
+    public void setChildDoc(List<Document> childDoc) {
+        this.childDoc = childDoc;
     }
 
     public Date getLastModifiedDate() {
@@ -78,7 +108,6 @@ public final class Dossier extends SubSpace implements Container, Activable {
     }
 
     // </editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="constructeurs">
     public Dossier(String name, Space parentSpace) {
         setName(name);
         setParentSpace(parentSpace);
@@ -87,5 +116,4 @@ public final class Dossier extends SubSpace implements Container, Activable {
     public Dossier() {
     }
 
-    // </editor-fold>
 }

@@ -52,7 +52,13 @@ public final class Space extends SubSpace implements Container, Activable {
 
     @Override
     public void setChildren(List<? extends SecuredItem> children) {
-        //compatibility
+        for (SecuredItem s : children) {
+            if (Space.class.isAssignableFrom(s.getClass())) {
+                childSpaces.add((Space) s);
+            } else if (Dossier.class.isAssignableFrom(s.getClass())) {
+                childDossiers.add((Dossier) s);
+            }
+        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">

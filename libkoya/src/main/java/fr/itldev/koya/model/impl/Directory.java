@@ -28,21 +28,49 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public final class Directory extends Content implements Container {
 
-    @JsonIgnore
-    private List<Content> children = new ArrayList<>();
+    @JsonProperty("childdir")
+    private List<Directory> childDir = new ArrayList<>();
 
-    
+    @JsonProperty("childdoc")
+    private List<Document> childDoc = new ArrayList<>();
 
     @Override
-    @JsonProperty("children")
+    @JsonIgnore
     public List<Content> getChildren() {
-        return children;
+        List<Content> content = new ArrayList<>();
+        content.addAll(childDir);
+        content.addAll(childDoc);
+        return content;
     }
 
     @Override
     public void setChildren(List<? extends SecuredItem> children) {
-        this.children = (List<Content>) children;
+        for (SecuredItem s : children) {
+            if (Directory.class.isAssignableFrom(s.getClass())) {
+                childDir.add((Directory) s);
+            } else if (Document.class.isAssignableFrom(s.getClass())) {
+                childDoc.add((Document) s);
+            }
+        }
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+    public List<Directory> getChildDir() {
+        return childDir;
+    }
+
+    public void setChildDir(List<Directory> childDir) {
+        this.childDir = childDir;
+    }
+
+    public List<Document> getChildDoc() {
+        return childDoc;
+    }
+
+    public void setChildDoc(List<Document> childDoc) {
+        this.childDoc = childDoc;
+    }
+    // </editor-fold>
 
     public Directory() {
     }
