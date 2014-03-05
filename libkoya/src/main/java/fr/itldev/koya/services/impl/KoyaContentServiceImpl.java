@@ -95,7 +95,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     public SecuredItem getParent(User user, Content content) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_GETPARENT , content, ItlAlfrescoServiceWrapper.class);
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (Content) ret.getItems().get(0);
+            return (SecuredItem) ret.getItems().get(0);
         } else {
             throw new AlfrescoServiceException(ret.getMessage());
         }

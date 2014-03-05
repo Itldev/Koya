@@ -163,4 +163,14 @@ public class KoyaContentServiceImplTest extends TestCase {
 
         assertEquals(rep3, koyaContentService.getParent(admin, srep));
     }
+
+    @Test
+    public void testGetParentDoc() throws AlfrescoServiceException {
+
+        Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
+        Document doc = koyaContentService.upload(admin, toUpload, dossierTests);
+
+        assertEquals(dossierTests, koyaContentService.getParent(admin, doc));
+    }
+
 }
