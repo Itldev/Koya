@@ -111,6 +111,10 @@
                         <exclude>runner/**</exclude>
                         <exclude>etc/**</exclude>
                         <exclude>solr/**</exclude>                        
+                        <exclude>**/*.log*</exclude>
+                        <exclude>.gitignore</exclude>
+                        <exclude>nbactions.xml</exclude>
+                        <exclude>**/*.acp</exclude>
                     </excludes>
                 </configuration>
                 <executions>
