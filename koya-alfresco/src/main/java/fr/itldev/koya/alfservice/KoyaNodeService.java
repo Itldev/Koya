@@ -192,10 +192,10 @@ public class KoyaNodeService {
                 } catch (InvalidNodeRefException e) {
                 }
             }
-        }
+        }        
         //favourites documents
-        String docsFavourites = (String) prefs.get(FAVOURITES_PREF_DOCS);
-        if (!docsFavourites.isEmpty()) {
+        String docsFavourites = (String) prefs.get(FAVOURITES_PREF_DOCS);     
+        if (docsFavourites != null && !docsFavourites.isEmpty()) {
             for (String favStr : docsFavourites.split(",")) {
                 try {
                     NodeRef n = new NodeRef(favStr);
@@ -204,7 +204,7 @@ public class KoyaNodeService {
                 }
             }
         }
-
+        
         //favourites companies
         for (String k : prefs.keySet()) {
             if (k.startsWith(FAVOURITES_PREF_COMPANIES) && ((Boolean) prefs.get(k)).equals(Boolean.TRUE)) {
@@ -218,7 +218,7 @@ public class KoyaNodeService {
 
             }
         }
-
+        
         //TODO do it with favourites service ?
         //  PagingResults<PersonFavourite> favsPaged = favouritesService.getPagedFavourites(userName, null, null, null);
         return favourites;
@@ -269,9 +269,9 @@ public class KoyaNodeService {
 
         try {
             FileInfo fi = fileFolderService.getFileInfo(n);
-            
+
             if (!fi.isFolder()) {
-                return new Long(fi.getContentData().getSize());                               
+                return new Long(fi.getContentData().getSize());
             } else {//return recusive size
                 long size = 0;
                 for (ChildAssociationRef car : nodeService.getChildAssocs(n)) {

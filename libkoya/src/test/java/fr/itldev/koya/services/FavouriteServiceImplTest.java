@@ -18,11 +18,9 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -83,6 +81,11 @@ public class FavouriteServiceImplTest extends TestCase {
     @After
     public void deleteCompany() throws RestClientException, AlfrescoServiceException {
         companyService.delete(admin, companyTests);
+    }
+
+    @Test
+    public void ReadFavouritesTest() throws AlfrescoServiceException {
+        assertNotNull(favouriteService.getFavourites(admin));
     }
 
     @Test
