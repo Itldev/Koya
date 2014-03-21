@@ -1,0 +1,7 @@
+<webscript>
+    <shortname>File Upload Koya</shortname>    
+    <url>/fr/itldev/koya/content/upload</url>
+    <family>Itldev</family>
+     <format default="json"/>
+    <authentication>user</authentication>
+</webscript>
