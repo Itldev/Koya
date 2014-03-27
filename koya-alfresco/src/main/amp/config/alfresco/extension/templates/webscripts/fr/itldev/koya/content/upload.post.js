@@ -1,36 +1,45 @@
-var filename = null;
-var content = null;
-var title = "";
-var parentnoderef = "";
+function main() {
 
-// locate file attributes
-for each (field in formdata.fields)
-{
-    if (field.name == "parentnoderef")
-    {
-        parentnoderef = field.value;
+    try {
+        for each (field in formdata.fields)
+        {
+            if (field.name == "parentnoderef")
+            {
+                parentnoderef = field.value;
+            }
+
+            else if (field.name == "file" && field.isFile)
+            {
+                filename = field.filename;
+                title = field.filename;
+                content = field.content;
+            }
+        }
+    } catch (e) {
+        model.error = "form field error : " + e.toString();
+        return;
     }
 
-    else if (field.name == "file" && field.isFile)
-    {
-        filename = field.filename;
-        title = field.filename;
-        ;
-        content = field.content;
-    }
-}
 
-// ensure mandatory file attributes have been located
-if (filename == undefined || content == undefined)
-{
-    status.code = 400;
-    status.message = "Uploaded file cannot be located in request";
-    status.redirect = true;
-}
-else
-{
+    // ensure mandatory file attributes have been located
+    if (filename == undefined || content == undefined)
+    {
+
+        model.error = "Uploaded file cannot be located in request ";
+        return;
+    }
+
+
+
     try {
         var upParent = search.findNode(parentnoderef);
+
+
+        if (upParent == null) {
+            model.error = "Invalid Parent Node";
+            return;
+        }
+
 
         // create document in company home for uploaded file
         upload = upParent.createFile(filename);
@@ -42,16 +51,29 @@ else
         upload.properties.title = title;
         upload.save();
 
-        // setup model for response template
-        model.upload = upload;
+        model.filename = upload.name;
+        model.size = upload.properties.content.size;
 
     } catch (e) {
-
-        status.code = 400;
-        status.message = "Uploaded error : " + e.toString();
-        status.redirect = true;
-
+        model.error = "Uploaded error : " + e.toString();
+        return;
     }
 
 
+
 }
+
+
+var filename = null;
+var content = null;
+var title = "";
+var parentnoderef = "";
+
+//model
+
+model.filename = "";
+model.size = 0;
+model.error = "";
+
+main();
+
