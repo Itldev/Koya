@@ -18,7 +18,9 @@
  */
 package fr.itldev.koya.webscript;
 
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
@@ -35,7 +37,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  *
  */
 public abstract class KoyaWebscript extends AbstractWebScript {
-    
+
     private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 
     /**
@@ -46,7 +48,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
      * @throws java.io.IOException
      */
     protected Map<String, Object> getJsonMap(WebScriptRequest req) throws IOException {
-        
+
         JSONParser parser = new JSONParser();
         Reader reader = req.getContent().getReader();
         JSONObject jsonConteneur = null;
@@ -56,9 +58,9 @@ public abstract class KoyaWebscript extends AbstractWebScript {
             } catch (ParseException ex) {
             }
         }
-        
+
         return new HashMap<>();
-        
+
     }
 
     /**
@@ -76,7 +78,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
         }
         return params;
     }
-    
+
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
@@ -85,15 +87,19 @@ public abstract class KoyaWebscript extends AbstractWebScript {
         try {
             wrapper = koyaExecute(wrapper, getUrlParamsMap(req), getJsonMap(req));
             wrapper.setStatusOK();
+        } catch (KoyaServiceException ex) {
+            wrapper.setStatusFail(ex.toString());
+            wrapper.setErrorCode(ex.getErrorCode());
         } catch (Exception ex) {
             wrapper.setStatusFail(ex.toString());
+            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
         }
-        
+
         res.setContentType("application/json");
         res.getWriter().write(wrapper.getAsJSON());
         logger.trace(wrapper.getAsJSON());
     }
-    
+
     public abstract ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception;
-    
+
 }

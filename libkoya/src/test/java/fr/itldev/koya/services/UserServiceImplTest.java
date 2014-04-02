@@ -97,7 +97,7 @@ public class UserServiceImplTest extends TestCase {
 
         assertEquals(nbPrefs, admin.getPreferences().size());
         /* ============= etat final ============= */
-        userService.updatePreferences(admin);
+        userService.loadPreferences(admin);
      //   System.out.println(admin.getPreferences());
 
     }

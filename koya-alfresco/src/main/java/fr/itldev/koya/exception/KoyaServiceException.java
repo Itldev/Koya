@@ -23,20 +23,34 @@ package fr.itldev.koya.exception;
  */
 public class KoyaServiceException extends Exception {
 
-    public KoyaServiceException() {
+    private Integer errorCode;
 
+    public Integer getErrorCode() {
+        return errorCode;
     }
 
-    public KoyaServiceException(String messageErreur) {
-        super(messageErreur);
+    public KoyaServiceException(Integer errorCode) {
+        this.errorCode = errorCode;
     }
 
-    public KoyaServiceException(Throwable cause) {
+    public KoyaServiceException(Integer errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    public KoyaServiceException(Integer errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
+    public KoyaServiceException(Integer errorCode, Throwable cause) {
         super(cause);
+        this.errorCode = errorCode;
     }
 
-    public KoyaServiceException(String messageErreur, Throwable cause) {
-        super(messageErreur, cause);
+    public KoyaServiceException(Integer errorCode, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+        this.errorCode = errorCode;
     }
 
 }

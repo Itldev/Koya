@@ -23,6 +23,7 @@ import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -135,7 +136,7 @@ public class KoyaContentService {
         } else if (nodeIsChildOfDossier(parentNr)) {
             return koyaNodeService.nodeContentBuilder(parentNr, userName);
         } else {
-            throw new KoyaServiceException("Invalid Content node passed to get parent.");
+            throw new KoyaServiceException(KoyaErrorCodes.CONTENT_INVALID_HIERACHY);
         }
 
     }

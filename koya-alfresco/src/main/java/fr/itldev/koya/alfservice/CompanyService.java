@@ -22,6 +22,7 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,7 +85,7 @@ public class CompanyService {
     public Company create(String title, SalesOffer sO) throws KoyaServiceException {
 
         if (title == null || title.isEmpty()) {
-            throw new KoyaServiceException();//TODO préciser l'exc
+            throw new KoyaServiceException(KoyaErrorCodes.COMPANY_EMPTY_TITLE);
         }
 
         String shortName = getShortNameFromTitle(title);
@@ -94,9 +95,8 @@ public class CompanyService {
 
         //Creating koya-config directory
         NodeRef koyaConfig = getKoyaConfigNodeRef(sInfo.getNodeRef(), true);
-        
-        //TODO copy config files to the koy-config directory
 
+        //TODO copy config files to the koy-config directory
         return created;
     }
 
@@ -118,12 +118,12 @@ public class CompanyService {
         }
         return socs;
     }
-    
-    public SiteInfo getSiteInfo(String shortName){
+
+    public SiteInfo getSiteInfo(String shortName) {
         return siteService.getSite(shortName);
     }
-    
-     public SiteInfo getSiteInfo(NodeRef nodeSite){
+
+    public SiteInfo getSiteInfo(NodeRef nodeSite) {
         return siteService.getSite(nodeSite);
     }
 

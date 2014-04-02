@@ -39,9 +39,10 @@ public class ItlAlfrescoServiceWrapper {
 
     private String status;
     private String message;
+    private Integer errorCode;
     private List items = new ArrayList();
     private Integer nbitems;
-    
+
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public String getStatus() {
         return status;
@@ -74,7 +75,14 @@ public class ItlAlfrescoServiceWrapper {
     public void setNbitems(Integer nbitems) {
         this.nbitems = nbitems;
     }
- 
+
+    public Integer getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(Integer errorCode) {
+        this.errorCode = errorCode;
+    }
 
     // </editor-fold>
     public void addItem(Object item) {
@@ -91,7 +99,7 @@ public class ItlAlfrescoServiceWrapper {
         this.status = STATUS_OK;
 
         //delete null items
-        this.nbitems = this.items.size();    
+        this.nbitems = this.items.size();
     }
 
     public void setStatusFail(String failMessage) {

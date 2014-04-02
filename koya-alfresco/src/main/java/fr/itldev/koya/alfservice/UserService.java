@@ -20,9 +20,16 @@
 
 package fr.itldev.koya.alfservice;
 
+import fr.itldev.koya.model.impl.User;
+import org.alfresco.repo.security.person.PersonServiceImpl;
+
 /**
  *
  */
 public class UserService {
+    
+    public void createUser(User userLog,String mail){
+        
+    }
 
 }

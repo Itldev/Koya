@@ -21,6 +21,7 @@ package fr.itldev.koya.alfservice;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -69,17 +70,17 @@ public class DossierService {
 
         //Dossier must have a name
         if (name == null || name.isEmpty()) {
-            throw new KoyaServiceException();
+            throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_EMPTY_NAME);
         }
 
         //parent must be a Space
         if (!nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
-            throw new KoyaServiceException();
+            throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_NOT_IN_SPACE);
         }
         //checks if dossier's name already exists
         for (ChildAssociationRef car : nodeService.getChildAssocs(parent)) {
             if (nodeService.getProperty(car.getChildRef(), ContentModel.PROP_NAME).equals(name)) {
-                throw new KoyaServiceException();
+                throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_NAME_EXISTS);
             }
         }
 
@@ -121,5 +122,4 @@ public class DossierService {
         //TODO 
     }
 
-   
 }

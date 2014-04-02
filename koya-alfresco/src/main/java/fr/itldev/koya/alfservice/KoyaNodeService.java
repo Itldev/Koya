@@ -27,6 +27,7 @@ import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -192,9 +193,9 @@ public class KoyaNodeService {
                 } catch (InvalidNodeRefException e) {
                 }
             }
-        }        
+        }
         //favourites documents
-        String docsFavourites = (String) prefs.get(FAVOURITES_PREF_DOCS);     
+        String docsFavourites = (String) prefs.get(FAVOURITES_PREF_DOCS);
         if (docsFavourites != null && !docsFavourites.isEmpty()) {
             for (String favStr : docsFavourites.split(",")) {
                 try {
@@ -204,7 +205,7 @@ public class KoyaNodeService {
                 }
             }
         }
-        
+
         //favourites companies
         for (String k : prefs.keySet()) {
             if (k.startsWith(FAVOURITES_PREF_COMPANIES) && ((Boolean) prefs.get(k)).equals(Boolean.TRUE)) {
@@ -218,7 +219,7 @@ public class KoyaNodeService {
 
             }
         }
-        
+
         //TODO do it with favourites service ?
         //  PagingResults<PersonFavourite> favsPaged = favouritesService.getPagedFavourites(userName, null, null, null);
         return favourites;
@@ -333,7 +334,7 @@ public class KoyaNodeService {
             //parent's parent
             realParent = nodeService.getPrimaryParent(directParent).getParentRef();
         } else {
-            throw new KoyaServiceException("parent space hierarchy error");
+            throw new KoyaServiceException(KoyaErrorCodes.SPACE_INVALID_PARENT);
         }
 
         //activity status

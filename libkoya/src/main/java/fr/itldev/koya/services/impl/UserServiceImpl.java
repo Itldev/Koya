@@ -3,22 +3,23 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
@@ -75,7 +76,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         //mise en place du template rest authentifié pour cet utilisateur
         user.setRestTemplate(getAuthenticatedRestTemplate(login, password));
         //appel rest preferences
-        updatePreferences(user);
+        loadPreferences(user);
         //
         user.setPassword(password);
 
@@ -93,7 +94,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     }
 
     @Override
-    public void creerUtilisateur(User userAdmin, User userACreer) {
+    public void createUser(User userAdmin, User toCreate) {
         //retour en exception si ca ne marche pas
     }
 
@@ -113,7 +114,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         CommonsClientHttpRequestFactory httpClientFactory = new CommonsClientHttpRequestFactory(httpClient);
 
         RestTemplate userRestTemplate = new RestTemplate(httpClientFactory);
-        List<HttpMessageConverter<?>> msgConverters = new ArrayList<HttpMessageConverter<?>>();
+        List<HttpMessageConverter<?>> msgConverters = new ArrayList<>();
         msgConverters.add((HttpMessageConverter<?>) beanFactory.getBean("stringHttpMessageConverter"));
         msgConverters.add((HttpMessageConverter<?>) beanFactory.getBean("jsonHttpMessageConverter"));
         msgConverters.add((HttpMessageConverter<?>) beanFactory.getBean("formHttpMessageConverter"));
@@ -130,12 +131,12 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      * @param user
      */
     @Override
-    public void updatePreferences(User user) {
-        updatePreferences(user, user);
+    public void loadPreferences(User user) {
+        loadPreferences(user, user);
     }
 
     @Override
-    public void updatePreferences(User userLog, User userToGetPrefs) {
+    public void loadPreferences(User userLog, User userToGetPrefs) {
         Preferences preferences = userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, Preferences.class, userToGetPrefs.getLogin());
         userToGetPrefs.setPreferences(preferences);
     }
@@ -144,8 +145,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      * Ecriture des préférences locales sur le serveur Alfresco.
      *
      * @param user
-     * @throws
-     * fr.itldev.koya.services.exceptions.AlfrescoServiceException
+     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
     @Override
     public void commitPreferences(User user) throws AlfrescoServiceException {
@@ -161,7 +161,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
             // 2 - update des prefs depuis le serveur
             Preferences prefsToCommit = userToCommitPrefs.getPreferences();
-            updatePreferences(userLog, userToCommitPrefs);
+            loadPreferences(userLog, userToCommitPrefs);
 
             // 3 - s'il y a moins de prefs a commiter que de prefs updatées --> supressions a effectuer
             if (prefsToCommit.size() < userToCommitPrefs.getPreferences().size()) {
@@ -175,7 +175,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
                     }
                 }
                 userLog.getRestTemplate().delete(getAlfrescoServerUrl() + REST_DELETE_PREFERENCES, userToCommitPrefs.getLogin(), deleteFilter);
-                updatePreferences(userLog, userToCommitPrefs);
+                loadPreferences(userLog, userToCommitPrefs);
             }
 
         } else {
@@ -183,7 +183,32 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         }
 
     }
-    
-    
+
     //TODO création / deactivation et gestion de compte 
+    @Override
+    public void commitProperties(User user) throws AlfrescoServiceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void commitProperties(User userLog, User userToCommitProps) throws AlfrescoServiceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void grantAccessSecuredItem(User userLog, SecuredItem sharedItem, String userMail) throws AlfrescoServiceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void grantAccessSecuredItem(User userLog, SecuredItem sharedItem, String userMail, Boolean revoke) throws AlfrescoServiceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<Notification> getNotifications(User userLog) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //cf alfresco activity service
+    }
+
 }
