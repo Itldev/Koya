@@ -25,11 +25,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 public abstract class SecuredItem {
 
+    //fields that should be escpaed before serialization
+    public static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
+
     private String nodeRef;
     private String path;
     private String name;
-    private String parentNodeRef;    
-   
+    private String parentNodeRef;
+
     private Boolean userFavourite;
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 

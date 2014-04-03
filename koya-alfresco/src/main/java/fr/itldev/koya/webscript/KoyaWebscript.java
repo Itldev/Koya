@@ -19,12 +19,16 @@
 package fr.itldev.koya.webscript;
 
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -51,7 +55,6 @@ public abstract class KoyaWebscript extends AbstractWebScript {
 
         JSONParser parser = new JSONParser();
         Reader reader = req.getContent().getReader();
-        JSONObject jsonConteneur = null;
         if (reader.ready()) {
             try {
                 return (JSONObject) parser.parse(req.getContent().getReader());
@@ -96,8 +99,31 @@ public abstract class KoyaWebscript extends AbstractWebScript {
         }
 
         res.setContentType("application/json");
-        res.getWriter().write(wrapper.getAsJSON());
-        logger.trace(wrapper.getAsJSON());
+
+        String response = escapeWrapper(wrapper.getAsJSON());
+        res.getWriter().write(response);
+        logger.trace(response);
+
+    }
+
+    /**
+     * escapes identified fields after json serialization
+     *
+     * @param jsonWrapper
+     * @return
+     */
+    private String escapeWrapper(String jsonWrapper) {
+
+        for (String fieldName : SecuredItem.ESCAPED_FIELDS_NAMES) {
+            //match on name attribute
+            Pattern p = Pattern.compile("\\\"" + fieldName + "\\\":\\\"([^\\\"]*)\\\"");
+            Matcher m = p.matcher(jsonWrapper);
+            while (m.find()) {
+                jsonWrapper = jsonWrapper.replace(m.group(1), StringEscapeUtils.escapeJava(m.group(1)));
+            }
+        }
+
+        return jsonWrapper;
     }
 
     public abstract ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception;
