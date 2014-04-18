@@ -27,17 +27,28 @@ function main()
     var connector = remote.connect("alfresco"),
             remoteUrl = "/fr/itldev/koya/salesoffer/list",
             result = connector.get(remoteUrl);
-
     if (result.status != status.STATUS_OK)
     {
         status.setCode(status.STATUS_INTERNAL_SERVER_ERROR, "Unable to call salesoffer list webscript. " +
                 "Status: " + result.status + ", response: " + result.response);
         return null;
     }
-
     var salesOffers = eval('(' + result.response + ')');
     model.salesOffers = salesOffers.items;
 
+
+    var remoteUrl = "/fr/itldev/koya/listfolder/app:company_home/app:dictionary/app:koya_space_templates",
+            result = connector.get(remoteUrl);
+    if (result.status != status.STATUS_OK) {
+        status.setCode(status.STATUS_INTERNAL_SERVER_ERROR, "Unable to call listfolder list webscript. " +
+                "Status: " + result.status + ", response: " + result.response);
+        return null;
+    }
+   
+    var spaceTemplates = eval('(' + result.response + ')');
+    model.spaceTemplates = spaceTemplates.items;
+    
+    
     var widget = {
         id: "CreateCompany",
         name: "Koya.CreateCompany",

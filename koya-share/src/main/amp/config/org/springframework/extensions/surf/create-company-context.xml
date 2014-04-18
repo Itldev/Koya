@@ -25,7 +25,7 @@
 <beans>
    
    <!-- Add Admin Console messages -->
-   <bean id="share-extras.javascript-console.resources" class="org.springframework.extensions.surf.util.ResourceBundleBootstrapComponent">
+   <bean id="itldev.create-company.resources" class="org.springframework.extensions.surf.util.ResourceBundleBootstrapComponent">
       <property name="resourceBundles">
          <list>
             <value>alfresco.messages.create-company</value>

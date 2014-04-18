@@ -1,0 +1,7 @@
+<webscript> 
+  <shortname>Folder Listing Utility</shortname> 
+  <description>Listing the folder contents</description>
+  <url>/fr/itldev/koya/listfolder/{folderpath}?verbose={verbose?}</url> 
+  <format default="json">extension</format> 
+  <authentication>user</authentication> 
+</webscript>

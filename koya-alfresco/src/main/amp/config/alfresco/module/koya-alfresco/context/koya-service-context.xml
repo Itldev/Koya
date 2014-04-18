@@ -78,6 +78,9 @@
     <!--Model Handling service-->
     <bean name="modelService" class="fr.itldev.koya.alfservice.ModelService">
         <property name="nodeService" ref="nodeService"/>
+        <property name="copyService" ref="copyService"/>
+        <property name="searchService" ref="searchService"/>
+        <property name="siteService" ref="siteService"/>
     </bean>
     
     <!--Profiles Handling Service-->

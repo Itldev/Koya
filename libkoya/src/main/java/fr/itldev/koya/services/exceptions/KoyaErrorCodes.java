@@ -11,11 +11,13 @@ public interface KoyaErrorCodes {
 
     //100 -> companies errors
     public static final Integer COMPANY_EMPTY_TITLE = 100;
+    public static final Integer COMPANY_SITE_NOT_FOUND = 101;
 
     //200 -> Spaces errors
     public static final Integer SPACE_EMPTY_NAME = 200;
     public static final Integer SPACE_INVALID_PARENT = 201;
     public static final Integer SPACE_DOCLIB_NODE_NOT_FOUND = 202;
+    public static final Integer SPACE_TEMPLATE_NOT_FOUND = 203;
 
     //300 -> Dossiers errors
     public static final Integer DOSSIER_EMPTY_NAME = 300;

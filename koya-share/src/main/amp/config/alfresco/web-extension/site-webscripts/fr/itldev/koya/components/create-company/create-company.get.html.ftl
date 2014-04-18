@@ -63,7 +63,17 @@
 	              </select>
 	           </div>
 	        </div>
-
+                <#-- SPACES TEMPLATES -->
+	        <div class="yui-gd">
+	           <div class="yui-u first"><label for="${el}-create-company-spacesTemplate">${msg("label.template")}:</label></div>
+	           <div class="yui-u">
+	              <select id="${el}-create-company-spaceTemplate" name="spaceTemplate" tabindex="0">
+	                 <#list spaceTemplates as spaceTemplate>
+	                    <option value="${spaceTemplate.name}">${spaceTemplate.name}</option>
+	                 </#list>
+	              </select>
+	           </div>
+	        </div>
 	        <#-- SITEPRESET -->
 	        <div class="yui-gd">
 	           <div class="yui-u first"><label for="${el}-create-company-sitePreset">${msg("label.type")}:</label></div>

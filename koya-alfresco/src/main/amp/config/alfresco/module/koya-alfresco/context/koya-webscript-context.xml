@@ -69,6 +69,14 @@
         <property name="spaceService" ref="spaceService" /> 
         <property name="authenticationService" ref="authenticationService" />
     </bean>
+    
+    <!-- apply space template -->
+    <bean id="webscript.fr.itldev.koya.space.apply-template.get" 
+          class="fr.itldev.koya.webscript.space.ApplyTemplates"
+          parent="webscript"> 
+        <property name="modelService" ref="modelService"/>               
+    </bean>
+    
     <!-- list spaces -->
     <bean id="webscript.fr.itldev.koya.space.list.post" 
           class="fr.itldev.koya.webscript.space.ListSpace"
