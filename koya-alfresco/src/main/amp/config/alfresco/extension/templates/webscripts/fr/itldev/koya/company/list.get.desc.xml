@@ -24,7 +24,7 @@
     <description>List Companies</description>
     <family>Itldev</family>
     <url>/fr/itldev/koya/company/list</url>
-    <authentication>admin</authentication>    
+    <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
 
