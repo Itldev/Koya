@@ -40,6 +40,7 @@
         <property name="unprotectedNodeService" ref="nodeService" />
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="hiddenAspect" ref="hiddenAspect" />
+        <property name="modelService" ref="modelService" />
     </bean>     
     
     <!--Spaces Handling service-->

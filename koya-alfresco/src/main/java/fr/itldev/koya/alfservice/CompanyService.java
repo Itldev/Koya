@@ -59,6 +59,7 @@ public class CompanyService {
     protected NodeService unprotNodeService;
     protected KoyaNodeService koyaNodeService;
     protected HiddenAspect hiddenAspect;
+    protected ModelService modelService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setSiteService(SiteService siteService) {
@@ -81,8 +82,12 @@ public class CompanyService {
         this.koyaNodeService = koyaNodeService;
     }
 
+    public void setModelService(ModelService modelService) {
+        this.modelService = modelService;
+    }
+
     // </editor-fold>
-    public Company create(String title, SalesOffer sO) throws KoyaServiceException {
+    public Company create(String title, SalesOffer sO, String template) throws KoyaServiceException {
 
         if (title == null || title.isEmpty()) {
             throw new KoyaServiceException(KoyaErrorCodes.COMPANY_EMPTY_TITLE);
@@ -95,6 +100,8 @@ public class CompanyService {
 
         //Creating koya-config directory
         NodeRef koyaConfig = getKoyaConfigNodeRef(sInfo.getNodeRef(), true);
+
+        modelService.companyInitTemplate(shortName, template);
 
         //TODO copy config files to the koy-config directory
         return created;

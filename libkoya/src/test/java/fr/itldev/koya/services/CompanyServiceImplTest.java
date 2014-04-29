@@ -79,7 +79,7 @@ public class CompanyServiceImplTest extends TestCase {
 
         Random r = new Random();
 
-        Company created = companyService.create(admin, new Company("soc_" + new Random().nextInt(1000), sel));
+        Company created = companyService.create(admin, new Company("soc_" + new Random().nextInt(1000), sel),"default");
         assertNotNull(created);
     }
 
@@ -90,7 +90,7 @@ public class CompanyServiceImplTest extends TestCase {
         SalesOffer sel = offresCom.get(0);
 
         Random r = new Random();
-        Company created = companyService.create(admin, new Company("soc_" + new Random().nextInt(1000), sel));
+        Company created = companyService.create(admin, new Company("soc_" + new Random().nextInt(1000), sel),"default");
 
         List<Company> lst = companyService.list(admin);
         assertTrue(lst.size() > 0);

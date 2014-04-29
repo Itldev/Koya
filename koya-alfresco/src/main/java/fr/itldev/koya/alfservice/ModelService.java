@@ -70,8 +70,10 @@ public class ModelService extends AlfrescoRestService {
     // </editor-fold>
     /**
      *
-     * @param societe
+     * @param siteShortName
      * @param templateName
+     * @return 
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      *
      * @retun company doclib noderef
      */

@@ -23,7 +23,7 @@
     <shortname>Add Company</shortname>
     <description>AAdd Company</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/company/add/{name}/{salesoffer}</url>
+    <url>/fr/itldev/koya/company/add/{name}/{salesoffer}/{template}</url>
     <authentication>admin</authentication>    
     <format default="json"/>
 </webscript>
