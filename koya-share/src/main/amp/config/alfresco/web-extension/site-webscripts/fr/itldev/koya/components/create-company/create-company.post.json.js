@@ -38,7 +38,7 @@ function main()
     // Call the repo to create the st:site folder structure
     var conn = remote.connect("alfresco");
 //   var repoResponse = conn.post("/api/sites", clientRequest, "application/json");
-    var repoResponse = conn.get("/fr/itldev/koya/company/add/" + stringUtils.urlEncode(clientJSON.title) + "/" + stringUtils.urlEncode(clientJSON.salesOffer));
+    var repoResponse = conn.get("/fr/itldev/koya/company/add/" + stringUtils.urlEncode(clientJSON.title) + "/" + stringUtils.urlEncode(clientJSON.salesOffer)+"/"+encodeURIComponent(clientJSON.spaceTemplate));
 
 
     if (repoResponse.status === 401)
@@ -59,18 +59,8 @@ function main()
                 model.success = sitedata.newPreset(clientJSON.sitePreset, tokens);
             }
 
-            if (model.success) {
-                // documentLibrary is lazily created on first view, so we fake it
-//                conn.get("/slingshot/doclib/containers/" + encodeURIComponent(model.shortName));
-                
-                var siteResponse = conn.get("/fr/itldev/koya/space/apply-template/" + encodeURIComponent(model.shortName)+"/"+encodeURIComponent(clientJSON.spaceTemplate));
-                if (siteResponse.status === 401)
-                {
-                    status.setCode(siteResponse.status, "error.loggedOut");
-                    model.success = false;
-                }
-            } else {
-                //// if we get here - it was a total failure to create the site config - even after retries
+            if (!model.success) {
+                // if we get here - it was a total failure to create the site config - even after retries
                 // Delete the st:site folder structure and set error handler
                 conn.del("/api/sites/" + encodeURIComponent(model.shortName));
                 status.setCode(status.STATUS_INTERNAL_SERVER_ERROR, "error.create");
