@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view:view xmlns:d="http://www.alfresco.org/model/dictionary/1.0" xmlns:cm="http://www.alfresco.org/model/content/1.0" xmlns:view="http://www.alfresco.org/view/repository/1.0">
+    <cm:person view:childName="cm:person">
+        <cm:userName>tranbach_itldev_fr</cm:userName>
+        <cm:firstName>Dang</cm:firstName>
+        <cm:lastName>Tranbach</cm:lastName>
+        <cm:middleName></cm:middleName>   
+        <cm:email>tranbach@itldev.fr</cm:email>
+    </cm:person>
+    <cm:person view:childName="cm:person">
+        <cm:userName>ferrero_itldev_fr</cm:userName>
+        <cm:firstName>Thierry</cm:firstName>
+        <cm:lastName>Ferrero</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>ferrero@itldev.fr</cm:email>
+    </cm:person>
+    <cm:person view:childName="cm:person">
+        <cm:userName>leroux_itldev_fr</cm:userName>
+        <cm:firstName>Christophe</cm:firstName>
+        <cm:lastName>Le Roux</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>leroux@itldev.fr</cm:email>
+    </cm:person>
+    <cm:person view:childName="cm:person">
+        <cm:userName>pellissier_itldev_fr</cm:userName>
+        <cm:firstName>Nicolas</cm:firstName>
+        <cm:lastName>Pellissier</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>pellissier@itldev.fr</cm:email>
+    </cm:person>
+    <cm:person view:childName="cm:person">
+        <cm:userName>phamkim_itldev_fr</cm:userName>
+        <cm:firstName>Kim</cm:firstName>
+        <cm:lastName>Pham</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>phamkim@itldev.fr</cm:email>
+    </cm:person>
+    <cm:person view:childName="cm:person">
+        <cm:userName>minati_itldev_fr</cm:userName>
+        <cm:firstName>Jean Michel</cm:firstName>
+        <cm:lastName>Minati</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>minati@itldev.fr</cm:email>
+    </cm:person>    
+    <cm:person view:childName="cm:person">
+        <cm:userName>jonsnow_itldev_fr</cm:userName>
+        <cm:firstName>Jon</cm:firstName>
+        <cm:lastName>Snow</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>jonsnow@itldev.fr</cm:email>
+    </cm:person>
+     <cm:person view:childName="cm:person">
+        <cm:userName>robbstarck_itldev_fr</cm:userName>
+        <cm:firstName>Robb</cm:firstName>
+        <cm:lastName>Starck</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>robbstarck@itldev.fr</cm:email>
+    </cm:person>    
+     <cm:person view:childName="cm:person">
+        <cm:userName>tyrionlannister_itldev_fr</cm:userName>
+        <cm:firstName>Tyrion</cm:firstName>
+        <cm:lastName>Lannister</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>tyrionlannister@itldev.fr</cm:email>
+    </cm:person>    
+     <cm:person view:childName="cm:person">
+        <cm:userName>joffreybaratheon_itldev_fr</cm:userName>
+        <cm:firstName>Joffrey</cm:firstName>
+        <cm:lastName>Baratheon</cm:lastName>
+        <cm:middleName></cm:middleName>
+        <cm:email>joffreybaratheon@itldev.fr</cm:email>
+    </cm:person>
+</view:view>

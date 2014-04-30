@@ -45,7 +45,12 @@
             <value>koya-company</value>
         </property>
         <property name="bootstrapViews">
-            <map>               
+            <map>       
+                <entry key="people">
+                    <props>
+                        <prop key="location">alfresco/module/${artifactId}/sample/koya-people.xml</prop>
+                    </props>
+                </entry>                     
                 <entry key="contents">
                     <props>
                         <prop key="location">alfresco/module/${artifactId}/sample/koya-company.acp</prop>
