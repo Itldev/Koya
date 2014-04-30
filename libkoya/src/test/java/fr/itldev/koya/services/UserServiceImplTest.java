@@ -108,7 +108,7 @@ public class UserServiceImplTest extends TestCase {
         userTest.setName("testeur");
 
         try {
-            userService.modifyUser(userTest);
+            userService.commitProperties(userTest);
         } catch (AlfrescoServiceException ex) {
             fail();
         }

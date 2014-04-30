@@ -128,19 +128,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         return userRestTemplate;
     }
 
-    @Override
-    public void modifyUser(User userLog) throws AlfrescoServiceException {
-        modifyUser(userLog, userLog);
-    }
-
-    @Override
-    public void modifyUser(User userLog, User userToModify) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToModify, ItlAlfrescoServiceWrapper.class);              
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage());
-        }
-    }
-
+   
     /**
      * Updates users preferences from alfresco server. Erases unsaved local
      * prefrences.
@@ -203,12 +191,15 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
     @Override
     public void commitProperties(User user) throws AlfrescoServiceException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        commitProperties(user, user);
     }
 
     @Override
     public void commitProperties(User userLog, User userToCommitProps) throws AlfrescoServiceException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToCommitProps, ItlAlfrescoServiceWrapper.class);              
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
     }
 
     @Override

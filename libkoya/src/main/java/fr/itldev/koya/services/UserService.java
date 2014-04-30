@@ -34,25 +34,6 @@ public interface UserService {
     void createUser(User userAdmin, User toCreate);
 
     /**
-     *
-     * modify current logged user details
-     *
-     * @param userLog
-     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
-     */
-    void modifyUser(User userLog) throws AlfrescoServiceException;
-
-    /**
-     *
-     * modify userToModify details.
-     *
-     * @param userLog
-     * @param userToModify
-     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
-     */
-    void modifyUser(User userLog, User userToModify) throws AlfrescoServiceException;
-
-    /**
      * Load users preference from alfresco server.
      *
      * @param user
