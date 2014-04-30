@@ -26,5 +26,9 @@ public interface KoyaErrorCodes {
 
     //400 -> Content errors
     public static final Integer CONTENT_INVALID_HIERACHY = 400;
+    
+    //500 -> User errors
+    public static final Integer UNKNOWN_USER = 500;
+    
 
 }

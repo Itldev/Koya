@@ -21,8 +21,10 @@ package fr.itldev.koya.services.impl;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
+import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
+import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -40,11 +43,12 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-public class UserServiceImpl extends AlfrescoRestService implements UserService, BeanFactoryAware {//cf services : http://localhost:18080/alfresco-koya-webapp/s/index/family/Authentication
+public class UserServiceImpl extends AlfrescoRestService implements UserService, BeanFactoryAware {
 
     private static final String REST_GET_LOGIN = "/s/api/login.json?u={username}&pw={password}";
     private static final String REST_GET_PERSONDETAILS = "/s/api/people/{userName}?alf_ticket={alf_ticket}";
     private static final String REST_DEL_LOGOUT = "/s/api/login/ticket/{ticket}";
+    private static final String REST_POST_MODIFYDETAILS = "/s/fr/itldev/koya/user/modifydetails";
 
     //===== Preferences
     private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
@@ -59,7 +63,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     }
 
     /**
-     * TODO passer le mot de passe en md5 ou autre méthode plus sécu !!
+     * TODO give md5 or other secured password instead of clear.
      *
      * @param login
      * @param password
@@ -67,15 +71,15 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      */
     @Override
     public User login(String login, String password) throws RestClientException {
-        //appel rest ticket
+        //call rest ticket
         AuthTicket ticket = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LOGIN, AuthTicket.class, login, password);
-        //appel rest infos utilisateur
+        //call rest user informations
         User user = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_PERSONDETAILS, User.class, login, ticket.toString());
-        //intégration du ticket d'authentification
+        //Authentication ticket integration
         user.setTicketAlfresco(ticket.toString());
-        //mise en place du template rest authentifié pour cet utilisateur
+        //set users authenticated rest template
         user.setRestTemplate(getAuthenticatedRestTemplate(login, password));
-        //appel rest preferences
+        //load users rest prefrences
         loadPreferences(user);
         //
         user.setPassword(password);
@@ -88,18 +92,18 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
         getTemplate().delete(REST_DEL_LOGOUT, user.getTicketAlfresco());
 
-        //TODO gerer les retours 
+        //TODO treat returns
         return null;
 
     }
 
     @Override
     public void createUser(User userAdmin, User toCreate) {
-        //retour en exception si ca ne marche pas
+        //exception if doesn't work
     }
 
     /**
-     * Factory d'un RestTemplate Authentifié
+     * Authenticated RestTemplate Factory.
      *
      * @return
      */
@@ -124,9 +128,22 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         return userRestTemplate;
     }
 
+    @Override
+    public void modifyUser(User userLog) throws AlfrescoServiceException {
+        modifyUser(userLog, userLog);
+    }
+
+    @Override
+    public void modifyUser(User userLog, User userToModify) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToModify, ItlAlfrescoServiceWrapper.class);              
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
+    }
+
     /**
-     * Mise à jour de préférences depuis le serveur Alfresco . Attention cela
-     * écrase les modifications locales non enregistrées.
+     * Updates users preferences from alfresco server. Erases unsaved local
+     * prefrences.
      *
      * @param user
      */
@@ -142,7 +159,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     }
 
     /**
-     * Ecriture des préférences locales sur le serveur Alfresco.
+     * Writes local preferences to alfresco server.
      *
      * @param user
      * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
@@ -156,14 +173,14 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     public void commitPreferences(User userLog, User userToCommitPrefs) throws AlfrescoServiceException {
 
         if (userToCommitPrefs.getPreferences() != null) {
-            // 1 - envoyer les nouvelles clés et celles modifiées 
+            // 1 - send new and modified keys
             userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_PREFERENCES, userToCommitPrefs.getPreferences(), Preferences.class, userToCommitPrefs.getLogin());
 
-            // 2 - update des prefs depuis le serveur
+            // 2 - updates preferences from server
             Preferences prefsToCommit = userToCommitPrefs.getPreferences();
             loadPreferences(userLog, userToCommitPrefs);
 
-            // 3 - s'il y a moins de prefs a commiter que de prefs updatées --> supressions a effectuer
+            // 3 - if less preferences to commit than updates --> some keys have to be deleted.
             if (prefsToCommit.size() < userToCommitPrefs.getPreferences().size()) {
 
                 String deleteFilter = "";
@@ -184,7 +201,6 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
     }
 
-    //TODO création / deactivation et gestion de compte 
     @Override
     public void commitProperties(User user) throws AlfrescoServiceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
