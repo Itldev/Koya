@@ -72,7 +72,10 @@
     </bean>
     
     <!--Users handling service-->
-    <bean name="userService" class="fr.itldev.koya.alfservice.UserService"/>
+    <bean name="userService" class="fr.itldev.koya.alfservice.UserService">
+        <property name="nodeService" ref="nodeService"/>
+        <property name="personService" ref="personService"/>
+    </bean>
    
     <!--Data Import/Export Service-->
     <bean name="importExportService" class="fr.itldev.koya.alfservice.ImportExportService"/>

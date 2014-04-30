@@ -202,13 +202,22 @@
     </bean>
     
     <bean id="webscript.fr.itldev.koya.global.secureditem.get" 
-            class="fr.itldev.koya.webscript.global.GetSecuredItem"
-            parent="webscript">                
+          class="fr.itldev.koya.webscript.global.GetSecuredItem"
+          parent="webscript">                
         <property name="koyaNodeService" ref="koyaNodeService" /> 
         <property name="authenticationService" ref="authenticationService" />              
     </bean>
     
+    <!--
+    ==================================================================
+    ========================== Users ==============================
+    ==================================================================
+    -->
     
-    
+    <bean id="webscript.fr.itldev.koya.user.modifydetails.post" 
+          class="fr.itldev.koya.webscript.user.ModifyDetails"
+          parent="webscript">                
+        <property name="userService" ref="userService" /> 
+    </bean>
  
 </beans>
