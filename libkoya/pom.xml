@@ -15,6 +15,7 @@
 
     <properties>
         <spring.version>3.0.6.RELEASE</spring.version>        
+        <alfresco.url>http://localhost:8080/alfresco</alfresco.url>
     </properties>
     
     <build>
