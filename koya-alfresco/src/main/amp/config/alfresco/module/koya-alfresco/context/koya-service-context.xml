@@ -75,6 +75,7 @@
     <bean name="userService" class="fr.itldev.koya.alfservice.UserService">
         <property name="nodeService" ref="nodeService"/>
         <property name="personService" ref="personService"/>
+        <property name="searchService" ref="searchService"/>
     </bean>
    
     <!--Data Import/Export Service-->

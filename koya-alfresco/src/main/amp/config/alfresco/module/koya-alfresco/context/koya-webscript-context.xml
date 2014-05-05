@@ -219,5 +219,12 @@
           parent="webscript">                
         <property name="userService" ref="userService" /> 
     </bean>
+    
+    <bean id="webscript.fr.itldev.koya.user.find.get" 
+           class="fr.itldev.koya.webscript.user.Find"
+           parent="webscript">                
+        <property name="userService" ref="userService" /> 
+        <property name="authenticationService" ref="authenticationService" />          
+    </bean>
  
 </beans>

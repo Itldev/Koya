@@ -21,9 +21,15 @@ package fr.itldev.koya.alfservice;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import java.util.ArrayList;
+import java.util.List;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.apache.log4j.Logger;
 
@@ -32,10 +38,11 @@ import org.apache.log4j.Logger;
  */
 public class UserService {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = Logger.getLogger(this.getClass());
 
     protected NodeService nodeService;
     private PersonService personService;
+    protected SearchService searchService;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -43,6 +50,10 @@ public class UserService {
 
     public void setPersonService(PersonService personService) {
         this.personService = personService;
+    }
+
+    public void setSearchService(SearchService searchService) {
+        this.searchService = searchService;
     }
 
     /**
@@ -62,11 +73,9 @@ public class UserService {
      * @throws KoyaServiceException
      */
     public void modifyUser(User userToModify) throws KoyaServiceException {
-        
+
         //TODO check who request user modification : user can only modify his own information
         //admin can modify everyone informations
-        
-
         if (personService.personExists(userToModify.getLogin())) {
             NodeRef userNr = personService.getPerson(userToModify.getLogin());
 
@@ -81,6 +90,67 @@ public class UserService {
             throw new KoyaServiceException(KoyaErrorCodes.UNKNOWN_USER);
         }
 
+    }
+
+    /**
+     * return users list that matches query . email, lastname or first name
+     * starts with query String.
+     *
+     *
+     * TODO limit results to users company users (ie one can not get all
+     * alfresco users mails way)
+     *
+     * @param askingUser
+     * @param query
+     * @param maxResults - 0 = no limit
+     * @return
+     */
+    public List<User> find(User askingUser, String query, int maxResults) {
+
+        String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\"" + query + "*\" OR @cm\\:firstName:\"" + query + "*\" OR @cm\\:email:\"" + query + "*\" )";
+
+        logger.trace(luceneRequest);
+        List<User> users = new ArrayList<>();
+
+        ResultSet rs = null;
+        try {
+            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
+            for (ResultSetRow r : rs) {
+                users.add(buildUser(r.getNodeRef()));
+                if (users.size() >= maxResults) {
+                    break;
+                }
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+        }
+
+        logger.trace(users.size() + " resultats trouvés");
+
+        return users;
+    }
+
+    public User buildUser(String username) {
+        if (personService.personExists(username)) {
+            return buildUser(personService.getPerson(username));
+        } else {
+            return null;
+        }
+
+    }
+
+    public User buildUser(NodeRef userNodeRef) {
+        User u = new User();
+
+        //TODO complete build with all properties
+        u.setLogin((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_USERNAME));
+        u.setFirstName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_FIRSTNAME));
+        u.setName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_LASTNAME));
+        u.setEmail((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));
+
+        return u;
     }
 
 }
