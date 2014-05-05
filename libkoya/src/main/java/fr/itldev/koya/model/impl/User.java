@@ -165,4 +165,21 @@ public final class User {
         }
 
     }
+
+    /**
+     * Useful method to deserialize content.
+     *
+     * @return
+     */
+    public String getContentType() {
+        return this.getClass().getCanonicalName();
+    }
+
+    /**
+     * Implemented for deserialization compatibility
+     *
+     * @param contentType
+     */
+    public void setContentType(String contentType) {
+    }
 }

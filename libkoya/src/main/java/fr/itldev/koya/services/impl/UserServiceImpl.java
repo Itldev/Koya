@@ -21,7 +21,6 @@ package fr.itldev.koya.services.impl;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
-import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
@@ -33,7 +32,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -49,6 +47,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_GET_PERSONDETAILS = "/s/api/people/{userName}?alf_ticket={alf_ticket}";
     private static final String REST_DEL_LOGOUT = "/s/api/login/ticket/{ticket}";
     private static final String REST_POST_MODIFYDETAILS = "/s/fr/itldev/koya/user/modifydetails";
+    private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find/{query}/{maxresults}";
 
     //===== Preferences
     private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
@@ -128,7 +127,6 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         return userRestTemplate;
     }
 
-   
     /**
      * Updates users preferences from alfresco server. Erases unsaved local
      * prefrences.
@@ -196,7 +194,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
     @Override
     public void commitProperties(User userLog, User userToCommitProps) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToCommitProps, ItlAlfrescoServiceWrapper.class);              
+        ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToCommitProps, ItlAlfrescoServiceWrapper.class);
         if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             throw new AlfrescoServiceException(ret.getMessage());
         }
@@ -210,6 +208,27 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     @Override
     public void grantAccessSecuredItem(User userLog, SecuredItem sharedItem, String userMail, Boolean revoke) throws AlfrescoServiceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * find users list wich first/last name or email starts with query. Return
+     * list limitated by maxResults.
+     *
+     * @param userLog
+     * @param query
+     * @param maxResults
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public List<User> find(User userLog, String query, Integer maxResults) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret
+                = userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_FINDUSERS, ItlAlfrescoServiceWrapper.class, query, maxResults);
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            return (List<User>) ret.getItems();
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
     }
 
     @Override

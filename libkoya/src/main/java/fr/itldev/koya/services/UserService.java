@@ -105,6 +105,18 @@ public interface UserService {
      */
     void grantAccessSecuredItem(User userLog, SecuredItem sharedItem, String userMail, Boolean revoke) throws AlfrescoServiceException;
 
+    /**
+     * find users list wich first/last name or email starts with query. Return
+     * list limitated by maxResults.
+     *
+     * @param userLog
+     * @param query
+     * @param maxResults
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    List<User> find(User userLog, String query, Integer maxResults) throws AlfrescoServiceException;
+
     List<Notification> getNotifications(User userLog);
 
 }
