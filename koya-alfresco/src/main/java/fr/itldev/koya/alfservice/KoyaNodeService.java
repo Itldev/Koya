@@ -175,7 +175,8 @@ public class KoyaNodeService {
 
         //favourites folders
         String foldersFavourites = (String) prefs.get(FAVOURITES_PREF_FOLDERS);
-        if (!foldersFavourites.isEmpty()) {
+
+        if (foldersFavourites != null && !foldersFavourites.isEmpty()) {
             for (String favStr : foldersFavourites.split(",")) {
                 try {
                     NodeRef n = new NodeRef(favStr);
