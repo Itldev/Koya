@@ -208,6 +208,23 @@
         <property name="authenticationService" ref="authenticationService" />              
     </bean>
     
+    <!-- rename secured item -->
+    <bean id="webscript.fr.itldev.koya.global.rename.get" 
+          class="fr.itldev.koya.webscript.global.Rename"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
+        <property name="authenticationService" ref="authenticationService" />              
+    </bean>
+    
+    <!-- delete secured item -->
+    <bean id="webscript.fr.itldev.koya.global.delete.get" 
+          class="fr.itldev.koya.webscript.global.Delete"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
+        <property name="authenticationService" ref="authenticationService" />              
+    </bean>
+    
+    
     <!--
     ==================================================================
     ========================== Users ==============================
@@ -221,8 +238,8 @@
     </bean>
     
     <bean id="webscript.fr.itldev.koya.user.find.get" 
-           class="fr.itldev.koya.webscript.user.Find"
-           parent="webscript">                
+          class="fr.itldev.koya.webscript.user.Find"
+          parent="webscript">                
         <property name="userService" ref="userService" /> 
         <property name="authenticationService" ref="authenticationService" />          
     </bean>

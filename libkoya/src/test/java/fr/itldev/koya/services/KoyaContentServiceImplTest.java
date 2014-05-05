@@ -73,7 +73,7 @@ public class KoyaContentServiceImplTest extends TestCase {
     @Before
     public void createSpace() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)),"default");
+        companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
         spaceTests = spaceService.create(admin, new Space("Esptests", companyTests));
         dossierTests = dossierService.create(admin, new Dossier("doss1", spaceTests));
     }
@@ -172,6 +172,7 @@ public class KoyaContentServiceImplTest extends TestCase {
 
         assertEquals(dossierTests, koyaContentService.getParent(admin, doc));
     }
+
     @Test
     public void testDocByteSize() throws AlfrescoServiceException {
 
@@ -194,6 +195,75 @@ public class KoyaContentServiceImplTest extends TestCase {
         Document doc2 = koyaContentService.upload(admin, toUpload, rep5);
 
         assertEquals(new Long(854 * 2), koyaContentService.getDiskSize(admin, rep4));
+    }
+
+    @Test
+    public void testDeleteDir() throws AlfrescoServiceException {
+
+        int nbDir = koyaContentService.list(admin, dossierTests).size();
+        Directory repdel = (Directory) koyaContentService.create(admin, new Directory("repdel", dossierTests));
+
+        assertEquals(nbDir + 1, koyaContentService.list(admin, dossierTests).size());
+
+        koyaContentService.delete(admin, repdel);
+
+        assertEquals(nbDir, koyaContentService.list(admin, dossierTests).size());
+    }
+
+    @Test
+    public void testDeleteContent() throws AlfrescoServiceException {
+
+        int nbDir = koyaContentService.list(admin, dossierTests).size();
+
+        Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
+        Document upDoc = koyaContentService.upload(admin, toUpload, dossierTests);
+
+        assertEquals(nbDir + 1, koyaContentService.list(admin, dossierTests).size());
+
+        koyaContentService.delete(admin, upDoc);
+
+        assertEquals(nbDir, koyaContentService.list(admin, dossierTests).size());
+    }
+
+    @Test
+    public void testRenameDir() throws AlfrescoServiceException {
+
+        Directory repRename = (Directory) koyaContentService.create(admin, new Directory("oldName", dossierTests));
+
+        for (Content c : koyaContentService.list(admin, dossierTests)) {
+            if (c.getName().equals("newName")) {
+                fail();
+            }
+        }
+        koyaContentService.rename(admin, repRename, "newName");
+
+        for (Content c : koyaContentService.list(admin, dossierTests)) {
+            if (c.getName().equals("oldName")) {
+                fail();
+            }
+        }
+
+    }
+
+    @Test
+    public void testRenameContent() throws AlfrescoServiceException {
+
+        Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
+        Document upDoc = koyaContentService.upload(admin, toUpload, dossierTests);
+
+        for (Content c : koyaContentService.list(admin, dossierTests)) {
+            if (c.getName().equals("newName")) {
+                fail();
+            }
+        }
+        koyaContentService.rename(admin, upDoc, "newName");
+
+        for (Content c : koyaContentService.list(admin, dossierTests)) {
+            if (c.getName().equals("testupload.txt")) {
+                fail();
+            }
+        }
+
     }
 
 }

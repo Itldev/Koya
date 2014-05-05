@@ -20,6 +20,7 @@ package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +31,8 @@ import org.springframework.web.client.RestTemplate;
 public class AlfrescoRestService implements AlfrescoService {
 
     protected static final String DESERIALISATION_ERROR = "Object deserialisation error";
-    protected static final String REST_DEL_NODE = "/s/api/node/{store_type}/{store_id}/{id}/tree";
+    protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}";
+    protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{newName}/{nodeRef}";
 
     private String alfrescoServerUrl;
 
@@ -55,17 +57,28 @@ public class AlfrescoRestService implements AlfrescoService {
 
     // </editor-fold>
     /**
-     * Deletes element.
-     *
-     * TODO protection pour la suppression de tous les sous elements ?
+     * deletes item.
      *
      * @param user
-     * @param element
+     * @param securedItem
      */
     @Override
-    public void delete(User user, SecuredItem element) {
-        user.getRestTemplate().delete(alfrescoServerUrl + REST_DEL_NODE, explodeNodeRef(element.getNodeRef()));
+    public void delete(User user, SecuredItem securedItem) {
+        user.getRestTemplate().getForObject(alfrescoServerUrl + REST_GET_DELITEM, ItlAlfrescoServiceWrapper.class, securedItem.getNodeRef());
     }
+
+    /**
+     * Renames item.
+     *
+     * @param user
+     * @param securedItem
+     * @param newName
+     */
+    @Override
+    public void rename(User user, SecuredItem securedItem, String newName) {
+        user.getRestTemplate().getForObject(alfrescoServerUrl + REST_GET_RENAMEITEM, ItlAlfrescoServiceWrapper.class, newName, securedItem.getNodeRef());
+    }
+
 
     /*
      *  ================ Methodes Utiles ==================

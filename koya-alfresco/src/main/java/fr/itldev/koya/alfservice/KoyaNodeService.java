@@ -453,4 +453,35 @@ public class KoyaNodeService {
                 && nodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE);
     }
 
+    /**
+     *
+     * ==== Global secured item methods =====.
+     *
+     */
+    /**
+     *
+     * @param userName
+     * @param n
+     * @param newName
+     * @return
+     */
+    public SecuredItem rename(String userName, NodeRef n, String newName) {
+        //todo check new name validity and user acl
+        nodeService.setProperty(n, ContentModel.PROP_NAME, newName);
+        return null;
+
+    }
+
+    /**
+     *
+     * @param userName
+     * @param n
+     * @throws KoyaServiceException
+     */
+    public void delete(String userName, NodeRef n) throws KoyaServiceException {
+        //todo check user acl to delete node.
+        nodeService.deleteNode(n);
+
+    }
+
 }
