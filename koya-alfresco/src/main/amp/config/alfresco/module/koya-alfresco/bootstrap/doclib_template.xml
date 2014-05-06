@@ -5,6 +5,7 @@
     <cm:folder xmlns:view="http://www.alfresco.org/view/repository/1.0"
                xmlns:app="http://www.alfresco.org/model/application/1.0" 
                xmlns:cm="http://www.alfresco.org/model/content/1.0" 
+               xmlns:koya="http://www.itldev.fr/koyamodel/content/1.0" 
                xmlns="" 
                view:childName="app:koya_space_templates">
         <view:aspects>
@@ -22,11 +23,11 @@
                 <cm:name>default</cm:name>
                 <app:icon>space-icon-default</app:icon>
                 <cm:contains>
-                    <cm:folder>
+                    <koya:space>
                         <app:uifacets/>
                         <cm:name>defaultSpace</cm:name>
                         <app:icon>space-icon-default</app:icon>
-                    </cm:folder>
+                    </koya:space>
                 </cm:contains>
             </cm:folder>
         </cm:contains>
