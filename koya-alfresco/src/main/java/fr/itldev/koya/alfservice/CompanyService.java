@@ -150,7 +150,7 @@ public class CompanyService {
      */
     private String getShortNameFromTitle(String title) {
         String shortTitle = title.replaceAll("[^0-9a-zA-Z\\-\\s]", "")
-                .replace("\\s+", "-").toLowerCase();
+                .replaceAll("\\s+", "-").toLowerCase();
 
         /**
          * shortTitle is unique even if title alredy exists.
