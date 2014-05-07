@@ -23,7 +23,6 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  *
@@ -33,21 +32,16 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 public class MoveContent extends KoyaWebscript {
 
     private KoyaContentService koyaContentService;
-    private AuthenticationService authenticationService;
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
-    }
-
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
     }
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         NodeRef node = new NodeRef((String) jsonPostMap.get("nodeRef"));
         NodeRef parent = new NodeRef((String) jsonPostMap.get("parentNodeRef"));
-        wrapper.addItem(koyaContentService.move(node, parent, authenticationService.getCurrentUserName()));
+        wrapper.addItem(koyaContentService.move(node, parent));
         return wrapper;
     }
 

@@ -22,7 +22,6 @@ import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  * Find users from query (fields starts with) with max results.
@@ -34,14 +33,9 @@ public class Find extends KoyaWebscript {
     private static final Integer DEFAULT_MAXRESULTS = 10;
 
     private UserService userService;
-    private AuthenticationService authenticationService;
 
     public void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -53,7 +47,7 @@ public class Find extends KoyaWebscript {
         } catch (NumberFormatException e) {
             maxResults = DEFAULT_MAXRESULTS;
         }
-        wrapper.addItems(userService.find(userService.buildUser(authenticationService.getCurrentUserName()), query, maxResults));
+        wrapper.addItems(userService.find(query, maxResults));
         return wrapper;
     }
 

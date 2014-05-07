@@ -41,7 +41,6 @@
           class="fr.itldev.koya.webscript.company.ListCompany"
           parent="webscript">                
         <property name="companyService" ref="companyService" />
-        <property name="authenticationService" ref="authenticationService" />
         
     </bean>
     
@@ -67,7 +66,6 @@
           class="fr.itldev.koya.webscript.space.AddSpace"
           parent="webscript">                
         <property name="spaceService" ref="spaceService" /> 
-        <property name="authenticationService" ref="authenticationService" />
     </bean>
     
     <!-- apply space template -->
@@ -82,26 +80,16 @@
           class="fr.itldev.koya.webscript.space.ListSpace"
           parent="webscript">                
         <property name="spaceService" ref="spaceService" />
-        <property name="authenticationService" ref="authenticationService" />
         
     </bean>
     
-    <!--delete a space-->
-    <bean id="webscript.fr.itldev.koya.space.del.post" 
-          class="fr.itldev.koya.webscript.space.DelSpace"
-          parent="webscript">                
-        <property name="spaceService" ref="spaceService" />
-        <property name="authenticationService" ref="authenticationService" />
         
-    </bean>
-    
     
     <!--move a space-->
     <bean id="webscript.fr.itldev.koya.space.move.post" 
           class="fr.itldev.koya.webscript.space.MoveSpace"
           parent="webscript">                
         <property name="spaceService" ref="spaceService" />
-        <property name="authenticationService" ref="authenticationService" />
     </bean>
     
     
@@ -116,14 +104,12 @@
           class="fr.itldev.koya.webscript.dossier.AddDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
-        <property name="authenticationService" ref="authenticationService" />
     </bean>
     <!--liste les dossiers-->
     <bean id="webscript.fr.itldev.koya.dossier.list.post" 
           class="fr.itldev.koya.webscript.dossier.ListDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
-        <property name="authenticationService" ref="authenticationService" />
     </bean>
        
     <!--
@@ -137,14 +123,12 @@
           class="fr.itldev.koya.webscript.content.AddContent"
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />
-        <property name="authenticationService" ref="authenticationService" /> 
     </bean>
     <!--content listing-->
     <bean id="webscript.fr.itldev.koya.content.list.post" 
           class="fr.itldev.koya.webscript.content.ListContent"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />   
-        <property name="authenticationService" ref="authenticationService" /> 
+        <property name="koyaContentService" ref="koyaContentService" />  
     </bean>
     
     <!--content move-->
@@ -152,15 +136,13 @@
           class="fr.itldev.koya.webscript.content.MoveContent"
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />   
-        <property name="authenticationService" ref="authenticationService" />  
     </bean>
  
     <!--get Parent-->
     <bean id="webscript.fr.itldev.koya.content.getparent.post" 
           class="fr.itldev.koya.webscript.content.GetParent"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />
-        <property name="authenticationService" ref="authenticationService" />      
+        <property name="koyaContentService" ref="koyaContentService" />     
     </bean>
     
     <!-- zip content-->
@@ -189,8 +171,7 @@
     <bean id="webscript.fr.itldev.koya.global.togglefavourite.post" 
           class="fr.itldev.koya.webscript.global.ToggleFavourite"
           parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />
-        <property name="authenticationService" ref="authenticationService" />        
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     
@@ -198,8 +179,7 @@
     <bean id="webscript.fr.itldev.koya.global.getfavourites.get" 
           class="fr.itldev.koya.webscript.global.GetFavourites"
           parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
-        <property name="authenticationService" ref="authenticationService" />        
+        <property name="koyaNodeService" ref="koyaNodeService" />      
     </bean>
     
     <!--Get used disk size-->
@@ -212,24 +192,21 @@
     <bean id="webscript.fr.itldev.koya.global.secureditem.get" 
           class="fr.itldev.koya.webscript.global.GetSecuredItem"
           parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
-        <property name="authenticationService" ref="authenticationService" />              
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     <!-- rename secured item -->
     <bean id="webscript.fr.itldev.koya.global.rename.get" 
           class="fr.itldev.koya.webscript.global.Rename"
           parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
-        <property name="authenticationService" ref="authenticationService" />              
+        <property name="koyaNodeService" ref="koyaNodeService" />          
     </bean>
     
     <!-- delete secured item -->
     <bean id="webscript.fr.itldev.koya.global.delete.get" 
           class="fr.itldev.koya.webscript.global.Delete"
           parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
-        <property name="authenticationService" ref="authenticationService" />              
+        <property name="koyaNodeService" ref="koyaNodeService" />         
     </bean>
     
     
@@ -249,7 +226,6 @@
           class="fr.itldev.koya.webscript.user.Find"
           parent="webscript">                
         <property name="userService" ref="userService" /> 
-        <property name="authenticationService" ref="authenticationService" />          
     </bean>
  
 </beans>

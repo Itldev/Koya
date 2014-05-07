@@ -23,7 +23,6 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
 
 /**
@@ -38,14 +37,9 @@ public class Rename extends KoyaWebscript {
     private static final String URL_PARAM_NEWNAME = "newName";
 
     private KoyaNodeService koyaNodeService;
-    private AuthenticationService authenticationService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
-    }
-
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -56,7 +50,7 @@ public class Rename extends KoyaWebscript {
         NodeRef renameItem = new NodeRef(urlParams.get(URL_PARAM_NODEREF));
         String newName = urlParams.get(URL_PARAM_NEWNAME);
 
-        wrapper.addItem(koyaNodeService.rename(authenticationService.getCurrentUserName(), renameItem, newName));
+        wrapper.addItem(koyaNodeService.rename(renameItem, newName));
         return wrapper;
     }
 

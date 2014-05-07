@@ -26,11 +26,9 @@ import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,7 +54,6 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.WebScriptException;
 
@@ -68,13 +65,13 @@ public class KoyaContentService {
     private final Logger logger = Logger.getLogger(this.getClass());
 
     private NodeService nodeService;
-    KoyaNodeService koyaNodeService;
+    private KoyaNodeService koyaNodeService;
 
-    
     protected DictionaryService dictionaryService;
     protected ContentService contentService;
     protected NamespaceService namespaceService;
 
+    // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
@@ -94,8 +91,9 @@ public class KoyaContentService {
     public void setNamespaceService(NamespaceService namespaceService) {
         this.namespaceService = namespaceService;
     }
+    // </editor-fold>
 
-    public Directory createDir(String name, NodeRef parent, String userName) {
+    public Directory createDir(String name, NodeRef parent) {
 
         //TODO parent must be a dir or a dossier
         //TODO check dir name unicity
@@ -110,17 +108,17 @@ public class KoyaContentService {
                 ContentModel.TYPE_FOLDER,
                 properties);
 
-        return koyaNodeService.nodeDirBuilder(car.getChildRef(), userName);
+        return koyaNodeService.nodeDirBuilder(car.getChildRef());
     }
 
-    public Content move(NodeRef toMove, NodeRef dest, String userName) {
+    public Content move(NodeRef toMove, NodeRef dest) {
 
         //TODO security check before moving OR exception catching ?
         String name = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
 
         nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
 
-        return koyaNodeService.nodeContentBuilder(toMove, userName);
+        return koyaNodeService.nodeContentBuilder(toMove);
     }
 
     /**
@@ -134,10 +132,9 @@ public class KoyaContentService {
      *
      * @param parent
      * @param depth
-     * @param userName
      * @return
      */
-    public List<Content> list(NodeRef parent, Integer depth, String userName) {
+    public List<Content> list(NodeRef parent, Integer depth) {
 
         List<Content> contents = new ArrayList<>();
 
@@ -148,16 +145,16 @@ public class KoyaContentService {
             NodeRef childNr = car.getChildRef();
             //
             if (koyaNodeService.nodeIsFolder(childNr)) {
-                Directory dir = koyaNodeService.nodeDirBuilder(childNr, userName);
-                dir.setChildren(list(childNr, depth - 1, userName));
+                Directory dir = koyaNodeService.nodeDirBuilder(childNr);
+                dir.setChildren(list(childNr, depth - 1));
                 contents.add(dir);
             } else {
-                contents.add(koyaNodeService.nodeDocumentBuilder(childNr, userName));
+                contents.add(koyaNodeService.nodeDocumentBuilder(childNr));
             }
         }
         return contents;
     }
-    
+
     public File zip(List<String> nodeRefs) {
         File tmpZipFile = null;
         try {
@@ -181,7 +178,7 @@ public class KoyaContentService {
                 for (String nodeRef : nodeRefs) {
                     addToZip(new NodeRef(nodeRef), zipStream, "");
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 logger.error(e.getMessage(), e);
                 throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } finally {
@@ -191,11 +188,11 @@ public class KoyaContentService {
                 fos.close();
 
             }
-        } catch (Exception e) {
+        } catch (IOException | WebScriptException e) {
             logger.error(e.getMessage(), e);
             throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-        } 
-        
+        }
+
         return tmpZipFile;
     }
 
@@ -274,23 +271,22 @@ public class KoyaContentService {
                     + ", filename: " + nodeName);
         }
     }
-    
+
     /**
      * Returns node (assumed is a content) parent
      *
      * @param currentNode
-     * @param userName
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public SecuredItem getParent(NodeRef currentNode, String userName) throws KoyaServiceException {
+    public SecuredItem getParent(NodeRef currentNode) throws KoyaServiceException {
 
         NodeRef parentNr = nodeService.getPrimaryParent(currentNode).getParentRef();
 
         if (nodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-            return koyaNodeService.nodeDossierBuilder(parentNr, userName);
+            return koyaNodeService.nodeDossierBuilder(parentNr);
         } else if (nodeIsChildOfDossier(parentNr)) {
-            return koyaNodeService.nodeContentBuilder(parentNr, userName);
+            return koyaNodeService.nodeContentBuilder(parentNr);
         } else {
             throw new KoyaServiceException(KoyaErrorCodes.CONTENT_INVALID_HIERACHY);
         }
@@ -317,6 +313,4 @@ public class KoyaContentService {
         }
     }
 
-    
-    
 }

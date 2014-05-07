@@ -23,7 +23,6 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  *
@@ -31,14 +30,9 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 public class MoveSpace extends KoyaWebscript {
 
     private SpaceService spaceService;
-    private AuthenticationService authenticationService;
 
     public void setSpaceService(SpaceService spaceService) {
         this.spaceService = spaceService;
-    }
-
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -46,7 +40,7 @@ public class MoveSpace extends KoyaWebscript {
         NodeRef node = new NodeRef((String) jsonPostMap.get("nodeRef"));
         NodeRef parent = new NodeRef((String) jsonPostMap.get("parentNodeRef"));
                 
-        wrapper.addItem(spaceService.move(node, parent, authenticationService.getCurrentUserName()));
+        wrapper.addItem(spaceService.move(node, parent));
         return wrapper;
     }
 

@@ -23,7 +23,6 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  * Delete secured item webscript.
@@ -33,14 +32,9 @@ public class Delete extends KoyaWebscript {
 
     private static final String URL_PARAM_NODEREF = "nodeRef";
     private KoyaNodeService koyaNodeService;
-    private AuthenticationService authenticationService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
-    }
-
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -48,7 +42,7 @@ public class Delete extends KoyaWebscript {
             ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams,
             Map<String, Object> jsonPostMap) throws Exception {
         NodeRef deleteItem = new NodeRef(urlParams.get(URL_PARAM_NODEREF));
-        koyaNodeService.delete(authenticationService.getCurrentUserName(), deleteItem);
+        koyaNodeService.delete(deleteItem);
         return wrapper;
     }
 

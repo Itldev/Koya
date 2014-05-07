@@ -22,7 +22,6 @@ import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  *
@@ -33,15 +32,12 @@ public class ListSpace extends KoyaWebscript {
     private static final Integer DEFAULT_MAX_DEPTH = 50;
 
     private SpaceService spaceService;
-    private AuthenticationService authenticationService;
 
     public void setSpaceService(SpaceService spaceService) {
         this.spaceService = spaceService;
     }
 
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+ 
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
@@ -55,7 +51,7 @@ public class ListSpace extends KoyaWebscript {
             depth = DEFAULT_MAX_DEPTH;
         }
 
-        wrapper.addItems(spaceService.list(name, depth, authenticationService.getCurrentUserName()));
+        wrapper.addItems(spaceService.list(name, depth));
         return wrapper;
     }
 

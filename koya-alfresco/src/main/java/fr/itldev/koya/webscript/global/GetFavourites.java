@@ -22,7 +22,6 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  * Get Users favourites
@@ -31,21 +30,17 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 public class GetFavourites extends KoyaWebscript {
 
     private KoyaNodeService koyaNodeService;
-    private AuthenticationService authenticationService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
 
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(
             ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams,
             Map<String, Object> jsonPostMap) throws Exception {
-        wrapper.addItems(koyaNodeService.getFavourites(authenticationService.getCurrentUserName()));
+        wrapper.addItems(koyaNodeService.getFavourites());
         return wrapper;
     }
 

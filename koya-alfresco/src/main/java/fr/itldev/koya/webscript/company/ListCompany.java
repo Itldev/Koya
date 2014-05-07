@@ -22,7 +22,6 @@ import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  * List Companies.
@@ -30,15 +29,12 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 public class ListCompany extends KoyaWebscript {
 
     private CompanyService companyService;
-    private AuthenticationService authenticationService;
 
     public void setCompanyService(CompanyService companyService) {
         this.companyService = companyService;
     }
 
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+ 
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
@@ -46,7 +42,7 @@ public class ListCompany extends KoyaWebscript {
         /**
          * TODO traiter param optionnel sur les société actives ou non
          */
-        wrapper.addItems(companyService.list(authenticationService.getCurrentUserName()));
+        wrapper.addItems(companyService.list());
         return wrapper;
     }
 

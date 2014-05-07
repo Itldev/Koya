@@ -24,7 +24,6 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
  *
@@ -32,21 +31,17 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 public class AddSpace extends KoyaWebscript {
 
    private SpaceService spaceService;
-    private AuthenticationService authenticationService;
 
     public void setSpaceService(SpaceService spaceService) {
         this.spaceService = spaceService;
     }
 
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
-
+   
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         String name = (String) jsonPostMap.get("name");
         NodeRef parent = new NodeRef((String) jsonPostMap.get("parentNodeRef"));
-        wrapper.addItem(spaceService.create(name, parent, null,authenticationService.getCurrentUserName()));
+        wrapper.addItem(spaceService.create(name, parent, null));
         return wrapper;
     }
 

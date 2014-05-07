@@ -109,18 +109,17 @@ public class CompanyService {
 
     /**
      * List users available companies.
-     *
-     * @param userName
+     *    
      * @return
      */
-    public List<Company> list(String userName) {
+    public List<Company> list() {
         //TODO limit user's available sites only
         //TODO active sites only
         List<Company> socs = new ArrayList<>();
 
         for (SiteInfo s : siteService.listSites("", SITE_PRESET)) {
             if (koyaNodeService.isKoyaCompany(s.getNodeRef())) {
-                socs.add(koyaNodeService.siteCompanyBuilder(s, userName));
+                socs.add(koyaNodeService.siteCompanyBuilder(s));
             }
         }
         return socs;

@@ -23,10 +23,9 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.AuthenticationService;
 
 /**
- * Toggle container active status webscript
+ * Set/unset Favourite status on node
  *
  *
  *
@@ -35,21 +34,16 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 public class ToggleFavourite extends KoyaWebscript {
 
     private KoyaNodeService koyaNodeService;
-    private AuthenticationService authenticationService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
-    }
-
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
     }
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         Boolean userFavourite = (Boolean) jsonPostMap.get("userFavourite");
         NodeRef conteneur = new NodeRef((String) jsonPostMap.get("nodeRef"));
-        koyaNodeService.setFavouriteStatus(authenticationService.getCurrentUserName(), conteneur, userFavourite);
+        koyaNodeService.setFavouriteStatus(conteneur, userFavourite);
 
         return wrapper;
     }

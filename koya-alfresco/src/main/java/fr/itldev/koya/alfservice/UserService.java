@@ -100,12 +100,11 @@ public class UserService {
      * TODO limit results to users company users (ie one can not get all
      * alfresco users mails way)
      *
-     * @param askingUser
      * @param query
      * @param maxResults - 0 = no limit
      * @return
      */
-    public List<User> find(User askingUser, String query, int maxResults) {
+    public List<User> find(String query, int maxResults) {
 
         String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\"" + query + "*\" OR @cm\\:firstName:\"" + query + "*\" OR @cm\\:email:\"" + query + "*\" )";
 

@@ -74,11 +74,10 @@ public class SpaceService {
      * @param name
      * @param parent
      * @param prop
-     * @param userName
      * @return
      * @throws KoyaServiceException
      */
-    public Space create(String name, NodeRef parent, Map<String, String> prop, String userName) throws KoyaServiceException {
+    public Space create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
 
         //Space must have a name
         if (name == null || name.isEmpty()) {
@@ -109,7 +108,7 @@ public class SpaceService {
                 properties);
         koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
 
-        return koyaNodeService.nodeSpaceBuilder(car.getChildRef(), userName);
+        return koyaNodeService.nodeSpaceBuilder(car.getChildRef());
     }
 
     /**
@@ -117,13 +116,12 @@ public class SpaceService {
      *
      * @param companyShortName
      * @param depth
-     * @param userName
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public List<Space> list(String companyShortName, Integer depth, String userName) throws KoyaServiceException {
+    public List<Space> list(String companyShortName, Integer depth) throws KoyaServiceException {
         NodeRef nodeDocLib = getDocLibNodeRef(companyService.getSiteInfo(companyShortName).getNodeRef());
-        return listRecursive(nodeDocLib, depth, userName);
+        return listRecursive(nodeDocLib, depth);
     }
 
     /**
@@ -131,11 +129,10 @@ public class SpaceService {
      *
      * @param rootNodeRef
      * @param depth
-     * @param userName
      * @return
      * @throws KoyaServiceException
      */
-    private List<Space> listRecursive(NodeRef rootNodeRef, Integer depth, String userName) throws KoyaServiceException {
+    private List<Space> listRecursive(NodeRef rootNodeRef, Integer depth) throws KoyaServiceException {
         List<Space> spaces = new ArrayList<>();
         if (depth <= 0) {
             return spaces;//return empty list if max depth < = 0 : ie max depth reached
@@ -143,8 +140,8 @@ public class SpaceService {
         for (ChildAssociationRef car : nodeService.getChildAssocs(rootNodeRef)) {
             NodeRef childNr = car.getChildRef();
             if (nodeService.getType(childNr).equals(KoyaModel.QNAME_KOYA_SPACE)) {
-                Space space = koyaNodeService.nodeSpaceBuilder(childNr, userName);
-                space.setChildSpaces(listRecursive(childNr, depth - 1, userName));
+                Space space = koyaNodeService.nodeSpaceBuilder(childNr);
+                space.setChildSpaces(listRecursive(childNr, depth - 1));
                 spaces.add(space);
             }
         }
@@ -152,26 +149,14 @@ public class SpaceService {
     }
 
     /**
-     * delete a Space
-     *
-     * @param toDel
-     * @param userName
-     */
-    public void del(NodeRef toDel, String userName) {
-        nodeService.deleteNode(toDel);
-        //TODO call global del method
-    }
-
-    /**
      * move a space
      *
      * @param toMove
      * @param dest
-     * @param userName
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public Space move(NodeRef toMove, NodeRef dest, String userName) throws KoyaServiceException {
+    public Space move(NodeRef toMove, NodeRef dest) throws KoyaServiceException {
 
         String name = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
 
@@ -181,7 +166,7 @@ public class SpaceService {
         logger.error("move " + name + " to " + (String) nodeService.getProperty(dest, ContentModel.PROP_NAME));
 
         nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
-        return koyaNodeService.nodeSpaceBuilder(toMove, userName);
+        return koyaNodeService.nodeSpaceBuilder(toMove);
         //TODO call global move method
     }
 

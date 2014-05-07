@@ -24,7 +24,6 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ public class DossierService {
      * @return
      * @throws KoyaServiceException
      */
-    public Dossier create(String name, NodeRef parent, Map<String, String> prop, String userName) throws KoyaServiceException {
+    public Dossier create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
 
         //Dossier must have a name
         if (name == null || name.isEmpty()) {
@@ -94,7 +93,7 @@ public class DossierService {
                 properties);
         nodeService.addAspect(childAssociationRef.getChildRef(), KoyaModel.QNAME_KOYA_ACTIVABLE, null);
 
-        return koyaNodeService.nodeDossierBuilder(childAssociationRef.getChildRef(), userName);
+        return koyaNodeService.nodeDossierBuilder(childAssociationRef.getChildRef());
     }
 
     /**
@@ -103,23 +102,15 @@ public class DossierService {
      * @return
      * @throws KoyaServiceException
      */
-    public List<Dossier> list(NodeRef parent, String userName) throws KoyaServiceException {
+    public List<Dossier> list(NodeRef parent) throws KoyaServiceException {
         List<Dossier> dossiers = new ArrayList<>();
 
         for (ChildAssociationRef child : nodeService.getChildAssocs(parent)) {
             if (nodeService.getType(child.getChildRef()).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-                dossiers.add(koyaNodeService.nodeDossierBuilder(child.getChildRef(), userName));
+                dossiers.add(koyaNodeService.nodeDossierBuilder(child.getChildRef()));
             }
         }
         return dossiers;
-    }
-
-    /**
-     *
-     * @param parent
-     */
-    public void delete(NodeRef parent) {
-        //TODO 
     }
 
 }
