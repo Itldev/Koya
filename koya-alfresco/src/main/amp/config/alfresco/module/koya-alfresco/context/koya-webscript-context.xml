@@ -162,7 +162,15 @@
         <property name="koyaContentService" ref="koyaContentService" />
         <property name="authenticationService" ref="authenticationService" />      
     </bean>
- 
+    
+    <!-- zip content-->
+    <bean id="webscript.fr.itldev.koya.content.zip.post" 
+          class="fr.itldev.koya.webscript.content.ZipContent"
+          parent="webscript">                
+        <property name="koyaContentService" ref="koyaContentService" />
+    </bean>
+    
+    
     <!--
     ==================================================================
     ========================== Global ============================

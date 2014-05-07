@@ -30,7 +30,15 @@ import fr.itldev.koya.model.json.DiskSizeWrapper;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.json.simple.JSONObject;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -49,6 +57,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
 
     private static final String REST_POST_UPLOAD = "/s/api/upload";
+
+    private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
+
 
     /*TODO mettre en place un proxy pour l'upload/download de contenus comme ce qui est
      * fait pour Share.
@@ -158,6 +169,37 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     public Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException {
         DiskSizeWrapper ret = user.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_DISKSIZE, DiskSizeWrapper.class, securedItem.getNodeRef());
         return ret.getSize();
+    }
+
+    @Override
+    public InputStream getZipInputStream(User user, List<SecuredItem> securedItems) throws AlfrescoServiceException {
+        HttpURLConnection con;
+
+        try {
+            String urlDownload = getAlfrescoServerUrl() + DOWNLOAD_ZIP_WS_URI + user.getTicketAlfresco();
+
+            Map<String, Serializable> params = new HashMap<>();
+            ArrayList<String> selected = new ArrayList<>();
+            params.put("nodeRefs", selected);
+            for (SecuredItem item : securedItems) {
+                selected.add(item.getNodeRef());
+            }
+
+            JSONObject postParams = new JSONObject(params);
+
+            con = (HttpURLConnection) new URL(urlDownload).openConnection();
+            con.setRequestMethod("POST");
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            con.setRequestProperty("Content-Type", "application/json");
+
+            con.getOutputStream().write(postParams.toString().getBytes());
+
+            return con.getInputStream();
+
+        } catch (Exception e) {
+            throw new AlfrescoServiceException(e.getMessage(), e);
+        }
     }
 
 }

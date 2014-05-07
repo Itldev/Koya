@@ -61,6 +61,9 @@
     <bean name="koyaContentService" class="fr.itldev.koya.alfservice.KoyaContentService">
         <property name="nodeService" ref="nodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="dictionaryService" ref="dictionaryService"/>
+        <property name="contentService" ref="contentService"/>
+        <property name="namespaceService" ref="namespaceService"/>
     </bean>
    
     

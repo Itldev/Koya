@@ -25,6 +25,8 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import org.springframework.core.io.Resource;
 
@@ -47,4 +49,6 @@ public interface KoyaContentService extends AlfrescoService {
     SecuredItem getParent(User user, Content content) throws AlfrescoServiceException;
 
     Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException;
+    
+    InputStream getZipInputStream(User user, List<SecuredItem> securedItems) throws AlfrescoServiceException;
 }

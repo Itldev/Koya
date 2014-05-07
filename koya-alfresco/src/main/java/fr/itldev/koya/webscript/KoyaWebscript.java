@@ -59,6 +59,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
             try {
                 return (JSONObject) parser.parse(req.getContent().getReader());
             } catch (ParseException ex) {
+                logger.error(ex.getMessage(), ex);
             }
         }
 

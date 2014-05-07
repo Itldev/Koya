@@ -24,19 +24,41 @@ import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.Adler32;
+import java.util.zip.CheckedOutputStream;
+import java.util.zip.Deflater;
+import java.util.zip.ZipEntry;
+import javax.servlet.http.HttpServletResponse;
+import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.TempFileProvider;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.WebScriptException;
 
 /**
  * Koya Specific documents and directories Service.
@@ -48,12 +70,29 @@ public class KoyaContentService {
     private NodeService nodeService;
     KoyaNodeService koyaNodeService;
 
+    
+    protected DictionaryService dictionaryService;
+    protected ContentService contentService;
+    protected NamespaceService namespaceService;
+
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
+    }
+
+    public void setDictionaryService(DictionaryService dictionaryService) {
+        this.dictionaryService = dictionaryService;
+    }
+
+    public void setContentService(ContentService contentService) {
+        this.contentService = contentService;
+    }
+
+    public void setNamespaceService(NamespaceService namespaceService) {
+        this.namespaceService = namespaceService;
     }
 
     public Directory createDir(String name, NodeRef parent, String userName) {
@@ -118,7 +157,124 @@ public class KoyaContentService {
         }
         return contents;
     }
+    
+    public File zip(List<String> nodeRefs) {
+        File tmpZipFile = null;
+        try {
+            tmpZipFile = TempFileProvider.createTempFile("tmpDL", ".zip");
+            FileOutputStream fos = new FileOutputStream(tmpZipFile);
+            CheckedOutputStream checksum = new CheckedOutputStream(fos, new Adler32());
+            BufferedOutputStream buff = new BufferedOutputStream(checksum);
+            ZipArchiveOutputStream zipStream = new ZipArchiveOutputStream(buff);
+            // NOTE: This encoding allows us to workaround bug...
+            //       http://bugs.sun.com/bugdatabase/view_bug.do;:WuuT?bug_id=4820807
+            zipStream.setEncoding("UTF-8");
 
+            zipStream.setMethod(ZipArchiveOutputStream.DEFLATED);
+            zipStream.setLevel(Deflater.BEST_COMPRESSION);
+
+            zipStream.setCreateUnicodeExtraFields(ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS);
+            zipStream.setUseLanguageEncodingFlag(true);
+            zipStream.setFallbackToUTF8(true);
+
+            try {
+                for (String nodeRef : nodeRefs) {
+                    addToZip(new NodeRef(nodeRef), zipStream, "");
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            } finally {
+                zipStream.close();
+                buff.close();
+                checksum.close();
+                fos.close();
+
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } 
+        
+        return tmpZipFile;
+    }
+
+    private void addToZip(NodeRef node, ZipArchiveOutputStream out, String path) throws IOException {
+        QName nodeQnameType = this.nodeService.getType(node);
+
+        // Special case : links
+        if (this.dictionaryService.isSubClass(nodeQnameType, ApplicationModel.TYPE_FILELINK)) {
+            NodeRef linkDestinationNode = (NodeRef) nodeService.getProperty(node, ContentModel.PROP_LINK_DESTINATION);
+            if (linkDestinationNode == null) {
+                return;
+            }
+
+            // Duplicate entry: check if link is not in the same space of the link destination
+            if (nodeService.getPrimaryParent(node).getParentRef().equals(nodeService.getPrimaryParent(linkDestinationNode).getParentRef())) {
+                return;
+            }
+
+            nodeQnameType = this.nodeService.getType(linkDestinationNode);
+            node = linkDestinationNode;
+        }
+
+        String nodeName = (String) nodeService.getProperty(node, ContentModel.PROP_NAME);
+//        nodeName = noaccent ? unAccent(nodeName) : nodeName;
+
+        if (this.dictionaryService.isSubClass(nodeQnameType, ContentModel.TYPE_CONTENT)) {
+            ContentReader reader = contentService.getReader(node, ContentModel.PROP_CONTENT);
+            if (reader != null) {
+                InputStream is = reader.getContentInputStream();
+
+                String filename = path.isEmpty() ? nodeName : path + '/' + nodeName;
+
+                ZipArchiveEntry entry = new ZipArchiveEntry(filename);
+                entry.setTime(((Date) nodeService.getProperty(node, ContentModel.PROP_MODIFIED)).getTime());
+
+                entry.setSize(reader.getSize());
+                out.putArchiveEntry(entry);
+                try {
+                    byte buffer[] = new byte[8192];
+                    while (true) {
+                        int nRead = is.read(buffer, 0, buffer.length);
+                        if (nRead <= 0) {
+                            break;
+                        }
+
+                        out.write(buffer, 0, nRead);
+                    }
+
+                } catch (Exception exception) {
+                    logger.error(exception.getMessage(), exception);
+                } finally {
+                    is.close();
+                    out.closeArchiveEntry();
+                }
+            } else {
+                logger.warn("Could not read : " + nodeName + "content");
+            }
+        } else if (this.dictionaryService.isSubClass(nodeQnameType, ContentModel.TYPE_FOLDER)
+                && !this.dictionaryService.isSubClass(nodeQnameType, ContentModel.TYPE_SYSTEM_FOLDER)) {
+            List<ChildAssociationRef> children = nodeService
+                    .getChildAssocs(node);
+            if (children.isEmpty()) {
+                String folderPath = path.isEmpty() ? nodeName + '/' : path + '/' + nodeName + '/';
+                out.putArchiveEntry(new ZipArchiveEntry(new ZipEntry(folderPath)));
+                out.closeArchiveEntry();
+            } else {
+                for (ChildAssociationRef childAssoc : children) {
+                    NodeRef childNodeRef = childAssoc.getChildRef();
+
+                    addToZip(childNodeRef, out, path.isEmpty() ? nodeName : path + '/' + nodeName);
+                }
+            }
+        } else {
+            logger.info("Unmanaged type: "
+                    + nodeQnameType.getPrefixedQName(this.namespaceService)
+                    + ", filename: " + nodeName);
+        }
+    }
+    
     /**
      * Returns node (assumed is a content) parent
      *
@@ -161,4 +317,6 @@ public class KoyaContentService {
         }
     }
 
+    
+    
 }
