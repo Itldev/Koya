@@ -113,7 +113,7 @@ if (typeof Koya == "undefined" || !Extras)
                                     crop: true
                                 }, "keyup");
 
-                        
+
 
 //                        var sitePresetEl = Dom.get(parent.id + "-create-company-sitePreset");
 
@@ -145,88 +145,9 @@ if (typeof Koya == "undefined" || !Extras)
                                             }
                                 });
                         createSiteForm.setSubmitAsJSON(true);
-//                        createSiteForm.doBeforeAjaxRequest = {
-//                            fn: this.doBeforeAjaxRequest,
-//                            scope: this
-//                        };
 
                         createSiteForm.init();
                     },
-//                    /**
-//                     * Called when a site has been succesfully created on the server.
-//                     * Redirects the user to the new site.
-//                     *
-//                     * @method onCreateCompanySuccess
-//                     * @param response
-//                     */
-//                    onCreateCompanySuccess: function CreateCompany_onCreateCompanySuccess(response)
-//                    {
-//                        if (response.json !== undefined && response.json.success)
-//                        {
-//                            // The site has been successfully created - add it to the user's favourites and navigate to it
-//                            var preferencesService = new Alfresco.service.Preferences(),
-//                                    shortName = response.config.dataObj.shortName;
-//
-//                            preferencesService.favouriteSite(shortName,
-//                                    {
-//                                        successCallback:
-//                                                {
-//                                                    fn: function CreateCompany_onCreateCompanySuccess_successCallback()
-//                                                    {
-//                                                        document.location.href = Alfresco.constants.URL_PAGECONTEXT + "site/" + shortName + "/dashboard";
-//                                                    }
-//                                                }
-//                                    });
-//                        }
-//                        else
-//                        {
-//                            parent._adjustGUIAfterFailure(response);
-//                        }
-//                    },
-//                    /**
-//                     * Called when a site failed to be created.
-//                     *
-//                     * @method onCreateCompanyFailure
-//                     * @param response
-//                     */
-//                    onCreateCompanyFailure: function CreateCompany_onCreateCompanyFailure(response)
-//                    {
-//                        this._adjustGUIAfterFailure(response);
-//                    },
-//                    /**
-//                     * Helper method that restores the gui and displays an error message.
-//                     *
-//                     * @method _adjustGUIAfterFailure
-//                     * @param response
-//                     */
-//                    _adjustGUIAfterFailure: function CreateCompany__adjustGUIAfterFailure(response)
-//                    {
-//                        parent.widgets.cancelButton.set("disabled", false);
-//                        var text = Alfresco.util.message("message.failure", parent.name);
-//
-//                        if (response.serverResponse.status === 403)
-//                        {
-//                            // User does not have permissions to create the site
-//                            if (response.json.message)
-//                            {
-//                                text = Alfresco.util.message(response.json.message, parent.name)
-//                            }
-//                            else
-//                            {
-//                                text = Alfresco.util.message("error.noPermissions", parent.name);
-//                            }
-//                        }
-//                        else if (response.json.message)
-//                        {
-//                            var tmp = Alfresco.util.message(response.json.message, parent.name);
-//                            text = tmp ? tmp : text;
-//                        }
-//                        Alfresco.util.PopupManager.displayPrompt(
-//                                {
-//                                    title: Alfresco.util.message("message.failure", parent.name),
-//                                    text: text
-//                                });
-//                    },
                     /**
                      * Called before the form is about to be submitted
                      *
@@ -297,20 +218,10 @@ if (typeof Koya == "undefined" || !Extras)
                 {
                     if (response.json !== undefined && response.json.success)
                     {
-                        // The site has been successfully created - add it to the user's favourites and navigate to it
-                        var preferencesService = new Alfresco.service.Preferences(),
-                                shortName = response.json.shortName;
-
-                        preferencesService.favouriteSite(shortName,
-                                {
-                                    successCallback:
-                                            {
-                                                fn: function CreateCompany_onCreateCompanySuccess_successCallback()
-                                                {
-                                                    document.location.href = Alfresco.constants.URL_PAGECONTEXT + "site/" + shortName + "/dashboard";
-                                                }
-                                            }
-                                });
+                        // The site has been successfully created - navigate to it
+                        var shortName = response.json.shortName;
+                        
+                        document.location.href = Alfresco.constants.URL_PAGECONTEXT + "site/" + shortName + "/dashboard";
                     }
                     else
                     {
@@ -368,9 +279,3 @@ if (typeof Koya == "undefined" || !Extras)
 
             });
 })();
-//
-//Alfresco.module.getCreateCompanyInstance = function()
-//{
-//    var instanceId = "koya-createCompany-instance";
-//    return Alfresco.util.ComponentManager.get(instanceId) || new Koya.CreateCompany(instanceId);
-//};
