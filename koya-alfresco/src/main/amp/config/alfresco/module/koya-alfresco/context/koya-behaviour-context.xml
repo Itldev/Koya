@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+">
+    
+    
+    <!--Apply acl on dossier or space node creation-->
+    <bean id="DefaultAclOnCreateBehaviour" class="fr.itldev.koya.behaviour.DefaultAclOnCreateBehaviour" init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
+        <property name="koyaAclService" ref="koyaAclService" />
+        <property name="policyComponent" ref="policyComponent" />
+    </bean>
+
+</beans>

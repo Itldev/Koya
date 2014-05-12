@@ -99,33 +99,6 @@ public class KoyaNodeService {
 
     // </editor-fold>
     /**
-     * Gets Koya Typed Object from NodeRef
-     *
-     * @param n
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public Object getKoyaTypedObject(NodeRef n) throws KoyaServiceException {
-
-        if (isKoyaCompany(n)) {
-            return nodeCompanyBuilder(n);
-        } else {
-            QName typeNode = nodeService.getType(n);
-
-            if (typeNode.equals(KoyaModel.QNAME_KOYA_SPACE)) {
-                return nodeSpaceBuilder(n);
-            } else if (typeNode.equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-                return nodeDossierBuilder(n);
-            } else if (nodeIsFolder(n)) {
-                return nodeDirBuilder(n);
-            } else {
-                return nodeDocumentBuilder(n);
-            }
-        }
-
-    }
-
-    /**
      * ===== Activity Handling methods ==========.
      *
      */
@@ -232,7 +205,6 @@ public class KoyaNodeService {
     /**
      * Change users favourite status for a node.
      *
-     * @param userName
      * @param item
      * @param status
      */
@@ -293,6 +265,52 @@ public class KoyaNodeService {
      * ==== Objects Builder Methods =====.
      *
      */
+    /**
+     *
+     * Get typed SecuredItem from Noderef String.
+     *
+     * @param strNodeRef
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public SecuredItem nodeRef2SecuredItem(String strNodeRef) throws KoyaServiceException {
+        NodeRef nr = null;
+        try {
+            nr = new NodeRef(strNodeRef);
+        } catch (InvalidNodeRefException ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF);
+        }
+        return nodeRef2SecuredItem(nr);
+    }
+
+    /**
+     *
+     * Get typed SecuredItem from Noderef
+     *
+     * @param nodeRef
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public SecuredItem nodeRef2SecuredItem(NodeRef nodeRef) throws KoyaServiceException {
+        SecuredItem si = null;
+        QName type = nodeService.getType(nodeRef);
+        if (type.equals(KoyaModel.QNAME_KOYA_COMPANY)) {
+            si = nodeCompanyBuilder(nodeRef);
+        } else if (type.equals(KoyaModel.QNAME_KOYA_SPACE)) {
+            si = nodeSpaceBuilder(nodeRef);
+        } else if (type.equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+            si = nodeDossierBuilder(nodeRef);
+        } else if (type.equals(ContentModel.TYPE_FOLDER)) {
+            si = nodeDirBuilder(nodeRef);
+        } else if (type.equals(ContentModel.TYPE_CONTENT)) {
+            si = nodeDocumentBuilder(nodeRef);
+        } else {
+            logger.warn("Invalid noderef type (" + type + ") given for sharing  : ignored");
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_SECUREDITEM_NODEREF);
+        }
+        return si;
+    }
+
     /**
      *
      * @param s
@@ -474,6 +492,84 @@ public class KoyaNodeService {
         //todo check user acl to delete node.
         nodeService.deleteNode(n);
 
+    }
+
+    /**
+     *
+     *
+     */
+    /**
+     * Return parent nodes list.
+     *
+     * @param s
+     * @param userName
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public List<SecuredItem> getParentsList(SecuredItem s, String userName) throws KoyaServiceException {
+        List<SecuredItem> parents = new ArrayList<>();
+
+        if (s.getClass().isAssignableFrom(Company.class)) {
+            parents.add(s);
+            return parents;
+        } else {
+
+            NodeRef nrParent = nodeService.getPrimaryParent(s.getNodeRefasObject()).getParentRef();
+
+            if (s.getClass().isAssignableFrom(Space.class)) {
+
+                //parent can be a space or documentLibrary node (child of company)
+                if (nodeService.getType(nrParent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
+
+                    Space sParent = nodeSpaceBuilder(nrParent);
+                    parents.add(sParent);
+                    parents.addAll(getParentsList(sParent, userName));
+                } else if (nodeService.getProperty(nrParent, ContentModel.PROP_NAME).equals(SpaceService.DOCLIB_NAME)) {
+                    Company c = nodeCompanyBuilder(nodeService.getPrimaryParent(nrParent).getParentRef());
+                    //do not add company -> done by recursive end condition.
+                    parents.addAll(getParentsList(c, userName));
+                }
+
+            } else if (s.getClass().isAssignableFrom(Dossier.class)) {
+                Space sParent = nodeSpaceBuilder(nrParent);
+                parents.add(sParent);
+                //Dossier parent must be a Space
+                parents.addAll(getParentsList(sParent, userName));
+
+            } else if (s.getClass().isAssignableFrom(Content.class)) {
+                //parent can be a Directory or Dossier                
+                if (nodeService.getType(nrParent).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+
+                    Dossier dParent = nodeDossierBuilder(nrParent);
+                    parents.add(dParent);
+
+                    parents.addAll(getParentsList(dParent, userName));
+                } else {
+                    Directory dirParent = nodeDirBuilder(nrParent);
+                    parents.add(dirParent);
+                    parents.addAll(getParentsList(dirParent, userName));
+                }
+            }
+        }
+        return parents;
+    }
+
+    /**
+     * Returns company whose node belongs to. Null is node is not a comapny
+     * child
+     *
+     *
+     * @param n
+     * @return
+     */
+    public Company getNodeCompany(NodeRef n) {
+        if (n == null) {
+            return null;
+        } else if (nodeService.getType(n).equals(KoyaModel.QNAME_KOYA_COMPANY)) {
+            return nodeCompanyBuilder(n);
+        } else {
+            return getNodeCompany(nodeService.getPrimaryParent(n).getParentRef());
+        }
     }
 
 }

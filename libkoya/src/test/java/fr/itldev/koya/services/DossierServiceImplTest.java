@@ -3,27 +3,29 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
@@ -61,7 +63,7 @@ public class DossierServiceImplTest extends TestCase {
     @Before
     public void createSpace() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)),"default");
+        companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
         spaceTests = spaceService.create(admin, new Space("Esptests", companyTests));
     }
 
@@ -80,7 +82,7 @@ public class DossierServiceImplTest extends TestCase {
     }
 
     @Test
-    public void testListDossierss() throws AlfrescoServiceException {
+    public void testListDossiers() throws AlfrescoServiceException {
         dossierService.create(admin, new Dossier("doss1", spaceTests));
         dossierService.create(admin, new Dossier("doss2", spaceTests));
         dossierService.create(admin, new Dossier("doss3", spaceTests));
@@ -88,17 +90,16 @@ public class DossierServiceImplTest extends TestCase {
         assertEquals(4, dossierService.list(admin, spaceTests).size());
     }
 
-//    @Test
-//    public void testTaille() throws AlfrescoServiceException, AlfrescoFtpException {
-//        Dossier doss1 = dossierService.creerNouveau(admin, new Dossier("doss1", espaceTests));
-//
-//        //verifier la taille des fichiers a envoyer
-//        long fileSize = 0;
-//
-//        //TODO quand le service d'upload de fichiers sera actif
-//        //verifier que taille dossier = Somme taille fichier uploadés
-//        assertEquals(fileSize, dossierService.getTailleOctet(admin, doss1));
-//
-//        System.out.println("le dossier '" + doss1 + "' fait " + societeService.getTailleString(admin, doss1));
-//    }
+    @Test
+    public void testShareDossiers() throws AlfrescoServiceException {
+        List<SecuredItem> sharedDossiers = new ArrayList<>();
+        sharedDossiers.add(dossierService.create(admin, new Dossier("doss1", spaceTests)));
+        sharedDossiers.add(dossierService.create(admin, new Dossier("doss2", spaceTests)));
+
+        List<String> shareToUsersMails = new ArrayList<>();
+        shareToUsersMails.add("leroux@itldev.fr");
+        shareToUsersMails.add("test@itldev.fr");
+
+        dossierService.shareItems(admin, sharedDossiers, shareToUsersMails);
+    }
 }

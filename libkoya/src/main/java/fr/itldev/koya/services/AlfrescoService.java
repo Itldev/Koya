@@ -20,6 +20,7 @@ package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
+import java.util.List;
 
 public interface AlfrescoService {
 
@@ -39,4 +40,14 @@ public interface AlfrescoService {
      * @param newName
      */
     void rename(User user, SecuredItem securedItem, String newName);
+
+    /**
+     * Shared SecuredItems to a list of users (pre created or not)
+     *
+     * @param user
+     * @param sharedItems
+     * @param usersMails
+     */
+    void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails);
+
 }

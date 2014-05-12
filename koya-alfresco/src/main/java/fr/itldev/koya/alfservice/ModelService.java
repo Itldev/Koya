@@ -19,11 +19,8 @@
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.services.impl.AlfrescoRestService;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.CopyService;
@@ -43,13 +40,13 @@ public class ModelService extends AlfrescoRestService {
 
     private static final String SPACE_TEMPLATE_PATH = "/app:company_home/app:dictionary/app:koya_space_templates";
     private static final String REST_GET_DOC_LIB_LIST = "/slingshot/doclib/containers/";
-    
+
     // Dependencies
     private NodeService nodeService;
     private CopyService copyService;
     private SearchService searchService;
     private SiteService siteService;
-    
+
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -72,7 +69,7 @@ public class ModelService extends AlfrescoRestService {
      *
      * @param siteShortName
      * @param templateName
-     * @return 
+     * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      *
      * @retun company doclib noderef
@@ -88,10 +85,9 @@ public class ModelService extends AlfrescoRestService {
                 NodeRef companyNodeRef = siteInfo.getNodeRef();
 
                 docLib = nodeService.getChildByName(companyNodeRef, ContentModel.ASSOC_CONTAINS, "documentLibrary");
-                if(docLib == null)
+                if (docLib == null) {
                     docLib = siteService.createContainer(siteShortName, SiteService.DOCUMENT_LIBRARY, ContentModel.TYPE_FOLDER, null);
-//
-//                    siteService.createContainer(siteShortName, "documentLibrary"templateName, null, null)
+                }
 
                 rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                         SearchService.LANGUAGE_XPATH,
@@ -101,7 +97,6 @@ public class ModelService extends AlfrescoRestService {
                 if (rs.length() == 1) {
                     template = rs.getNodeRef(0);
 
-//                //copie des templates
                     for (ChildAssociationRef associationRef : nodeService.getChildAssocs(template)) {
                         copyService.copyAndRename(associationRef.getChildRef(),
                                 docLib,

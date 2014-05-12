@@ -28,10 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
+import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -43,12 +46,14 @@ public class SpaceService {
 
     public static final String DOCLIB_NAME = "documentLibrary";
 
-    private Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = Logger.getLogger(this.getClass());
 
     private NodeService nodeService;
     private SearchService searchService;
     private KoyaNodeService koyaNodeService;
     private CompanyService companyService;
+    private KoyaAclService koyaAclService;
+    private FileFolderService fileFolderService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -65,6 +70,14 @@ public class SpaceService {
 
     public void setCompanyService(CompanyService companyService) {
         this.companyService = companyService;
+    }
+
+    public void setKoyaAclService(KoyaAclService koyaAclService) {
+        this.koyaAclService = koyaAclService;
+    }
+
+    public void setFileFolderService(FileFolderService fileFolderService) {
+        this.fileFolderService = fileFolderService;
     }
 
     // </editor-fold>
@@ -107,7 +120,7 @@ public class SpaceService {
                 KoyaModel.QNAME_KOYA_SPACE,
                 properties);
         koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
-
+               
         return koyaNodeService.nodeSpaceBuilder(car.getChildRef());
     }
 
@@ -137,8 +150,9 @@ public class SpaceService {
         if (depth <= 0) {
             return spaces;//return empty list if max depth < = 0 : ie max depth reached
         }
-        for (ChildAssociationRef car : nodeService.getChildAssocs(rootNodeRef)) {
-            NodeRef childNr = car.getChildRef();
+
+        for (FileInfo fi : fileFolderService.listFolders(rootNodeRef)) {
+            NodeRef childNr = fi.getNodeRef();
             if (nodeService.getType(childNr).equals(KoyaModel.QNAME_KOYA_SPACE)) {
                 Space space = koyaNodeService.nodeSpaceBuilder(childNr);
                 space.setChildSpaces(listRecursive(childNr, depth - 1));

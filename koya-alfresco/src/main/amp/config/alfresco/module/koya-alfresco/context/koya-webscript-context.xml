@@ -209,6 +209,13 @@
         <property name="koyaNodeService" ref="koyaNodeService" />         
     </bean>
     
+     <!-- share secured item -->
+    <bean id="webscript.fr.itldev.koya.global.shareitems.post" 
+          class="fr.itldev.koya.webscript.global.ShareItems"
+          parent="webscript">                
+        <property name="koyaShareService" ref="koyaShareService" />   
+    </bean>
+    
     
     <!--
     ==================================================================

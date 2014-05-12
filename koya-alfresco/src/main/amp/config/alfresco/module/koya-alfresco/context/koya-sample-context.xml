@@ -23,13 +23,25 @@
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <beans>
     <!-- Bootstrap sample koya company-->
-     <bean id="patch.siteLoadPatch.koyacompany" class="org.alfresco.repo.admin.patch.impl.SiteLoadPatch" parent="basePatch">
-        <property name="id"><value>patch.siteLoadPatch.koyacompany</value></property>
-        <property name="description"><value>patch.siteLoadPatch.koyacompany</value></property>
-        <property name="fixesFromSchema"><value>0</value></property>
-        <property name="fixesToSchema"><value>${version.schema}</value></property>
-        <property name="targetSchema"><value>10000</value></property> 
-        <property name="disabled"><value>${koya.sample.site.disabled}</value></property>
+    <bean id="patch.siteLoadPatch.koyacompany" class="fr.itldev.koya.sample.KoyaSiteLoadPatch" parent="basePatch">
+        <property name="id">
+            <value>patch.siteLoadPatch.koyacompany</value>
+        </property>
+        <property name="description">
+            <value>patch.siteLoadPatch.koyacompany</value>
+        </property>
+        <property name="fixesFromSchema">
+            <value>0</value>
+        </property>
+        <property name="fixesToSchema">
+            <value>${version.schema}</value>
+        </property>
+        <property name="targetSchema">
+            <value>10000</value>
+        </property> 
+        <property name="disabled">
+            <value>${koya.sample.site.disabled}</value>
+        </property>
         <property name="dependsOn" >
             <list>
                 <ref bean="patch.updateDmPermissions" />
@@ -40,6 +52,8 @@
         <property name="siteService" ref="siteService" />
         <property name="descriptorService" ref="descriptorComponent" />
         <property name="authorityService" ref="authorityService" />
+        <property name="userService" ref="userService" />
+        <property name="personService" ref="personService" />
         <property name="behaviourFilter" ref="policyBehaviourFilter" />
         <property name="siteName">
             <value>koya-company</value>

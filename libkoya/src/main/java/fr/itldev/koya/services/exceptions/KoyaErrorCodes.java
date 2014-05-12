@@ -6,8 +6,10 @@ package fr.itldev.koya.services.exceptions;
  */
 public interface KoyaErrorCodes {
 
-    //
+    // 000 -> global errors
     public static final Integer UNHANDLED = 0;
+    public static final Integer INVALID_NODEREF = 1;
+    public static final Integer INVALID_SECUREDITEM_NODEREF = 2;
 
     //100 -> companies errors
     public static final Integer COMPANY_EMPTY_TITLE = 100;
@@ -26,9 +28,11 @@ public interface KoyaErrorCodes {
 
     //400 -> Content errors
     public static final Integer CONTENT_INVALID_HIERACHY = 400;
-    
+
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;
-    
+    public static final Integer NO_SUCH_USER_IDENTIFIED_BY_EMAIL = 501;
+    public static final Integer MANY_USERS_IDENTIFIED_BY_EMAIL = 502;
+    public static final Integer LOGIN_ALREADY_EXISTS = 503;
 
 }

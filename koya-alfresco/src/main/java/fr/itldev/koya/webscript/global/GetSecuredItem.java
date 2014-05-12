@@ -22,7 +22,6 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
-import org.alfresco.service.cmr.repository.NodeRef;
 
 /**
  *
@@ -40,8 +39,7 @@ public class GetSecuredItem extends KoyaWebscript {
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef nodeRef = new NodeRef((String) urlParams.get(URL_PARAM_NODEREF));
-        wrapper.addItem(koyaNodeService.getKoyaTypedObject(nodeRef));
+        wrapper.addItem(koyaNodeService.nodeRef2SecuredItem((String) urlParams.get(URL_PARAM_NODEREF)));
         return wrapper;
     }
 

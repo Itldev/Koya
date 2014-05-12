@@ -33,6 +33,7 @@ import org.alfresco.repo.model.filefolder.HiddenAspect;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.site.SiteVisibility;
@@ -60,6 +61,7 @@ public class CompanyService {
     protected KoyaNodeService koyaNodeService;
     protected HiddenAspect hiddenAspect;
     protected ModelService modelService;
+    private AuthenticationService authenticationService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setSiteService(SiteService siteService) {
@@ -86,6 +88,10 @@ public class CompanyService {
         this.modelService = modelService;
     }
 
+    public void setAuthenticationService(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
+
     // </editor-fold>
     public Company create(String title, SalesOffer sO, String template) throws KoyaServiceException {
 
@@ -94,7 +100,7 @@ public class CompanyService {
         }
 
         String shortName = getShortNameFromTitle(title);
-        SiteInfo sInfo = siteService.createSite(SITE_PRESET, shortName, title, DESC + " - " + shortName, SiteVisibility.PUBLIC);
+        SiteInfo sInfo = siteService.createSite(SITE_PRESET, shortName, title, DESC + " - " + shortName, SiteVisibility.PRIVATE);
         Company created = new Company(sInfo);
         koyaNodeService.setActiveStatus(sInfo.getNodeRef(), Boolean.TRUE);
 
@@ -109,7 +115,7 @@ public class CompanyService {
 
     /**
      * List users available companies.
-     *    
+     *
      * @return
      */
     public List<Company> list() {
@@ -117,7 +123,7 @@ public class CompanyService {
         //TODO active sites only
         List<Company> socs = new ArrayList<>();
 
-        for (SiteInfo s : siteService.listSites("", SITE_PRESET)) {
+        for (SiteInfo s : siteService.listSites(authenticationService.getCurrentUserName())) {
             if (koyaNodeService.isKoyaCompany(s.getNodeRef())) {
                 socs.add(koyaNodeService.siteCompanyBuilder(s));
             }

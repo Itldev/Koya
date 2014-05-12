@@ -30,7 +30,9 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.MutableAuthenticationService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.util.PropertyMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -43,6 +45,7 @@ public class UserService {
     protected NodeService nodeService;
     private PersonService personService;
     protected SearchService searchService;
+    private MutableAuthenticationService authenticationService;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -56,14 +59,29 @@ public class UserService {
         this.searchService = searchService;
     }
 
+    public void setAuthenticationService(MutableAuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
+
     /**
      * User creation method.
      *
-     * @param userLog
-     * @param mail
+     * @param userToCreate
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public void createUser(User userLog, String mail) {
+    public void createUser(User userToCreate) throws KoyaServiceException {
 
+        PropertyMap propsUser = new PropertyMap();
+        propsUser.put(ContentModel.PROP_USERNAME, userToCreate.getLogin());
+        propsUser.put(ContentModel.PROP_FIRSTNAME, userToCreate.getFirstName());
+        propsUser.put(ContentModel.PROP_LASTNAME, userToCreate.getName());
+        propsUser.put(ContentModel.PROP_EMAIL, userToCreate.getEmail());
+        if (!personService.personExists(userToCreate.getLogin())) {
+            authenticationService.createAuthentication(userToCreate.getLogin(), userToCreate.getPassword().toCharArray());
+            personService.createPerson(propsUser);
+        } else {
+            throw new KoyaServiceException(KoyaErrorCodes.LOGIN_ALREADY_EXISTS);
+        }
     }
 
     /**
@@ -106,6 +124,7 @@ public class UserService {
      */
     public List<User> find(String query, int maxResults) {
 
+        //TODO search with personService to limit results to authenticated users
         String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\"" + query + "*\" OR @cm\\:firstName:\"" + query + "*\" OR @cm\\:email:\"" + query + "*\" )";
 
         logger.trace(luceneRequest);
@@ -150,6 +169,38 @@ public class UserService {
         u.setEmail((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));
 
         return u;
+    }
+
+    /**
+     * Get user by mail address if exists.
+     *
+     * @param email
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public User getUser(String email) throws KoyaServiceException {
+        String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"" + email + "*\" ";
+        List<User> users = new ArrayList<>();
+        ResultSet rs = null;
+        try {
+            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
+            for (ResultSetRow r : rs) {
+                users.add(buildUser(r.getNodeRef()));
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+        }
+
+        if (users.isEmpty()) {
+            throw new KoyaServiceException(KoyaErrorCodes.NO_SUCH_USER_IDENTIFIED_BY_EMAIL, email);
+        } else if (users.size() > 1) {
+            throw new KoyaServiceException(KoyaErrorCodes.MANY_USERS_IDENTIFIED_BY_EMAIL, email);
+        } else {
+            return users.get(0);
+        }
+
     }
 
 }
