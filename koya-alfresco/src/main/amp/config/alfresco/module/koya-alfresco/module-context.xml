@@ -25,6 +25,7 @@
 <beans>
 	
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-behaviour-context.xml" />
+    <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-js-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-model-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-service-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-webscript-context.xml" />
