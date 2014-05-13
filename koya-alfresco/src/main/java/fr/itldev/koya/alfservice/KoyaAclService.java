@@ -7,7 +7,10 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
+import java.util.ArrayList;
+import java.util.List;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteService;
@@ -206,6 +209,51 @@ public class KoyaAclService {
      */
     public String buildCompanyAuthorityName(Company c, String roleName) {
         return "GROUP_site_" + c.getName() + "_" + roleName;
+    }
+
+    /**
+     *
+     * =============== Shares and Access Listing
+     *
+     * TODO work with caches ( !!! data size explosion !!! )
+     *
+     */
+    /**
+     * List all users who can access specified SecuredItem.
+     *
+     *
+     * TODO add users who belong to groups listed by getAllAuthorities.
+     * currently lists only public share access
+     *
+     * TODO check inherance possibilities
+     *
+     * @param s
+     * @return
+     */
+    public List<User> listUsersAccess(SecuredItem s) {
+        List<User> users = new ArrayList<>();
+
+        for (AccessPermission ap : permissionService.getAllSetPermissions(s.getNodeRefasObject())) {
+            User u = userService.buildUser(ap.getAuthority());
+            if (u != null) {
+                users.add(u);
+            }
+        }
+        return users;
+    }
+
+    /**
+     * List all secured items shared with user.
+     *
+     *
+     * @param u
+     * @return
+     */
+    public List<SecuredItem> listItemsShared(User u) {
+        List<SecuredItem> items = new ArrayList<>();
+
+        //TODO 
+        return items;
     }
 
 }
