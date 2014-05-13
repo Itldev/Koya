@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.model.impl;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -26,6 +27,8 @@ import org.springframework.web.client.RestTemplate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class User {
 
+    @JsonProperty("nodeRef")
+    private String nodeRef;
     @JsonProperty("userName")
     private String login;
     @JsonProperty("firstName")
@@ -47,6 +50,14 @@ public final class User {
 
     @JsonIgnore
     private RestTemplate restTemplate;
+
+    public String getNodeRef() {
+        return nodeRef;
+    }
+
+    public void setNodeRef(String nodeRef) {
+        this.nodeRef = nodeRef;
+    }
 
     public String getLogin() {
         return login;
@@ -181,5 +192,10 @@ public final class User {
      * @param contentType
      */
     public void setContentType(String contentType) {
+    }
+
+    @JsonIgnore
+    public NodeRef getNodeRefasObject() {
+        return new NodeRef(this.nodeRef);
     }
 }
