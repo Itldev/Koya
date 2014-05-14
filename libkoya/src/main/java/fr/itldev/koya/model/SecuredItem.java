@@ -32,6 +32,7 @@ public abstract class SecuredItem {
     private String path;
     private String name;
     private String parentNodeRef;
+    private Boolean shared;
 
     private Boolean userFavourite;
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
@@ -82,6 +83,14 @@ public abstract class SecuredItem {
 
     public void setUserFavourite(Boolean userFavourite) {
         this.userFavourite = userFavourite;
+    }
+
+    public Boolean isShared() {
+        return shared;
+    }
+
+    public void setShared(Boolean shared) {
+        this.shared = shared;
     }
 
     // </editor-fold>

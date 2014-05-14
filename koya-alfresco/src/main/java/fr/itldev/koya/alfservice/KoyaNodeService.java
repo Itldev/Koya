@@ -67,6 +67,7 @@ public class KoyaNodeService {
     private CompanyService companyService;
     private FileFolderService fileFolderService;
     private AuthenticationService authenticationService;
+    private KoyaAclService koyaAclService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -95,6 +96,10 @@ public class KoyaNodeService {
 
     public void setAuthenticationService(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
+    }
+
+    public void setKoyaAclService(KoyaAclService koyaAclService) {
+        this.koyaAclService = koyaAclService;
     }
 
     // </editor-fold>
@@ -319,6 +324,7 @@ public class KoyaNodeService {
     public Company siteCompanyBuilder(SiteInfo s) {
         Company c = new Company(s);
         c.setUserFavourite(isFavourite(c.getNodeRefasObject()));
+        c.setShared(koyaAclService.listUsersAccess(c).size() > 0);
         return c;
     }
 
@@ -359,6 +365,7 @@ public class KoyaNodeService {
         e.setActive(isActive(spaceNodeRef));
 
         e.setUserFavourite(isFavourite(spaceNodeRef));
+        e.setShared(koyaAclService.listUsersAccess(e).size() > 0);
 
         e.setParentNodeRefasObject(realParent);
         return e;
@@ -388,6 +395,7 @@ public class KoyaNodeService {
         c.setActive(isActive(dossierNodeRef));
 
         c.setUserFavourite(isFavourite(dossierNodeRef));
+        c.setShared(koyaAclService.listUsersAccess(c).size() > 0);
 
         return c;
     }
@@ -417,6 +425,9 @@ public class KoyaNodeService {
         r.setName((String) nodeService.getProperty(dirNodeRef, ContentModel.PROP_NAME));
         r.setParentNodeRefasObject(nodeService.getPrimaryParent(dirNodeRef).getParentRef());
         r.setUserFavourite(isFavourite(dirNodeRef));
+
+        //not used
+        r.setShared(Boolean.FALSE);
         return r;
     }
 
@@ -432,6 +443,9 @@ public class KoyaNodeService {
         d.setParentNodeRefasObject(nodeService.getPrimaryParent(docNodeRef).getParentRef());
         d.setUserFavourite(isFavourite(docNodeRef));
         d.setByteSize(getByteSize(docNodeRef));
+        //not used
+        d.setShared(Boolean.FALSE);
+
         return d;
     }
 
