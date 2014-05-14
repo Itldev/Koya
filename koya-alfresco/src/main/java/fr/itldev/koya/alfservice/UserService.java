@@ -24,6 +24,7 @@ import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.util.ArrayList;
 import java.util.List;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -39,26 +40,26 @@ import org.apache.log4j.Logger;
  *
  */
 public class UserService {
-    
+
     private final Logger logger = Logger.getLogger(this.getClass());
-    
+
     protected NodeService nodeService;
     private PersonService personService;
     protected SearchService searchService;
     private MutableAuthenticationService authenticationService;
-    
+
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-    
+
     public void setPersonService(PersonService personService) {
         this.personService = personService;
     }
-    
+
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
     }
-    
+
     public void setAuthenticationService(MutableAuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
@@ -70,7 +71,7 @@ public class UserService {
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public void createUser(User userToCreate) throws KoyaServiceException {
-        
+
         PropertyMap propsUser = new PropertyMap();
         propsUser.put(ContentModel.PROP_USERNAME, userToCreate.getLogin());
         propsUser.put(ContentModel.PROP_FIRSTNAME, userToCreate.getFirstName());
@@ -107,7 +108,22 @@ public class UserService {
         } else {
             throw new KoyaServiceException(KoyaErrorCodes.UNKNOWN_USER);
         }
-        
+
+    }
+
+    /**
+     * Change users password
+     *
+     * @param oldPassword
+     * @param newPassword
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public void changePassword(String oldPassword, String newPassword) throws KoyaServiceException {
+        try {
+            authenticationService.updateAuthentication(authenticationService.getCurrentUserName(), oldPassword.toCharArray(), newPassword.toCharArray());
+        } catch (AuthenticationException aex) {
+            throw new KoyaServiceException(KoyaErrorCodes.CANT_MODIFY_USER_PASSWORD);
+        }
     }
 
     /**
@@ -126,10 +142,10 @@ public class UserService {
 
         //TODO search with personService to limit results to authenticated users
         String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\"" + query + "*\" OR @cm\\:firstName:\"" + query + "*\" OR @cm\\:email:\"" + query + "*\" )";
-        
+
         logger.trace(luceneRequest);
         List<User> users = new ArrayList<>();
-        
+
         ResultSet rs = null;
         try {
             rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
@@ -144,21 +160,21 @@ public class UserService {
                 rs.close();
             }
         }
-        
+
         logger.trace(users.size() + " resultats trouvés");
-        
+
         return users;
     }
-    
+
     public User buildUser(String username) {
         if (personService.personExists(username)) {
             return buildUser(personService.getPerson(username));
         } else {
             return null;
         }
-        
+
     }
-    
+
     public User buildUser(NodeRef userNodeRef) {
         User u = new User();
 
@@ -168,7 +184,7 @@ public class UserService {
         u.setName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_LASTNAME));
         u.setEmail((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));
         u.setNodeRef(userNodeRef.toString());
-                
+
         return u;
     }
 
@@ -193,7 +209,7 @@ public class UserService {
                 rs.close();
             }
         }
-        
+
         if (users.isEmpty()) {
             throw new KoyaServiceException(KoyaErrorCodes.NO_SUCH_USER_IDENTIFIED_BY_EMAIL, email);
         } else if (users.size() > 1) {
@@ -201,7 +217,7 @@ public class UserService {
         } else {
             return users.get(0);
         }
-        
+
     }
-    
+
 }

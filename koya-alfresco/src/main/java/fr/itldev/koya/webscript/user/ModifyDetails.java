@@ -31,8 +31,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
- * TODO verify authentication to allow users to modify only his personnal
- * details. TODO admin can modify all users details.
+ * Modify user details
  */
 public class ModifyDetails extends AbstractWebScript {
 

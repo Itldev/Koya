@@ -234,5 +234,11 @@
           parent="webscript">                
         <property name="userService" ref="userService" /> 
     </bean>
+    
+     <bean id="webscript.fr.itldev.koya.user.changepassword.get" 
+          class="fr.itldev.koya.webscript.user.ChangePassword"
+          parent="webscript">                
+        <property name="userService" ref="userService" /> 
+    </bean>
  
 </beans>

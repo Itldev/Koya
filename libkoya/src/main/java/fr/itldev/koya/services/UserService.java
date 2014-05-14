@@ -83,6 +83,15 @@ public interface UserService {
     void commitProperties(User userLog, User userToCommitProps) throws AlfrescoServiceException;
 
     /**
+     *
+     * @param userLog
+     * @param oldPassword
+     * @param newPassword
+     * @throws AlfrescoServiceException
+     */
+    void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException;
+
+    /**
      * Share specified Secured item to specified mail user. If user doesn't
      * exists, alfresco backend creates it.
      *

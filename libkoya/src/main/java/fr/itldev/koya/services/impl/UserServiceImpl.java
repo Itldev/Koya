@@ -48,6 +48,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_DEL_LOGOUT = "/s/api/login/ticket/{ticket}";
     private static final String REST_POST_MODIFYDETAILS = "/s/fr/itldev/koya/user/modifydetails";
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find/{query}/{maxresults}";
+    private static final String REST_GET_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword/{oldpwd}/{newpwd}";
 
     //===== Preferences
     private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
@@ -195,6 +196,15 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     @Override
     public void commitProperties(User userLog, User userToCommitProps) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToCommitProps, ItlAlfrescoServiceWrapper.class);
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
+    }
+
+    @Override
+    public void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_CHANGEPASSWORD, ItlAlfrescoServiceWrapper.class, oldPassword, newPassword);
         if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             throw new AlfrescoServiceException(ret.getMessage());
         }
