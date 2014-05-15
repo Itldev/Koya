@@ -209,12 +209,7 @@
         <property name="koyaNodeService" ref="koyaNodeService" />         
     </bean>
     
-     <!-- share secured item -->
-    <bean id="webscript.fr.itldev.koya.global.shareitems.post" 
-          class="fr.itldev.koya.webscript.global.ShareItems"
-          parent="webscript">                
-        <property name="koyaShareService" ref="koyaShareService" />   
-    </bean>
+    
     
     
     <!--
@@ -239,6 +234,26 @@
           class="fr.itldev.koya.webscript.user.ChangePassword"
           parent="webscript">                
         <property name="userService" ref="userService" /> 
+    </bean>
+    
+     <!--
+    ==================================================================
+    ========================== Shares ==============================
+    ==================================================================
+    -->
+    
+     <!-- share secured item -->
+    <bean id="webscript.fr.itldev.koya.share.shareitems.post" 
+          class="fr.itldev.koya.webscript.share.ShareItems"
+          parent="webscript">                
+        <property name="koyaShareService" ref="koyaShareService" />   
+    </bean>
+    
+      <!-- items shared with users -->
+    <bean id="webscript.fr.itldev.koya.share.sharedusers.get" 
+          class="fr.itldev.koya.webscript.share.SharedUsers"
+          parent="webscript">
+        <property name="koyaAclService" ref="koyaAclService" />   
     </bean>
  
 </beans>

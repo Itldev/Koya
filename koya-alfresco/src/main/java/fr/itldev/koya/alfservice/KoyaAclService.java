@@ -82,17 +82,17 @@ public class KoyaAclService {
      *
      * @param userName
      * @param item
-     * @param set
+     * @param grant
      * @param recursive
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public void setReadAccess(String userName, SecuredItem item, Boolean set, Boolean recursive) throws KoyaServiceException {
+    public void setReadAccess(String userName, SecuredItem item, Boolean grant, Boolean recursive) throws KoyaServiceException {
 
-        logger.trace("set read acces for user '" + userName + "' on " + item.getName() + " (" + item.getClass().getSimpleName() + ")");
+        logger.trace((grant ? "Set" : "Reset") + " read acces for user '" + userName + "' on " + item.getName() + " (" + item.getClass().getSimpleName() + ")");
 
         //TODO grant acces to other elements
         if (item.getClass().equals(Dossier.class)) {
-            grantPermission(userName, (Dossier) item, PermissionService.READ, set);
+            KoyaAclService.this.setPermission(userName, (Dossier) item, PermissionService.READ, grant);
         } else {
             logger.error("Unsupported sharing type " + item.getClass().getSimpleName());
         }
@@ -129,10 +129,10 @@ public class KoyaAclService {
      * @param userName
      * @param c
      * @param permission
-     * @param set
+     * @param grant
      * @param recursive
      */
-    public void grantPermission(String userName, Company c, String permission, Boolean set, Boolean recursive) {
+    public void setPermission(String userName, Company c, String permission, Boolean grant, Boolean recursive) {
         //todo process recursive         
         permissionService.setPermission(c.getNodeRefasObject(), userName, permission, true);
         if (!recursive) {
@@ -145,7 +145,14 @@ public class KoyaAclService {
 
     }
 
-    public void setSiteAccess(String userName, Company c) {
+    /**
+     * Grant or revoke access to a comapny
+     *
+     * @param userName
+     * @param c
+     * @param grant
+     */
+    public void setSiteAccess(String userName, Company c, Boolean grant) {
         siteService.setMembership(c.getName(), userName, ROLE_SITE_CONSUMER);
     }
 
@@ -155,10 +162,10 @@ public class KoyaAclService {
      * @param userName
      * @param s
      * @param permission
-     * @param set
+     * @param grant
      * @param recursive
      */
-    public void grantPermission(String userName, Space s, String permission, Boolean set, Boolean recursive) {
+    public void setPermission(String userName, Space s, String permission, Boolean grant, Boolean recursive) {
         //todo process recursive         
         permissionService.setPermission(s.getNodeRefasObject(), userName, permission, true);
     }
@@ -169,22 +176,29 @@ public class KoyaAclService {
      * @param userName
      * @param d
      * @param permission
-     * @param set
+     * @param grant
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public void grantPermission(String userName, Dossier d, String permission, Boolean set) throws KoyaServiceException {
+    public void setPermission(String userName, Dossier d, String permission, Boolean grant) throws KoyaServiceException {
 
-        permissionService.setPermission(d.getNodeRefasObject(), userName, PermissionService.READ, true);
+        if (grant) {
+            permissionService.setPermission(d.getNodeRefasObject(), userName, PermissionService.READ, true);
+            //give read acces to a dossier means give non recursive read access to parents company and spaces.
+            for (SecuredItem si : koyaNodeService.getParentsList(d, userName)) {
 
-        //give read acces to a dossier means give non recursive read access to parents company and spaces.
-        for (SecuredItem si : koyaNodeService.getParentsList(d, userName)) {
-
-            if (si.getClass().equals(Space.class)) {
-                grantPermission(userName, (Space) si, permission, set, Boolean.FALSE);
-            } else if (si.getClass().equals(Company.class)) {
-                setSiteAccess(userName, (Company) si);
+                if (si.getClass().equals(Space.class)) {
+                    setPermission(userName, (Space) si, permission, Boolean.TRUE, Boolean.FALSE);
+                } else if (si.getClass().equals(Company.class)) {
+                    setSiteAccess(userName, (Company) si, Boolean.TRUE);
+                }
             }
+        } else {
+            //if dossiers List user can access is empty -> revoke space access
+            //and recursilvy for parent elements
+            //TODO
+
         }
+
     }
 
     /**
@@ -192,9 +206,9 @@ public class KoyaAclService {
      *
      * @param userName
      * @param c
-     * @param set
+     * @param grant
      */
-    public void grantPermission(String userName, Content c, Boolean set) {
+    public void setPermission(String userName, Content c, Boolean grant) {
 
     }
 
@@ -222,18 +236,29 @@ public class KoyaAclService {
      * List all users who can access specified SecuredItem.
      *
      *
+     * @param s
+     * @return
+     */
+    public List<User> listUsersAccess(SecuredItem s) {
+        return listUsersAccess(s.getNodeRefasObject());
+    }
+
+    /**
+     * List all users who can access specified SecuredItem.
+     *
+     *
      * TODO add users who belong to groups listed by getAllAuthorities.
      * currently lists only public share access
      *
      * TODO check inherance possibilities
      *
-     * @param s
+     * @param n
      * @return
      */
-    public List<User> listUsersAccess(SecuredItem s) {
+    public List<User> listUsersAccess(NodeRef n) {
         List<User> users = new ArrayList<>();
 
-        for (AccessPermission ap : permissionService.getAllSetPermissions(s.getNodeRefasObject())) {
+        for (AccessPermission ap : permissionService.getAllSetPermissions(n)) {
             User u = userService.buildUser(ap.getAuthority());
             if (u != null) {
                 users.add(u);

@@ -92,29 +92,6 @@ public interface UserService {
     void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException;
 
     /**
-     * Share specified Secured item to specified mail user. If user doesn't
-     * exists, alfresco backend creates it.
-     *
-     * @param userLog
-     * @param sharedItem
-     * @param userMail
-     * @throws AlfrescoServiceException
-     */
-    void grantAccessSecuredItem(User userLog, SecuredItem sharedItem, String userMail) throws AlfrescoServiceException;
-
-    /**
-     * Share or Unshare specified Secured item to specified mail user. If user
-     * doesn't exists, alfresco backend creates it.
-     *
-     * @param userLog
-     * @param sharedItem
-     * @param userMail
-     * @param revoke
-     * @throws AlfrescoServiceException
-     */
-    void grantAccessSecuredItem(User userLog, SecuredItem sharedItem, String userMail, Boolean revoke) throws AlfrescoServiceException;
-
-    /**
      * find users list wich first/last name or email starts with query. Return
      * list limitated by maxResults.
      *

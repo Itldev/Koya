@@ -15,6 +15,7 @@ public class SharingWrapper {
 
     private List<String> sharedNodeRefs = new ArrayList<>();
     private List<String> sharingUsersMails;
+    private Boolean resetSharings;
 
     public List<String> getSharedNodeRefs() {
         return sharedNodeRefs;
@@ -32,12 +33,26 @@ public class SharingWrapper {
         this.sharingUsersMails = sharingUsersMails;
     }
 
+    public Boolean isResetSharings() {
+        return resetSharings;
+    }
+
+    public void setResetSharings(Boolean resetSharings) {
+        this.resetSharings = resetSharings;
+    }
+
     public SharingWrapper(List<SecuredItem> sharedItems, List<String> usersMails) {
+        this(sharedItems, usersMails, Boolean.FALSE);
+    }
+
+    public SharingWrapper(List<SecuredItem> sharedItems, List<String> usersMails, Boolean resetSharings) {
 
         for (SecuredItem s : sharedItems) {
             sharedNodeRefs.add(s.getNodeRef());
         }
         sharingUsersMails = usersMails;
+
+        this.resetSharings = resetSharings;
     }
 
     public SharingWrapper() {

@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Share Secured Items</shortname>
-    <description>Share Secured Items</description>
+    <shortname>Share or UnShare Secured Items</shortname>
+    <description>Share or UnShare Secured Items</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/global/shareitems</url>
+    <url>/fr/itldev/koya/share/shareitems</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

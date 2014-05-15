@@ -18,11 +18,14 @@
  */
 package fr.itldev.koya.services;
 
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
@@ -37,7 +40,7 @@ import org.springframework.web.client.RestClientException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
-public class DossierServiceImplTest extends TestCase {
+public class ShareServiceImplTest extends TestCase {
 
     private Logger logger = Logger.getLogger(this.getClass());
 
@@ -52,6 +55,9 @@ public class DossierServiceImplTest extends TestCase {
 
     @Autowired
     private DossierService dossierService;
+
+    @Autowired
+    private ShareService shareService;
 
     private Company companyTests;
     private Space spaceTests;
@@ -70,20 +76,15 @@ public class DossierServiceImplTest extends TestCase {
     }
 
     @Test
-    public void testCreateDossier() throws AlfrescoServiceException {
-        Dossier cree = dossierService.create(admin, new Dossier("doss1", spaceTests));
-        assertNotNull("erreur de creation de l'espace 'espace Enfant'", cree);
+    public void testShareDossiers() throws AlfrescoServiceException {
+        List<SecuredItem> sharedDossiers = new ArrayList<>();
+        sharedDossiers.add(dossierService.create(admin, new Dossier("doss1", spaceTests)));
+        sharedDossiers.add(dossierService.create(admin, new Dossier("doss2", spaceTests)));
 
-        dossierService.list(admin, spaceTests);
-        //  dossierService.supprimer(admin, cree);
+        List<String> shareToUsersMails = new ArrayList<>();
+        shareToUsersMails.add("leroux@itldev.fr");
+        shareToUsersMails.add("test@itldev.fr");
+
+        shareService.shareItems(admin, sharedDossiers, shareToUsersMails);
     }
-
-    @Test
-    public void testListDossiers() throws AlfrescoServiceException {
-        dossierService.create(admin, new Dossier("doss1", spaceTests));
-        dossierService.create(admin, new Dossier("doss2", spaceTests));
-        dossierService.create(admin, new Dossier("doss3", spaceTests));
-        dossierService.create(admin, new Dossier("doss4", spaceTests));
-        assertEquals(4, dossierService.list(admin, spaceTests).size());
-    }   
 }

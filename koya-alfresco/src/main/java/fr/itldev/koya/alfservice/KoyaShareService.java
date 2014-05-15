@@ -30,17 +30,16 @@ public class KoyaShareService {
     }
 
     //</editor-fold>
+    /**
+     *
+     * Sharing item mean grant READ ONLY permission on specified element.
+     *
+     * @param sharingWrapper
+     * @throws KoyaServiceException
+     */
     public void shareItems(SharingWrapper sharingWrapper) throws KoyaServiceException {
 
-        List<SecuredItem> sharedItems = new ArrayList<>();
-        //extract shared elements and define sharing configuration
-        for (String n : sharingWrapper.getSharedNodeRefs()) {
-            try {
-                sharedItems.add(koyaNodeService.nodeRef2SecuredItem(n));
-            } catch (KoyaServiceException kex) {
-                logger.error("Error creating element for sharing : " + kex.toString());
-            }
-        }
+        List<SecuredItem> sharedItems = getSharedItems(sharingWrapper);
 
         //share elements to users specified by email
         for (String userMail : sharingWrapper.getSharingUsersMails()) {
@@ -58,6 +57,30 @@ public class KoyaShareService {
                 shareSecuredItemsWithNonExistingUser(sharedItems, userMail);
             }
         }
+    }
+
+    public void unShareItems(SharingWrapper sharingWrapper) throws KoyaServiceException {
+
+        List<SecuredItem> sharedItems = getSharedItems(sharingWrapper);
+
+        //share elements to users specified by email
+        for (String userMail : sharingWrapper.getSharingUsersMails()) {
+            User u = null;
+
+            try {
+                u = userService.getUser(userMail);
+            } catch (KoyaServiceException kex) {
+                //do nothing if exception thrown
+            }
+            //unknown users are ignored
+            if (u != null) {
+                for (SecuredItem si : sharedItems) {
+                    //set access parameter = False --> revoke access
+                    koyaAclService.setReadAccess(u.getLogin(), si, Boolean.FALSE, Boolean.TRUE);
+                }
+            }
+        }
+
     }
 
     private void shareSecuredItemsWithExistingUser(List<SecuredItem> sharedItems, User userToShareWith) throws KoyaServiceException {
@@ -78,6 +101,20 @@ public class KoyaShareService {
         //create user 
         //give permissions
         //send email
+    }
+
+    private List<SecuredItem> getSharedItems(SharingWrapper sharingWrapper) {
+        List<SecuredItem> sharedItems = new ArrayList<>();
+        //extract shared elements
+        for (String n : sharingWrapper.getSharedNodeRefs()) {
+            try {
+                sharedItems.add(koyaNodeService.nodeRef2SecuredItem(n));
+            } catch (KoyaServiceException kex) {
+                logger.error("Error creating element for sharing : " + kex.toString());
+            }
+        }
+        return sharedItems;
+
     }
 
 }

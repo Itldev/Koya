@@ -16,16 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.global;
+package fr.itldev.koya.webscript.share;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.KoyaShareService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.model.json.SharingWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
-import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -59,7 +57,12 @@ public class ShareItems extends AbstractWebScript {
         try {
             ObjectMapper mapper = new ObjectMapper();
             SharingWrapper sw = mapper.readValue(req.getContent().getReader(), SharingWrapper.class);
-            koyaShareService.shareItems(sw);
+
+            if (!sw.isResetSharings()) {
+                koyaShareService.shareItems(sw);
+            } else {
+                koyaShareService.unShareItems(sw);
+            }
             wrapper.setStatusOK();
         } catch (KoyaServiceException ex) {
             wrapper.setStatusFail(ex.toString());

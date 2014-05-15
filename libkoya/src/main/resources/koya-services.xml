@@ -30,7 +30,7 @@
     
     
     <bean id="propertyPlaceholderConfigurer"   
-           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
         <property name="locations">  
             <list>  
                 <value>classpath:koya.properties</value>  
@@ -47,7 +47,7 @@
                             <bean id="httpClientParams" class="org.apache.commons.httpclient.params.HttpClientParams">
                                 <property name="authenticationPreemptive" value="true"/>
                                 <property name="connectionManagerClass"
-                                  value="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager"/>
+                                          value="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager"/>
                             </bean>
                         </constructor-arg>
                     </bean>
@@ -99,4 +99,6 @@
     <bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl" parent="abstractRestService"/>
     
     <bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl" parent="abstractRestService"/>
+    
+    <bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl" parent="abstractRestService"/>
 </beans>

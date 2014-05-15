@@ -21,10 +21,8 @@ package fr.itldev.koya.services.impl;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.model.json.SharingWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,7 +33,6 @@ public class AlfrescoRestService implements AlfrescoService {
     protected static final String DESERIALISATION_ERROR = "Object deserialisation error";
     protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}";
     protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{newName}/{nodeRef}";
-    protected static final String REST_POST_SHAREITEMS = "/s/fr/itldev/koya/global/shareitems";
 
     private String alfrescoServerUrl;
 
@@ -82,31 +79,12 @@ public class AlfrescoRestService implements AlfrescoService {
         user.getRestTemplate().getForObject(alfrescoServerUrl + REST_GET_RENAMEITEM, ItlAlfrescoServiceWrapper.class, newName, securedItem.getNodeRef());
     }
 
-    /**
-     * Shared SecuredItems to a list of users (pre created or not)
-     *
-     * @param user
-     * @param sharedItems
-     * @param usersMails
-     */
-    @Override
-    public void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails) {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(alfrescoServerUrl + REST_POST_SHAREITEMS,
-                new SharingWrapper(sharedItems, usersMails), ItlAlfrescoServiceWrapper.class);
-        
-        
-        int n= ret.getItems().size();
-            
-
-        //TODO analyse return
-    }
 
     /*
-     *  ================ Methodes Utiles ==================
+     *  ================ Utils methods ==================
      */
     /**
-     * Extrait les elements d'un nodeRef passé sous forme brute
+     * Extracts noderef parts.
      *
      * @param nodeRef
      * @return

@@ -190,6 +190,9 @@ public class UserService {
 
     /**
      * Get user by mail address if exists.
+     * 
+     * 
+     * TODO ehcache of users to avoid reload
      *
      * @param email
      * @return
