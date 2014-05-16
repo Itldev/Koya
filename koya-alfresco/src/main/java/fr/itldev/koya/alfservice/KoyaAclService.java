@@ -184,7 +184,7 @@ public class KoyaAclService {
         if (grant) {
             permissionService.setPermission(d.getNodeRefasObject(), userName, PermissionService.READ, true);
             //give read acces to a dossier means give non recursive read access to parents company and spaces.
-            for (SecuredItem si : koyaNodeService.getParentsList(d, userName)) {
+            for (SecuredItem si : koyaNodeService.getParentsList(d)) {
 
                 if (si.getClass().equals(Space.class)) {
                     setPermission(userName, (Space) si, permission, Boolean.TRUE, Boolean.FALSE);

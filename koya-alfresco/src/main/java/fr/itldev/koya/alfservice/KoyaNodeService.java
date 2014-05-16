@@ -516,7 +516,7 @@ public class KoyaNodeService {
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public List<SecuredItem> getParentsList(SecuredItem s, String userName) throws KoyaServiceException {
+    public List<SecuredItem> getParentsList(SecuredItem s) throws KoyaServiceException {
         List<SecuredItem> parents = new ArrayList<>();
 
         if (s.getClass().isAssignableFrom(Company.class)) {
@@ -533,18 +533,18 @@ public class KoyaNodeService {
 
                     Space sParent = nodeSpaceBuilder(nrParent);
                     parents.add(sParent);
-                    parents.addAll(getParentsList(sParent, userName));
+                    parents.addAll(getParentsList(sParent));
                 } else if (nodeService.getProperty(nrParent, ContentModel.PROP_NAME).equals(SpaceService.DOCLIB_NAME)) {
                     Company c = nodeCompanyBuilder(nodeService.getPrimaryParent(nrParent).getParentRef());
                     //do not add company -> done by recursive end condition.
-                    parents.addAll(getParentsList(c, userName));
+                    parents.addAll(getParentsList(c));
                 }
 
             } else if (s.getClass().isAssignableFrom(Dossier.class)) {
                 Space sParent = nodeSpaceBuilder(nrParent);
                 parents.add(sParent);
                 //Dossier parent must be a Space
-                parents.addAll(getParentsList(sParent, userName));
+                parents.addAll(getParentsList(sParent));
 
             } else if (s.getClass().isAssignableFrom(Content.class)) {
                 //parent can be a Directory or Dossier                
@@ -553,11 +553,11 @@ public class KoyaNodeService {
                     Dossier dParent = nodeDossierBuilder(nrParent);
                     parents.add(dParent);
 
-                    parents.addAll(getParentsList(dParent, userName));
+                    parents.addAll(getParentsList(dParent));
                 } else {
                     Directory dirParent = nodeDirBuilder(nrParent);
                     parents.add(dirParent);
-                    parents.addAll(getParentsList(dirParent, userName));
+                    parents.addAll(getParentsList(dirParent));
                 }
             }
         }
