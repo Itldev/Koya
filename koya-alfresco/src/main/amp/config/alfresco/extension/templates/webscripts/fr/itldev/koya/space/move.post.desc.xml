@@ -23,7 +23,7 @@
     <shortname>Move Space</shortname>
     <description>Move Company Spaces</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/space/move</url>
+    <url>/fr/itldev/koya/space/move/{parentNodeRef}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

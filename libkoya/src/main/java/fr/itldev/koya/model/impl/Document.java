@@ -27,16 +27,12 @@ public final class Document extends Content {
     public Document() {
     }
 
-    public Document(String name, Directory parent) {
-        super(name, parent);
+    public Document(String name) {
+        super(name);
     }
 
-    public Document(String name, Dossier parent) {
-        super(name, parent);
-    }
-
-    public Document(String nodeRef, String path, String name, String parentNodeRef) {
-        super(nodeRef, path, name, parentNodeRef);
+    public Document(String nodeRef, String path, String name) {
+        super(nodeRef, path, name);
     }
 
     public Long getByteSize() {

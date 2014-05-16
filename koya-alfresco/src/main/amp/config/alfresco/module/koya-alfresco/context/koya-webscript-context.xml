@@ -62,7 +62,7 @@
     -->
     
     <!--space creation-->
-    <bean id="webscript.fr.itldev.koya.space.add.post" 
+    <bean id="webscript.fr.itldev.koya.space.add.post"
           class="fr.itldev.koya.webscript.space.AddSpace"
           parent="webscript">                
         <property name="spaceService" ref="spaceService" /> 

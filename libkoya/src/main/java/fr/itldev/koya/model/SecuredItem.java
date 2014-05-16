@@ -31,7 +31,6 @@ public abstract class SecuredItem {
     private String nodeRef;
     private String path;
     private String name;
-    private String parentNodeRef;
     private Boolean shared;
 
     private Boolean userFavourite;
@@ -65,18 +64,6 @@ public abstract class SecuredItem {
         this.name = name;
     }
 
-    public String getParentNodeRef() {
-        return parentNodeRef;
-    }
-
-    public void setParentNodeRef(String parentNodeRef) {
-        this.parentNodeRef = parentNodeRef;
-    }
-
-    public void setParentNodeRefasObject(NodeRef parentNodeRef) {
-        this.parentNodeRef = parentNodeRef.toString();
-    }
-
     public Boolean isUserFavourite() {
         return userFavourite;
     }
@@ -97,21 +84,15 @@ public abstract class SecuredItem {
     public SecuredItem() {
     }
 
-    public SecuredItem(String nodeRef, String path, String name, String parentNodeRef) {
+    public SecuredItem(String nodeRef, String path, String name) {
         this.nodeRef = nodeRef;
         this.path = path;
         this.name = name;
-        this.parentNodeRef = parentNodeRef;
     }
 
     @JsonIgnore
     public NodeRef getNodeRefasObject() {
         return new NodeRef(this.nodeRef);
-    }
-
-    @JsonIgnore
-    public NodeRef getParentNodeRefasObject() {
-        return new NodeRef(this.parentNodeRef);
     }
 
     private static final Integer HASHCONST1 = 3;

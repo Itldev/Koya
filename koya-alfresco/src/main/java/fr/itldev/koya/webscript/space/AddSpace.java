@@ -40,7 +40,7 @@ public class AddSpace extends KoyaWebscript {
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         String name = (String) jsonPostMap.get("name");
-        NodeRef parent = new NodeRef((String) jsonPostMap.get("parentNodeRef"));
+        NodeRef parent = new NodeRef((String) urlParams.get("parentNodeRef"));
         wrapper.addItem(spaceService.create(name, parent, null));
         return wrapper;
     }

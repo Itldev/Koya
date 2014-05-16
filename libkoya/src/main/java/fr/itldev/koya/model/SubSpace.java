@@ -25,8 +25,8 @@ public abstract class SubSpace extends SecuredItem {
     public SubSpace() {
     }
 
-    public SubSpace(String nodeRef, String path, String name, String parentNodeRef) {
-        super(nodeRef, path, name, parentNodeRef);
+    public SubSpace(String nodeRef, String path, String name) {
+        super(nodeRef, path, name);
     }
 
 }

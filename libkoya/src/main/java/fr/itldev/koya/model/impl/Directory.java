@@ -75,16 +75,12 @@ public final class Directory extends Content implements Container {
     public Directory() {
     }
 
-    public Directory(String name, Directory pere) {
-        super(name, pere);
+    public Directory(String name) {
+        super(name);
     }
 
-    public Directory(String name, Dossier pere) {
-        super(name, pere);
-    }
-
-    public Directory(String nodeRef, String path, String name, String parentNodeRef) {
-        super(nodeRef, path, name, parentNodeRef);
+    public Directory(String nodeRef, String path, String name) {
+        super(nodeRef, path, name);
     }
 
 }

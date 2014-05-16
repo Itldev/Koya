@@ -48,10 +48,10 @@ import org.springframework.util.MultiValueMap;
 
 public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService {
 
-    private static final String REST_POST_ADDCONTENT = "/s/fr/itldev/koya/content/add";//+/{typeClass}
+    private static final String REST_POST_ADDCONTENT = "/s/fr/itldev/koya/content/add/{parentNodeRef}";
     private static final String REST_POST_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list?maxdepth={maxdepth}";
     private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list";
-    private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move";
+    private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move/{parentNodeRef}";
     private static final String REST_POST_GETPARENT = "/s/fr/itldev/koya/content/getparent";
     private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
@@ -60,19 +60,14 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
     private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
 
-
-    /*TODO mettre en place un proxy pour l'upload/download de contenus comme ce qui est
-     * fait pour Share.
-     */
     @Override
-    public Content create(User user, Content aCreer) throws AlfrescoServiceException {
-        //TODO template de remplacement de params
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_ADDCONTENT + "/" + aCreer.getClass().getSimpleName(), aCreer, ItlAlfrescoServiceWrapper.class);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (Content) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage());
-        }
+    public Content create(User user, Content toCreate, Directory parent) throws AlfrescoServiceException {
+        return createImpl(user, toCreate, parent);
+    }
+
+    @Override
+    public Content create(User user, Content toCreate, Dossier parent) throws AlfrescoServiceException {
+        return createImpl(user, toCreate, parent);
     }
 
     @Override
@@ -87,12 +82,12 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
     @Override
     public Content move(User user, Content aDeplacer, Directory desination) throws AlfrescoServiceException {
-        return movePrivate(user, aDeplacer, desination);
+        return moveImpl(user, aDeplacer, desination);
     }
 
     @Override
     public Content move(User user, Content aDeplacer, Dossier desination) throws AlfrescoServiceException {
-        return movePrivate(user, aDeplacer, desination);
+        return moveImpl(user, aDeplacer, desination);
     }
 
     @Override
@@ -115,12 +110,30 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         }
     }
 
+    private Content createImpl(User user, Content content, Container parent) throws AlfrescoServiceException {
+
+        if (parent.getNodeRef() == null) {
+            throw new AlfrescoServiceException("parent noderef must be set");
+        }
+
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_ADDCONTENT, content,
+                ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
+            return (Content) ret.getItems().get(0);
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
+    }
+
     private List<Content> listContent(User user, SecuredItem container, Integer... depth) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret;
         if (depth.length > 0) {
-            ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTCONTENT_DEPTH_OPTION, container, ItlAlfrescoServiceWrapper.class, depth[0]);
+            ret = user.getRestTemplate().postForObject(
+                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT_DEPTH_OPTION, container, ItlAlfrescoServiceWrapper.class, depth[0]);
         } else {
-            ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTCONTENT, container, ItlAlfrescoServiceWrapper.class);
+            ret = user.getRestTemplate().postForObject(
+                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT, container, ItlAlfrescoServiceWrapper.class);
         }
 
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
@@ -155,9 +168,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         }
     }
 
-    private Content movePrivate(User user, Content contenu, Container parent) throws AlfrescoServiceException {
-        contenu.setParent(parent);
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MOVECONTENT, contenu, ItlAlfrescoServiceWrapper.class);
+    private Content moveImpl(User user, Content contenu, Container parent) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_MOVECONTENT, contenu, ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (Content) ret.getItems().get(0);
         } else {

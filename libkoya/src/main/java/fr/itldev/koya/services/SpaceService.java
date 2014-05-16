@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services;
 
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
@@ -31,10 +32,11 @@ public interface SpaceService extends AlfrescoService {
      *
      * @param user
      * @param space
+     * @param parent
      * @return
      * @throws AlfrescoServiceException
      */
-    Space create(User user, Space space) throws AlfrescoServiceException;
+    Space create(User user, Space space, SecuredItem parent) throws AlfrescoServiceException;
 
     /**
      * Activate a space

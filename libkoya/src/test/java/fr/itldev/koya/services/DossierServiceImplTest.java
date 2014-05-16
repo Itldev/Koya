@@ -61,7 +61,7 @@ public class DossierServiceImplTest extends TestCase {
     public void createSpace() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
         companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
-        spaceTests = spaceService.create(admin, new Space("Esptests", companyTests));
+        spaceTests = spaceService.create(admin, new Space("Esptests"), companyTests);
     }
 
     @After
@@ -71,7 +71,7 @@ public class DossierServiceImplTest extends TestCase {
 
     @Test
     public void testCreateDossier() throws AlfrescoServiceException {
-        Dossier cree = dossierService.create(admin, new Dossier("doss1", spaceTests));
+        Dossier cree = dossierService.create(admin, new Dossier("doss1"), spaceTests);
         assertNotNull("erreur de creation de l'espace 'espace Enfant'", cree);
 
         dossierService.list(admin, spaceTests);
@@ -80,10 +80,10 @@ public class DossierServiceImplTest extends TestCase {
 
     @Test
     public void testListDossiers() throws AlfrescoServiceException {
-        dossierService.create(admin, new Dossier("doss1", spaceTests));
-        dossierService.create(admin, new Dossier("doss2", spaceTests));
-        dossierService.create(admin, new Dossier("doss3", spaceTests));
-        dossierService.create(admin, new Dossier("doss4", spaceTests));
+        dossierService.create(admin, new Dossier("doss1"), spaceTests);
+        dossierService.create(admin, new Dossier("doss2"), spaceTests);
+        dossierService.create(admin, new Dossier("doss3"), spaceTests);
+        dossierService.create(admin, new Dossier("doss4"), spaceTests);
         assertEquals(4, dossierService.list(admin, spaceTests).size());
-    }   
+    }
 }

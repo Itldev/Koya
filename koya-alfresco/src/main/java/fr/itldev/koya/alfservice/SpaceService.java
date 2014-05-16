@@ -43,11 +43,11 @@ import org.apache.log4j.Logger;
  * Spaces Handling service
  */
 public class SpaceService {
-
+    
     public static final String DOCLIB_NAME = "documentLibrary";
-
+    
     private final Logger logger = Logger.getLogger(this.getClass());
-
+    
     private NodeService nodeService;
     private SearchService searchService;
     private KoyaNodeService koyaNodeService;
@@ -59,23 +59,23 @@ public class SpaceService {
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-
+    
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
     }
-
+    
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
-
+    
     public void setCompanyService(CompanyService companyService) {
         this.companyService = companyService;
     }
-
+    
     public void setKoyaAclService(KoyaAclService koyaAclService) {
         this.koyaAclService = koyaAclService;
     }
-
+    
     public void setFileFolderService(FileFolderService fileFolderService) {
         this.fileFolderService = fileFolderService;
     }
@@ -91,14 +91,14 @@ public class SpaceService {
      * @throws KoyaServiceException
      */
     public Space create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
-
+        
         //Space must have a name
         if (name == null || name.isEmpty()) {
             throw new KoyaServiceException(KoyaErrorCodes.SPACE_EMPTY_NAME);
         }
-
+        
         NodeRef nrParent = null;
-
+        
         if (nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
             //if parent is a space, select his node
             nrParent = parent;
@@ -113,14 +113,14 @@ public class SpaceService {
         //build node properties
         final Map<QName, Serializable> properties = new HashMap<>();
         properties.put(ContentModel.PROP_NAME, name);
-
+        
         ChildAssociationRef car = nodeService.createNode(nrParent,
                 ContentModel.ASSOC_CONTAINS,
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
                 KoyaModel.QNAME_KOYA_SPACE,
                 properties);
         koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
-               
+        
         return koyaNodeService.nodeSpaceBuilder(car.getChildRef());
     }
 
@@ -150,7 +150,7 @@ public class SpaceService {
         if (depth <= 0) {
             return spaces;//return empty list if max depth < = 0 : ie max depth reached
         }
-
+        
         for (FileInfo fi : fileFolderService.listFolders(rootNodeRef)) {
             NodeRef childNr = fi.getNodeRef();
             if (nodeService.getType(childNr).equals(KoyaModel.QNAME_KOYA_SPACE)) {
@@ -171,14 +171,14 @@ public class SpaceService {
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public Space move(NodeRef toMove, NodeRef dest) throws KoyaServiceException {
-
+        
         String name = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
-
+        
         if (nodeService.getType(dest).equals(KoyaModel.QNAME_KOYA_COMPANY)) {
             dest = getDocLibNodeRef(dest);
         }
         logger.error("move " + name + " to " + (String) nodeService.getProperty(dest, ContentModel.PROP_NAME));
-
+        
         nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
         return koyaNodeService.nodeSpaceBuilder(toMove);
         //TODO call global move method
@@ -205,7 +205,7 @@ public class SpaceService {
                 return car.getChildRef();
             }
         }
-
+        
         throw new KoyaServiceException(KoyaErrorCodes.SPACE_DOCLIB_NODE_NOT_FOUND);
     }
 }

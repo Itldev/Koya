@@ -18,46 +18,18 @@
  */
 package fr.itldev.koya.model;
 
-import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.impl.Dossier;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
-
 public abstract class Content extends SecuredItem {
-
-    @JsonIgnore
-    private Container parent;
-
-   
-
-    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public Container getParent() {
-        return parent;
-    }
-
-    public final void setParent(Container parent) {
-        this.parent = parent;
-        this.setParentNodeRef(parent.getNodeRef());
-    }
 
     // </editor-fold>
     public Content() {
     }
 
-    public Content(String name, Directory parent) {
+    public Content(String name) {
         this.setName(name);
-        this.setParent(parent);
     }
 
-    public Content(String name, Dossier parent) {
-        this.setName(name);
-        this.setParent(parent);
+    public Content(String nodeRef, String path, String name) {
+        super(nodeRef, path, name);
     }
-
-    public Content(String nodeRef, String path, String name, String parentNodeRef) {
-        super(nodeRef, path, name, parentNodeRef);
-    }
-
-   
 
 }

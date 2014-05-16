@@ -72,22 +72,6 @@ public final class Space extends SubSpace implements Container, Activable {
         this.active = active;
     }
 
-    @JsonIgnore
-    public void setParent(Space e) {
-        this.parent = e;
-        setParentNodeRef(e.getNodeRef());
-    }
-
-    @JsonIgnore
-    public void setParent(Company s) {
-        this.parent = s;
-        setParentNodeRef(s.getNodeRef());
-    }
-
-    public SecuredItem getParent() {
-        return parent;
-    }
-
     public List<Space> getChildSpaces() {
         return childSpaces;
     }
@@ -108,19 +92,13 @@ public final class Space extends SubSpace implements Container, Activable {
     public Space() {
     }
 
-    public Space(String name, Company parent) {
+    public Space(String name) {
         setName(name);
-        setParent(parent);
-    }
-
-    public Space(String name, Space parent) {
-        setName(name);
-        setParent(parent);
     }
 
     @Override
     public String toString() {
-        return "Space [ name = " + getName() + ", noderef=" + getNodeRef() + " , active =" + active + ", parentNoderef= " + getParentNodeRef() + "]";
+        return "Space [ name = " + getName() + ", noderef=" + getNodeRef() + " , active =" + active + "]";
     }
 
 }

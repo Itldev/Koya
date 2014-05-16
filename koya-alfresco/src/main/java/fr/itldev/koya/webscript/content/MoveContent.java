@@ -40,7 +40,7 @@ public class MoveContent extends KoyaWebscript {
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         NodeRef node = new NodeRef((String) jsonPostMap.get("nodeRef"));
-        NodeRef parent = new NodeRef((String) jsonPostMap.get("parentNodeRef"));
+        NodeRef parent = new NodeRef((String) urlParams.get("parentNodeRef"));
         wrapper.addItem(koyaContentService.move(node, parent));
         return wrapper;
     }

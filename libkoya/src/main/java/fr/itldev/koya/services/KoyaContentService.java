@@ -25,14 +25,15 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import org.springframework.core.io.Resource;
 
 public interface KoyaContentService extends AlfrescoService {
 
-    Content create(User user, Content aCreer) throws AlfrescoServiceException;
+    Content create(User user, Content toCreate,Directory parent) throws AlfrescoServiceException;
+    
+    Content create(User user, Content toCreate,Dossier parent) throws AlfrescoServiceException;
 
     Document upload(User user, Resource r, Directory repertoire) throws AlfrescoServiceException;
 

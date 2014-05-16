@@ -367,7 +367,6 @@ public class KoyaNodeService {
         e.setUserFavourite(isFavourite(spaceNodeRef));
         e.setShared(koyaAclService.listUsersAccess(e).size() > 0);
 
-        e.setParentNodeRefasObject(realParent);
         return e;
     }
 
@@ -390,7 +389,6 @@ public class KoyaNodeService {
             logger.warn("Error in space parent hierarchy");
             //TODO exception      
         }
-        c.setParentNodeRefasObject(realParent);
         c.setLastModifiedDate((Date) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_MODIFIED));
         c.setActive(isActive(dossierNodeRef));
 
@@ -423,7 +421,6 @@ public class KoyaNodeService {
         Directory r = new Directory();
         r.setNodeRef(dirNodeRef.toString());
         r.setName((String) nodeService.getProperty(dirNodeRef, ContentModel.PROP_NAME));
-        r.setParentNodeRefasObject(nodeService.getPrimaryParent(dirNodeRef).getParentRef());
         r.setUserFavourite(isFavourite(dirNodeRef));
 
         //not used
@@ -440,7 +437,6 @@ public class KoyaNodeService {
         Document d = new Document();
         d.setNodeRef(docNodeRef.toString());
         d.setName((String) nodeService.getProperty(docNodeRef, ContentModel.PROP_NAME));
-        d.setParentNodeRefasObject(nodeService.getPrimaryParent(docNodeRef).getParentRef());
         d.setUserFavourite(isFavourite(docNodeRef));
         d.setByteSize(getByteSize(docNodeRef));
         //not used

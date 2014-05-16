@@ -32,8 +32,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public final class Dossier extends SubSpace implements Container, Activable {
 
     private Boolean active = Boolean.TRUE;
-    @JsonIgnore
-    private Space parentSpace;
 
     @JsonProperty("childdir")
     private List<Directory> childDir = new ArrayList<>();
@@ -52,15 +50,6 @@ public final class Dossier extends SubSpace implements Container, Activable {
     @Override
     public void setActive(Boolean active) {
         this.active = active;
-    }
-
-    public Space getParentSpace() {
-        return parentSpace;
-    }
-
-    public void setParentSpace(Space parentSpace) {
-        this.parentSpace = parentSpace;
-        setParentNodeRef(parentSpace.getNodeRef());
     }
 
     @Override
@@ -108,9 +97,8 @@ public final class Dossier extends SubSpace implements Container, Activable {
     }
 
     // </editor-fold>
-    public Dossier(String name, Space parentSpace) {
+    public Dossier(String name) {
         setName(name);
-        setParentSpace(parentSpace);
     }
 
     public Dossier() {

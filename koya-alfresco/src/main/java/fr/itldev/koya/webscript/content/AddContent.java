@@ -20,11 +20,16 @@ package fr.itldev.koya.webscript.content;
 
 import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.webscript.KoyaWebscript;
-import java.util.Map;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import java.io.IOException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
@@ -32,12 +37,7 @@ import org.apache.log4j.Logger;
  *
  *
  */
-public class AddContent extends KoyaWebscript {
-
-    private static final String ARG_TYPECLASS = "typeClass";
-
-    //TODO a faire avec les noms issus de la classe mais pour le moment elle est unknown ???
-    private static final String TYPECLASS_DIRECTORY = "Directory";
+public class AddContent extends AbstractWebScript {
 
     private final Logger logger = Logger.getLogger(AddContent.class);
     private KoyaContentService koyaContentService;
@@ -46,22 +46,39 @@ public class AddContent extends KoyaWebscript {
         this.koyaContentService = koyaContentService;
     }
 
+    /**
+     *
+     * @param req
+     * @param res
+     * @throws IOException
+     */
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
 
-        NodeRef parent = new NodeRef((String) jsonPostMap.get("parentNodeRef"));
-        String name = (String) jsonPostMap.get("name");
+        try {
+            ObjectMapper mapper = new ObjectMapper();
 
-        Content c = null;
+            try {
+                Directory dir = mapper.readValue(req.getContent().getReader(), Directory.class);
 
-        if (TYPECLASS_DIRECTORY.equals(urlParams.get(ARG_TYPECLASS))) {
-            c = koyaContentService.createDir(name, parent);
-        } else {
-            throw new Exception("Invalid Content type : '" + urlParams.get(ARG_TYPECLASS) + "'");
+                NodeRef parent = new NodeRef(req.getServiceMatch().getTemplateVars().get("parentNodeRef"));
+                Directory dirCreated = koyaContentService.createDir(dir.getName(), parent);
+                wrapper.addItem(dirCreated);
+                wrapper.setStatusOK();
+            } catch (IOException ex) {
+                wrapper.setStatusFail(ex.toString());
+                wrapper.setErrorCode(KoyaErrorCodes.CONTENT_CREATION_INVALID_TYPE);
+            }
+        } catch (Exception ex) {
+            wrapper.setStatusFail(ex.toString());
+            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
         }
 
-        wrapper.addItem(c);
-        return wrapper;
+        res.setContentType("application/json");
+
+        res.getWriter().write(wrapper.getAsJSON());
+        logger.trace(wrapper.getAsJSON());
     }
 
 }

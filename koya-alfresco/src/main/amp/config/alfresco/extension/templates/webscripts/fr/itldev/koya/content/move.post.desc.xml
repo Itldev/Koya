@@ -23,7 +23,7 @@
      <shortname>Move Content</shortname>
     <description>move content to new defined parent</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/content/move</url>
+    <url>/fr/itldev/koya/content/move/{parentNodeRef}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

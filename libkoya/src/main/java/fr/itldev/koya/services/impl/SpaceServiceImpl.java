@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services.impl;
 
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
@@ -28,16 +29,26 @@ import java.util.List;
 
 public class SpaceServiceImpl extends AlfrescoRestService implements SpaceService {
 
-    private static final String REST_POST_ADDSPACE = "/s/fr/itldev/koya/space/add";
+    private static final String REST_POST_ADDSPACE = "/s/fr/itldev/koya/space/add/{parentNodeRef}";
     private static final String REST_POST_TOGGLEACTIVE = "/s/fr/itldev/koya/global/toggleactive";
     private static final String REST_POST_LISTSPACE = "/s/fr/itldev/koya/space/list";
     private static final String REST_POST_LISTSPACE_DEPTH_OPTION = "/s/fr/itldev/koya/space/list?maxdepth={maxdepth}";
-    private static final String REST_POST_MOVESPACE = "/s/fr/itldev/koya/space/move";
+    private static final String REST_POST_MOVESPACE = "/s/fr/itldev/koya/space/move/{newParentNodeRef}";
     private static final String REST_POST_DELSPACE = "/s/fr/itldev/koya/space/del";
 
+    /**
+     * Create a new space
+     *
+     * @param user
+     * @param space
+     * @param parent
+     * @return
+     * @throws AlfrescoServiceException
+     */
     @Override
-    public Space create(User user, Space space) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_ADDSPACE, space, ItlAlfrescoServiceWrapper.class);
+    public Space create(User user, Space space, SecuredItem parent) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_ADDSPACE, space, ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
             return (Space) ret.getItems().get(0);
         } else {
@@ -86,18 +97,17 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
 
     @Override
     public Space move(User user, Space toMove, Space destination) throws AlfrescoServiceException {
-        toMove.setParent(destination);
-        return movePrivate(user, toMove);
+        return movePrivate(user, toMove, destination.getNodeRef());
     }
 
     @Override
     public Space move(User user, Space toMove, Company destination) throws AlfrescoServiceException {
-        toMove.setParent(destination);
-        return movePrivate(user, toMove);
+        return movePrivate(user, toMove, destination.getNodeRef());
     }
 
-    private Space movePrivate(User user, Space toMove) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MOVESPACE, toMove, ItlAlfrescoServiceWrapper.class);
+    private Space movePrivate(User user, Space toMove, String newParentNodeRef) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_MOVESPACE, toMove, ItlAlfrescoServiceWrapper.class, newParentNodeRef);
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (Space) ret.getItems().get(0);
         } else {

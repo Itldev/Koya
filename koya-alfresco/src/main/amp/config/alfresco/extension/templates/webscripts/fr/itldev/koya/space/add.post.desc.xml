@@ -23,7 +23,7 @@
     <shortname>Add Space</shortname>
     <description>Add Space</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/space/add</url>
+    <url>/fr/itldev/koya/space/add/{parentNodeRef}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
