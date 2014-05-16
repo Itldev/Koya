@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.favourites.FavouritesService;
@@ -57,6 +58,7 @@ public class KoyaNodeService {
     private static final String FAVOURITES_PREF_FOLDERS = "org.alfresco.share.folders.favourites";
     private static final String FAVOURITES_PREF_DOCS = "org.alfresco.share.documents.favourites";
     private static final String FAVOURITES_PREF_COMPANIES = "org.alfresco.share.sites.favourites";
+    public static final String DOCLIB_NAME = "documentLibrary";
 
     private Logger logger = Logger.getLogger(KoyaNodeService.class);
 
@@ -348,19 +350,6 @@ public class KoyaNodeService {
         e.setNodeRef(spaceNodeRef.toString());
         e.setName((String) nodeService.getProperty(spaceNodeRef, ContentModel.PROP_NAME));
 
-        //parent node ref definition
-        NodeRef directParent = nodeService.getPrimaryParent(spaceNodeRef).getParentRef();
-        NodeRef realParent = null;
-
-        if (nodeService.getType(directParent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
-            realParent = directParent;
-        } else if (nodeService.getProperty(directParent, ContentModel.PROP_NAME).equals(SpaceService.DOCLIB_NAME)) {
-            //parent's parent
-            realParent = nodeService.getPrimaryParent(directParent).getParentRef();
-        } else {
-            throw new KoyaServiceException(KoyaErrorCodes.SPACE_INVALID_PARENT);
-        }
-
         //activity status
         e.setActive(isActive(spaceNodeRef));
 
@@ -381,14 +370,6 @@ public class KoyaNodeService {
         c.setNodeRef(dossierNodeRef.toString());
         c.setName((String) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_NAME));
 
-        NodeRef directParent = nodeService.getPrimaryParent(dossierNodeRef).getParentRef();
-        NodeRef realParent = null;
-        if (nodeService.getType(directParent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
-            realParent = directParent;
-        } else {
-            logger.warn("Error in space parent hierarchy");
-            //TODO exception      
-        }
         c.setLastModifiedDate((Date) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_MODIFIED));
         c.setActive(isActive(dossierNodeRef));
 
@@ -505,65 +486,90 @@ public class KoyaNodeService {
     }
 
     /**
+     * Returns node parent if exists.
      *
-     *
-     */
-    /**
-     * Return parent nodes list.
-     *
-     * @param s
-     * @param userName
+     * @param currentNode
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public List<SecuredItem> getParentsList(SecuredItem s) throws KoyaServiceException {
-        List<SecuredItem> parents = new ArrayList<>();
+    public SecuredItem getParent(NodeRef currentNode) throws KoyaServiceException {
+        NodeRef parentNr = nodeService.getPrimaryParent(currentNode).getParentRef();
+        if (isKoyaCompany(parentNr)
+                || (nodeService.getProperty(parentNr, ContentModel.PROP_NAME).equals(DOCLIB_NAME)
+                && isKoyaCompany(nodeService.getPrimaryParent(parentNr).getParentRef()))) {
+            //If parent is a company or doclib node (which primary parent is a company)
+            return nodeCompanyBuilder(parentNr);
+        } else if (nodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_SPACE)) {
+            return nodeSpaceBuilder(parentNr);
+        } else if (nodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+            return nodeDossierBuilder(parentNr);
+        } else if (nodeIsChildOfDossier(parentNr)) {
+            return nodeContentBuilder(parentNr);
+        } else {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODE_HIERACHY);
+        }
+    }
 
-        if (s.getClass().isAssignableFrom(Company.class)) {
-            parents.add(s);
+    public static final Integer NB_ANCESTOR_INFINTE = -1;
+
+    /**
+     * Return parent nodes list with maximum nbAncestor elements.
+     *
+     * if NbAncestor
+     *
+     * @param n
+     * @param nbAncestor
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public List<SecuredItem> getParentsList(NodeRef n, Integer nbAncestor) throws KoyaServiceException {
+        List<SecuredItem> parents = new ArrayList<>();
+        SecuredItem parent = getParent(n);
+        
+        if (parent == null) {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODE_HIERACHY);
+        } else if (parent.getClass().isAssignableFrom(Company.class)) {
+            parents.add(parent);
             return parents;
         } else {
+            parents.add(parent);
 
-            NodeRef nrParent = nodeService.getPrimaryParent(s.getNodeRefasObject()).getParentRef();
-
-            if (s.getClass().isAssignableFrom(Space.class)) {
-
-                //parent can be a space or documentLibrary node (child of company)
-                if (nodeService.getType(nrParent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
-
-                    Space sParent = nodeSpaceBuilder(nrParent);
-                    parents.add(sParent);
-                    parents.addAll(getParentsList(sParent));
-                } else if (nodeService.getProperty(nrParent, ContentModel.PROP_NAME).equals(SpaceService.DOCLIB_NAME)) {
-                    Company c = nodeCompanyBuilder(nodeService.getPrimaryParent(nrParent).getParentRef());
-                    //do not add company -> done by recursive end condition.
-                    parents.addAll(getParentsList(c));
-                }
-
-            } else if (s.getClass().isAssignableFrom(Dossier.class)) {
-                Space sParent = nodeSpaceBuilder(nrParent);
-                parents.add(sParent);
-                //Dossier parent must be a Space
-                parents.addAll(getParentsList(sParent));
-
-            } else if (s.getClass().isAssignableFrom(Content.class)) {
-                //parent can be a Directory or Dossier                
-                if (nodeService.getType(nrParent).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-
-                    Dossier dParent = nodeDossierBuilder(nrParent);
-                    parents.add(dParent);
-
-                    parents.addAll(getParentsList(dParent));
-                } else {
-                    Directory dirParent = nodeDirBuilder(nrParent);
-                    parents.add(dirParent);
-                    parents.addAll(getParentsList(dirParent));
-                }
+            if (Objects.equals(nbAncestor, NB_ANCESTOR_INFINTE)) {
+                parents.addAll(getParentsList(parent.getNodeRefasObject(), NB_ANCESTOR_INFINTE));
+            } else if (nbAncestor > 1) {
+                nbAncestor--;
+                parents.addAll(getParentsList(parent.getNodeRefasObject(), nbAncestor));
             }
-        }
+        }       
+
         return parents;
     }
 
+    /**
+     * return true if node given in argument has a Dossier in his ancestors.
+     *
+     * @param nodeRef
+     * @return
+     */
+    private Boolean nodeIsChildOfDossier(NodeRef nodeRef) {
+
+        try {
+            NodeRef parent = nodeService.getPrimaryParent(nodeRef).getParentRef();
+
+            if (nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+                return true;
+            } else {
+                return nodeIsChildOfDossier(parent);
+            }
+        } catch (InvalidNodeRefException e) {
+            return false;
+        }
+    }
+
+    /**
+     *
+     *
+     */
     /**
      * Returns company whose node belongs to. Null is node is not a comapny
      * child

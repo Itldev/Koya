@@ -137,13 +137,7 @@
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />   
     </bean>
- 
-    <!--get Parent-->
-    <bean id="webscript.fr.itldev.koya.content.getparent.post" 
-          class="fr.itldev.koya.webscript.content.GetParent"
-          parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />     
-    </bean>
+   
     
     <!-- zip content-->
     <bean id="webscript.fr.itldev.koya.content.zip.post" 
@@ -209,7 +203,12 @@
         <property name="koyaNodeService" ref="koyaNodeService" />         
     </bean>
     
-    
+    <!--get Parent-->
+    <bean id="webscript.fr.itldev.koya.global.getparent.post" 
+          class="fr.itldev.koya.webscript.global.GetParent"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" />     
+    </bean>
     
     
     <!--
@@ -230,26 +229,26 @@
         <property name="userService" ref="userService" /> 
     </bean>
     
-     <bean id="webscript.fr.itldev.koya.user.changepassword.get" 
+    <bean id="webscript.fr.itldev.koya.user.changepassword.get" 
           class="fr.itldev.koya.webscript.user.ChangePassword"
           parent="webscript">                
         <property name="userService" ref="userService" /> 
     </bean>
     
-     <!--
+    <!--
     ==================================================================
     ========================== Shares ==============================
     ==================================================================
     -->
     
-     <!-- share secured item -->
+    <!-- share secured item -->
     <bean id="webscript.fr.itldev.koya.share.shareitems.post" 
           class="fr.itldev.koya.webscript.share.ShareItems"
           parent="webscript">                
         <property name="koyaShareService" ref="koyaShareService" />   
     </bean>
     
-      <!-- items shared with users -->
+    <!-- items shared with users -->
     <bean id="webscript.fr.itldev.koya.share.sharedusers.get" 
           class="fr.itldev.koya.webscript.share.SharedUsers"
           parent="webscript">

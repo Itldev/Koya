@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.content;
+package fr.itldev.koya.webscript.global;
 
-import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
@@ -26,22 +26,28 @@ import org.alfresco.service.cmr.repository.NodeRef;
 
 /**
  *
- * Move Content Webscript.
+ * Get Secured Item parents webscript.
  *
  */
 public class GetParent extends KoyaWebscript {
 
-    private KoyaContentService koyaContentService;
+    private KoyaNodeService koyaNodeService;
 
-    public void setKoyaContentService(KoyaContentService koyaContentService) {
-        this.koyaContentService = koyaContentService;
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
     }
-
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef node = new NodeRef((String) jsonPostMap.get("nodeRef"));
-        wrapper.addItem(koyaContentService.getParent(node));
+        NodeRef node = new NodeRef((String) jsonPostMap.get(WSCONST_NODEREF));
+        Integer nbAncestor;
+        try {
+            nbAncestor = Integer.valueOf((String) urlParams.get(WSCONST_NBANCESTOR));
+        } catch (NumberFormatException ex) {
+            nbAncestor = KoyaNodeService.NB_ANCESTOR_INFINTE;
+        }
+
+        wrapper.addItems(koyaNodeService.getParentsList(node, nbAncestor));
         return wrapper;
     }
 

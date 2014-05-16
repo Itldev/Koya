@@ -20,11 +20,13 @@ package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.List;
 
 public interface AlfrescoService {
 
     /**
-     * deletes item.
+     * Deletes item.
      *
      * @param user
      * @param securedItem
@@ -40,5 +42,25 @@ public interface AlfrescoService {
      */
     void rename(User user, SecuredItem securedItem, String newName);
 
+    /**
+     *
+     * Returns Secured Item Parent if exists.
+     *
+     * @param user
+     * @param securedItem
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    SecuredItem getParent(User user, SecuredItem securedItem) throws AlfrescoServiceException;
+
+    /**
+     * Returns SecuredItems ancestors list.
+     *
+     * @param user
+     * @param securedItem
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    List<SecuredItem> getParents(User user, SecuredItem securedItem) throws AlfrescoServiceException;
 
 }

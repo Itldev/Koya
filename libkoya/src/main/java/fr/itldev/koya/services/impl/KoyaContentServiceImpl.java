@@ -52,7 +52,6 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_POST_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list?maxdepth={maxdepth}";
     private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list";
     private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move/{parentNodeRef}";
-    private static final String REST_POST_GETPARENT = "/s/fr/itldev/koya/content/getparent";
     private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
 
@@ -99,16 +98,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     public List<Content> list(User user, Directory dir, Integer... depth) throws AlfrescoServiceException {
         return listContent(user, dir, depth);
     }
-
-    @Override
-    public SecuredItem getParent(User user, Content content) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_GETPARENT, content, ItlAlfrescoServiceWrapper.class);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (SecuredItem) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage());
-        }
-    }
+ 
 
     private Content createImpl(User user, Content content, Container parent) throws AlfrescoServiceException {
 

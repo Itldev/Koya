@@ -23,7 +23,8 @@
     <shortname>Get Content Parent</shortname>
     <description>Get Content Parent</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/content/getparent</url>
+    <url>/fr/itldev/koya/global/getparent/{nbAncestor}</url>
+    <url>/fr/itldev/koya/global/getparent</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>

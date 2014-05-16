@@ -10,6 +10,7 @@ public interface KoyaErrorCodes {
     public static final Integer UNHANDLED = 0;
     public static final Integer INVALID_NODEREF = 1;
     public static final Integer INVALID_SECUREDITEM_NODEREF = 2;
+    public static final Integer INVALID_NODE_HIERACHY = 3;
 
     //100 -> companies errors
     public static final Integer COMPANY_EMPTY_TITLE = 100;
@@ -27,8 +28,7 @@ public interface KoyaErrorCodes {
     public static final Integer DOSSIER_NAME_EXISTS = 302;
 
     //400 -> Content errors
-    public static final Integer CONTENT_INVALID_HIERACHY = 400;
-    public static final Integer CONTENT_CREATION_INVALID_TYPE = 401;
+    public static final Integer CONTENT_CREATION_INVALID_TYPE = 400;
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;

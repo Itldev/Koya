@@ -18,12 +18,8 @@
  */
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.Content;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,7 +42,6 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
@@ -269,47 +264,6 @@ public class KoyaContentService {
             logger.info("Unmanaged type: "
                     + nodeQnameType.getPrefixedQName(this.namespaceService)
                     + ", filename: " + nodeName);
-        }
-    }
-
-    /**
-     * Returns node (assumed is a content) parent
-     *
-     * @param currentNode
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public SecuredItem getParent(NodeRef currentNode) throws KoyaServiceException {
-
-        NodeRef parentNr = nodeService.getPrimaryParent(currentNode).getParentRef();
-
-        if (nodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-            return koyaNodeService.nodeDossierBuilder(parentNr);
-        } else if (nodeIsChildOfDossier(parentNr)) {
-            return koyaNodeService.nodeContentBuilder(parentNr);
-        } else {
-            throw new KoyaServiceException(KoyaErrorCodes.CONTENT_INVALID_HIERACHY);
-        }
-
-    }
-
-    /**
-     *
-     * @param nodeRef
-     * @return
-     */
-    private Boolean nodeIsChildOfDossier(NodeRef nodeRef) {
-
-        try {
-            NodeRef parent = nodeService.getPrimaryParent(nodeRef).getParentRef();
-
-            if (nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-                return true;
-            } else {
-                return nodeIsChildOfDossier(parent);
-            }
-        } catch (InvalidNodeRefException e) {
-            return false;
         }
     }
 

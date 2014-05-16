@@ -42,6 +42,9 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public abstract class KoyaWebscript extends AbstractWebScript {
 
+    public static final String WSCONST_NODEREF = "nodeRef";
+    public static final String WSCONST_NBANCESTOR = "nbAncestor";
+
     private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 
     /**
