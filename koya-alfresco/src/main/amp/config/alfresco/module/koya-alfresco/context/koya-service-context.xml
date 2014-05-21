@@ -135,6 +135,7 @@
     
     <!--Secured Items Sharing service-->
     <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService" parent="koyaAclService">
+         <property name="spaceService" ref="spaceService"/>  
     </bean>
     
     

@@ -20,6 +20,12 @@ public class KoyaShareService extends KoyaAclService {
 
     private Logger logger = Logger.getLogger(KoyaShareService.class);
 
+    private SpaceService spaceService;
+
+    public void setSpaceService(SpaceService spaceService) {
+        this.spaceService = spaceService;
+    }
+
     /**
      *
      *
@@ -224,15 +230,22 @@ public class KoyaShareService extends KoyaAclService {
 
         List<SecuredItem> items = new ArrayList<>();
         String currentUser = authenticationService.getCurrentUserName();
-        AuthenticationUtil.setRunAsUser(userName);
-        try {
-            for (FileInfo fi : fileFolderService.list(s.getNodeRefasObject())) {
-                try {
-                    items.add(koyaNodeService.nodeRef2SecuredItem(fi.getNodeRef()));
-                } catch (KoyaServiceException kex) {
 
+        try {
+            AuthenticationUtil.setRunAsUser(userName);
+
+            if (Company.class.isAssignableFrom(s.getClass())) {
+                items.addAll(spaceService.list(s.getName(), 1));
+            } else {
+                for (FileInfo fi : fileFolderService.list(s.getNodeRefasObject())) {
+                    try {
+                        items.add(koyaNodeService.nodeRef2SecuredItem(fi.getNodeRef()));
+                    } catch (KoyaServiceException kex) {
+
+                    }
                 }
             }
+
         } finally {
             AuthenticationUtil.setRunAsUser(currentUser);
         }
