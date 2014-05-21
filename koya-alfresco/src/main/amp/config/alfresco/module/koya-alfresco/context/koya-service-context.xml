@@ -32,7 +32,7 @@
         <property name="companyService" ref="companyService"/>
         <property name="fileFolderService" ref="fileFolderService" />
         <property name="authenticationService" ref="authenticationService" />
-        <property name="koyaAclService" ref="koyaAclService"/>
+        <property name="koyaShareService" ref="koyaShareService"/>
     </bean>
     
     <!--Companies handling service-->
@@ -112,23 +112,33 @@
     <!--Mailing Service-->
     <bean name="mailingService" class="fr.itldev.koya.alfservice.MailingService"/>
     
-    
-    <!--Secured Items Sharing service-->
-    <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService">
-        <property name="userService" ref="userService"/>
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="koyaAclService" ref="koyaAclService"/>
-    </bean>
+<!--    
     
     
+    ACL Services
+    
+    
+    -->
     <!--Koya specific Permissions service-->
     <bean name="koyaAclService" class="fr.itldev.koya.alfservice.KoyaAclService">     
         <property name="userService" ref="userService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="siteService" ref="siteService"/>      
         <property name="permissionService" ref="permissionService"/>     
+        <property name="nodeService" ref="nodeService"/>       
+        <property name="fileFolderService" ref="fileFolderService"/>       
         <property name="authenticationService" ref="authenticationService"/>                
     </bean>
+    
+    
+    
+    
+    <!--Secured Items Sharing service-->
+    <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService" parent="koyaAclService">
+    </bean>
+    
+    
+    
     
    
 </beans>

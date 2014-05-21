@@ -18,7 +18,7 @@
  */
 package fr.itldev.koya.webscript.share;
 
-import fr.itldev.koya.alfservice.KoyaAclService;
+import fr.itldev.koya.alfservice.KoyaShareService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
@@ -30,18 +30,15 @@ import org.alfresco.service.cmr.repository.NodeRef;
  */
 public class SharedUsers extends KoyaWebscript {
 
-    private static final String URL_PARAM_NODEREF = "nodeRef";
+    private KoyaShareService koyaShareService;
 
-    private KoyaAclService koyaAclService;
-
-    public void setKoyaAclService(KoyaAclService koyaAclService) {
-        this.koyaAclService = koyaAclService;
+    public void setKoyaShareService(KoyaShareService koyaShareService) {
+        this.koyaShareService = koyaShareService;
     }
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-
-        wrapper.addItems(koyaAclService.listUsersAccess(new NodeRef((String) urlParams.get(URL_PARAM_NODEREF))));
+        wrapper.addItems(koyaShareService.listUsersAccessShare(new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF))));
         return wrapper;
     }
 

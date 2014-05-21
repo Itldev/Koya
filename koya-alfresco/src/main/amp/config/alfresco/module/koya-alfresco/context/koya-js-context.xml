@@ -29,7 +29,8 @@
             <value>koya</value>
         </property>
         <property name="koyaAclService" ref="koyaAclService"/>
-        <property name="koyaNodeService" ref="koyaNodeService"/>        
+        <property name="koyaNodeService" ref="koyaNodeService"/>    
+        <property name="koyaShareService" ref="koyaShareService"/>        
         <property name="userService" ref="userService"/>
         <property name="serviceRegistry" ref="ServiceRegistry"/>
     </bean>    

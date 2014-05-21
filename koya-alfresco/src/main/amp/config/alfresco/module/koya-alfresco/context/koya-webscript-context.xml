@@ -252,7 +252,7 @@
     <bean id="webscript.fr.itldev.koya.share.sharedusers.get" 
           class="fr.itldev.koya.webscript.share.SharedUsers"
           parent="webscript">
-        <property name="koyaAclService" ref="koyaAclService" />   
+        <property name="koyaShareService" ref="koyaShareService" />   
     </bean>
  
 </beans>

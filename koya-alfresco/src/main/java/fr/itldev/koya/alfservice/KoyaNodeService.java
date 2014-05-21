@@ -69,7 +69,7 @@ public class KoyaNodeService {
     private CompanyService companyService;
     private FileFolderService fileFolderService;
     private AuthenticationService authenticationService;
-    private KoyaAclService koyaAclService;
+    private KoyaShareService koyaShareService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -100,8 +100,8 @@ public class KoyaNodeService {
         this.authenticationService = authenticationService;
     }
 
-    public void setKoyaAclService(KoyaAclService koyaAclService) {
-        this.koyaAclService = koyaAclService;
+    public void setKoyaShareService(KoyaShareService koyaShareService) {
+        this.koyaShareService = koyaShareService;
     }
 
     // </editor-fold>
@@ -307,9 +307,9 @@ public class KoyaNodeService {
             si = nodeSpaceBuilder(nodeRef);
         } else if (type.equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
             si = nodeDossierBuilder(nodeRef);
-        } else if (type.equals(ContentModel.TYPE_FOLDER)) {
+        } else if (type.equals(ContentModel.TYPE_FOLDER) && nodeIsChildOfDossier(nodeRef)) {
             si = nodeDirBuilder(nodeRef);
-        } else if (type.equals(ContentModel.TYPE_CONTENT)) {
+        } else if (type.equals(ContentModel.TYPE_CONTENT) && nodeIsChildOfDossier(nodeRef)) {
             si = nodeDocumentBuilder(nodeRef);
         } else {
             logger.warn("Invalid noderef type (" + type + ") given for sharing  : ignored");
@@ -326,7 +326,7 @@ public class KoyaNodeService {
     public Company siteCompanyBuilder(SiteInfo s) {
         Company c = new Company(s);
         c.setUserFavourite(isFavourite(c.getNodeRefasObject()));
-        c.setShared(koyaAclService.listUsersAccess(c).size() > 0);
+        c.setShared(koyaShareService.listUsersAccessShare(c).size() > 0);
         return c;
     }
 
@@ -354,7 +354,7 @@ public class KoyaNodeService {
         e.setActive(isActive(spaceNodeRef));
 
         e.setUserFavourite(isFavourite(spaceNodeRef));
-        e.setShared(koyaAclService.listUsersAccess(e).size() > 0);
+        e.setShared(koyaShareService.listUsersAccessShare(e).size() > 0);
 
         return e;
     }
@@ -374,7 +374,7 @@ public class KoyaNodeService {
         c.setActive(isActive(dossierNodeRef));
 
         c.setUserFavourite(isFavourite(dossierNodeRef));
-        c.setShared(koyaAclService.listUsersAccess(c).size() > 0);
+        c.setShared(koyaShareService.listUsersAccessShare(c).size() > 0);
 
         return c;
     }
@@ -525,7 +525,7 @@ public class KoyaNodeService {
     public List<SecuredItem> getParentsList(NodeRef n, Integer nbAncestor) throws KoyaServiceException {
         List<SecuredItem> parents = new ArrayList<>();
         SecuredItem parent = getParent(n);
-        
+
         if (parent == null) {
             throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODE_HIERACHY);
         } else if (parent.getClass().isAssignableFrom(Company.class)) {
@@ -540,7 +540,7 @@ public class KoyaNodeService {
                 nbAncestor--;
                 parents.addAll(getParentsList(parent.getNodeRefasObject(), nbAncestor));
             }
-        }       
+        }
 
         return parents;
     }
@@ -561,7 +561,7 @@ public class KoyaNodeService {
             } else {
                 return nodeIsChildOfDossier(parent);
             }
-        } catch (InvalidNodeRefException e) {
+        } catch (Exception e) {
             return false;
         }
     }
