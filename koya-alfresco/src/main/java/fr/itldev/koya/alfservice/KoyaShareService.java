@@ -226,30 +226,27 @@ public class KoyaShareService extends KoyaAclService {
      * @param userName
      * @return
      */
-    private List<SecuredItem> listChildrenItemsShared(SecuredItem s, String userName) throws KoyaServiceException {
+    private List<SecuredItem> listChildrenItemsShared(final SecuredItem s, String userName) throws KoyaServiceException {
 
-        List<SecuredItem> items = new ArrayList<>();
-        String currentUser = authenticationService.getCurrentUserName();
+        return AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork< List<SecuredItem>>() {
+            @Override
+            public List<SecuredItem> doWork() throws Exception {
+                List<SecuredItem> items = new ArrayList<>();
+                if (Company.class.isAssignableFrom(s.getClass())) {
+                    items.addAll(spaceService.list(s.getName(), 1));
+                } else {
+                    for (FileInfo fi : fileFolderService.list(s.getNodeRefasObject())) {
+                        try {
+                            items.add(koyaNodeService.nodeRef2SecuredItem(fi.getNodeRef()));
+                        } catch (KoyaServiceException kex) {
 
-        try {
-            AuthenticationUtil.setRunAsUser(userName);
-
-            if (Company.class.isAssignableFrom(s.getClass())) {
-                items.addAll(spaceService.list(s.getName(), 1));
-            } else {
-                for (FileInfo fi : fileFolderService.list(s.getNodeRefasObject())) {
-                    try {
-                        items.add(koyaNodeService.nodeRef2SecuredItem(fi.getNodeRef()));
-                    } catch (KoyaServiceException kex) {
-
+                        }
                     }
                 }
+                return items;
             }
+        }, userName);
 
-        } finally {
-            AuthenticationUtil.setRunAsUser(currentUser);
-        }
-        return items;
     }
 
 }
