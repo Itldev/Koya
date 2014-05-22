@@ -82,20 +82,20 @@ public class UserServiceImplTest extends TestCase {
         int nbPrefs = admin.getPreferences().size();
         System.out.println(admin.getPreferences());
 
-        /* =============== Ajout d'un préférence de tests ===========*/
+        /* =============== Add a test preference ===========*/
         admin.getPreferences().put(testKey, "OK_PREF");
         userService.commitPreferences(admin);
 
-        //on a une préférence en +
+        //one more preference
         assertEquals(nbPrefs + 1, admin.getPreferences().size());
         //   System.out.println(admin.getPreferences());
 
-        /* =============== Suppression de la preference de tests =====*/
+        /* =============== Del test preference =====*/
         admin.getPreferences().remove(testKey);
         userService.commitPreferences(admin);
 
         assertEquals(nbPrefs, admin.getPreferences().size());
-        /* ============= etat final ============= */
+        /* ============= final state ============= */
         userService.loadPreferences(admin);
         //   System.out.println(admin.getPreferences());
 
@@ -105,7 +105,7 @@ public class UserServiceImplTest extends TestCase {
     public void testModifyDetails() throws IOException, AlfrescoServiceException {
         User userTest = userService.login("admin", "admin");
 
-        userTest.setName("testeur");
+        userTest.setName("tester");
 
         try {
             userService.commitProperties(userTest);

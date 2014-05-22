@@ -56,7 +56,7 @@ public class SpaceServiceImplTest extends TestCase {
     @Before
     public void createCompany() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
+        companyTests = companyService.create(admin, new Company("company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
     }
 
     @After
@@ -67,42 +67,42 @@ public class SpaceServiceImplTest extends TestCase {
     @Test
     public void testCreateSpace() throws RestClientException, AlfrescoServiceException {
 
-        Space eTocreate = new Space("espace1");
+        Space eTocreate = new Space("space1");
         Space eCreated = spaceService.create(admin, eTocreate, companyTests);
-        assertNotNull("erreur de creation de l'espace 'espace1'", eCreated);
+        assertNotNull("error crating 'space1'", eCreated);
 
     }
 
     @Test
     public void testCreateSubSpace() throws RestClientException, AlfrescoServiceException {
 
-        Space eCreated = spaceService.create(admin, new Space("espaceParent"), companyTests);
-        assertNotNull("erreur de creation de l'espace 'espace Parent'", eCreated);
+        Space eCreated = spaceService.create(admin, new Space("parentSpace"), companyTests);
+        assertNotNull("'parent Space creation error'", eCreated);
 
-        Space eEnfant = spaceService.create(admin, new Space("espaceEnfant"), eCreated);
-        assertNotNull("erreur de creation de l'espace 'espace Enfant'", eEnfant);
+        Space eEnfant = spaceService.create(admin, new Space("childSpace"), eCreated);
+        assertNotNull("'child Space creation error'", eEnfant);
 
     }
 
     @Test
     public void testSpaceToggleActive() throws RestClientException, AlfrescoServiceException {
 
-        Space eCreated = spaceService.create(admin, new Space("espaceParent"), companyTests);
+        Space eCreated = spaceService.create(admin, new Space("parentSpace"), companyTests);
 
-        spaceService.create(admin, new Space("espaceEnfant"), eCreated);
+        spaceService.create(admin, new Space("childSpace"), eCreated);
 
         for (Space e : spaceService.list(admin, companyTests)) {
-            assertTrue("les espaces doivent etre actifs à l'initialisation", e.getActive());
+            assertTrue("Spaces must be active at init", e.getActive());
             spaceService.disable(admin, e);
         }
 
         for (Space e : spaceService.list(admin, companyTests)) {
-            assertTrue("les espaces devraient tous etre désactivés", !e.getActive());
+            assertTrue("Spaces should all be inactive", !e.getActive());
             spaceService.enable(admin, e);
         }
 
         for (Space e : spaceService.list(admin, companyTests)) {
-            assertTrue("les espaces devraient tous etre réactivés", e.getActive());
+            assertTrue("Spaces should all be active", e.getActive());
         }
 
     }
@@ -110,17 +110,17 @@ public class SpaceServiceImplTest extends TestCase {
     @Test
     public void testListSpaces() throws RestClientException, AlfrescoServiceException {
 
-        Space eParent1 = spaceService.create(admin, new Space("espaceParent1"), companyTests);
+        Space eParent1 = spaceService.create(admin, new Space("parentSpace1"), companyTests);
 
-        spaceService.create(admin, new Space("espaceEnfant11"), eParent1);
+        spaceService.create(admin, new Space("childSpace11"), eParent1);
 
-        spaceService.create(admin, new Space("espaceEnfant12"), eParent1);
+        spaceService.create(admin, new Space("childSpace12"), eParent1);
 
-        Space eParent2 = spaceService.create(admin, new Space("espaceParent2"), companyTests);
+        Space eParent2 = spaceService.create(admin, new Space("parentSpace2"), companyTests);
 
-        spaceService.create(admin, new Space("espaceEnfant21"), eParent2);
+        spaceService.create(admin, new Space("childSpace21"), eParent2);
 
-        spaceService.create(admin, new Space("espaceEnfant22"), eParent2);
+        spaceService.create(admin, new Space("childSpace22"), eParent2);
 
         List<Space> lstArboEspaces = spaceService.list(admin, companyTests);
 

@@ -66,8 +66,8 @@ public class ShareServiceImplTest extends TestCase {
     @Before
     public void createSpace() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
-        spaceTests = spaceService.create(admin, new Space("Esptests"), companyTests);
+        companyTests = companyService.create(admin, new Company("company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
+        spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
     }
 
     @After
@@ -81,8 +81,7 @@ public class ShareServiceImplTest extends TestCase {
         sharedDossiers.add(dossierService.create(admin, new Dossier("doss1"), spaceTests));
         sharedDossiers.add(dossierService.create(admin, new Dossier("doss2"), spaceTests));
 
-        List<String> shareToUsersMails = new ArrayList<>();
-        shareToUsersMails.add("leroux@itldev.fr");
+        List<String> shareToUsersMails = new ArrayList<>();      
         shareToUsersMails.add("test@itldev.fr");
 
         shareService.shareItems(admin, sharedDossiers, shareToUsersMails);

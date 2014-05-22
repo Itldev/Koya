@@ -72,8 +72,8 @@ public class GenericServiceImplTest extends TestCase {
     @Before
     public void createDossier() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("societe" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
-        spaceTests = spaceService.create(admin, new Space("Esptests"), companyTests);
+        companyTests = companyService.create(admin, new Company("company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
+        spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
         dossierTests = dossierService.create(admin, new Dossier("doss1"), spaceTests);
     }
 
