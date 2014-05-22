@@ -4,7 +4,7 @@
     <artifactId>koya-alfresco</artifactId>
     <name>[Koya] Alfresco amp </name>
     <packaging>amp</packaging>
-
+    <description>koya alfresco - A corporate alfresco based dataroom module</description>
 
     <parent>
         <groupId>fr.itldev</groupId>
@@ -12,12 +12,6 @@
         <version>0.3.2-SNAPSHOT</version>
     </parent>
 
-    <!--
-    Following dependencies are needed for compiling Java code in src/main/java; <scope>provided</scope>
-    is inherited for each of the following; for more info, please refer to alfresco-integration-parent
-    POM definition
-    @TODO - document
-    -->
     <dependencies>
         <dependency>
             <groupId>${alfresco.groupId}</groupId>
@@ -32,14 +26,7 @@
     </dependencies>
     
     <properties>
-        <!-- Defines the target WAR artifactId to run this amp, only used with the -Pamp-to-war switch
-        .    | Allowed values: alfresco | share. Defaults to a repository AMP, but could point to your custom corporate Alfresco WAR -->
-        <alfresco.client.war>alfresco</alfresco.client.war>
-        <!-- Defines the target WAR groupId to run this amp, only used with the -Pamp-to-war switch
-        .    | Could be org.alfresco | org.alfresco.enterprise or your corporate groupId -->
-        <!-- <alfresco.client.war.groupId>org.alfresco</alfresco.client.war.groupId> -->
-        <!-- Defines the target WAR version to run this amp, only used with the -Pamp-to-war switch -->
-        <!-- <alfresco.client.war.version>${alfresco.version}</alfresco.client.war.version> -->
+        <alfresco.client.war>alfresco</alfresco.client.war>   
     </properties>
     
 </project>

@@ -37,6 +37,7 @@ public class AlfrescoRestService implements AlfrescoService {
     protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{newName}/{nodeRef}";
     private static final String REST_POST_GETPARENT = "/s/fr/itldev/koya/global/getparent/{nbAncestor}";
     private static final String REST_POST_GETPARENT_INFINITE = "/s/fr/itldev/koya/global/getparent";
+    private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos";
 
     private String alfrescoServerUrl;
 
@@ -123,6 +124,17 @@ public class AlfrescoRestService implements AlfrescoService {
         }
     }
 
+    /**
+     * Get Informations about server and modules.
+     *
+     * @param user
+     * @return
+     */
+    @Override
+    public Map getServerInfos(User user) {
+        return user.getRestTemplate().getForObject(
+                alfrescoServerUrl + REST_GET_SERVERINFOS, Map.class);
+    }
 
     /*
      *  ================ Utils methods ==================

@@ -254,5 +254,20 @@
           parent="webscript">
         <property name="koyaShareService" ref="koyaShareService" />   
     </bean>
+    
+    
+     <!--
+    ==================================================================
+    ========================== Meta  ==============================
+    ==================================================================
+    -->
+    
+    
+    <!-- items shared with users -->
+    <bean id="webscript.fr.itldev.koya.meta.infos.get" 
+          class="fr.itldev.koya.webscript.meta.GetInfos"
+          parent="webscript">
+        <property name="moduleService" ref="moduleService" />   
+    </bean>
  
 </beans>
