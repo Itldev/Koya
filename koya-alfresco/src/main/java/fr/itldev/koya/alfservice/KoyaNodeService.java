@@ -42,6 +42,7 @@ import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -420,6 +421,9 @@ public class KoyaNodeService {
         d.setName((String) nodeService.getProperty(docNodeRef, ContentModel.PROP_NAME));
         d.setUserFavourite(isFavourite(docNodeRef));
         d.setByteSize(getByteSize(docNodeRef));
+
+        ContentData contentData = (ContentData) nodeService.getProperty(docNodeRef, ContentModel.PROP_CONTENT);
+        d.setMimeType(contentData.getMimetype());
         //not used
         d.setShared(Boolean.FALSE);
 

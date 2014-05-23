@@ -23,7 +23,8 @@ import fr.itldev.koya.model.Content;
 public final class Document extends Content {
 
     private Long byteSize;
-
+    private String mimeType;
+    
     public Document() {
     }
 
@@ -41,6 +42,14 @@ public final class Document extends Content {
 
     public void setByteSize(Long tailleOctets) {
         this.byteSize = tailleOctets;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 
 }
