@@ -18,7 +18,6 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -27,7 +26,7 @@ import org.springframework.web.client.RestClientException;
 
 public interface UserService {
 
-    User login(String login, String md5password) throws RestClientException;
+    User login(String authKey, String md5password) throws RestClientException, AlfrescoServiceException;
 
     Boolean logout(User user);
 

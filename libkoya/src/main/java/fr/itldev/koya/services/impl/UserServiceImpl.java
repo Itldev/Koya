@@ -18,7 +18,6 @@
  */
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
@@ -27,11 +26,14 @@ import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -43,8 +45,10 @@ import org.springframework.web.client.RestTemplate;
 
 public class UserServiceImpl extends AlfrescoRestService implements UserService, BeanFactoryAware {
 
+    private Logger logger = Logger.getLogger(this.getClass());
+
     private static final String REST_GET_LOGIN = "/s/api/login.json?u={username}&pw={password}";
-    private static final String REST_GET_PERSONDETAILS = "/s/api/people/{userName}?alf_ticket={alf_ticket}";
+    private static final String REST_POST_PERSONFROMMAIL = "/s/fr/itldev/koya/user/getbyauthkey?alf_ticket={alf_ticket}";
     private static final String REST_DEL_LOGOUT = "/s/api/login/ticket/{ticket}";
     private static final String REST_POST_MODIFYDETAILS = "/s/fr/itldev/koya/user/modifydetails";
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find/{query}/{maxresults}";
@@ -63,27 +67,42 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     }
 
     /**
+     * Authenticates user with authentication key that could be his login or
+     * email.
+     *
+     *
      * TODO give md5 or other secured password instead of clear.
      *
-     * @param login
+     * @param authKey
      * @param password
      * @return
+     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
     @Override
-    public User login(String login, String password) throws RestClientException {
+    public User login(String authKey, String password) throws RestClientException, AlfrescoServiceException {
+
         //call rest ticket
-        AuthTicket ticket = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LOGIN, AuthTicket.class, login, password);
-        //call rest user informations
-        User user = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_PERSONDETAILS, User.class, login, ticket.toString());
+        AuthTicket ticket = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LOGIN, AuthTicket.class, authKey, password);
+        //Get User Object
+        Map emailPostWrapper = new HashMap();
+        emailPostWrapper.put("authKey", authKey);
+        User user = null;
+        ItlAlfrescoServiceWrapper ret = getTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper, ItlAlfrescoServiceWrapper.class, ticket);
+
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
+            user = (User) ret.getItems().get(0);
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
         //Authentication ticket integration
         user.setTicketAlfresco(ticket.toString());
         //set users authenticated rest template
-        user.setRestTemplate(getAuthenticatedRestTemplate(login, password));
+        user.setRestTemplate(getAuthenticatedRestTemplate(user.getLogin(), password));
         //load users rest prefrences
         loadPreferences(user);
         //
         user.setPassword(password);
-
         return user;
     }
 

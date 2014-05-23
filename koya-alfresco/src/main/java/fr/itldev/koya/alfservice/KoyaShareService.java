@@ -127,7 +127,7 @@ public class KoyaShareService extends KoyaAclService {
     public List<User> listUsersAccessShare(NodeRef n) {
         List<User> users = new ArrayList<>();
         for (AccessPermission ap : permissionService.getAllSetPermissions(n)) {
-            User u = userService.buildUser(ap.getAuthority());
+            User u = userService.getUserByUsername(ap.getAuthority());
             if (u != null) {
                 users.add(u);
             }

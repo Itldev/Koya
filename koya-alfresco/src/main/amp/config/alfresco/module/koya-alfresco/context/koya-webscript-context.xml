@@ -235,6 +235,12 @@
         <property name="userService" ref="userService" /> 
     </bean>
     
+     <bean id="webscript.fr.itldev.koya.user.getbyauthkey.post" 
+          class="fr.itldev.koya.webscript.user.GetByAuthKey"
+          parent="webscript">                
+        <property name="userService" ref="userService" /> 
+    </bean>
+    
     <!--
     ==================================================================
     ========================== Shares ==============================

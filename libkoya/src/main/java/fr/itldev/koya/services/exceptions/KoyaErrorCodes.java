@@ -32,8 +32,8 @@ public interface KoyaErrorCodes {
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;
-    public static final Integer NO_SUCH_USER_IDENTIFIED_BY_EMAIL = 501;
-    public static final Integer MANY_USERS_IDENTIFIED_BY_EMAIL = 502;
+    public static final Integer NO_SUCH_USER_IDENTIFIED_BY_AUTHKEY = 501;
+    public static final Integer MANY_USERS_IDENTIFIED_BY_AUTHKEY = 502;
     public static final Integer LOGIN_ALREADY_EXISTS = 503;
     public static final Integer CANT_MODIFY_USER_PASSWORD = 504;
 

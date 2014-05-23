@@ -41,7 +41,7 @@ public class UserServiceImplTest extends TestCase {
     private UserService userService;
 
     @Test
-    public void testAdminLogin() {
+    public void testAdminLogin() throws AlfrescoServiceException {
         User admin = null;
         try {
             admin = userService.login("admin", "admin");
@@ -58,7 +58,7 @@ public class UserServiceImplTest extends TestCase {
     }
 
     @Test
-    public void testGetPrefs() throws IOException {
+    public void testGetPrefs() throws IOException, AlfrescoServiceException {
 
         User admin = null;
         try {

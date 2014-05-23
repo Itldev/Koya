@@ -28,7 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.cxf.helpers.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -57,13 +59,10 @@ public abstract class KoyaWebscript extends AbstractWebScript {
     protected Map<String, Object> getJsonMap(WebScriptRequest req) throws IOException {
 
         JSONParser parser = new JSONParser();
-        Reader reader = req.getContent().getReader();
-        if (reader.ready()) {
-            try {
-                return (JSONObject) parser.parse(req.getContent().getReader());
-            } catch (ParseException ex) {
-                logger.error(ex.getMessage(), ex);
-            }
+        //TODO improve json POST reading
+        try {
+            return (JSONObject) parser.parse(req.getContent().getReader());
+        } catch (ParseException ex) {
         }
 
         return new HashMap<>();
@@ -89,6 +88,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
+        logger.trace(this.getClass().getSimpleName() + " - Webscript Executed by " + AuthenticationUtil.getRunAsUser());
 
         //TODO url params et url template
         try {
