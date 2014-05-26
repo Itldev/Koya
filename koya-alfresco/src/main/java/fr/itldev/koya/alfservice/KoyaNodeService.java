@@ -71,6 +71,7 @@ public class KoyaNodeService {
     private FileFolderService fileFolderService;
     private AuthenticationService authenticationService;
     private KoyaShareService koyaShareService;
+    private KoyaAclService koyaAclService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -103,6 +104,10 @@ public class KoyaNodeService {
 
     public void setKoyaShareService(KoyaShareService koyaShareService) {
         this.koyaShareService = koyaShareService;
+    }
+
+    public void setKoyaAclService(KoyaAclService koyaAclService) {
+        this.koyaAclService = koyaAclService;
     }
 
     // </editor-fold>
@@ -328,6 +333,7 @@ public class KoyaNodeService {
         Company c = new Company(s);
         c.setUserFavourite(isFavourite(c.getNodeRefasObject()));
         c.setShared(koyaShareService.listUsersAccessShare(c).size() > 0);
+        c.setPermissions(koyaAclService.getPermissions(c.getNodeRefasObject()));
         return c;
     }
 
@@ -357,6 +363,8 @@ public class KoyaNodeService {
         e.setUserFavourite(isFavourite(spaceNodeRef));
         e.setShared(koyaShareService.listUsersAccessShare(e).size() > 0);
 
+        e.setPermissions(koyaAclService.getPermissions(spaceNodeRef));
+
         return e;
     }
 
@@ -376,6 +384,8 @@ public class KoyaNodeService {
 
         c.setUserFavourite(isFavourite(dossierNodeRef));
         c.setShared(koyaShareService.listUsersAccessShare(c).size() > 0);
+
+        c.setPermissions(koyaAclService.getPermissions(dossierNodeRef));
 
         return c;
     }
@@ -407,6 +417,9 @@ public class KoyaNodeService {
 
         //not used
         r.setShared(Boolean.FALSE);
+
+        r.setPermissions(koyaAclService.getPermissions(dirNodeRef));
+
         return r;
     }
 
@@ -426,6 +439,8 @@ public class KoyaNodeService {
         d.setMimeType(contentData.getMimetype());
         //not used
         d.setShared(Boolean.FALSE);
+
+        d.setPermissions(koyaAclService.getPermissions(docNodeRef));
 
         return d;
     }

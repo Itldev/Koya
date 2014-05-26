@@ -33,6 +33,7 @@
         <property name="fileFolderService" ref="fileFolderService" />
         <property name="authenticationService" ref="authenticationService" />
         <property name="koyaShareService" ref="koyaShareService"/>
+        <property name="koyaAclService" ref="koyaAclService"/>
     </bean>
     
     <!--Companies handling service-->

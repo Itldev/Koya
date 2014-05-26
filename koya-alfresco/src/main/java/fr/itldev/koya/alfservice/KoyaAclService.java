@@ -1,15 +1,13 @@
 package fr.itldev.koya.alfservice;
 
+import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
-import java.util.ArrayList;
-import java.util.List;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteService;
@@ -117,6 +115,36 @@ public class KoyaAclService {
      */
     public String buildCompanyAuthorityName(Company c, String roleName) {
         return "GROUP_site_" + c.getName() + "_" + roleName;
+    }
+
+    /**
+     * Builds Koya permissions on given NodeRef.
+     *
+     * @param n
+     * @return
+     */
+    public Permissions getPermissions(NodeRef n) {
+
+        Permissions p = new Permissions(authenticationService.getCurrentUserName());
+
+        p.canAddChild(permissionService.hasPermission(n, PermissionService.ADD_CHILDREN).equals(AccessStatus.ALLOWED));
+        p.canDelete(permissionService.hasPermission(n, PermissionService.DELETE_NODE).equals(AccessStatus.ALLOWED));
+        p.canReadProperties(permissionService.hasPermission(n, PermissionService.WRITE).equals(AccessStatus.ALLOWED));
+
+        /*
+         * TODO define here these extra permissions policy.
+         * OR 
+         * define permission definition in a config file.        
+         *  ex : only element owner and company administrator can rename ....
+         *  
+         */
+        p.canRename(permissionService.hasPermission(n, PermissionService.WRITE).equals(AccessStatus.ALLOWED));
+        p.canDownload(permissionService.hasPermission(n, PermissionService.WRITE).equals(AccessStatus.ALLOWED));
+        //user can share if he's domain admin         
+        p.canShare(permissionService.hasPermission(n, PermissionService.DELETE).equals(AccessStatus.ALLOWED));
+
+        return p;
+
     }
 
 }

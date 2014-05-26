@@ -33,6 +33,8 @@ public abstract class SecuredItem {
     private String name;
     private Boolean shared;
 
+    private Permissions permissions;
+
     private Boolean userFavourite;
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 
@@ -78,6 +80,14 @@ public abstract class SecuredItem {
 
     public void setShared(Boolean shared) {
         this.shared = shared;
+    }
+
+    public Permissions getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Permissions permissions) {
+        this.permissions = permissions;
     }
 
     // </editor-fold>
