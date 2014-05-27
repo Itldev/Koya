@@ -174,7 +174,7 @@ public class SpaceService {
         if (nodeService.getType(dest).equals(KoyaModel.QNAME_KOYA_COMPANY)) {
             dest = getDocLibNodeRef(dest);
         }
-        logger.error("move " + name + " to " + (String) nodeService.getProperty(dest, ContentModel.PROP_NAME));
+        logger.trace("move " + name + " to " + (String) nodeService.getProperty(dest, ContentModel.PROP_NAME));
 
         nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
         return koyaNodeService.nodeSpaceBuilder(toMove);

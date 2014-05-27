@@ -124,10 +124,13 @@ public class SpaceServiceImplTest extends TestCase {
 
         List<Space> lstArboEspaces = spaceService.list(admin, companyTests);
 
-        assertEquals(2, lstArboEspaces.size());
+        //2 created + defaultspace automaticly created on company creation
+        assertEquals(3, lstArboEspaces.size());
 
         for (Space e : lstArboEspaces) {
-            assertEquals(2, e.getChildren().size());
+            if (!e.getName().equals("defaultSpace")) {
+                assertEquals(2, e.getChildren().size());
+            }
         }
 
     }
@@ -138,12 +141,12 @@ public class SpaceServiceImplTest extends TestCase {
         Space parentSpace = spaceService.create(admin, new Space("parentSpace"), companyTests);
 
         Space childSpace = spaceService.create(admin, new Space("childSpace"), parentSpace);
-
-        assertEquals(1, spaceService.list(admin, companyTests).size());
+        //1 created + defaultspace automaticly created on company creation
+        assertEquals(2, spaceService.list(admin, companyTests).size());
         //move
         spaceService.move(admin, childSpace, companyTests);
 
-        assertEquals(2, spaceService.list(admin, companyTests).size());
+        assertEquals(3, spaceService.list(admin, companyTests).size());
     }
 
     @Test
@@ -153,11 +156,12 @@ public class SpaceServiceImplTest extends TestCase {
 
         Space space2 = spaceService.create(admin, new Space("space2"), companyTests);
 
-        assertEquals(2, spaceService.list(admin, companyTests).size());
+        //2 created + defaultspace automaticly created on company creation
+        assertEquals(3, spaceService.list(admin, companyTests).size());
         //del
-        spaceService.del(admin, space2);
+         spaceService.delete(admin, space2);
 
-        assertEquals(1, spaceService.list(admin, companyTests).size());
+        assertEquals(2, spaceService.list(admin, companyTests).size());
     }
 
 }

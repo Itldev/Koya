@@ -24,7 +24,7 @@
     <description>Move Company Spaces</description>
     <family>Itldev</family>
     <url>/fr/itldev/koya/space/move/{parentNodeRef}</url>
-    <authentication>user</authentication>    
+    <authentication>user</authentication>
     <format default="json"/>
 </webscript>
 

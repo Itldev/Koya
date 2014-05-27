@@ -25,24 +25,27 @@ public class MutableAuthenticationServiceItlMail extends MutableAuthenticationSe
 
     @Override
     public void authenticate(String userName, char[] password) throws AuthenticationException {
-        User u = null;
 
         final String uName = userName;
-        u = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< User>() {
+
+        User u = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< User>() {
             @Override
             public User doWork() throws Exception {
-                return userService.getUser(uName);
+
+                try {
+                    return userService.getUser(uName);
+                } catch (KoyaServiceException kex) {
+                    //no error if user id not found
+                }
+                return null;
             }
         });
-        
-        if(u != null){
+
+        if (u != null) {
             super.authenticate(u.getLogin(), password);
-        }else{
+        } else {
             super.authenticate(userName, password);
         }
-        
-        
-        
 
     }
 

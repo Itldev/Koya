@@ -27,6 +27,9 @@
                         <app:uifacets/>
                         <cm:name>defaultSpace</cm:name>
                         <app:icon>space-icon-default</app:icon>
+                        <view:aspects>
+                            <koya:activable></koya:activable>
+                        </view:aspects>
                     </koya:space>
                 </cm:contains>
             </cm:folder>

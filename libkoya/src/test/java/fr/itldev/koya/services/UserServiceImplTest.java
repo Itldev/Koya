@@ -49,7 +49,6 @@ public class UserServiceImplTest extends TestCase {
             fail();
         }
         assertNotNull(admin);
-        assertTrue(admin.isAdmin());
     }
 
     @Test(expected = AlfrescoAuthenticationException.class)

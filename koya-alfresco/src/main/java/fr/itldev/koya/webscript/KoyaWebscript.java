@@ -23,14 +23,12 @@ import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.cxf.helpers.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -46,7 +44,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
 
     public static final String WSCONST_NODEREF = "nodeRef";
     public static final String WSCONST_NBANCESTOR = "nbAncestor";
-
+    public static final String WSCONST_PARENTNODEREF = "parentNodeRef";
     private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 
     /**

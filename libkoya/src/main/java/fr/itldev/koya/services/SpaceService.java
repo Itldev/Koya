@@ -87,12 +87,4 @@ public interface SpaceService extends AlfrescoService {
      */
     Space move(User user, Space toMove, Company destination) throws AlfrescoServiceException;
 
-    /**
-     *
-     * @param user
-     * @param toDel
-     * @throws AlfrescoServiceException
-     */
-    void del(User user, Space toDel) throws AlfrescoServiceException;
-
 }

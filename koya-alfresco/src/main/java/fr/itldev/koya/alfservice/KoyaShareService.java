@@ -47,7 +47,9 @@ public class KoyaShareService extends KoyaAclService {
             }
 
             if (u == null) {
-                u = createUserForSharing(sharedItems, userMail);//TODO user creation process
+
+                break;//TODO replace with user creation process
+                // u = createUserForSharing(sharedItems, userMail);//TODO user creation process
             }
 
             logger.debug("share " + sharedItems.size() + " elements to existing : " + u.getEmail());

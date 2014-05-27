@@ -42,8 +42,6 @@ public final class User {
     @JsonIgnore
     private String password;
 
-    @JsonIgnore
-    private Capabilities capabilities;
     private String ticketAlfresco;
     @JsonIgnore
     private Preferences preferences;
@@ -107,15 +105,6 @@ public final class User {
         this.password = password;
     }
 
-    public Capabilities getCapabilities() {
-        return capabilities;
-    }
-
-    public void setCapabilities(Capabilities capabilities) {
-        this.capabilities = capabilities;
-    }
-    //---
-
     public String getTicketAlfresco() {
         return ticketAlfresco;
     }
@@ -138,43 +127,6 @@ public final class User {
 
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-    }
-
-    @JsonIgnore
-    public Boolean isAdmin() {
-        return capabilities.getIsAdmin();
-    }
-
-    public static class Capabilities {
-
-        private Boolean isMutable;
-        private Boolean isGuest;
-        private Boolean isAdmin;
-
-        public Boolean getIsMutable() {
-            return isMutable;
-        }
-
-        public void setIsMutable(Boolean isMutable) {
-            this.isMutable = isMutable;
-        }
-
-        public Boolean getIsGuest() {
-            return isGuest;
-        }
-
-        public void setIsGuest(Boolean isGuest) {
-            this.isGuest = isGuest;
-        }
-
-        public Boolean getIsAdmin() {
-            return isAdmin;
-        }
-
-        public void setIsAdmin(Boolean isAdmin) {
-            this.isAdmin = isAdmin;
-        }
-
     }
 
     /**

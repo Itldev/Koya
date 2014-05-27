@@ -34,7 +34,6 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
     private static final String REST_POST_LISTSPACE = "/s/fr/itldev/koya/space/list";
     private static final String REST_POST_LISTSPACE_DEPTH_OPTION = "/s/fr/itldev/koya/space/list?maxdepth={maxdepth}";
     private static final String REST_POST_MOVESPACE = "/s/fr/itldev/koya/space/move/{newParentNodeRef}";
-    private static final String REST_POST_DELSPACE = "/s/fr/itldev/koya/space/del";
 
     /**
      * Create a new space
@@ -111,15 +110,6 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (Space) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
-        }
-    }
-
-    @Override
-    public void del(User user, Space toDel) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_DELSPACE, toDel, ItlAlfrescoServiceWrapper.class);
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-
             throw new AlfrescoServiceException(ret.getMessage());
         }
     }

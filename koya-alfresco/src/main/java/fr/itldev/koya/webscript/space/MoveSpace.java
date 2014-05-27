@@ -37,9 +37,9 @@ public class MoveSpace extends KoyaWebscript {
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef node = new NodeRef((String) jsonPostMap.get("nodeRef"));
-        NodeRef parent = new NodeRef((String) urlParams.get("newParentNodeRef"));
-                
+        NodeRef node = new NodeRef((String) jsonPostMap.get(WSCONST_NODEREF));
+        NodeRef parent = new NodeRef((String) urlParams.get(WSCONST_PARENTNODEREF));
+
         wrapper.addItem(spaceService.move(node, parent));
         return wrapper;
     }
