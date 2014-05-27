@@ -19,6 +19,7 @@
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
@@ -69,7 +70,8 @@ public interface AlfrescoService {
      *
      * @param user
      * @return
+     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
-    Map getServerInfos(User user);
+    MetaInfos getServerInfos(User user) throws AlfrescoServiceException;
 
 }

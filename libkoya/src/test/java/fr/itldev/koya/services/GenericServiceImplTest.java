@@ -23,6 +23,7 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -48,6 +49,9 @@ public class GenericServiceImplTest extends TestCase {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    private AlfrescoService alfrescoService;
 
     @Autowired
     private CompanyService companyService;
@@ -85,7 +89,7 @@ public class GenericServiceImplTest extends TestCase {
     @Test
     public void testgetParent() throws AlfrescoServiceException {
         Content dir = koyaContentService.create(admin, new Directory("dir"), dossierTests);
-        assertTrue(dossierService.getParent(admin, dir).getName().equals("doss1"));    
+        assertTrue(dossierService.getParent(admin, dir).getName().equals("doss1"));
     }
 
     @Test
@@ -103,6 +107,23 @@ public class GenericServiceImplTest extends TestCase {
         Document doc = koyaContentService.upload(admin, toUpload, (Directory) subDir);
 
         assertEquals(dossierService.getParents(admin, doc).size(), 5);
+    }
+
+    @Test
+    public void testgetServerInfos() throws AlfrescoServiceException {
+        MetaInfos infos = alfrescoService.getServerInfos(admin);
+
+        for (String k : infos.getKoyaInfos().stringPropertyNames()) {
+            System.out.println(k + "= " + infos.getKoyaInfos().getProperty(k));
+        }
+        System.out.println("===");
+
+        for (String k : infos.getServerInfos().stringPropertyNames()) {
+            System.out.println(k + "= " + infos.getServerInfos().getProperty(k));
+        }
+
+        assertEquals(infos.getKoyaInfos().getProperty("module.id"), "koya-alfresco");
+
     }
 
 }

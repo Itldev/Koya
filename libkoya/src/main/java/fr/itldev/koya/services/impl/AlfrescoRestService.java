@@ -19,15 +19,20 @@
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 import org.springframework.web.client.RestTemplate;
 
 public class AlfrescoRestService implements AlfrescoService {
@@ -69,7 +74,9 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     @Override
     public void delete(User user, SecuredItem securedItem) {
-        user.getRestTemplate().getForObject(alfrescoServerUrl + REST_GET_DELITEM, ItlAlfrescoServiceWrapper.class, securedItem.getNodeRef());
+        user.getRestTemplate().getForObject(
+                alfrescoServerUrl + REST_GET_DELITEM,
+                ItlAlfrescoServiceWrapper.class, securedItem.getNodeRef());
     }
 
     /**
@@ -81,7 +88,10 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     @Override
     public void rename(User user, SecuredItem securedItem, String newName) {
-        user.getRestTemplate().getForObject(alfrescoServerUrl + REST_GET_RENAMEITEM, ItlAlfrescoServiceWrapper.class, newName, securedItem.getNodeRef());
+        user.getRestTemplate().getForObject(
+                alfrescoServerUrl + REST_GET_RENAMEITEM,
+                ItlAlfrescoServiceWrapper.class, newName,
+                securedItem.getNodeRef());
     }
 
     /**
@@ -93,11 +103,14 @@ public class AlfrescoRestService implements AlfrescoService {
      * @throws AlfrescoServiceException
      */
     @Override
-    public SecuredItem getParent(User user, SecuredItem securedItem) throws AlfrescoServiceException {
+    public SecuredItem getParent(User user, SecuredItem securedItem)
+            throws AlfrescoServiceException {
 
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_GETPARENT, securedItem, ItlAlfrescoServiceWrapper.class, 1);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
+                getAlfrescoServerUrl() + REST_POST_GETPARENT, securedItem,
+                ItlAlfrescoServiceWrapper.class, 1);
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)
+                && ret.getNbitems() == 1) {
             return (SecuredItem) ret.getItems().get(0);
         } else {
             throw new AlfrescoServiceException(ret.getMessage());
@@ -112,17 +125,22 @@ public class AlfrescoRestService implements AlfrescoService {
      * @return
      * @throws AlfrescoServiceException
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public List<SecuredItem> getParents(User user, SecuredItem securedItem) throws AlfrescoServiceException {
+    public List<SecuredItem> getParents(User user, SecuredItem securedItem)
+            throws AlfrescoServiceException {
 
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_GETPARENT_INFINITE, securedItem, ItlAlfrescoServiceWrapper.class);
+                getAlfrescoServerUrl() + REST_POST_GETPARENT_INFINITE,
+                securedItem, ItlAlfrescoServiceWrapper.class);
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (List<SecuredItem>) ret.getItems();
         } else {
             throw new AlfrescoServiceException(ret.getMessage());
         }
     }
+
+    private Logger logger = Logger.getLogger(getClass());
 
     /**
      * Get Informations about server and modules.
@@ -131,13 +149,21 @@ public class AlfrescoRestService implements AlfrescoService {
      * @return
      */
     @Override
-    public Map getServerInfos(User user) {
-        return user.getRestTemplate().getForObject(
-                alfrescoServerUrl + REST_GET_SERVERINFOS, Map.class);
+    public MetaInfos getServerInfos(User user) throws AlfrescoServiceException {
+
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+                alfrescoServerUrl + REST_GET_SERVERINFOS, ItlAlfrescoServiceWrapper.class);
+
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            return ((MetaInfos) ret.getItems().get(0));
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage());
+        }
+
     }
 
     /*
-     *  ================ Utils methods ==================
+     * ================ Utils methods ==================
      */
     /**
      * Extracts noderef parts.
@@ -175,7 +201,8 @@ public class AlfrescoRestService implements AlfrescoService {
             return bytes + " b";
         }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1)
+                + (si ? "" : "i");
         return String.format("%.1f %so", bytes / Math.pow(unit, exp), pre);
     }
 

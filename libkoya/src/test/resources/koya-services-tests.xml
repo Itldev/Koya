@@ -92,6 +92,7 @@
         <property name="template" ref="anonymousRestTemplate"/>
     </bean>
     
+     <bean id="alfrescoService" class="fr.itldev.koya.services.impl.AlfrescoRestService" parent="abstractRestService"/>
     
     <bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl" parent="abstractRestService"/>
         
