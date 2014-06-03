@@ -129,7 +129,7 @@ public class SpaceServiceImplTest extends TestCase {
 
         for (Space e : lstArboEspaces) {
             if (!e.getName().equals("defaultSpace")) {
-                assertEquals(2, e.getChildren().size());
+                assertEquals(2, e.getChildSpaces().size());
             }
         }
 

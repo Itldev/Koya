@@ -18,13 +18,8 @@
  */
 package fr.itldev.koya.model;
 
-import java.util.List;
-
 public interface Container {
 
-    List<? extends SecuredItem> getChildren();
-
-    void setChildren(List<? extends SecuredItem> children);
 
     String getNodeRef();
 }

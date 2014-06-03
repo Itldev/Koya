@@ -93,12 +93,10 @@ public final class Company extends SecuredItem implements Container, Activable {
         this.saleOffersHistory = saleOffersHistory;
     }
 
-    @Override
     public List<? extends SecuredItem> getChildren() {
         return children;
     }
 
-    @Override
     public void setChildren(List<? extends SecuredItem> children) {
         this.children = (List<Space>) children;
     }

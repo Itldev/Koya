@@ -34,7 +34,6 @@ public final class Directory extends Content implements Container {
     @JsonProperty("childdoc")
     private List<Document> childDoc = new ArrayList<>();
 
-    @Override
     @JsonIgnore
     public List<Content> getChildren() {
         List<Content> content = new ArrayList<>();
@@ -43,7 +42,6 @@ public final class Directory extends Content implements Container {
         return content;
     }
 
-    @Override
     public void setChildren(List<? extends SecuredItem> children) {
         for (SecuredItem s : children) {
             if (Directory.class.isAssignableFrom(s.getClass())) {

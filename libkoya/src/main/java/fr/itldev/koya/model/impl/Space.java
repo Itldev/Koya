@@ -37,30 +37,6 @@ public final class Space extends SubSpace implements Container, Activable {
     @JsonProperty("childspaces")
     private List<Space> childSpaces = new ArrayList<>();
 
-    @JsonProperty("childcontent")
-    private List<Dossier> childDossiers = new ArrayList<>();
-
-    @Override
-    @JsonIgnore
-    public List<SubSpace> getChildren() {
-
-        List<SubSpace> subspaces = new ArrayList<>();
-        subspaces.addAll(childDossiers);
-        subspaces.addAll(childSpaces);
-        return subspaces;
-    }
-
-    @Override
-    public void setChildren(List<? extends SecuredItem> children) {
-        for (SecuredItem s : children) {
-            if (Space.class.isAssignableFrom(s.getClass())) {
-                childSpaces.add((Space) s);
-            } else if (Dossier.class.isAssignableFrom(s.getClass())) {
-                childDossiers.add((Dossier) s);
-            }
-        }
-    }
-
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     @Override
     public Boolean getActive() {
@@ -78,14 +54,6 @@ public final class Space extends SubSpace implements Container, Activable {
 
     public void setChildSpaces(List<Space> childSpaces) {
         this.childSpaces = childSpaces;
-    }
-
-    public List<Dossier> getChildDossiers() {
-        return childDossiers;
-    }
-
-    public void setChildDossiers(List<Dossier> childDossiers) {
-        this.childDossiers = childDossiers;
     }
 
     // </editor-fold>

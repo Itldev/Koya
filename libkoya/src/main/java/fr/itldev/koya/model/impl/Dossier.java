@@ -52,7 +52,6 @@ public final class Dossier extends SubSpace implements Container, Activable {
         this.active = active;
     }
 
-    @Override
     @JsonIgnore
     public List<Content> getChildren() {
         List<Content> content = new ArrayList<>();
@@ -61,7 +60,6 @@ public final class Dossier extends SubSpace implements Container, Activable {
         return content;
     }
 
-    @Override
     public void setChildren(List<? extends SecuredItem> children) {
         for (SecuredItem s : children) {
             if (Directory.class.isAssignableFrom(s.getClass())) {
