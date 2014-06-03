@@ -12,8 +12,10 @@ import java.util.List;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.apache.log4j.Logger;
 
 public class KoyaShareService extends KoyaAclService {
@@ -21,9 +23,14 @@ public class KoyaShareService extends KoyaAclService {
     private Logger logger = Logger.getLogger(KoyaShareService.class);
 
     private SpaceService spaceService;
+    private DossierService dossierService;
 
     public void setSpaceService(SpaceService spaceService) {
         this.spaceService = spaceService;
+    }
+
+    public void setDossierService(DossierService dossierService) {
+        this.dossierService = dossierService;
     }
 
     /**
@@ -90,16 +97,55 @@ public class KoyaShareService extends KoyaAclService {
     }
 
     /**
-     * List all secured items shared with user.
+     * List all secured items shared with user on the system.
      *
      *
      * @param u
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public List<SecuredItem> listItemsShared(User u) {
+    public List<SecuredItem> listItemsShared(User u) throws KoyaServiceException {
+        List<SecuredItem> items = new ArrayList<>();
+        for (SiteInfo si : siteService.listSites(u.getLogin())) {
+            items.addAll(listItemsShared(u.getLogin(), si.getShortName()));
+        }
+        return items;
+    }
+
+    /**
+     * List shared elements with specified user. ie user has Read permissions on
+     * each element
+     *
+     * @param userName
+     * @param companyName
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public List<SecuredItem> listItemsShared(String userName, String companyName) throws KoyaServiceException {
+        return listItemSharedRecursive(userName, spaceService.list(companyName, Integer.MAX_VALUE));
+    }
+
+    private List<SecuredItem> listItemSharedRecursive(String userName, List<Space> spaces) throws KoyaServiceException {
         List<SecuredItem> items = new ArrayList<>();
 
-        //TODO 
+        for (Space s : spaces) {
+            items.addAll(listItemSharedRecursive(userName, s.getChildSpaces()));
+            //check if current space is shared with user as site consumer
+            for (AccessPermission ap : permissionService.getAllSetPermissions(s.getNodeRefasObject())) {
+                if (ap.getAuthority().equals(userName) && ap.getPermission().equals(PERMISSION_READ)) {
+                    items.add(s);
+                }
+            }
+                
+            //check if current space children (ie dossiers) are shared with user as site consumer
+            for (Dossier d : dossierService.list(s.getNodeRefasObject())) {
+                for (AccessPermission ap : permissionService.getAllSetPermissions(d.getNodeRefasObject())) {
+                    if (ap.getAuthority().equals(userName) && ap.getPermission().equals(PERMISSION_READ)) {
+                        items.add(d);
+                    }
+                }
+            }
+        }
         return items;
     }
 

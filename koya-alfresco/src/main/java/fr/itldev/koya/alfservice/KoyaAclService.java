@@ -7,6 +7,7 @@ import fr.itldev.koya.model.impl.User;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -20,6 +21,8 @@ public class KoyaAclService {
     protected static final String ROLE_SITE_CONTRIBUTOR = "SiteContributor";
     protected static final String ROLE_SITE_MANAGER = "SiteManager";
 
+    protected static final String PERMISSION_READ = "Read";
+
     private final Logger logger = Logger.getLogger(this.getClass());
 
     protected UserService userService;
@@ -29,6 +32,7 @@ public class KoyaAclService {
     protected NodeService nodeService;
     protected FileFolderService fileFolderService;
     protected AuthenticationService authenticationService;
+    protected SearchService searchService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setUserService(UserService userService) {
@@ -57,6 +61,10 @@ public class KoyaAclService {
 
     public void setAuthenticationService(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
+    }
+
+    public void setSearchService(SearchService searchService) {
+        this.searchService = searchService;
     }
 
     //</editor-fold>

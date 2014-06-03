@@ -261,6 +261,12 @@
         <property name="koyaShareService" ref="koyaShareService" />   
     </bean>
     
+    <bean id="webscript.fr.itldev.koya.share.listusershares.get" 
+          class="fr.itldev.koya.webscript.share.ListUserShares"
+          parent="webscript">
+        <property name="koyaShareService" ref="koyaShareService" />   
+    </bean>
+    
     
      <!--
     ==================================================================

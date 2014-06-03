@@ -69,7 +69,7 @@ public class KoyaScript extends BaseProcessorExtension {
      * @param n
      * @return
      */
-    public List<ScriptNode> listNodesSharedWithUser(ScriptNode n) {
+    public List<ScriptNode> listNodesSharedWithUser(ScriptNode n) throws KoyaServiceException {
         List<ScriptNode> sharedElements = new ArrayList<>();
         for (SecuredItem s : koyaShareService.listItemsShared(userService.buildUser(n.getNodeRef()))) {
             sharedElements.add(new ScriptNode(s.getNodeRefasObject(), serviceRegistry));

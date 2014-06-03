@@ -129,7 +129,8 @@
         <property name="permissionService" ref="permissionService"/>     
         <property name="nodeService" ref="nodeService"/>       
         <property name="fileFolderService" ref="fileFolderService"/>       
-        <property name="authenticationService" ref="authenticationService"/>                
+        <property name="authenticationService" ref="authenticationService"/>      
+        <property name="searchService" ref="searchService"/>                
     </bean>
     
     
@@ -138,6 +139,7 @@
     <!--Secured Items Sharing service-->
     <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService" parent="koyaAclService">
         <property name="spaceService" ref="spaceService"/>  
+        <property name="dossierService" ref="dossierService"/>  
     </bean>
     
     

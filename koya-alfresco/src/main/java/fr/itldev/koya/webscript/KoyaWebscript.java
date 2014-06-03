@@ -45,6 +45,10 @@ public abstract class KoyaWebscript extends AbstractWebScript {
     public static final String WSCONST_NODEREF = "nodeRef";
     public static final String WSCONST_NBANCESTOR = "nbAncestor";
     public static final String WSCONST_PARENTNODEREF = "parentNodeRef";
+    public static final String WSCONST_USERNAME = "userName";
+    public static final String WSCONST_COMPANYNAME = "companyName";
+    
+    
     private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 
     /**
