@@ -106,8 +106,8 @@ public class KoyaShareService extends KoyaAclService {
      */
     public List<SecuredItem> listItemsShared(User u) throws KoyaServiceException {
         List<SecuredItem> items = new ArrayList<>();
-        for (SiteInfo si : siteService.listSites(u.getLogin())) {
-            items.addAll(listItemsShared(u.getLogin(), si.getShortName()));
+        for (SiteInfo si : siteService.listSites(u.getUserName())) {
+            items.addAll(listItemsShared(u.getUserName(), si.getShortName()));
         }
         return items;
     }
@@ -212,17 +212,17 @@ public class KoyaShareService extends KoyaAclService {
      *
      */
     private void grantDossierShare(Dossier dossier, User user) throws KoyaServiceException {
-        grantShare(dossier, user.getLogin());
+        grantShare(dossier, user.getUserName());
         for (SecuredItem si : koyaNodeService.getParentsList(dossier.getNodeRefasObject(), KoyaNodeService.NB_ANCESTOR_INFINTE)) {
-            grantShare(si, user.getLogin());
+            grantShare(si, user.getUserName());
         }
     }
 
     private void revokeDossierShare(Dossier dossier, User user) throws KoyaServiceException {
-        revokeShare(dossier, user.getLogin());
+        revokeShare(dossier, user.getUserName());
         for (SecuredItem si : koyaNodeService.getParentsList(dossier.getNodeRefasObject(), KoyaNodeService.NB_ANCESTOR_INFINTE)) {
-            if (listChildrenItemsShared(si, user.getLogin()).isEmpty()) {
-                revokeShare(si, user.getLogin());
+            if (listChildrenItemsShared(si, user.getUserName()).isEmpty()) {
+                revokeShare(si, user.getUserName());
             } else {
                 return;
             }

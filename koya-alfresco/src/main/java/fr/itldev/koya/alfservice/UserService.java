@@ -80,12 +80,12 @@ public class UserService {
     public void createUser(User userToCreate) throws KoyaServiceException {
 
         PropertyMap propsUser = new PropertyMap();
-        propsUser.put(ContentModel.PROP_USERNAME, userToCreate.getLogin());
+        propsUser.put(ContentModel.PROP_USERNAME, userToCreate.getUserName());
         propsUser.put(ContentModel.PROP_FIRSTNAME, userToCreate.getFirstName());
         propsUser.put(ContentModel.PROP_LASTNAME, userToCreate.getName());
         propsUser.put(ContentModel.PROP_EMAIL, userToCreate.getEmail());
-        if (!personService.personExists(userToCreate.getLogin())) {
-            authenticationService.createAuthentication(userToCreate.getLogin(), userToCreate.getPassword().toCharArray());
+        if (!personService.personExists(userToCreate.getUserName())) {
+            authenticationService.createAuthentication(userToCreate.getUserName(), userToCreate.getPassword().toCharArray());
             personService.createPerson(propsUser);
         } else {
             throw new KoyaServiceException(KoyaErrorCodes.LOGIN_ALREADY_EXISTS);
@@ -102,8 +102,8 @@ public class UserService {
 
         //TODO check who request user modification : user can only modify his own information
         //admin can modify everyone informations
-        if (personService.personExists(userToModify.getLogin())) {
-            NodeRef userNr = personService.getPerson(userToModify.getLogin());
+        if (personService.personExists(userToModify.getUserName())) {
+            NodeRef userNr = personService.getPerson(userToModify.getUserName());
 
             //update 4 fields : firstname,lastname,email,password            
             nodeService.setProperty(userNr, ContentModel.PROP_FIRSTNAME, userToModify.getFirstName());
@@ -231,7 +231,7 @@ public class UserService {
         User u = new User();
 
         //TODO complete build with all properties
-        u.setLogin((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_USERNAME));
+        u.setUserName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_USERNAME));
         u.setFirstName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_FIRSTNAME));
         u.setName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_LASTNAME));
         u.setEmail((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));

@@ -100,7 +100,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         //Authentication ticket integration
         user.setTicketAlfresco(ticket.toString());
         //set users authenticated rest template
-        user.setRestTemplate(getAuthenticatedRestTemplate(user.getLogin(), password));
+        user.setRestTemplate(getAuthenticatedRestTemplate(user.getUserName(), password));
         //load users rest prefrences
         loadPreferences(user);
         //
@@ -162,7 +162,8 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
     @Override
     public void loadPreferences(User userLog, User userToGetPrefs) {
-        Preferences preferences = userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, Preferences.class, userToGetPrefs.getLogin());
+        Preferences preferences = userLog.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_PREFERENCES, Preferences.class, userToGetPrefs.getUserName());
         userToGetPrefs.setPreferences(preferences);
     }
 
@@ -182,7 +183,8 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
         if (userToCommitPrefs.getPreferences() != null) {
             // 1 - send new and modified keys
-            userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_PREFERENCES, userToCommitPrefs.getPreferences(), Preferences.class, userToCommitPrefs.getLogin());
+            userLog.getRestTemplate().postForObject(
+                    getAlfrescoServerUrl() + REST_POST_PREFERENCES, userToCommitPrefs.getPreferences(), Preferences.class, userToCommitPrefs.getUserName());
 
             // 2 - updates preferences from server
             Preferences prefsToCommit = userToCommitPrefs.getPreferences();
@@ -199,7 +201,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
                         sep = ",";
                     }
                 }
-                userLog.getRestTemplate().delete(getAlfrescoServerUrl() + REST_DELETE_PREFERENCES, userToCommitPrefs.getLogin(), deleteFilter);
+                userLog.getRestTemplate().delete(getAlfrescoServerUrl() + REST_DELETE_PREFERENCES, userToCommitPrefs.getUserName(), deleteFilter);
                 loadPreferences(userLog, userToCommitPrefs);
             }
 

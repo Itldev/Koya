@@ -42,7 +42,7 @@ public class MutableAuthenticationServiceItlMail extends MutableAuthenticationSe
         });
 
         if (u != null) {
-            super.authenticate(u.getLogin(), password);
+            super.authenticate(u.getUserName(), password);
         } else {
             super.authenticate(userName, password);
         }

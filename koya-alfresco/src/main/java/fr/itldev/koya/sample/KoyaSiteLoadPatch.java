@@ -45,7 +45,7 @@ public class KoyaSiteLoadPatch extends SiteLoadPatch {
               
                 
                 User userToCreate = new User();
-                userToCreate.setLogin(username);
+                userToCreate.setUserName(username);
                 userToCreate.setFirstName(nodeService.getProperty(r.getNodeRef(), ContentModel.PROP_FIRSTNAME).toString());
                 userToCreate.setName(nodeService.getProperty(r.getNodeRef(), ContentModel.PROP_LASTNAME).toString());
                 userToCreate.setEmail(nodeService.getProperty(r.getNodeRef(), ContentModel.PROP_EMAIL).toString());
