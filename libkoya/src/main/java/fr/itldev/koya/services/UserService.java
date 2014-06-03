@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services;
 
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -97,10 +98,11 @@ public interface UserService {
      * @param userLog
      * @param query
      * @param maxResults
+     * @param company
      * @return
      * @throws AlfrescoServiceException
      */
-    List<User> find(User userLog, String query, Integer maxResults) throws AlfrescoServiceException;
+    List<User> find(User userLog, String query, Integer maxResults, Company... company) throws AlfrescoServiceException;
 
     List<Notification> getNotifications(User userLog);
 

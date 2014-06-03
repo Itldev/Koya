@@ -88,6 +88,7 @@
         <property name="personService" ref="personService"/>
         <property name="searchService" ref="searchService"/>
         <property name="authenticationService" ref="AuthenticationService"/>
+        <property name="siteService" ref="siteService"/>
     </bean>
    
     <!--Data Import/Export Service-->
@@ -136,7 +137,7 @@
     
     <!--Secured Items Sharing service-->
     <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService" parent="koyaAclService">
-         <property name="spaceService" ref="spaceService"/>  
+        <property name="spaceService" ref="spaceService"/>  
     </bean>
     
     

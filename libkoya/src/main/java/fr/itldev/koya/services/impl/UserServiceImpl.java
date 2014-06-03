@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services.impl;
 
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
@@ -52,6 +53,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_DEL_LOGOUT = "/s/api/login/ticket/{ticket}";
     private static final String REST_POST_MODIFYDETAILS = "/s/fr/itldev/koya/user/modifydetails";
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find/{query}/{maxresults}";
+    private static final String REST_GET_FINDUSERS_INCOMPANY = "/s/fr/itldev/koya/user/find/{query}/{maxresults}/{sitename}";
     private static final String REST_GET_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword/{oldpwd}/{newpwd}";
 
     //===== Preferences
@@ -240,9 +242,15 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<User> find(User userLog, String query, Integer maxResults) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret
-                = userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_FINDUSERS, ItlAlfrescoServiceWrapper.class, query, maxResults);
+    public List<User> find(User userLog, String query, Integer maxResults, Company... company) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret;
+
+        if (company.length == 1) {
+            ret = userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_FINDUSERS_INCOMPANY, ItlAlfrescoServiceWrapper.class, query, maxResults, company[0].getName());
+        } else {
+            ret = userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_FINDUSERS, ItlAlfrescoServiceWrapper.class, query, maxResults);
+        }
+
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (List<User>) ret.getItems();
         } else {

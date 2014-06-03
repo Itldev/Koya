@@ -24,6 +24,7 @@
     <description>Find Users</description>
     <family>Itldev</family>
     <url>/fr/itldev/koya/user/find/{query}/{maxresults}</url>
+        <url>/fr/itldev/koya/user/find/{query}/{maxresults}/{sitename}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

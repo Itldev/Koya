@@ -23,6 +23,7 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -33,6 +34,7 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.MutableAuthenticationService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.PropertyMap;
 import org.apache.log4j.Logger;
 
@@ -47,6 +49,7 @@ public class UserService {
     private PersonService personService;
     protected SearchService searchService;
     private MutableAuthenticationService authenticationService;
+    private SiteService siteService;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -62,6 +65,10 @@ public class UserService {
 
     public void setAuthenticationService(MutableAuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
+    }
+
+    public void setSiteService(SiteService siteService) {
+        this.siteService = siteService;
     }
 
     /**
@@ -131,17 +138,13 @@ public class UserService {
      * starts with query String.
      *
      *
-     * TODO limit results to users company users (ie one can not get all
-     * alfresco users mails way)
      *
-     * @param query
+     * @param queryStartsWith
      * @param maxResults - 0 = no limit
      * @return
      */
-    public List<User> find(String query, int maxResults) {
-
-        //TODO search with personService to limit results to authenticated users
-        String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\"" + query + "*\" OR @cm\\:firstName:\"" + query + "*\" OR @cm\\:email:\"" + query + "*\" )";
+    public List<User> find(String queryStartsWith, int maxResults) {
+        String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\"" + queryStartsWith + "*\" OR @cm\\:firstName:\"" + queryStartsWith + "*\" OR @cm\\:email:\"" + queryStartsWith + "*\" )";
 
         logger.trace(luceneRequest);
         List<User> users = new ArrayList<>();
@@ -161,7 +164,65 @@ public class UserService {
             }
         }
 
-        logger.trace(users.size() + " resultats trouvés");
+        logger.trace(users.size() + " results found");
+
+        return users;
+    }
+
+    /**
+     *
+     * Find users per company who username starts with defined query.
+     *
+     * TODO improve implementation using cache --> can be with long lot of users
+     * TODO load tests
+     *
+     * @param userFilter
+     * @param roleFilter
+     * @param maxResults
+     * @param companyName
+     * @return
+     */
+    public List<User> findInCompany(String userFilter, String roleFilter, int maxResults, String companyName) {
+        List<User> users = new ArrayList<>();
+
+        /**
+         * find users userName who mail adress can match userFilter.
+         */
+        List<String> userNameMailRequested = new ArrayList<>();
+        String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"*" + userFilter + "*\"";
+        ResultSet rs = null;
+        try {
+            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
+            for (ResultSetRow r : rs) {
+                userNameMailRequested.add((String) nodeService.getProperty(r.getNodeRef(), ContentModel.PROP_USERNAME));
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+        }
+
+        Map<String, String> members = siteService.listMembers(companyName, "*" + userFilter + "*", roleFilter, maxResults, true);
+
+        for (String usernameByMail : userNameMailRequested) {
+            members.putAll(siteService.listMembers(companyName, usernameByMail, roleFilter, maxResults, true));
+        }
+
+        for (String userName : members.keySet()) {
+            //remove from results where query is not name|firstname|email substring
+            //---> prevent display changed mail adress (username not changed )
+            User u = buildUser(personService.getPerson(userName));
+            if (u.getName().contains(userFilter)
+                    || u.getFirstName().contains(userFilter)
+                    || u.getEmail().contains(userFilter)) {
+                users.add(buildUser(personService.getPerson(userName)));
+            }
+
+            if (users.size() >= maxResults) {
+                break;
+            }
+        }
+        logger.trace(users.size() + " results found");
 
         return users;
     }

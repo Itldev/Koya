@@ -41,13 +41,40 @@ public class Find extends KoyaWebscript {
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         String query = (String) urlParams.get("query");
+
         Integer maxResults;
         try {
             maxResults = Integer.valueOf((String) urlParams.get("maxResults"));
         } catch (NumberFormatException e) {
             maxResults = DEFAULT_MAXRESULTS;
         }
-        wrapper.addItems(userService.find(query, maxResults));
+        String sitename = null;
+        try {
+            sitename = (String) urlParams.get("sitename");
+        } catch (Exception ex) {
+
+        }
+
+        if (sitename == null) {
+            wrapper.addItems(userService.find(query, maxResults));
+        } else {
+
+            /**
+             * Find in company filtered on role SiteConsumer because this
+             * request is used to autocomplete users for sharing : ie only for
+             * this groups users.
+             *
+             * TODO More flexible implementation. particularly when there will
+             * be differents spaces per company. (ex user can be collaborator on
+             * specific space and have no permission on other one but be shared
+             * a specific Dossier)
+             *
+             */
+            String roleFilter = "SiteConsumer";
+
+            wrapper.addItems(userService.findInCompany(query, roleFilter, maxResults, sitename));
+        }
+
         return wrapper;
     }
 
