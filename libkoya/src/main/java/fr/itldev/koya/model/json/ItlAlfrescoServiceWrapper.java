@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
@@ -57,7 +58,7 @@ public class ItlAlfrescoServiceWrapper {
     }
 
     public void setMessage(String message) {
-        this.message = message;
+        this.message = StringEscapeUtils.escapeJava(message);
     }
 
     public List getItems() {
@@ -104,7 +105,7 @@ public class ItlAlfrescoServiceWrapper {
 
     public void setStatusFail(String failMessage) {
         this.status = STATUS_NOK;
-        this.message = failMessage;
+        this.message = StringEscapeUtils.escapeJava(failMessage);
     }
 
     @JsonIgnore
