@@ -114,22 +114,8 @@ public class DossierService {
         List<Dossier> dossiers = new ArrayList<>();
 
         for (final FileInfo fi : fileFolderService.listFolders(parent)) {
-            //  NodeRef childNr = fi.getNodeRef();
-
-            if (fi.getType().equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-                /**
-                 * Executed as system user beacause current user may have so
-                 * limited rights he can't even read properies (name property is
-                 * required)
-                 *
-                 */
-                Dossier d = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Dossier>() {
-                    @Override
-                    public Dossier doWork() throws Exception {
-                        return koyaNodeService.nodeDossierBuilder(fi.getNodeRef());
-                    }
-                });
-                dossiers.add(d);
+            if (fi.getType().equals(KoyaModel.QNAME_KOYA_DOSSIER)) {        
+                dossiers.add(koyaNodeService.nodeDossierBuilder(fi.getNodeRef()));
             }
         }
         return dossiers;

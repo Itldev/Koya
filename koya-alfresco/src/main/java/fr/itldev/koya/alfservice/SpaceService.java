@@ -152,18 +152,7 @@ public class SpaceService {
         for (final FileInfo fi : fileFolderService.listFolders(rootNodeRef)) {
 
             if (fi.getType().equals(KoyaModel.QNAME_KOYA_SPACE)) {
-                /**
-                 * Executed as system user beacause current user may have so
-                 * limited rights he can't even read properies (name property is
-                 * required)
-                 *
-                 */
-                Space space = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Space>() {
-                    @Override
-                    public Space doWork() throws Exception {
-                        return koyaNodeService.nodeSpaceBuilder(fi.getNodeRef());
-                    }
-                });
+                Space space = koyaNodeService.nodeSpaceBuilder(fi.getNodeRef());
                 space.setChildSpaces(listRecursive(fi.getNodeRef(), depth - 1));
                 spaces.add(space);
             }

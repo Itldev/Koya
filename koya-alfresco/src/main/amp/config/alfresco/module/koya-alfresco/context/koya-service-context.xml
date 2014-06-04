@@ -31,6 +31,7 @@
     <!--Global Koya nodes util services-->
     <bean name="koyaNodeService" class="fr.itldev.koya.alfservice.KoyaNodeService">
         <property name="nodeService" ref="NodeService"/>
+        <property name="unsecuredNodeService" ref="nodeService"/>
         <property name="favouritesService" ref="favouritesService"/>
         <property name="preferenceService" ref="preferenceService"/>
         <property name="dictionaryService" ref="DictionaryService"/>
