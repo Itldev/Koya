@@ -23,6 +23,7 @@ import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -152,18 +153,18 @@ public class KoyaContentService {
         if (depth <= 0) {
             return contents;//return empty list if max depth < = 0 : ie max depth reached
         }
-        for (ChildAssociationRef car : nodeService.getChildAssocs(parent)) {
-            NodeRef childNr = car.getChildRef();
-            //
-            if (koyaNodeService.nodeIsFolder(childNr)) {
-                Directory dir = koyaNodeService.nodeDirBuilder(childNr);
-                dir.setChildren(list(childNr, depth - 1));
+        
+        for (final FileInfo fi : fileFolderService.listFolders(parent)) {
+          if (koyaNodeService.nodeIsFolder(fi.getNodeRef())) {
+                Directory dir = koyaNodeService.nodeDirBuilder(fi.getNodeRef());
+                dir.setChildren(list(fi.getNodeRef(), depth - 1));
                 contents.add(dir);
             } else {
-                contents.add(koyaNodeService.nodeDocumentBuilder(childNr));
+                contents.add(koyaNodeService.nodeDocumentBuilder(fi.getNodeRef()));
             }
-        }
+        }                    
         return contents;
+        
     }
 
     public File zip(List<String> nodeRefs) {
