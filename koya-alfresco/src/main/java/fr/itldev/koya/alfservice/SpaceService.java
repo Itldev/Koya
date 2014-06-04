@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -148,11 +149,22 @@ public class SpaceService {
             return spaces;//return empty list if max depth < = 0 : ie max depth reached
         }
 
-        for (FileInfo fi : fileFolderService.listFolders(rootNodeRef)) {
-            NodeRef childNr = fi.getNodeRef();
-            if (nodeService.getType(childNr).equals(KoyaModel.QNAME_KOYA_SPACE)) {
-                Space space = koyaNodeService.nodeSpaceBuilder(childNr);
-                space.setChildSpaces(listRecursive(childNr, depth - 1));
+        for (final FileInfo fi : fileFolderService.listFolders(rootNodeRef)) {
+
+            if (fi.getType().equals(KoyaModel.QNAME_KOYA_SPACE)) {
+                /**
+                 * Executed as system user beacause current user may have so
+                 * limited rights he can't even read properies (name property is
+                 * required)
+                 *
+                 */
+                Space space = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Space>() {
+                    @Override
+                    public Space doWork() throws Exception {
+                        return koyaNodeService.nodeSpaceBuilder(fi.getNodeRef());
+                    }
+                });
+                space.setChildSpaces(listRecursive(fi.getNodeRef(), depth - 1));
                 spaces.add(space);
             }
         }

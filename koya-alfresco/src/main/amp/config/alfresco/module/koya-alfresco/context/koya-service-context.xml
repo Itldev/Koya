@@ -23,15 +23,20 @@
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <beans>
     
+    
+    <!--    For all Alfresco services, we defaultly use Upper case bean reference because
+    if salfly calls service : http://alfrescoshare.wordpress.com/2010/01/06/alfresco-coding-best-practice-how-to-safely-call-java-services/
+    -->
+    
     <!--Global Koya nodes util services-->
     <bean name="koyaNodeService" class="fr.itldev.koya.alfservice.KoyaNodeService">
-        <property name="nodeService" ref="nodeService"/>
+        <property name="nodeService" ref="NodeService"/>
         <property name="favouritesService" ref="favouritesService"/>
         <property name="preferenceService" ref="preferenceService"/>
-        <property name="dictionaryService" ref="dictionaryService"/>
+        <property name="dictionaryService" ref="DictionaryService"/>
         <property name="companyService" ref="companyService"/>
-        <property name="fileFolderService" ref="fileFolderService" />
-        <property name="authenticationService" ref="authenticationService" />
+        <property name="fileFolderService" ref="FileFolderService" />
+        <property name="authenticationService" ref="AuthenticationService" />
         <property name="koyaShareService" ref="koyaShareService"/>
         <property name="koyaAclService" ref="koyaAclService"/>
     </bean>
@@ -44,61 +49,62 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="hiddenAspect" ref="hiddenAspect" />
         <property name="modelService" ref="modelService" />
-        <property name="authenticationService" ref="authenticationService" />
+        <property name="authenticationService" ref="AuthenticationService" />
     </bean>     
     
     <!--Spaces Handling service-->
     <bean name="spaceService" class="fr.itldev.koya.alfservice.SpaceService">
-        <property name="nodeService" ref="nodeService"/>
-        <property name="searchService" ref="searchService"/>
+        <property name="nodeService" ref="NodeService"/>
+        <property name="searchService" ref="SearchService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="companyService" ref="companyService"/>
         <property name="koyaAclService" ref="koyaAclService"/>
-        <property name="fileFolderService" ref="fileFolderService"/>
+        <property name="fileFolderService" ref="FileFolderService"/>
     </bean> 
     
     <!--Dossiers handling service-->
     <bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
-        <property name="nodeService" ref="nodeService"/>
+        <property name="nodeService" ref="NodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="koyaAclService" ref="koyaAclService"/>
-        <property name="fileFolderService" ref="fileFolderService"/>
+        <property name="fileFolderService" ref="FileFolderService"/>
     </bean>
 
     <!--Contents handling service-->
     <bean name="koyaContentService" class="fr.itldev.koya.alfservice.KoyaContentService">
-        <property name="nodeService" ref="nodeService"/>
+        <property name="nodeService" ref="NodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="dictionaryService" ref="dictionaryService"/>
+        <property name="dictionaryService" ref="DictionaryService"/>
         <property name="contentService" ref="contentService"/>
-        <property name="namespaceService" ref="namespaceService"/>
+        <property name="namespaceService" ref="NamespaceService"/>
+        <property name="fileFolderService" ref="FileFolderService"/>
+        <property name="koyaAclService" ref="koyaAclService"/>     
     </bean>
    
     
     
     <!--Sales Offer Handling service-->
     <bean name="salesOfferService" class="fr.itldev.koya.alfservice.SalesOfferService">
-        <property name="nodeService" ref="nodeService"/>
+        <property name="nodeService" ref="NodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
     
     <!--Users handling service-->
     <bean name="userService" class="fr.itldev.koya.alfservice.UserService">
-        <property name="nodeService" ref="nodeService"/>
-        <property name="personService" ref="personService"/>
-        <property name="searchService" ref="searchService"/>
+        <property name="nodeService" ref="NodeService"/>
+        <property name="personService" ref="PersonService"/>
+        <property name="searchService" ref="SearchService"/>
         <property name="authenticationService" ref="AuthenticationService"/>
-        <property name="siteService" ref="siteService"/>
+        <property name="siteService" ref="SiteService"/>
     </bean>
    
     <!--Data Import/Export Service-->
     <bean name="importExportService" class="fr.itldev.koya.alfservice.ImportExportService"/>
     <!--Model Handling service-->
     <bean name="modelService" class="fr.itldev.koya.alfservice.ModelService">
-        <property name="nodeService" ref="nodeService"/>
-        <property name="copyService" ref="copyService"/>
-        <property name="searchService" ref="searchService"/>
-        <property name="siteService" ref="siteService"/>
+        <property name="nodeService" ref="NodeService"/>
+        <property name="copyService" ref="CopyService"/>
+        <property name="searchService" ref="SearchService"/>
+        <property name="siteService" ref="SiteService"/>
     </bean>
     
     <!--Profiles Handling Service-->
@@ -123,23 +129,20 @@
     -->
     <!--Koya specific Permissions service-->
     <bean name="koyaAclService" class="fr.itldev.koya.alfservice.KoyaAclService">     
-        <property name="userService" ref="userService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="siteService" ref="siteService"/>      
-        <property name="permissionService" ref="permissionService"/>     
-        <property name="nodeService" ref="nodeService"/>       
-        <property name="fileFolderService" ref="fileFolderService"/>       
-        <property name="authenticationService" ref="authenticationService"/>      
-        <property name="searchService" ref="searchService"/>                
+        <property name="permissionService" ref="PermissionService"/>     
+        <property name="nodeService" ref="NodeService"/>       
+        <property name="authenticationService" ref="AuthenticationService"/>      
     </bean>
     
-    
-    
-    
+        
     <!--Secured Items Sharing service-->
     <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService" parent="koyaAclService">
         <property name="spaceService" ref="spaceService"/>  
-        <property name="dossierService" ref="dossierService"/>  
+        <property name="dossierService" ref="dossierService"/> 
+        <property name="userService" ref="userService"/>
+        <property name="siteService" ref="SiteService"/>            
+        <property name="fileFolderService" ref="FileFolderService"/>       
     </bean>
     
     

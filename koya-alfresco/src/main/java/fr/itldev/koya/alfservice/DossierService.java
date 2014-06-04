@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -48,7 +49,6 @@ public class DossierService {
 
     private NodeService nodeService;
     private KoyaNodeService koyaNodeService;
-    private KoyaAclService koyaAclService;
     private FileFolderService fileFolderService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
@@ -58,10 +58,6 @@ public class DossierService {
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
-    }
-
-    public void setKoyaAclService(KoyaAclService koyaAclService) {
-        this.koyaAclService = koyaAclService;
     }
 
     public void setFileFolderService(FileFolderService fileFolderService) {
@@ -117,11 +113,22 @@ public class DossierService {
     public List<Dossier> list(NodeRef parent) throws KoyaServiceException {
         List<Dossier> dossiers = new ArrayList<>();
 
-        for (FileInfo fi : fileFolderService.listFolders(parent)) {
-            NodeRef childNr = fi.getNodeRef();
+        for (final FileInfo fi : fileFolderService.listFolders(parent)) {
+            //  NodeRef childNr = fi.getNodeRef();
 
-            if (nodeService.getType(childNr).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
-                Dossier d = koyaNodeService.nodeDossierBuilder(childNr);
+            if (fi.getType().equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+                /**
+                 * Executed as system user beacause current user may have so
+                 * limited rights he can't even read properies (name property is
+                 * required)
+                 *
+                 */
+                Dossier d = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Dossier>() {
+                    @Override
+                    public Dossier doWork() throws Exception {
+                        return koyaNodeService.nodeDossierBuilder(fi.getNodeRef());
+                    }
+                });
                 dossiers.add(d);
             }
         }

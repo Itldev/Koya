@@ -10,12 +10,13 @@ import fr.itldev.koya.model.json.SharingWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteService;
 import org.apache.log4j.Logger;
 
 public class KoyaShareService extends KoyaAclService {
@@ -24,6 +25,9 @@ public class KoyaShareService extends KoyaAclService {
 
     private SpaceService spaceService;
     private DossierService dossierService;
+    private UserService userService;
+    private SiteService siteService;
+    private FileFolderService fileFolderService;
 
     public void setSpaceService(SpaceService spaceService) {
         this.spaceService = spaceService;
@@ -31,6 +35,18 @@ public class KoyaShareService extends KoyaAclService {
 
     public void setDossierService(DossierService dossierService) {
         this.dossierService = dossierService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public void setSiteService(SiteService siteService) {
+        this.siteService = siteService;
+    }
+
+    public void setFileFolderService(FileFolderService fileFolderService) {
+        this.fileFolderService = fileFolderService;
     }
 
     /**
@@ -136,7 +152,7 @@ public class KoyaShareService extends KoyaAclService {
                     items.add(s);
                 }
             }
-                
+
             //check if current space children (ie dossiers) are shared with user as site consumer
             for (Dossier d : dossierService.list(s.getNodeRefasObject())) {
                 for (AccessPermission ap : permissionService.getAllSetPermissions(d.getNodeRefasObject())) {

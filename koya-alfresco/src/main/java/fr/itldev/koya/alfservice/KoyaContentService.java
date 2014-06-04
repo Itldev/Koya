@@ -18,8 +18,12 @@
  */
 package fr.itldev.koya.alfservice;
 
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,6 +43,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.model.FileExistsException;
+import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
@@ -65,6 +72,8 @@ public class KoyaContentService {
     protected DictionaryService dictionaryService;
     protected ContentService contentService;
     protected NamespaceService namespaceService;
+    protected FileFolderService fileFolderService;
+    protected KoyaAclService koyaAclService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -86,24 +95,31 @@ public class KoyaContentService {
     public void setNamespaceService(NamespaceService namespaceService) {
         this.namespaceService = namespaceService;
     }
+
+    public void setFileFolderService(FileFolderService fileFolderService) {
+        this.fileFolderService = fileFolderService;
+    }
+
+    public void setKoyaAclService(KoyaAclService koyaAclService) {
+        this.koyaAclService = koyaAclService;
+    }
+
     // </editor-fold>
+    public Directory createDir(String name, NodeRef parent) throws KoyaServiceException {
 
-    public Directory createDir(String name, NodeRef parent) {
+        if (!(nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_DOSSIER)
+                || nodeService.getType(parent).equals(ContentModel.TYPE_FOLDER))) {
+            throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_INVALID_PARENT_TYPE);
+        }
 
-        //TODO parent must be a dir or a dossier
-        //TODO check dir name unicity
-        //node properties building
-        final Map<QName, Serializable> properties = new HashMap<>();
-        properties.put(ContentModel.PROP_NAME, name);
-        //TODO other properties
+        FileInfo fInfo;
+        try {
+            fInfo = fileFolderService.create(parent, name, ContentModel.TYPE_FOLDER);
+        } catch (FileExistsException fex) {
+            throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
+        }
 
-        ChildAssociationRef car = nodeService.createNode(parent,
-                ContentModel.ASSOC_CONTAINS,
-                QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
-                ContentModel.TYPE_FOLDER,
-                properties);
-
-        return koyaNodeService.nodeDirBuilder(car.getChildRef());
+        return koyaNodeService.nodeDirBuilder(fInfo.getNodeRef());
     }
 
     public Content move(NodeRef toMove, NodeRef dest) {

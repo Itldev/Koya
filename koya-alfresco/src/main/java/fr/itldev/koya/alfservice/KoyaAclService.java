@@ -4,14 +4,11 @@ import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
-import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.site.SiteService;
 import org.apache.log4j.Logger;
 
 public class KoyaAclService {
@@ -25,26 +22,14 @@ public class KoyaAclService {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    protected UserService userService;
     protected PermissionService permissionService;
-    protected SiteService siteService;
     protected KoyaNodeService koyaNodeService;
     protected NodeService nodeService;
-    protected FileFolderService fileFolderService;
     protected AuthenticationService authenticationService;
-    protected SearchService searchService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
     public void setPermissionService(PermissionService permissionService) {
         this.permissionService = permissionService;
-    }
-
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
     }
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
@@ -55,16 +40,8 @@ public class KoyaAclService {
         this.nodeService = nodeService;
     }
 
-    public void setFileFolderService(FileFolderService fileFolderService) {
-        this.fileFolderService = fileFolderService;
-    }
-
     public void setAuthenticationService(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
-    }
-
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
     }
 
     //</editor-fold>

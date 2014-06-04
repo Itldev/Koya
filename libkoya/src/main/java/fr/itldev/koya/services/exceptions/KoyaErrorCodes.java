@@ -29,6 +29,8 @@ public interface KoyaErrorCodes {
 
     //400 -> Content errors
     public static final Integer CONTENT_CREATION_INVALID_TYPE = 400;
+    public static final Integer DIR_CREATION_INVALID_PARENT_TYPE = 401;
+    public static final Integer DIR_CREATION_NAME_EXISTS = 402;
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;

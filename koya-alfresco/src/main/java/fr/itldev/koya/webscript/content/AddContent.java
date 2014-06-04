@@ -19,7 +19,6 @@
 package fr.itldev.koya.webscript.content;
 
 import fr.itldev.koya.alfservice.KoyaContentService;
-import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
