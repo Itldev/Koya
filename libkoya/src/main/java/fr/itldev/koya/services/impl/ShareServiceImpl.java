@@ -25,11 +25,11 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
      * @param usersMails
      */
     @Override
-    public void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails) {
+    public void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails, String serverPath, String acceptUrl, String rejectUrl) {
 
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_SHAREITEMS,
-                new SharingWrapper(sharedItems, usersMails), ItlAlfrescoServiceWrapper.class);
+                new SharingWrapper(sharedItems, usersMails, serverPath, acceptUrl, rejectUrl), ItlAlfrescoServiceWrapper.class);
 
         int n = ret.getItems().size();
 

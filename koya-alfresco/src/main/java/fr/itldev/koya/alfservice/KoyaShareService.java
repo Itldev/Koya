@@ -8,9 +8,13 @@ import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.SharingWrapper;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.invitation.Invitation;
+import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AccessPermission;
@@ -18,6 +22,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.log4j.Logger;
+import org.springframework.util.Assert;
 
 public class KoyaShareService extends KoyaAclService {
 
@@ -28,6 +33,7 @@ public class KoyaShareService extends KoyaAclService {
     private UserService userService;
     private SiteService siteService;
     private FileFolderService fileFolderService;
+    private InvitationService invitationService;
 
     public void setSpaceService(SpaceService spaceService) {
         this.spaceService = spaceService;
@@ -49,6 +55,10 @@ public class KoyaShareService extends KoyaAclService {
         this.fileFolderService = fileFolderService;
     }
 
+    public void setInvitationService(InvitationService invitationService) {
+        this.invitationService = invitationService;
+    }
+
     /**
      *
      *
@@ -58,6 +68,13 @@ public class KoyaShareService extends KoyaAclService {
     public void shareItems(SharingWrapper sharingWrapper) throws KoyaServiceException {
 
         List<SecuredItem> sharedItems = getSharedItems(sharingWrapper);
+        String serverPath = sharingWrapper.getServerPath();
+        String acceptUrl = sharingWrapper.getAcceptUrl();
+        String rejectUrl = sharingWrapper.getRejectUrl();
+
+        Assert.notNull(serverPath, "serverPath is null");
+        Assert.notNull(acceptUrl, "acceptUrl is null");
+        Assert.notNull(rejectUrl, "rejectUrl is null");
 
         //share elements to users specified by email
         for (String userMail : sharingWrapper.getSharingUsersMails()) {
@@ -70,9 +87,7 @@ public class KoyaShareService extends KoyaAclService {
             }
 
             if (u == null) {
-
-                break;//TODO replace with user creation process
-                // u = createUserForSharing(sharedItems, userMail);//TODO user creation process
+                u = createUserForSharing(sharedItems, userMail, serverPath, acceptUrl, rejectUrl);//TODO user creation process
             }
 
             logger.debug("share " + sharedItems.size() + " elements to existing : " + u.getEmail());
@@ -199,13 +214,26 @@ public class KoyaShareService extends KoyaAclService {
         return users;
     }
 
-    private User createUserForSharing(List<SecuredItem> sharedItems, String newUserMail) {
+    private User createUserForSharing(List<SecuredItem> sharedItems, String newUserMail, String serverPath, String acceptUrl, String rejectUrl) {
         logger.error("create user : " + newUserMail + " and share " + sharedItems.size() + " elements");
-        //create user 
-        //give permissions
-        //send email
 
-        return new User();//returns created user
+        Set<Company> invitedTo = new HashSet<>();
+        User u = null;
+        for (SecuredItem si : sharedItems) {
+            Company company;
+            try {
+                //Faster than instanceof
+                company = (Company) si;
+            } catch (ClassCastException cce) {
+                company = koyaNodeService.getNodeCompany(si.getNodeRefasObject());
+            }
+            if (company != null && invitedTo.add(company)) {
+                Invitation invitation = invitationService.inviteNominated(null, newUserMail, newUserMail, Invitation.ResourceType.WEB_SITE, company.getName(), ROLE_SITE_CONSUMER, serverPath, acceptUrl, rejectUrl);
+                u = userService.getUserByUsername(invitation.getInviteeUserName());
+            }
+        }
+
+        return u;
     }
 
     private List<SecuredItem> getSharedItems(SharingWrapper sharingWrapper) {

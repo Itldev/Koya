@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.nodelocator.AncestorNodeLocator;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.favourites.FavouritesService;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -75,7 +76,8 @@ public class KoyaNodeService {
     private AuthenticationService authenticationService;
     private KoyaShareService koyaShareService;
     private KoyaAclService koyaAclService;
-
+    private AncestorNodeLocator ancestorNodeLocator;
+    
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -608,6 +610,26 @@ public class KoyaNodeService {
         return parents;
     }
 
+    /**
+     * get the company this nodeRef belongs to
+     * 
+     * @param nodeRef
+     * @return 
+     */
+    public SecuredItem getCompany(NodeRef nodeRef) throws KoyaServiceException {
+        Map params = new HashMap(1);
+        params.put(AncestorNodeLocator.TYPE_KEY, KoyaModel.QNAME_KOYA_COMPANY);
+        
+        NodeRef companyNR = ancestorNodeLocator.getNode(nodeRef,params);
+        
+        if(companyNR != null) {
+            return nodeCompanyBuilder(companyNR);
+        } else {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF, "nodeRef not whithin a Company");
+        }
+        
+        
+    }
     /**
      * return true if node given in argument has a Dossier in his ancestors.
      *

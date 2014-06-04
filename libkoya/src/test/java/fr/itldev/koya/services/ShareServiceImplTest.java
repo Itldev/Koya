@@ -84,8 +84,6 @@ public class ShareServiceImplTest extends TestCase {
         List<String> shareToUsersMails = new ArrayList<>();      
         shareToUsersMails.add("test@itldev.fr");
 
-
-        //TODO can't currently share with non existing users
-        shareService.shareItems(admin, sharedDossiers, shareToUsersMails);
+        shareService.shareItems(admin, sharedDossiers, shareToUsersMails, "http://localhost:9090/test", "accept.xhtml", "reject.xhtml");
     }
 }

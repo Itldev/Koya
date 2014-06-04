@@ -18,7 +18,7 @@ public interface ShareService extends AlfrescoService {
      * @param sharedItems
      * @param usersMails
      */
-    void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails);
+    void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails, String serverPath, String acceptUrl, String rejectUrl);
     
     
      /**

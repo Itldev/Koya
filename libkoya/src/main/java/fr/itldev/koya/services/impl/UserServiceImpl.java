@@ -55,7 +55,9 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find/{query}/{maxresults}";
     private static final String REST_GET_FINDUSERS_INCOMPANY = "/s/fr/itldev/koya/user/find/{query}/{maxresults}/{sitename}";
     private static final String REST_GET_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword/{oldpwd}/{newpwd}";
+    private static final String REST_GET_REJECT_INVITE = "/s/api/invite/{inviteId}/{inviteTicket}";
 
+    private static final String REST_GET_ACCEPT_INVITE = "/s/api/invite/{inviteId}/{inviteTicket}/accept";
     //===== Preferences
     private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
     private static final String REST_POST_PREFERENCES = "/s/api/people/{userid}/preferences";
@@ -264,6 +266,31 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     public List<Notification> getNotifications(User userLog) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         //cf alfresco activity service
+    }
+
+//TODO Not used yet
+    public void acceptInvite(String inviteId, String inviteTicket, String userName) {
+
+        String acceptUrl = REST_GET_ACCEPT_INVITE;
+
+        if (userName != null && !userName.trim().isEmpty()) {
+            acceptUrl = acceptUrl + "?inviteeUserName=" + userName;
+        }
+
+        getTemplate().getForEntity(getAlfrescoServerUrl() + acceptUrl, String.class, inviteId, inviteTicket);
+
+    }
+
+    public void rejectInvite(String inviteId, String inviteTicket, String userName) {
+
+        String acceptUrl = REST_GET_REJECT_INVITE;
+
+        if (userName != null && !userName.trim().isEmpty()) {
+            acceptUrl = acceptUrl + "?inviteeUserName=" + userName;
+        }
+
+        getTemplate().getForEntity(getAlfrescoServerUrl() + acceptUrl, String.class, inviteId, inviteTicket);
+
     }
 
 }
