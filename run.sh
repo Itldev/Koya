@@ -60,6 +60,9 @@ do
 
 done
 
+if [ -f alfresco/src/main/properties/dev/alfresco-global.properties ];then
+	MVNOPTS="$MVNOPTS -Denv=dev"
+fi
 
 if [ -n "$ALFRESCO_HOME" ];then
         OPTS="$OPTS -Dalfresco.home=$ALFRESCO_HOME/"

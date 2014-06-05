@@ -20,3 +20,4 @@ nbproject
 *.log
 *.log.*
 
+alfresco/src/main/properties/dev/alfresco-global.properties
