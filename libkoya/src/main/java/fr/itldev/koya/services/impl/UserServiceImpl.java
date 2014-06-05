@@ -26,13 +26,15 @@ import fr.itldev.koya.model.json.AuthTicket;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScheme;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
@@ -42,7 +44,6 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -51,7 +52,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -115,8 +115,12 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         }
         //Authentication ticket integration
         user.setTicketAlfresco(ticket.toString());
-        //set users authenticated rest template
-        user.setRestTemplate(getAuthenticatedRestTemplate(user.getUserName(), password));
+        try {
+            //set users authenticated rest template
+            user.setRestTemplate(getAuthenticatedRestTemplate(user.getUserName(), password));
+        } catch (MalformedURLException ex) {
+            throw new AlfrescoServiceException(ex.toString());
+        }
         //load users rest prefrences
         loadPreferences(user);
         //
@@ -144,9 +148,10 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      *
      * @return
      */
-    private RestTemplate getAuthenticatedRestTemplate(String login, String password) {
+    private RestTemplate getAuthenticatedRestTemplate(String login, String password) throws MalformedURLException {
+        URL url = new URL(getAlfrescoServerUrl());
 
-        RestTemplate userRestTemplate = new RestClient(login, password, "localhost", 8080, "http");
+        RestTemplate userRestTemplate = new RestClient(login, password, url.getHost(), url.getPort(), url.getProtocol());
         List<HttpMessageConverter<?>> msgConverters = new ArrayList<>();
         msgConverters.add((HttpMessageConverter<?>) beanFactory.getBean("stringHttpMessageConverter"));
         msgConverters.add((HttpMessageConverter<?>) beanFactory.getBean("jsonHttpMessageConverter"));
