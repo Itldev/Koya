@@ -26,19 +26,33 @@ import fr.itldev.koya.model.json.AuthTicket;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScheme;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.http.client.CommonsClientHttpRequestFactory;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
@@ -132,15 +146,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      */
     private RestTemplate getAuthenticatedRestTemplate(String login, String password) {
 
-        HttpState httpState = new HttpState();
-        httpState.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-
-        HttpClient httpClient = new HttpClient();
-        httpClient.setState(httpState);
-
-        CommonsClientHttpRequestFactory httpClientFactory = new CommonsClientHttpRequestFactory(httpClient);
-
-        RestTemplate userRestTemplate = new RestTemplate(httpClientFactory);
+        RestTemplate userRestTemplate = new RestClient(login, password, "localhost", 8080, "http");
         List<HttpMessageConverter<?>> msgConverters = new ArrayList<>();
         msgConverters.add((HttpMessageConverter<?>) beanFactory.getBean("stringHttpMessageConverter"));
         msgConverters.add((HttpMessageConverter<?>) beanFactory.getBean("jsonHttpMessageConverter"));
@@ -291,6 +297,53 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
         getTemplate().getForEntity(getAlfrescoServerUrl() + acceptUrl, String.class, inviteId, inviteTicket);
 
+    }
+
+    private class RestClient extends RestTemplate {
+//        http://forum.spring.io/forum/spring-projects/web/114029-preemptive-basic-authentication-with-resttemplate
+
+        public RestClient(String username, String password, String host, int port, String protocol) {
+            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(
+                    new AuthScope(null, -1),
+                    new UsernamePasswordCredentials(username, password));
+            HttpClient httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+
+            ContextAwareHttpComponentsClientHttpRequestFactory customFactory = new ContextAwareHttpComponentsClientHttpRequestFactory(httpClient);
+            HttpHost targetHost = new HttpHost(host, port, protocol);
+
+            // Create AuthCache instance
+            AuthCache authCache = new BasicAuthCache();
+            authCache.put(targetHost, new BasicScheme());
+
+            // Add AuthCache to the execution context
+            BasicHttpContext localContext = new BasicHttpContext();
+            localContext.setAttribute(ClientContext.AUTH_CACHE, authCache);
+
+            customFactory.setHttpContext(localContext);
+
+            setRequestFactory(customFactory);
+        }
+    }
+
+    private class ContextAwareHttpComponentsClientHttpRequestFactory extends
+            HttpComponentsClientHttpRequestFactory {
+
+        private HttpContext httpContext;
+
+        public ContextAwareHttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
+            super(httpClient);
+        }
+
+        @Override
+        protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
+            //Ignoring the URI and method.
+            return httpContext;
+        }
+
+        public void setHttpContext(HttpContext httpContext) {
+            this.httpContext = httpContext;
+        }
     }
 
 }
