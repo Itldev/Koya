@@ -31,9 +31,9 @@ import org.springframework.core.io.Resource;
 
 public interface KoyaContentService extends AlfrescoService {
 
-    Content create(User user, Content toCreate,Directory parent) throws AlfrescoServiceException;
-    
-    Content create(User user, Content toCreate,Dossier parent) throws AlfrescoServiceException;
+    Content create(User user, Content toCreate, Directory parent) throws AlfrescoServiceException;
+
+    Content create(User user, Content toCreate, Dossier parent) throws AlfrescoServiceException;
 
     Document upload(User user, Resource r, Directory repertoire) throws AlfrescoServiceException;
 
@@ -43,11 +43,11 @@ public interface KoyaContentService extends AlfrescoService {
 
     Content move(User user, Content aDeplacer, Dossier desination) throws AlfrescoServiceException;
 
-    List<Content> list(User user, Dossier dossier, Integer... depth) throws AlfrescoServiceException;
+    List<Content> list(User user, Dossier dossier, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException;
 
-    List<Content> list(User user, Directory dir, Integer... depth) throws AlfrescoServiceException;   
+    List<Content> list(User user, Directory dir, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException;
 
     Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException;
-    
+
     InputStream getZipInputStream(User user, List<SecuredItem> securedItems) throws AlfrescoServiceException;
 }

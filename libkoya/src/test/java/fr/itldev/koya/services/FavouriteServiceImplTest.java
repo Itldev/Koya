@@ -101,9 +101,9 @@ public class FavouriteServiceImplTest extends TestCase {
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
         Document doc = koyaContentService.upload(admin, toUpload, dossierTests);
         favouriteService.setFavouriteValue(admin, doc, Boolean.TRUE);
-        assertTrue(koyaContentService.list(admin, dossierTests).get(0).isUserFavourite());
+        assertTrue(koyaContentService.list(admin, dossierTests, false).get(0).isUserFavourite());
         favouriteService.setFavouriteValue(admin, doc, Boolean.FALSE);
-        assertFalse(koyaContentService.list(admin, dossierTests).get(0).isUserFavourite());
+        assertFalse(koyaContentService.list(admin, dossierTests, false).get(0).isUserFavourite());
     }
 
     @Test

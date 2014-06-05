@@ -23,7 +23,7 @@
     <shortname>List Content</shortname>
     <description>List available content</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/content/list?maxdepth={maxdepth}</url>
+    <url>/fr/itldev/koya/content/list/{onlyFolders}?maxdepth={maxdepth}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

@@ -23,6 +23,7 @@ import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
@@ -144,27 +145,35 @@ public class KoyaContentService {
      *
      * @param parent
      * @param depth
+     * @param folderOnly
      * @return
      */
-    public List<Content> list(NodeRef parent, Integer depth) {
+    public List<Content> list(NodeRef parent, Integer depth, Boolean... folderOnly) {
 
         List<Content> contents = new ArrayList<>();
 
         if (depth <= 0) {
             return contents;//return empty list if max depth < = 0 : ie max depth reached
         }
-        
-        for (final FileInfo fi : fileFolderService.listFolders(parent)) {
-          if (koyaNodeService.nodeIsFolder(fi.getNodeRef())) {
+
+        List<FileInfo> childList;
+        if (folderOnly.length > 0 && folderOnly[0]) {
+            childList = fileFolderService.listFolders(parent);
+        } else {
+            childList = fileFolderService.list(parent);
+        }
+
+        for (final FileInfo fi : childList) {
+            if (koyaNodeService.nodeIsFolder(fi.getNodeRef())) {
                 Directory dir = koyaNodeService.nodeDirBuilder(fi.getNodeRef());
-                dir.setChildren(list(fi.getNodeRef(), depth - 1));
+                dir.setChildren(list(fi.getNodeRef(), depth - 1, folderOnly));
                 contents.add(dir);
             } else {
                 contents.add(koyaNodeService.nodeDocumentBuilder(fi.getNodeRef()));
             }
-        }                    
+        }
         return contents;
-        
+
     }
 
     public File zip(List<String> nodeRefs) {

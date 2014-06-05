@@ -49,8 +49,8 @@ import org.springframework.util.MultiValueMap;
 public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService {
 
     private static final String REST_POST_ADDCONTENT = "/s/fr/itldev/koya/content/add/{parentNodeRef}";
-    private static final String REST_POST_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list?maxdepth={maxdepth}";
-    private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list";
+    private static final String REST_POST_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list/{onlyFolders}?maxdepth={maxdepth}";
+    private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list/{onlyFolders}";
     private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move/{parentNodeRef}";
     private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
@@ -90,15 +90,14 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     @Override
-    public List<Content> list(User user, Dossier dossier, Integer... depth) throws AlfrescoServiceException {
-        return listContent(user, dossier, depth);
+    public List<Content> list(User user, Dossier dossier, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
+        return listContent(user, dossier, onlyFolders, depth);
     }
 
     @Override
-    public List<Content> list(User user, Directory dir, Integer... depth) throws AlfrescoServiceException {
-        return listContent(user, dir, depth);
+    public List<Content> list(User user, Directory dir, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
+        return listContent(user, dir, onlyFolders, depth);
     }
- 
 
     private Content createImpl(User user, Content content, Container parent) throws AlfrescoServiceException {
 
@@ -116,14 +115,14 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         }
     }
 
-    private List<Content> listContent(User user, SecuredItem container, Integer... depth) throws AlfrescoServiceException {
+    private List<Content> listContent(User user, SecuredItem container, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret;
         if (depth.length > 0) {
             ret = user.getRestTemplate().postForObject(
-                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT_DEPTH_OPTION, container, ItlAlfrescoServiceWrapper.class, depth[0]);
+                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT_DEPTH_OPTION, container, ItlAlfrescoServiceWrapper.class, onlyFolders, depth[0]);
         } else {
             ret = user.getRestTemplate().postForObject(
-                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT, container, ItlAlfrescoServiceWrapper.class);
+                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT, container, ItlAlfrescoServiceWrapper.class, onlyFolders);
         }
 
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {

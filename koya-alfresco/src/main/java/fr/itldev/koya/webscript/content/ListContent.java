@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
 public class ListContent extends KoyaWebscript {
 
     private static final String URL_PARAM_MAXDEPTH = "maxdepth";
-    private static final  Integer DEFAULT_MAX_DEPTH = 50;
+    private static final Integer DEFAULT_MAX_DEPTH = 50;
 
     private final Logger logger = Logger.getLogger(ListContent.class);
 
@@ -45,7 +45,6 @@ public class ListContent extends KoyaWebscript {
     public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
     }
-
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
@@ -59,7 +58,9 @@ public class ListContent extends KoyaWebscript {
             depth = DEFAULT_MAX_DEPTH;
         }
 
-        wrapper.addItems(koyaContentService.list(parent, depth));
+        Boolean onlyFolders = ((String) urlParams.get(WSCONST_ONLYFOLDERS)).equals("true");
+
+        wrapper.addItems(koyaContentService.list(parent, depth, onlyFolders));
         return wrapper;
     }
 
