@@ -63,7 +63,7 @@ public class ItlAlfrescoServiceWrapperDeserializer extends JsonDeserializer<ItlA
         ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
         wrapper.setStatus(node.get("status").getTextValue());
         wrapper.setMessage(node.get("message").getTextValue());
-        wrapper.setMessage(node.get("errorCode").getTextValue());
+        wrapper.setErrorCode(node.get("errorCode").asInt());
         wrapper.setNbitems(nbItems);
         wrapper.setItems(itemsList);
 
