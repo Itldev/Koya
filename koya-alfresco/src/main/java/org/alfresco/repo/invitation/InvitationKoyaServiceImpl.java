@@ -55,6 +55,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
      * Start the invitation process for a NominatedInvitation
      *
      * @param inviteeUserName Alfresco user name of the invitee
+     * @param resourceType
      * @param Invitation
      * @param ResourceType resourceType
      * @param resourceName
@@ -69,6 +70,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
      * @throws InvitationExceptionUserError
      * @throws InvitationExceptionForbidden
      */
+    @Override
     public NominatedInvitation inviteNominated(String inviteeUserName, Invitation.ResourceType resourceType,
             String resourceName, String inviteeRole, String serverPath, String acceptUrl, String rejectUrl) {
         // inviteeUserName was specified
@@ -91,8 +93,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
      * @param inviteeFirstName
      * @param inviteeLastName
      * @param inviteeEmail
-     * @param inviteeUserName optional Alfresco user name of the invitee, null
-     * if not on system.
+     * @param resourceType
      * @param Invitation .ResourceType resourceType
      * @param resourceName
      * @param inviteeRole
@@ -106,6 +107,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
      * @throws InvitationExceptionUserError
      * @throws InvitationExceptionForbidden
      */
+    @Override
     public NominatedInvitation inviteNominated(String inviteeFirstName, String inviteeLastName, String inviteeEmail,
             Invitation.ResourceType resourceType, String resourceName, String inviteeRole, String serverPath,
             String acceptUrl, String rejectUrl) {

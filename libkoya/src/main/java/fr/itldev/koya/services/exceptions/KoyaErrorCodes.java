@@ -38,5 +38,10 @@ public interface KoyaErrorCodes {
     public static final Integer MANY_USERS_IDENTIFIED_BY_AUTHKEY = 502;
     public static final Integer LOGIN_ALREADY_EXISTS = 503;
     public static final Integer CANT_MODIFY_USER_PASSWORD = 504;
+    //550 -> invitation process errors
+    public static final Integer INVALID_INVITATION_TICKET = 550;
+    public static final Integer INVITATION_PROCESS_USER_MODIFICATION_ERROR = 551;
+    public static final Integer INVITATION_PROCESS_ACCEPT_ERROR = 552;
+    public static final Integer INVITATION_ALREADY_COMPLETED = 553;
 
 }

@@ -75,7 +75,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_DELETE_PREFERENCES = "/s/api/people/{userid}/preferences?pf={preferencefilter?}";
 
     //====== invitation workfow  
-    private static final String REST_POST_VALIDUSERBYINVITE = "/s//fr/itldev/koya/user/validateInvitation/{inviteId}/{inviteTicket}";
+    private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/user/validateinvitation/{inviteId}/{inviteTicket}/{password}";
 
     private BeanFactory beanFactory;
 
@@ -292,9 +292,9 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         ItlAlfrescoServiceWrapper ret;
 
         ret = getTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, user, ItlAlfrescoServiceWrapper.class, inviteId, inviteTicket);
+                getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, user, ItlAlfrescoServiceWrapper.class, inviteId, inviteTicket, user.getPassword());
         if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 

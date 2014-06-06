@@ -17,7 +17,7 @@ public class EmailBasedNameGenerator implements UserNameGenerator {
     @Override
     public String generateUserName(String firstName, String lastName, String emailAddress, int seed) {
 
-        String userName = emailAddress.toLowerCase().trim().replaceAll("[^a-z]", "_");
+        String userName = emailAddress.toLowerCase().trim().replaceAll("[^a-z1-9]", "_");
         if (seed > 0) {
             userName = userName + RandomStringUtils.randomNumeric(3);
 
