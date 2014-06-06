@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -69,13 +68,14 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find/{query}/{maxresults}";
     private static final String REST_GET_FINDUSERS_INCOMPANY = "/s/fr/itldev/koya/user/find/{query}/{maxresults}/{sitename}";
     private static final String REST_GET_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword/{oldpwd}/{newpwd}";
-    private static final String REST_GET_REJECT_INVITE = "/s/api/invite/{inviteId}/{inviteTicket}";
 
-    private static final String REST_GET_ACCEPT_INVITE = "/s/api/invite/{inviteId}/{inviteTicket}/accept";
     //===== Preferences
     private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
     private static final String REST_POST_PREFERENCES = "/s/api/people/{userid}/preferences";
     private static final String REST_DELETE_PREFERENCES = "/s/api/people/{userid}/preferences?pf={preferencefilter?}";
+
+    //====== invitation workfow  
+    private static final String REST_POST_VALIDUSERBYINVITE = "/s//fr/itldev/koya/user/validateInvitation/{inviteId}/{inviteTicket}";
 
     private BeanFactory beanFactory;
 
@@ -279,29 +279,23 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         //cf alfresco activity service
     }
 
-//TODO Not used yet
-    public void acceptInvite(String inviteId, String inviteTicket, String userName) {
+    /**
+     * Validate invitation giving user modifications;
+     *
+     * @param user
+     * @param inviteId
+     * @param inviteTicket
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public void validateInvitation(User user, String inviteId, String inviteTicket) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret;
 
-        String acceptUrl = REST_GET_ACCEPT_INVITE;
-
-        if (userName != null && !userName.trim().isEmpty()) {
-            acceptUrl = acceptUrl + "?inviteeUserName=" + userName;
+        ret = getTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, user, ItlAlfrescoServiceWrapper.class, inviteId, inviteTicket);
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage());
         }
-
-        getTemplate().getForEntity(getAlfrescoServerUrl() + acceptUrl, String.class, inviteId, inviteTicket);
-
-    }
-
-    public void rejectInvite(String inviteId, String inviteTicket, String userName) {
-
-        String acceptUrl = REST_GET_REJECT_INVITE;
-
-        if (userName != null && !userName.trim().isEmpty()) {
-            acceptUrl = acceptUrl + "?inviteeUserName=" + userName;
-        }
-
-        getTemplate().getForEntity(getAlfrescoServerUrl() + acceptUrl, String.class, inviteId, inviteTicket);
-
     }
 
     private class RestClient extends RestTemplate {

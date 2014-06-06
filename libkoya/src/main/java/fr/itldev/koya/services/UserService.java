@@ -106,4 +106,14 @@ public interface UserService {
 
     List<Notification> getNotifications(User userLog);
 
+    /**
+     * Validate invitation giving user modifications;
+     *
+     * @param user
+     * @param inviteId
+     * @param inviteTicket
+     * @throws AlfrescoServiceException
+     */
+    void validateInvitation(User user, String inviteId, String inviteTicket) throws AlfrescoServiceException;
+
 }
