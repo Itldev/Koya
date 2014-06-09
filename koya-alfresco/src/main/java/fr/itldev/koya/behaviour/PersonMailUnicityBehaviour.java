@@ -9,6 +9,7 @@ import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -59,18 +60,26 @@ public class PersonMailUnicityBehaviour implements
     }
 
     @Override
-    public void onUpdateProperties(NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
+    public void onUpdateProperties(final NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
 
-        //                
-        String mailAfterModif = (String) after.get(ContentModel.PROP_EMAIL);
 
-        //Add MailUnique Aspect if not already present
-        if (!nodeService.hasAspect(nodeRef, KoyaModel.QNAME_KOYA_MAILUNIQUE)) {
-            Map<QName, Serializable> props = new HashMap<>();
-            nodeService.addAspect(nodeRef, KoyaModel.QNAME_KOYA_MAILUNIQUE, props);
-        }
+        final String mailAfterModif = (String) after.get(ContentModel.PROP_EMAIL);
 
-        nodeService.setProperty(nodeRef, KoyaModel.QNAME_PROPASPECT_KOYA_MAIL, mailAfterModif);
+        AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Object>() {
+            @Override
+            public Object doWork() throws Exception {
+
+                //Add MailUnique Aspect if not already present
+                if (!nodeService.hasAspect(nodeRef, KoyaModel.QNAME_KOYA_MAILUNIQUE)) {
+                    Map<QName, Serializable> props = new HashMap<>();
+                    nodeService.addAspect(nodeRef, KoyaModel.QNAME_KOYA_MAILUNIQUE, props);
+                }
+
+                nodeService.setProperty(nodeRef, KoyaModel.QNAME_PROPASPECT_KOYA_MAIL, mailAfterModif);
+                return null;
+            }
+        });
+
     }
 
 }
