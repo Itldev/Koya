@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.util.Map;
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.invitation.InvitationExceptionNotFound;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.workflow.WorkflowService;
@@ -42,25 +43,25 @@ import org.apache.log4j.Logger;
  *
  */
 public class ValidateInvitation extends KoyaWebscript {
-
+    
     private Logger logger = Logger.getLogger(this.getClass());
-
+    
     private UserService userService;
     private InvitationService invitationService;
     private WorkflowService workflowService;
-
+    
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
-
+    
     public void setInvitationService(InvitationService invitationService) {
         this.invitationService = invitationService;
     }
-
+    
     public void setWorkflowService(WorkflowService workflowService) {
         this.workflowService = workflowService;
     }
-
+    
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         /* ======== params ========*/
@@ -72,28 +73,46 @@ public class ValidateInvitation extends KoyaWebscript {
         userInvited.setFirstName((String) jsonPostMap.get("firstName"));
 
         /**/
-        final NominatedInvitation invitation = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< NominatedInvitation>() {
-            @Override
-            public NominatedInvitation doWork() throws Exception {
-                return (NominatedInvitation) invitationService.getInvitation(invitationId);
-            }
-        });
-
-        WorkflowTask startTask = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< WorkflowTask>() {
-            @Override
-            public WorkflowTask doWork() throws Exception {
-                return workflowService.getStartTask(invitationId);
-            }
-        });
-
+        final NominatedInvitation invitation;
+        try {
+            invitation = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< NominatedInvitation>() {
+                @Override
+                public NominatedInvitation doWork() throws Exception {
+                    try {
+                        return (NominatedInvitation) invitationService.getInvitation(invitationId);
+                    } catch (Exception ex) {
+                        logger.error("Error getting invitation from invitationId : " + ex.toString());
+                        throw ex;
+                        
+                    }
+                }
+            });
+        } catch (RuntimeException rex) {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_ID);
+        }
+        WorkflowTask startTask;
+        try {
+            startTask = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< WorkflowTask>() {
+                @Override
+                public WorkflowTask doWork() throws Exception {
+                    try {
+                        return workflowService.getStartTask(invitationId);
+                    } catch (Exception ex) {
+                        logger.error("Error getting WorkflowTask from invitationId : " + ex.toString());
+                        throw ex;
+                    }
+                }
+            });
+        } catch (RuntimeException rex) {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_ID);
+        }
+        
         if (!invitation.getTicket().equals(inviteTicket)) {
             throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_TICKET);
-        } else if (startTask.getState().equals(WorkflowTaskState.COMPLETED)) {
-            throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
         } else {
             userInvited.setUserName(invitation.getInviteeUserName());
             userInvited.setEmail(invitation.getInviteeEmail());
-
+            
             Map<QName, Serializable> taskProps = startTask.getProperties();
             final String oldPassword = (String) taskProps.get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_GEN_PASSWORD);
 
@@ -101,17 +120,21 @@ public class ValidateInvitation extends KoyaWebscript {
             Exception eInvite = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
                 @Override
                 public Exception doWork() throws Exception {
-
+                    
                     try {
-
+                        
                         invitationService.accept(invitationId, inviteTicket);
                     } catch (Exception ex) {
+                        logger.error("Error duaring invitation accept" + ex.toString());
+                        //TODO detect already accepted/rejected invitation -> KoyaErrorCodes.INVITATION_ALREADY_COMPLETED
+                        //startTask.getState().equals(WorkflowTaskState.COMPLETED condition is always true even if not already accepted ...
+                        
                         return ex;
                     }
                     return null;
                 }
             }, invitation.getInviteeUserName());
-
+            
             if (eInvite != null) {
                 throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_ACCEPT_ERROR, eInvite);
             }
@@ -121,7 +144,7 @@ public class ValidateInvitation extends KoyaWebscript {
                 @Override
                 public Exception doWork() throws Exception {
                     try {
-
+                        
                         userService.modifyUser(userInvited);
                         userService.changePassword(oldPassword, newPassword);
                     } catch (Exception ex) {
@@ -130,14 +153,14 @@ public class ValidateInvitation extends KoyaWebscript {
                     return null;
                 }
             }, invitation.getInviteeUserName());
-
+            
             if (eModify != null) {
                 throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
             }
-
+            
             return wrapper;
         }
-
+        
     }
-
+    
 }
