@@ -11,5 +11,13 @@
         <property name="koyaAclService" ref="koyaAclService" />
         <property name="policyComponent" ref="policyComponent" />
     </bean>
+    
+       
+    <bean id="PersonMailUnicityBehaviour" class="fr.itldev.koya.behaviour.PersonMailUnicityBehaviour" 
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
+        <property name="policyComponent" ref="policyComponent" />
+        <property name="nodeService" ref="NodeService"/>
+    </bean>
+    
 
 </beans>

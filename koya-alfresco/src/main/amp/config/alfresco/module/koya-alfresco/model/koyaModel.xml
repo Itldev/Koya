@@ -41,6 +41,10 @@
         <namespace uri="http://www.itldev.fr/koyamodel/content/1.0" prefix="koya" />
     </namespaces>
 
+    <constraints>
+        <constraint name="koya:mailUniqueConstraint" type="fr.itldev.koya.constraint.UniqueMailConstraint" />
+    </constraints>
+
     <types>
         <type name="koya:container">
             <parent>cm:folder</parent>
@@ -59,7 +63,7 @@
         </type>        
         
     </types>
-    
+      
     <aspects>
         <!--Aspect available on containers to trigger active status-->
         <aspect name="koya:activable">
@@ -71,6 +75,18 @@
                 </property>                        
             </properties>  
         </aspect>        
+        
+        <aspect name="koya:mailunique">
+            <title>Person Mail Unique</title>
+            <properties>
+                <property name="koya:mail">
+                    <type>d:text</type>
+                    <constraints>
+                        <constraint ref="koya:mailUniqueConstraint" />
+                    </constraints>  
+                </property>     
+            </properties>  
+        </aspect>        
     </aspects>
-
+    
 </model>
