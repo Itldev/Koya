@@ -71,7 +71,7 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
 
     }

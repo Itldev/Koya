@@ -38,7 +38,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
             return (Dossier) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -64,7 +64,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 

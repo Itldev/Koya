@@ -11,6 +11,7 @@ public interface KoyaErrorCodes {
     public static final Integer INVALID_NODEREF = 1;
     public static final Integer INVALID_SECUREDITEM_NODEREF = 2;
     public static final Integer INVALID_NODE_HIERACHY = 3;
+    public static final Integer DUPLICATE_CHILD_RENAME = 4;
 
     //100 -> companies errors
     public static final Integer COMPANY_EMPTY_TITLE = 100;
@@ -31,6 +32,8 @@ public interface KoyaErrorCodes {
     public static final Integer CONTENT_CREATION_INVALID_TYPE = 400;
     public static final Integer DIR_CREATION_INVALID_PARENT_TYPE = 401;
     public static final Integer DIR_CREATION_NAME_EXISTS = 402;
+    public static final Integer MOVE_DESTINATION_NAME_ALREADY_EXISTS = 403;
+    public static final Integer MOVE_SOURCE_NOT_FOUND = 404;
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;
@@ -45,4 +48,6 @@ public interface KoyaErrorCodes {
     public static final Integer INVITATION_PROCESS_ACCEPT_ERROR = 553;
     public static final Integer INVITATION_ALREADY_COMPLETED = 554;
 
+    //600 -> Sales Offer
+    public static final Integer SALES_OFFER_LACK_MANDATORY_PROPERTY = 600;
 }

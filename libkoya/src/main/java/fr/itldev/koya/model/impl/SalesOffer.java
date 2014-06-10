@@ -3,25 +3,25 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.model.impl;
 
 import fr.itldev.koya.model.Activable;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import static java.util.Arrays.asList;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +32,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * already attributed to a company.
  *
  */
-public final class SalesOffer extends SecuredItem implements Activable{
-   
+public final class SalesOffer extends SecuredItem implements Activable {
+
     private static List<String> mandatoryProperties = asList("template", "nodeRef", "name", "active");
 
     private Map<String, String> data;
@@ -85,7 +85,7 @@ public final class SalesOffer extends SecuredItem implements Activable{
     }
 
     @JsonIgnore
-    public String getExpiration() {        
+    public String getExpiration() {
         return data.get("expiration");
     }
 
@@ -94,9 +94,10 @@ public final class SalesOffer extends SecuredItem implements Activable{
     }
 
     public SalesOffer(Map<String, String> data) throws AlfrescoServiceException {
-        for (String prop : mandatoryProperties) {            
+        for (String prop : mandatoryProperties) {
             if (!data.keySet().contains(prop)) {
-                throw new AlfrescoServiceException("Invalid Sale Offer - Mandatory property not found : '" + prop + "'");
+                throw new AlfrescoServiceException(
+                        "Invalid Sale Offer - Mandatory property not found : '" + prop + "'", KoyaErrorCodes.SALES_OFFER_LACK_MANDATORY_PROPERTY);
             }
         }
         this.setNodeRef(data.get("nodeRef"));

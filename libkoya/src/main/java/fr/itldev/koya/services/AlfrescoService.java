@@ -23,7 +23,6 @@ import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
-import java.util.Map;
 
 public interface AlfrescoService {
 
@@ -32,8 +31,9 @@ public interface AlfrescoService {
      *
      * @param user
      * @param securedItem
+     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
-    void delete(User user, SecuredItem securedItem);
+    void delete(User user, SecuredItem securedItem) throws AlfrescoServiceException;
 
     /**
      * Renames item.
@@ -41,8 +41,9 @@ public interface AlfrescoService {
      * @param user
      * @param securedItem
      * @param newName
+     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
-    void rename(User user, SecuredItem securedItem, String newName);
+    void rename(User user, SecuredItem securedItem, String newName) throws AlfrescoServiceException;
 
     /**
      *

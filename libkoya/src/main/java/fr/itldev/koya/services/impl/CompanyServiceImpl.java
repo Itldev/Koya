@@ -58,7 +58,7 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
             return (Company) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -68,7 +68,7 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -100,7 +100,7 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
 
     }

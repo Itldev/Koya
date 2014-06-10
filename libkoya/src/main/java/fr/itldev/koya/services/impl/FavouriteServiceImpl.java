@@ -19,7 +19,7 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements Favouri
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -29,7 +29,7 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements Favouri
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_TOGGLEFAVOURITE, item, ItlAlfrescoServiceWrapper.class);
         if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 

@@ -24,15 +24,12 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 import org.springframework.web.client.RestTemplate;
 
 public class AlfrescoRestService implements AlfrescoService {
@@ -71,12 +68,16 @@ public class AlfrescoRestService implements AlfrescoService {
      *
      * @param user
      * @param securedItem
+     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
     @Override
-    public void delete(User user, SecuredItem securedItem) {
-        user.getRestTemplate().getForObject(
+    public void delete(User user, SecuredItem securedItem) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
                 alfrescoServerUrl + REST_GET_DELITEM,
                 ItlAlfrescoServiceWrapper.class, securedItem.getNodeRef());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_NOK)) {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
     }
 
     /**
@@ -87,11 +88,15 @@ public class AlfrescoRestService implements AlfrescoService {
      * @param newName
      */
     @Override
-    public void rename(User user, SecuredItem securedItem, String newName) {
-        user.getRestTemplate().getForObject(
+    public void rename(User user, SecuredItem securedItem, String newName) throws AlfrescoServiceException {
+
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
                 alfrescoServerUrl + REST_GET_RENAMEITEM,
                 ItlAlfrescoServiceWrapper.class, newName,
                 securedItem.getNodeRef());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_NOK)) {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
     }
 
     /**
@@ -113,7 +118,7 @@ public class AlfrescoRestService implements AlfrescoService {
                 && ret.getNbitems() == 1) {
             return (SecuredItem) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -136,7 +141,7 @@ public class AlfrescoRestService implements AlfrescoService {
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (List<SecuredItem>) ret.getItems();
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -157,7 +162,7 @@ public class AlfrescoRestService implements AlfrescoService {
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ((MetaInfos) ret.getItems().get(0));
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
 
     }

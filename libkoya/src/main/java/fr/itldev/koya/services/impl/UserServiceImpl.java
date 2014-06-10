@@ -111,7 +111,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
             user = (User) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
         //Authentication ticket integration
         user.setTicketAlfresco(ticket.toString());
@@ -119,7 +119,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
             //set users authenticated rest template
             user.setRestTemplate(getAuthenticatedRestTemplate(user.getUserName(), password));
         } catch (MalformedURLException ex) {
-            throw new AlfrescoServiceException(ex.toString());
+            throw new AlfrescoServiceException(ex.toString(), ret.getErrorCode());
         }
         //load users rest prefrences
         loadPreferences(user);
@@ -219,7 +219,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
             }
 
         } else {
-            throw new AlfrescoServiceException("Aucune préférence à mettre à jour pour cet utilisateur");
+            throw new AlfrescoServiceException("No user preference to commit", 0);
         }
 
     }
@@ -233,7 +233,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     public void commitProperties(User userLog, User userToCommitProps) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToCommitProps, ItlAlfrescoServiceWrapper.class);
         if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -242,7 +242,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_CHANGEPASSWORD, ItlAlfrescoServiceWrapper.class, oldPassword, newPassword);
         if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -269,7 +269,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (List<User>) ret.getItems();
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 

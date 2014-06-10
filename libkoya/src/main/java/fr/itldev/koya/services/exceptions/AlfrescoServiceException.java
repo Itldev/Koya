@@ -29,10 +29,6 @@ public class AlfrescoServiceException extends Exception {
     public AlfrescoServiceException() {
     }
 
-    public AlfrescoServiceException(String string) {
-        super(string);
-    }
-
     public AlfrescoServiceException(String string, Throwable ex) {
         super(string, ex);
     }

@@ -102,7 +102,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private Content createImpl(User user, Content content, Container parent) throws AlfrescoServiceException {
 
         if (parent.getNodeRef() == null) {
-            throw new AlfrescoServiceException("parent noderef must be set");
+            throw new AlfrescoServiceException("parent noderef must be set", 0);
         }
 
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
@@ -111,7 +111,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
             return (Content) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -128,7 +128,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -153,7 +153,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
             return (Document) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
@@ -163,7 +163,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (Content) ret.getItems().get(0);
         } else {
-            throw new AlfrescoServiceException(ret.getMessage());
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }
 
