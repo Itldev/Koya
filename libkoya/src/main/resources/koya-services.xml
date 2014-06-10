@@ -76,7 +76,7 @@
         </property>
     </bean>       
     <bean id="formHttpMessageConverter" class="org.springframework.http.converter.FormHttpMessageConverter"/>
-    <bean id="alfrescoRestErrorHandler" class="fr.itldev.koya.services.impl.AlfrescoRestErrorHandler"/>                 
+    <bean id="alfrescoRestErrorHandler" class="fr.itldev.koya.services.impl.util.AlfrescoRestErrorHandler"/>                 
     
     <!--================== Declaration des services ===============================-->
     
@@ -88,6 +88,8 @@
     </bean>
     
     <bean id="alfrescoService" class="fr.itldev.koya.services.impl.AlfrescoRestService" parent="abstractRestService"/>
+    
+    <bean id="securedItemService" class="fr.itldev.koya.services.impl.SecuredItemServiceImpl" parent="abstractRestService"/>
    
     <bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl" parent="abstractRestService"/>
         

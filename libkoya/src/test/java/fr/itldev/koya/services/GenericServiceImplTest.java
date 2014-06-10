@@ -66,6 +66,9 @@ public class GenericServiceImplTest extends TestCase {
     private KoyaContentService koyaContentService;
 
     @Autowired
+    private SecuredItemService securedItemService;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     private Company companyTests;
@@ -89,13 +92,13 @@ public class GenericServiceImplTest extends TestCase {
     @Test
     public void testgetParent() throws AlfrescoServiceException {
         Content dir = koyaContentService.create(admin, new Directory("dir"), dossierTests);
-        assertTrue(dossierService.getParent(admin, dir).getName().equals("doss1"));
+        assertTrue(securedItemService.getParent(admin, dir).getName().equals("doss1"));
     }
 
     @Test
     public void testgetParents1() throws AlfrescoServiceException {
         Content dir = koyaContentService.create(admin, new Directory("dir2"), dossierTests);
-        assertEquals(dossierService.getParents(admin, dir).size(), 3);
+        assertEquals(securedItemService.getParents(admin, dir).size(), 3);
     }
 
     @Test
@@ -106,7 +109,7 @@ public class GenericServiceImplTest extends TestCase {
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
         Document doc = koyaContentService.upload(admin, toUpload, (Directory) subDir);
 
-        assertEquals(dossierService.getParents(admin, doc).size(), 5);
+        assertEquals(securedItemService.getParents(admin, doc).size(), 5);
     }
 
     @Test

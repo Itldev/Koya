@@ -35,10 +35,6 @@ import org.springframework.web.client.RestTemplate;
 public class AlfrescoRestService implements AlfrescoService {
 
     protected static final String DESERIALISATION_ERROR = "Object deserialisation error";
-    protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}";
-    protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{newName}/{nodeRef}";
-    private static final String REST_POST_GETPARENT = "/s/fr/itldev/koya/global/getparent/{nbAncestor}";
-    private static final String REST_POST_GETPARENT_INFINITE = "/s/fr/itldev/koya/global/getparent";
     private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos";
 
     private String alfrescoServerUrl;
@@ -63,90 +59,6 @@ public class AlfrescoRestService implements AlfrescoService {
     }
 
     // </editor-fold>
-    /**
-     * deletes item.
-     *
-     * @param user
-     * @param securedItem
-     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
-     */
-    @Override
-    public void delete(User user, SecuredItem securedItem) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
-                alfrescoServerUrl + REST_GET_DELITEM,
-                ItlAlfrescoServiceWrapper.class, securedItem.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_NOK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
-    }
-
-    /**
-     * Renames item.
-     *
-     * @param user
-     * @param securedItem
-     * @param newName
-     */
-    @Override
-    public void rename(User user, SecuredItem securedItem, String newName) throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
-                alfrescoServerUrl + REST_GET_RENAMEITEM,
-                ItlAlfrescoServiceWrapper.class, newName,
-                securedItem.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_NOK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
-    }
-
-    /**
-     * Get Secured Item Parent if exists.
-     *
-     * @param user
-     * @param securedItem
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    @Override
-    public SecuredItem getParent(User user, SecuredItem securedItem)
-            throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_GETPARENT, securedItem,
-                ItlAlfrescoServiceWrapper.class, 1);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)
-                && ret.getNbitems() == 1) {
-            return (SecuredItem) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
-    }
-
-    /**
-     * Get Secured Item Parent if exists.
-     *
-     * @param user
-     * @param securedItem
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<SecuredItem> getParents(User user, SecuredItem securedItem)
-            throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_GETPARENT_INFINITE,
-                securedItem, ItlAlfrescoServiceWrapper.class);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (List<SecuredItem>) ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
-    }
-
-    private Logger logger = Logger.getLogger(getClass());
-
     /**
      * Get Informations about server and modules.
      *

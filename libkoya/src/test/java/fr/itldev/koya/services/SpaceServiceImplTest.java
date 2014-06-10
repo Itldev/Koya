@@ -49,6 +49,8 @@ public class SpaceServiceImplTest extends TestCase {
 
     @Autowired
     private SpaceService spaceService;
+    @Autowired
+    private SecuredItemService securedItemService;
 
     private Company companyTests;
     private User admin;
@@ -159,7 +161,7 @@ public class SpaceServiceImplTest extends TestCase {
         //2 created + defaultspace automaticly created on company creation
         assertEquals(3, spaceService.list(admin, companyTests).size());
         //del
-         spaceService.delete(admin, space2);
+        securedItemService.delete(admin, space2);
 
         assertEquals(2, spaceService.list(admin, companyTests).size());
     }

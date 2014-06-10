@@ -17,7 +17,7 @@
  * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
  */
 
-package fr.itldev.koya.services.impl;
+package fr.itldev.koya.services.impl.util;
 
 import fr.itldev.koya.services.exceptions.AlfrescoAuthenticationException;
 import fr.itldev.koya.services.exceptions.AlfrescoServerException;
