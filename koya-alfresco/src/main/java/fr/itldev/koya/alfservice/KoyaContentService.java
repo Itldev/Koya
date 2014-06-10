@@ -21,22 +21,16 @@ package fr.itldev.koya.alfservice;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
@@ -48,6 +42,7 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.model.FileNotFoundException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
@@ -124,14 +119,20 @@ public class KoyaContentService {
         return koyaNodeService.nodeDirBuilder(fInfo.getNodeRef());
     }
 
-    public Content move(NodeRef toMove, NodeRef dest) {
+    public Content move(NodeRef toMove, NodeRef dest) throws KoyaServiceException {
 
-        //TODO security check before moving OR exception catching ?
-        String name = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
+        String newName = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
 
-        nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
+        FileInfo fInfo;
+        try {
+            fInfo = fileFolderService.move(toMove, dest, newName);
+        } catch (FileExistsException fex) {
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
+        } catch (FileNotFoundException ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
+        }
 
-        return koyaNodeService.nodeContentBuilder(toMove);
+        return koyaNodeService.nodeContentBuilder(fInfo.getNodeRef());
     }
 
     /**

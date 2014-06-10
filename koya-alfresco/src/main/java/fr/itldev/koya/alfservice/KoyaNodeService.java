@@ -27,7 +27,6 @@ import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -46,6 +45,7 @@ import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentData;
+import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -77,7 +77,7 @@ public class KoyaNodeService {
     private KoyaShareService koyaShareService;
     private KoyaAclService koyaAclService;
     private AncestorNodeLocator ancestorNodeLocator;
-    
+
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -433,7 +433,7 @@ public class KoyaNodeService {
 
     /**
      * Directory building method
-     * 
+     *
      * unsecured method
      *
      * @param dirNodeRef
@@ -456,10 +456,10 @@ public class KoyaNodeService {
 
     /**
      * Document building method
-     * 
-     * 
+     *
+     *
      * unsecured method
-     * 
+     *
      *
      * @param docNodeRef
      * @return
@@ -530,12 +530,18 @@ public class KoyaNodeService {
      * @param n
      * @param newName
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public SecuredItem rename(NodeRef n, String newName) {
+    public SecuredItem rename(NodeRef n, String newName) throws KoyaServiceException {
         //todo check new name validity
-        nodeService.setProperty(n, ContentModel.PROP_NAME, newName);
-        return null;
 
+        try {
+            nodeService.setProperty(n, ContentModel.PROP_NAME, newName);
+        } catch (DuplicateChildNodeNameException dex) {
+            throw new KoyaServiceException(KoyaErrorCodes.DUPLICATE_CHILD_RENAME, dex);
+        }
+
+        return nodeRef2SecuredItem(n);
     }
 
     /**
@@ -545,12 +551,11 @@ public class KoyaNodeService {
      */
     public void delete(NodeRef n) throws KoyaServiceException {
         nodeService.deleteNode(n);
-
     }
 
     /**
      * Returns node parent if exists.
-     * 
+     *
      * unsecured method
      *
      * @param currentNode
@@ -612,29 +617,29 @@ public class KoyaNodeService {
 
     /**
      * get the company this nodeRef belongs to
-     * 
+     *
      * @param nodeRef
-     * @return 
+     * @return
      */
     public SecuredItem getCompany(NodeRef nodeRef) throws KoyaServiceException {
         Map params = new HashMap(1);
         params.put(AncestorNodeLocator.TYPE_KEY, KoyaModel.QNAME_KOYA_COMPANY);
-        
-        NodeRef companyNR = ancestorNodeLocator.getNode(nodeRef,params);
-        
-        if(companyNR != null) {
+
+        NodeRef companyNR = ancestorNodeLocator.getNode(nodeRef, params);
+
+        if (companyNR != null) {
             return nodeCompanyBuilder(companyNR);
         } else {
             throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF, "nodeRef not whithin a Company");
         }
-        
-        
+
     }
+
     /**
      * return true if node given in argument has a Dossier in his ancestors.
      *
      * unsecured method
-     * 
+     *
      * @param nodeRef
      * @return
      */
@@ -660,7 +665,7 @@ public class KoyaNodeService {
     /**
      * Returns company whose node belongs to. Null is node is not a comapny
      * child
-     * 
+     *
      * unsecured method
      *
      *

@@ -19,6 +19,7 @@
 package fr.itldev.koya.webscript.content;
 
 import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
@@ -58,17 +59,19 @@ public class AddContent extends AbstractWebScript {
         try {
             ObjectMapper mapper = new ObjectMapper();
 
-            try {
-                Directory dir = mapper.readValue(req.getContent().getReader(), Directory.class);
+            // try {
+            Directory dir = mapper.readValue(req.getContent().getReader(), Directory.class);
 
-                NodeRef parent = new NodeRef(req.getServiceMatch().getTemplateVars().get("parentNodeRef"));
-                Directory dirCreated = koyaContentService.createDir(dir.getName(), parent);
-                wrapper.addItem(dirCreated);
-                wrapper.setStatusOK();
-            } catch (IOException ex) {
-                wrapper.setStatusFail(ex.toString());
-                wrapper.setErrorCode(KoyaErrorCodes.CONTENT_CREATION_INVALID_TYPE);
-            }
+            NodeRef parent = new NodeRef(req.getServiceMatch().getTemplateVars().get("parentNodeRef"));
+            Directory dirCreated = koyaContentService.createDir(dir.getName(), parent);
+            wrapper.addItem(dirCreated);
+            wrapper.setStatusOK();
+        } catch (KoyaServiceException ex) {
+            wrapper.setStatusFail(ex.getMessage());
+            wrapper.setErrorCode(ex.getErrorCode());
+        } catch (IOException ex) {
+            wrapper.setStatusFail(ex.toString());
+            wrapper.setErrorCode(KoyaErrorCodes.CONTENT_CREATION_INVALID_TYPE);
         } catch (Exception ex) {
             wrapper.setStatusFail(ex.toString());
             wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
