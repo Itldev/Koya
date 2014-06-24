@@ -278,7 +278,7 @@ public class KoyaContentService {
                     .getChildAssocs(node);
             if (children.isEmpty()) {
                 String folderPath = path.isEmpty() ? nodeName + '/' : path + '/' + nodeName + '/';
-                out.putArchiveEntry(new ZipArchiveEntry(new ZipEntry(folderPath)));
+                out.putArchiveEntry(new ZipArchiveEntry(folderPath));
                 out.closeArchiveEntry();
             } else {
                 for (ChildAssociationRef childAssoc : children) {

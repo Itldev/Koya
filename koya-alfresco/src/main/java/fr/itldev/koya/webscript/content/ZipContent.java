@@ -80,7 +80,7 @@ public class ZipContent extends KoyaWebscript {
                     }
                 }
         } catch (RuntimeException e) {
-            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, "Erreur lors de la génération de l'archive.");
+            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, "Erreur lors de la génération de l'archive.", e);
         }
 
     }
