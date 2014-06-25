@@ -34,6 +34,11 @@ public interface KoyaErrorCodes {
     public static final Integer DIR_CREATION_NAME_EXISTS = 402;
     public static final Integer MOVE_DESTINATION_NAME_ALREADY_EXISTS = 403;
     public static final Integer MOVE_SOURCE_NOT_FOUND = 404;
+    public static final Integer CONTENT_IS_NOT_ZIP = 405;
+    public static final Integer ZIP_EXTRACTION_PROCESS_ERROR = 406;
+    public static final Integer FILE_DELETE_ERROR = 407;
+
+    
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;

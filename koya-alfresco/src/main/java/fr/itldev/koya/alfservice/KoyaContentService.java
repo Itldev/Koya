@@ -28,9 +28,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
@@ -38,6 +41,9 @@ import java.util.zip.ZipEntry;
 import javax.servlet.http.HttpServletResponse;
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.content.MimetypeMap;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -46,6 +52,7 @@ import org.alfresco.service.cmr.model.FileNotFoundException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
@@ -71,6 +78,7 @@ public class KoyaContentService {
     protected NamespaceService namespaceService;
     protected FileFolderService fileFolderService;
     protected KoyaAclService koyaAclService;
+    protected ActionService actionService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -99,6 +107,10 @@ public class KoyaContentService {
 
     public void setKoyaAclService(KoyaAclService koyaAclService) {
         this.koyaAclService = koyaAclService;
+    }
+
+    public void setActionService(ActionService actionService) {
+        this.actionService = actionService;
     }
 
     // </editor-fold>
@@ -216,6 +228,54 @@ public class KoyaContentService {
         }
 
         return tmpZipFile;
+    }
+
+    /**
+     * Extract selected zipfile and delete it if succeed.
+     *
+     * use 'import' Action :
+     * https://svn.alfresco.com/repos/alfresco-open-mirror/alfresco/HEAD/root/projects/repository/source/java/org/alfresco/repo/action/executer/ImporterActionExecuter.java
+     *
+     * @param zipFile
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public void importZip(NodeRef zipFile) throws KoyaServiceException {
+
+        /**
+         * Checks if nodeRef is a zip file
+         */
+        try {
+            ContentReader reader = contentService.getReader(zipFile, ContentModel.PROP_CONTENT);
+            if (!MimetypeMap.MIMETYPE_ZIP.equals(reader.getMimetype())) {
+                throw new KoyaServiceException(KoyaErrorCodes.CONTENT_IS_NOT_ZIP);
+            }
+        } catch (InvalidNodeRefException ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF, ex);
+        }
+
+        try {
+            Map<String, Serializable> paramsImport = new HashMap<>();
+            paramsImport.put("encoding", "UTF-8");
+            paramsImport.put("destination", nodeService.getPrimaryParent(zipFile).getParentRef());
+            Action importZip = actionService.createAction("import", paramsImport);
+            /**
+             * Process must be executed synchronously in order to delete
+             * original zip
+             *
+             * We could also have written a new action that exctracts AND delete
+             * zip.
+             */
+            importZip.setExecuteAsynchronously(false);
+            actionService.executeAction(importZip, zipFile);      
+        } catch (Exception ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.ZIP_EXTRACTION_PROCESS_ERROR, ex);
+        }
+
+        try {
+            fileFolderService.delete(zipFile);
+        } catch (Exception ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.FILE_DELETE_ERROR, ex);
+        }
     }
 
     private void addToZip(NodeRef node, ZipArchiveOutputStream out, String path) throws IOException {

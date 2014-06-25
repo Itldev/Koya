@@ -50,4 +50,7 @@ public interface KoyaContentService extends AlfrescoService {
     Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException;
 
     InputStream getZipInputStream(User user, List<SecuredItem> securedItems) throws AlfrescoServiceException;
+
+    void importZipedContent(User user, Document zipFile) throws AlfrescoServiceException;
+
 }

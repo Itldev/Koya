@@ -79,6 +79,7 @@
         <property name="namespaceService" ref="NamespaceService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
         <property name="koyaAclService" ref="koyaAclService"/>     
+        <property name="actionService" ref="ActionService"/>
     </bean>
    
     

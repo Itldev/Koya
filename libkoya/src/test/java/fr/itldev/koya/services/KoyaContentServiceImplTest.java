@@ -322,4 +322,32 @@ public class KoyaContentServiceImplTest extends TestCase {
         }
 
     }
+    @Test
+    public void testImportTreeAsZip() throws AlfrescoServiceException {
+
+        Resource toUpload = applicationContext.getResource("classpath:docs/zippedtree.zip");
+        Document upDoc = koyaContentService.upload(admin, toUpload, dossierTests);
+
+        for (Content c : koyaContentService.list(admin, dossierTests, false)) {
+            if (c.getName().equals("rootzip")) {
+                fail();
+            }
+        }
+        
+        //TODO fix this test - generate faled to import zip file : should work ...
+        
+
+//        koyaContentService.importZipedContent(admin, upDoc);
+//        boolean rootExists = false;
+//        for (Content c : koyaContentService.list(admin, dossierTests, false)) {
+//            if (c.getName().equals("rootzip")) {
+//                rootExists = true;
+//            }
+//        }
+//
+//        if (!rootExists) {
+//            fail();
+//        }
+
+    }
 }

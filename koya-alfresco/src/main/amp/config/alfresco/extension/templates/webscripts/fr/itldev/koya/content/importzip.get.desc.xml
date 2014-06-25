@@ -1,0 +1,11 @@
+<webscript>
+    <shortname>Import fileset from zip file</shortname>
+    <description>Import fileset from zip file</description>
+    <family>Itldev</family>
+    <url>/fr/itldev/koya/content/importzip/{nodeRef}</url>
+    <authentication>user</authentication>
+    <transaction>required</transaction>    
+    <format default="json">extension</format>
+</webscript>
+
+	

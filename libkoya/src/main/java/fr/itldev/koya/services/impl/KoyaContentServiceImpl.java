@@ -54,6 +54,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move/{parentNodeRef}";
     private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
+    private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
 
     private static final String REST_POST_UPLOAD = "/s/api/upload";
 
@@ -204,4 +205,16 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         }
     }
 
+    @Override
+    public void importZipedContent(User user, Document zipFile) throws AlfrescoServiceException {
+
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate()
+                .getForObject(getAlfrescoServerUrl() + REST_GET_IMPORTZIP,
+                        ItlAlfrescoServiceWrapper.class, zipFile.getNodeRef());
+
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+
+    }
 }
