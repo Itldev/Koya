@@ -23,6 +23,7 @@ import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
+import org.springframework.core.io.Resource;
 
 public interface DossierService extends AlfrescoService {
 
@@ -36,6 +37,18 @@ public interface DossierService extends AlfrescoService {
      * @throws AlfrescoServiceException
      */
     Dossier create(User user, Dossier dossier, Space parentSpace) throws AlfrescoServiceException;
+
+    /**
+     * Creates a new Dossier with content in a zip file
+     *
+     * @param user
+     * @param dossier
+     * @param parentSpace
+     * @param zipFile
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    Dossier create(User user, Dossier dossier, Space parentSpace, Resource zipFile) throws AlfrescoServiceException;
 
     /**
      *

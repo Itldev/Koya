@@ -18,18 +18,27 @@
  */
 package fr.itldev.koya.services.impl;
 
+import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.DossierService;
+import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
+import org.springframework.core.io.Resource;
 
 public class DossierServiceImpl extends AlfrescoRestService implements DossierService {
 
     private static final String REST_POST_ADDDOSSIER = "/s/fr/itldev/koya/dossier/add/{parentNodeRef}";
     private static final String REST_POST_LISTCHILD = "/s/fr/itldev/koya/dossier/list?filter={filter}";
+
+    private KoyaContentService KoyaContentService;
+
+    public void setKoyaContentService(KoyaContentService KoyaContentService) {
+        this.KoyaContentService = KoyaContentService;
+    }
 
     @Override
     public Dossier create(User user, Dossier dossier, Space parentSpace) throws AlfrescoServiceException {
@@ -40,6 +49,28 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
         } else {
             throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
+    }
+
+    /**
+     * Creates a new Dossier with content in a zip file
+     *
+     * TODO make this process atomic
+     * 
+     * @param user
+     * @param dossier
+     * @param parentSpace
+     * @param zipFile
+     * 
+     * 
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public Dossier create(User user, Dossier dossier, Space parentSpace, Resource zipFile) throws AlfrescoServiceException {
+        Dossier d = create(user, dossier, parentSpace);
+        Document zipDoc = KoyaContentService.upload(user, zipFile, d);
+        KoyaContentService.importZipedContent(user, zipDoc);
+        return d;
     }
 
     @Override
