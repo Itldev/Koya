@@ -155,7 +155,19 @@ public class CompanyService {
      * @return
      */
     private String getShortNameFromTitle(String title) {
-        String shortTitle = title.replaceAll("[^0-9a-zA-Z\\-\\s]", "")
+
+        String shortTitle = title.replaceAll("[àáâãäå]", "a")
+                .replaceAll("æ", "ae")
+                .replaceAll("ç", "c")
+                .replaceAll("[èéêë]", "e")
+                .replaceAll("[ìíîï]", "i")
+                .replaceAll("ñ", "n")
+                .replaceAll("[òóôõö]", "o")
+                .replaceAll("œ", "oe")
+                .replaceAll("[ùúûü]", "u")
+                .replaceAll("[ýÿ]", "y")
+                .replaceAll("&", "and")
+                .replaceAll("[^0-9a-zA-Z\\-\\s]", "")
                 .replaceAll("\\s+", "-").toLowerCase();
 
         /**
