@@ -20,6 +20,7 @@ package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
@@ -84,9 +85,30 @@ public interface CompanyService extends AlfrescoService {
      * Charge l'historique des offres commerciales de la société.
      *
      * @param admin
-     * @param s
+     * @param c
      * @throws AlfrescoServiceException
      */
-    void loadSalesOfferHistory(User admin, Company s) throws AlfrescoServiceException;
+    void loadSalesOfferHistory(User admin, Company c) throws AlfrescoServiceException;
 
+    /**
+     * refresh preferences for a company.
+     *
+     * Unsaved local preferences will be erased.
+     *
+     * @param user
+     * @param c
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    public Preferences getPreferences(User user, Company c) throws AlfrescoServiceException;
+
+    /**
+     * Commit localy modified preferences.
+     *
+     * @param user
+     * @param c
+     * @param p
+     * @throws AlfrescoServiceException
+     */
+    public void commitPreferences(User user, Company c, Preferences p) throws AlfrescoServiceException;
 }

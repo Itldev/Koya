@@ -20,6 +20,7 @@ package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.CompanyService;
@@ -33,6 +34,8 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
     private static final String REST_DEL_DELCOMPANY = "/s/api/sites/{shortname}";
     private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}";
+    private static final String REST_GET_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
+    private static final String REST_POST_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
 
     /**
      * Méthode de creation d'une nouvelle société
@@ -113,5 +116,25 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     @Override
     public void loadSalesOfferHistory(User admin, Company c) throws AlfrescoServiceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Preferences getPreferences(User user, Company c) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, ItlAlfrescoServiceWrapper.class, c.getName());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            return (Preferences) ret.getItems().get(0);
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    @Override
+    public void commitPreferences(User user, Company c, Preferences p) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
+                postForObject(getAlfrescoServerUrl() + REST_POST_PREFERENCES, p, ItlAlfrescoServiceWrapper.class, c.getName());
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
     }
 }

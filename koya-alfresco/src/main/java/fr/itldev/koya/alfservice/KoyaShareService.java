@@ -214,7 +214,7 @@ public class KoyaShareService extends KoyaAclService {
         return users;
     }
 
-    private User createUserForSharing(List<SecuredItem> sharedItems, String newUserMail, String serverPath, String acceptUrl, String rejectUrl) {
+    private User createUserForSharing(List<SecuredItem> sharedItems, String newUserMail, String serverPath, String acceptUrl, String rejectUrl) throws KoyaServiceException {
         logger.error("create user : " + newUserMail + " and share " + sharedItems.size() + " elements");
 
         Set<Company> invitedTo = new HashSet<>();

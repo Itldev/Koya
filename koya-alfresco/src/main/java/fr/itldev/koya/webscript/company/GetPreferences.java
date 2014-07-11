@@ -19,21 +19,15 @@
 package fr.itldev.koya.webscript.company;
 
 import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.util.Map;
 
 /**
- *
- * Add Company.
+ * Get company current preferences.
  *
  */
-public class AddCompany extends KoyaWebscript {
-
-    private static final String ARG_NAME = "name";
-    private static final String ARG_TEMPLATE = "template";
-    private static final String ARG_SALESOFFER = "salesoffer";
+public class GetPreferences extends KoyaWebscript {
 
     private CompanyService companyService;
 
@@ -43,18 +37,8 @@ public class AddCompany extends KoyaWebscript {
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-
-        String name = urlParams.get(ARG_NAME);
-        String template = urlParams.get(ARG_TEMPLATE);
-        /**
-         *
-         * TODO handle sale offer
-         *
-         */
-        SalesOffer so = companyService.getSalesOffer(urlParams.get(ARG_SALESOFFER));
-
-        wrapper.addItem(companyService.create(name, so, template));
+        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
+        wrapper.addItem(companyService.getPreferences(companyName));
         return wrapper;
     }
-
 }

@@ -40,7 +40,7 @@ public class ListCompany extends KoyaWebscript {
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
 
         /**
-         * TODO traiter param optionnel sur les société actives ou non
+         * TODO handle optionnal active parameter 
          */
         wrapper.addItems(companyService.list());
         return wrapper;

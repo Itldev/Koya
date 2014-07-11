@@ -63,9 +63,7 @@ public class KoyaNodeService {
     private static final String FAVOURITES_PREF_DOCS = "org.alfresco.share.documents.favourites";
     private static final String FAVOURITES_PREF_COMPANIES = "org.alfresco.share.sites.favourites";
     public static final String DOCLIB_NAME = "documentLibrary";
-
     private Logger logger = Logger.getLogger(KoyaNodeService.class);
-
     private NodeService nodeService;
     private NodeService unsecuredNodeService;
     private FavouritesService favouritesService;
@@ -210,9 +208,8 @@ public class KoyaNodeService {
             if (k.startsWith(FAVOURITES_PREF_COMPANIES) && ((Boolean) prefs.get(k)).equals(Boolean.TRUE)) {
 
                 String compName = k.substring(FAVOURITES_PREF_COMPANIES.length() + 1);
-                try {
-                    SiteInfo s = companyService.getSiteInfo(compName);
-                    favourites.add(siteCompanyBuilder(s));
+                try {                   
+                    favourites.add(companyBuilder(compName));
                 } catch (Exception e) {//In case of non existant company
                 }
 
@@ -317,7 +314,7 @@ public class KoyaNodeService {
         SecuredItem si = null;
         QName type = nodeService.getType(nodeRef);
         if (type.equals(KoyaModel.QNAME_KOYA_COMPANY)) {
-            si = nodeCompanyBuilder(nodeRef);
+            si = companyBuilder(nodeRef);
         } else if (type.equals(KoyaModel.QNAME_KOYA_SPACE)) {
             si = nodeSpaceBuilder(nodeRef);
         } else if (type.equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
@@ -337,12 +334,14 @@ public class KoyaNodeService {
      *
      * @param s
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public Company siteCompanyBuilder(SiteInfo s) {
+    public Company companyBuilder(SiteInfo s) throws KoyaServiceException {
         Company c = new Company(s);
         c.setUserFavourite(isFavourite(c.getNodeRefasObject()));
         c.setShared(koyaShareService.listUsersAccessShare(c).size() > 0);
         c.setPermissions(koyaAclService.getPermissions(c.getNodeRefasObject()));
+
         return c;
     }
 
@@ -350,9 +349,28 @@ public class KoyaNodeService {
      *
      * @param n
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public Company nodeCompanyBuilder(NodeRef n) {
-        return siteCompanyBuilder(companyService.getSiteInfo(n));
+    public Company companyBuilder(NodeRef n) throws KoyaServiceException {
+
+        SiteInfo si = companyService.getSiteInfo(n);
+
+        if (si == null) {
+            throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+        }
+
+        return companyBuilder(si);
+    }
+
+    public Company companyBuilder(String companyName) throws KoyaServiceException {
+
+        SiteInfo si = companyService.getSiteInfo(companyName);
+
+        if (si == null) {
+            throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+        }
+
+        return companyBuilder(si);
     }
 
     /**
@@ -568,7 +586,7 @@ public class KoyaNodeService {
                 || (unsecuredNodeService.getProperty(parentNr, ContentModel.PROP_NAME).equals(DOCLIB_NAME)
                 && isKoyaCompany(unsecuredNodeService.getPrimaryParent(parentNr).getParentRef()))) {
             //If parent is a company or doclib node (which primary parent is a company)
-            return nodeCompanyBuilder(parentNr);
+            return companyBuilder(parentNr);
         } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_SPACE)) {
             return nodeSpaceBuilder(parentNr);
         } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
@@ -579,7 +597,6 @@ public class KoyaNodeService {
             throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODE_HIERACHY);
         }
     }
-
     public static final Integer NB_ANCESTOR_INFINTE = -1;
 
     /**
@@ -628,7 +645,7 @@ public class KoyaNodeService {
         NodeRef companyNR = ancestorNodeLocator.getNode(nodeRef, params);
 
         if (companyNR != null) {
-            return nodeCompanyBuilder(companyNR);
+            return companyBuilder(companyNR);
         } else {
             throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF, "nodeRef not whithin a Company");
         }
@@ -674,14 +691,13 @@ public class KoyaNodeService {
      * @param n
      * @return
      */
-    public Company getNodeCompany(NodeRef n) {
+    public Company getNodeCompany(NodeRef n) throws KoyaServiceException {
         if (n == null) {
             return null;
         } else if (unsecuredNodeService.getType(n).equals(KoyaModel.QNAME_KOYA_COMPANY)) {
-            return nodeCompanyBuilder(n);
+            return companyBuilder(n);
         } else {
             return getNodeCompany(unsecuredNodeService.getPrimaryParent(n).getParentRef());
         }
     }
-
 }

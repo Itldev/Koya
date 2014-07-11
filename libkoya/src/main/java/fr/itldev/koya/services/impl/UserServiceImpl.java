@@ -164,7 +164,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
     /**
      * Updates users preferences from alfresco server. Erases unsaved local
-     * prefrences.
+     * preferences.
      *
      * @param user
      */

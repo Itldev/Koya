@@ -51,6 +51,7 @@
         <property name="hiddenAspect" ref="hiddenAspect" />
         <property name="modelService" ref="modelService" />
         <property name="authenticationService" ref="AuthenticationService" />
+        <property name="fileFolderService" ref="FileFolderService" />
     </bean>     
     
     <!--Spaces Handling service-->

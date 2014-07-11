@@ -40,8 +40,22 @@
     <bean id="webscript.fr.itldev.koya.company.list.get" 
           class="fr.itldev.koya.webscript.company.ListCompany"
           parent="webscript">                
-        <property name="companyService" ref="companyService" />
-        
+        <property name="companyService" ref="companyService" />        
+    </bean>
+    
+    <!-- get current preferences-->
+    <bean id="webscript.fr.itldev.koya.company.preferences.get" 
+          class="fr.itldev.koya.webscript.company.GetPreferences"
+          parent="webscript">                
+        <property name="companyService" ref="companyService" />        
+    </bean>
+    
+    
+    <!-- commit preferences-->
+    <bean id="webscript.fr.itldev.koya.company.preferences.post" 
+          class="fr.itldev.koya.webscript.company.CommitPreferences"
+          parent="webscript">                
+        <property name="companyService" ref="companyService" />        
     </bean>
     
     <!--
@@ -147,7 +161,7 @@
     </bean>
     
     
-     <!-- import Zip -->
+    <!-- import Zip -->
     <bean id="webscript.fr.itldev.koya.content.importzip.get" 
           class="fr.itldev.koya.webscript.content.ImportZip"
           parent="webscript">                

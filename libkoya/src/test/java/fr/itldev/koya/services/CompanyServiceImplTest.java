@@ -16,16 +16,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import junit.framework.TestCase;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -44,7 +47,6 @@ public class CompanyServiceImplTest extends TestCase {
     private User admin;
     @Autowired
     UserService userService;
-
     @Autowired
     private CompanyService companyService;
 
@@ -77,9 +79,7 @@ public class CompanyServiceImplTest extends TestCase {
         assertTrue(offresCom.size() > 0);
         SalesOffer sel = offresCom.get(0);
 
-        Random r = new Random();
-
-        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel),"default");
+        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel), "default");
         assertNotNull(created);
     }
 
@@ -90,7 +90,7 @@ public class CompanyServiceImplTest extends TestCase {
         SalesOffer sel = offresCom.get(0);
 
         Random r = new Random();
-        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel),"default");
+        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel), "default");
 
         List<Company> lst = companyService.list(admin);
         assertTrue(lst.size() > 0);
@@ -102,5 +102,49 @@ public class CompanyServiceImplTest extends TestCase {
             companyService.delete(admin, s);
         }
         assertEquals(companyService.list(admin).size(), 0);
+    }
+
+    @Test
+    public void testGetPrefs() throws IOException, AlfrescoServiceException {
+
+        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+        assertTrue(offresCom.size() > 0);
+        SalesOffer sel = offresCom.get(0);
+
+        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel), "default");
+
+        Preferences p = companyService.getPreferences(admin, created);
+
+        assertTrue(p.size() == 0);
+    }
+
+    @Test
+    public void testSetPrefs() throws IOException, AlfrescoServiceException {
+
+        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+        assertTrue(offresCom.size() > 0);
+        SalesOffer sel = offresCom.get(0);
+
+        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel), "default");
+        Preferences p = companyService.getPreferences(admin, created);
+        String testKey = "fr.itldev.test";
+
+        int nbPrefs = p.size();
+
+        /* =============== Add a test preference ===========*/
+        p.put(testKey, "OK_PREF");
+        companyService.commitPreferences(admin, created, p);
+
+        Preferences p2 = companyService.getPreferences(admin, created);
+
+        //one more preference
+        assertEquals(nbPrefs + 1, p2.size());
+
+        /* =============== Del test preference =====*/
+        p2.remove(testKey);
+        companyService.commitPreferences(admin, created, p2);
+        Preferences p3 = companyService.getPreferences(admin, created);
+        assertEquals(nbPrefs, p3.size());
+
     }
 }

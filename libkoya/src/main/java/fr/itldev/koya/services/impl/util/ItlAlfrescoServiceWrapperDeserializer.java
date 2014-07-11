@@ -34,6 +34,13 @@ import org.codehaus.jackson.node.ArrayNode;
 
 public class ItlAlfrescoServiceWrapperDeserializer extends JsonDeserializer<ItlAlfrescoServiceWrapper> {
 
+    public static final String ATTRIBUTE_CONTENT_TYPE = "contentType";
+    public static final String ATTRIBUTE_ITEMS = "items";
+    public static final String ATTRIBUTE_NBITEMS = "nbitems";
+    public static final String ATTRIBUTE_STATUS = "status";
+    public static final String ATTRIBUTE_MESSAGE = "message";
+    public static final String ATTRIBUTE_ERRORCODE = "errorCode";
+
     @Override
     public ItlAlfrescoServiceWrapper deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         ObjectCodec oc = jsonParser.getCodec();
@@ -43,27 +50,27 @@ public class ItlAlfrescoServiceWrapperDeserializer extends JsonDeserializer<ItlA
         JsonNode node = oc.readTree(jsonParser);
 
         List itemsList = new ArrayList();
-        Integer nbItems = node.get("nbitems").getIntValue();
+        Integer nbItems = node.get(ATTRIBUTE_NBITEMS).getIntValue();
 
         if (nbItems > 0) {
             try {
                 //def des items 
-                ArrayNode items = (ArrayNode) node.get("items");
+                ArrayNode items = (ArrayNode) node.get(ATTRIBUTE_ITEMS);
 
                 for (JsonNode n : items) {
                     //Build Object with mapper type
-                    itemsList.add(mapper.readValue(n, Class.forName(n.get("contentType").getTextValue())));
+                    itemsList.add(mapper.readValue(n, Class.forName(n.get(ATTRIBUTE_CONTENT_TYPE).getTextValue())));
                 }
 
             } catch (ClassNotFoundException ex) {
-                throw new IOException("Erreur de désérialisation de la liste des elements", ex);
+                throw new IOException("Deserialization error in items list", ex);
             }
         }
         //construction de l'objet
         ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
-        wrapper.setStatus(node.get("status").getTextValue());
-        wrapper.setMessage(node.get("message").getTextValue());
-        wrapper.setErrorCode(node.get("errorCode").asInt());
+        wrapper.setStatus(node.get(ATTRIBUTE_STATUS).getTextValue());
+        wrapper.setMessage(node.get(ATTRIBUTE_MESSAGE).getTextValue());
+        wrapper.setErrorCode(node.get(ATTRIBUTE_ERRORCODE).asInt());
         wrapper.setNbitems(nbItems);
         wrapper.setItems(itemsList);
 

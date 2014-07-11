@@ -1,7 +1,9 @@
 package fr.itldev.koya.behaviour;
 
 import fr.itldev.koya.alfservice.KoyaAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
+import java.util.logging.Level;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
@@ -16,7 +18,6 @@ import org.apache.log4j.Logger;
 public class DefaultAclOnCreateBehaviour implements NodeServicePolicies.OnCreateNodePolicy {
 
     private final Logger logger = Logger.getLogger(this.getClass());
-
     private Behaviour onCreateNode;
     private PolicyComponent policyComponent;
     private KoyaAclService koyaAclService;
@@ -42,7 +43,10 @@ public class DefaultAclOnCreateBehaviour implements NodeServicePolicies.OnCreate
 
     @Override
     public void onCreateNode(ChildAssociationRef childAssocRef) {
-        koyaAclService.setSpaceDossierDefaultAccess(childAssocRef.getChildRef());
+        try {
+            koyaAclService.setSpaceDossierDefaultAccess(childAssocRef.getChildRef());
+        } catch (KoyaServiceException ex) {
+            logger.error(ex.toString());
+        }
     }
-
 }

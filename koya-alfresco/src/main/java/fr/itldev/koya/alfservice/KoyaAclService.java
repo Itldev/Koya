@@ -1,5 +1,6 @@
 package fr.itldev.koya.alfservice;
 
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
@@ -79,7 +80,7 @@ public class KoyaAclService {
      *
      * @param n
      */
-    public void setSpaceDossierDefaultAccess(NodeRef n) {
+    public void setSpaceDossierDefaultAccess(NodeRef n) throws KoyaServiceException {
         permissionService.setInheritParentPermissions(n, false);
 
         Company c = koyaNodeService.getNodeCompany(n);

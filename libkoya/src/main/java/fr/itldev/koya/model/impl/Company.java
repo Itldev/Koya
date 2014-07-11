@@ -38,7 +38,6 @@ public final class Company extends SecuredItem implements Container, Activable {
 
     private String title;//displayed title
     private Boolean active = Boolean.TRUE;
-
     private String currentSaleOfferNodeRef;
     @JsonIgnore
     private SalesOffer currentSaleOffer;
@@ -121,5 +120,4 @@ public final class Company extends SecuredItem implements Container, Activable {
     public String toString() {
         return "Company {" + "name=" + getName() + ", title=" + title + ", nodeRef=" + getNodeRef() + '}';
     }
-
 }
