@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.model.filefolder.HiddenAspect;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentIOException;
@@ -65,7 +64,6 @@ public class CompanyService {
     protected NodeService nodeService;
     protected NodeService unprotNodeService;
     protected KoyaNodeService koyaNodeService;
-    protected HiddenAspect hiddenAspect;
     protected ModelService modelService;
     private AuthenticationService authenticationService;
     private FileFolderService fileFolderService;
@@ -81,10 +79,6 @@ public class CompanyService {
 
     public void setUnprotectedNodeService(NodeService unprotNodeService) {
         this.unprotNodeService = unprotNodeService;
-    }
-
-    public void setHiddenAspect(HiddenAspect hiddenAspect) {
-        this.hiddenAspect = hiddenAspect;
     }
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
@@ -305,7 +299,12 @@ public class CompanyService {
                     rootRef, ContentModel.ASSOC_CONTAINS, assocQName, ContentModel.TYPE_FOLDER, properties);
             koyaConfigRef = ref.getChildRef();
             // koya-config needs to be hidden - applies index control aspect as part of the hidden aspect
-            hiddenAspect.hideNode(ref.getChildRef(), false, false, false);
+
+            Map<QName, Serializable> props = new HashMap<>();
+            props.put(ContentModel.PROP_IS_INDEXED, Boolean.FALSE);
+            props.put(ContentModel.PROP_IS_CONTENT_INDEXED, Boolean.FALSE);
+            nodeService.addAspect(ref.getChildRef(), ContentModel.ASPECT_INDEX_CONTROL, props);
+
         }
         return koyaConfigRef;
     }

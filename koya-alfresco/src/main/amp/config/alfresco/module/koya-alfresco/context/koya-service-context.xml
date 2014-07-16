@@ -48,7 +48,6 @@
         <property name="nodeService" ref="NodeService"/>
         <property name="unprotectedNodeService" ref="nodeService" />
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="hiddenAspect" ref="hiddenAspect" />
         <property name="modelService" ref="modelService" />
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="fileFolderService" ref="FileFolderService" />
