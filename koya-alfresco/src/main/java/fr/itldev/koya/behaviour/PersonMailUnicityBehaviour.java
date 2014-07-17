@@ -54,14 +54,13 @@ public class PersonMailUnicityBehaviour implements
 
         //add koya:mailunique aspect on person --> execute mail unicity constraint
         Map<QName, Serializable> props = new HashMap<>();
-        props.put(KoyaModel.QNAME_PROPASPECT_KOYA_MAIL, mail);
-        nodeService.addAspect(person, KoyaModel.QNAME_KOYA_MAILUNIQUE, props);
+        props.put(KoyaModel.PROP_MAIL, mail);
+        nodeService.addAspect(person, KoyaModel.ASPECT_MAILUNIQUE, props);
 
     }
 
     @Override
     public void onUpdateProperties(final NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
-
 
         final String mailAfterModif = (String) after.get(ContentModel.PROP_EMAIL);
 
@@ -70,12 +69,12 @@ public class PersonMailUnicityBehaviour implements
             public Object doWork() throws Exception {
 
                 //Add MailUnique Aspect if not already present
-                if (!nodeService.hasAspect(nodeRef, KoyaModel.QNAME_KOYA_MAILUNIQUE)) {
+                if (!nodeService.hasAspect(nodeRef, KoyaModel.ASPECT_MAILUNIQUE)) {
                     Map<QName, Serializable> props = new HashMap<>();
-                    nodeService.addAspect(nodeRef, KoyaModel.QNAME_KOYA_MAILUNIQUE, props);
+                    nodeService.addAspect(nodeRef, KoyaModel.ASPECT_MAILUNIQUE, props);
                 }
 
-                nodeService.setProperty(nodeRef, KoyaModel.QNAME_PROPASPECT_KOYA_MAIL, mailAfterModif);
+                nodeService.setProperty(nodeRef, KoyaModel.PROP_MAIL, mailAfterModif);
                 return null;
             }
         });

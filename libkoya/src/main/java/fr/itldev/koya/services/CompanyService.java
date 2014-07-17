@@ -20,6 +20,7 @@ package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -111,4 +112,25 @@ public interface CompanyService extends AlfrescoService {
      * @throws AlfrescoServiceException
      */
     public void commitPreferences(User user, Company c, Preferences p) throws AlfrescoServiceException;
+
+    /**
+     * get properties for a company.
+     *
+     *
+     * @param user
+     * @param c
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    public CompanyProperties getProperties(User user, Company c) throws AlfrescoServiceException;
+
+    /**
+     * Commit localy modified properties.
+     *
+     * @param user
+     * @param c
+     * @param p
+     * @throws AlfrescoServiceException
+     */
+    public void commitProperties(User user, Company c, CompanyProperties p) throws AlfrescoServiceException;
 }

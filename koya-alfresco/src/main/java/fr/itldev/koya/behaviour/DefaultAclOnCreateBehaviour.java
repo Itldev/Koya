@@ -33,10 +33,10 @@ public class DefaultAclOnCreateBehaviour implements NodeServicePolicies.OnCreate
     public void init() {
         // Create behaviours
         this.onCreateNode = new JavaBehaviour(this, "onCreateNode", Behaviour.NotificationFrequency.TRANSACTION_COMMIT);
-        this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnCreateNodePolicy.QNAME, KoyaModel.QNAME_KOYA_DOSSIER,
+        this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnCreateNodePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
                 this.onCreateNode);
 
-        this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnCreateNodePolicy.QNAME, KoyaModel.QNAME_KOYA_SPACE,
+        this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnCreateNodePolicy.QNAME, KoyaModel.TYPE_SPACE,
                 this.onCreateNode);
 
     }

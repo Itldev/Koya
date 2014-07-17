@@ -20,6 +20,7 @@ package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
@@ -36,6 +37,9 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}";
     private static final String REST_GET_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
     private static final String REST_POST_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
+
+    private static final String REST_GET_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
+    private static final String REST_POST_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
 
     /**
      * Méthode de creation d'une nouvelle société
@@ -133,6 +137,26 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     public void commitPreferences(User user, Company c, Preferences p) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
                 postForObject(getAlfrescoServerUrl() + REST_POST_PREFERENCES, p, ItlAlfrescoServiceWrapper.class, c.getName());
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    @Override
+    public CompanyProperties getProperties(User user, Company c) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_PROPERTIES, ItlAlfrescoServiceWrapper.class, c.getName());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            return (CompanyProperties) ret.getItems().get(0);
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    @Override
+    public void commitProperties(User user, Company c, CompanyProperties p) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
+                postForObject(getAlfrescoServerUrl() + REST_POST_PROPERTIES, p, ItlAlfrescoServiceWrapper.class, c.getName());
         if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }

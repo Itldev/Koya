@@ -30,32 +30,41 @@ public class KoyaModel {
     public static final String NAMESPACE_KOYA_CONTENT_MODEL = "http://www.itldev.fr/koyamodel/content/1.0";
     public static final String NAMESPACE_ALFRESCO_ROOT = "http://www.alfresco.org/model/site/1.0";
     // ============= Types ===============
-    public static final String TYPE_KOYA_COMPANY = "site";
-    public static final QName QNAME_KOYA_COMPANY = SiteModel.TYPE_SITE;
-    public static final String TYPESHORTPREFIX_KOYA_COMPANY = "st:site";
+    public static final QName TYPE_COMPANY = SiteModel.TYPE_SITE;
     //    
-    public static final String TYPE_KOYA_SPACE = "space";
-    public static final QName QNAME_KOYA_SPACE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, TYPE_KOYA_SPACE);
-    public static final String TYPESHORTPREFIX_KOYA_SPACE = "koya:space";
+    public static final QName TYPE_SPACE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "space");
     //
-    public static final String TYPE_KOYA_DOSSIER = "dossier";
-    public static final QName QNAME_KOYA_DOSSIER = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, TYPE_KOYA_DOSSIER);
-    public static final String TYPESHORTPREFIX_KOYA_DOSSIER = "koya:dossier";
+    public static final QName TYPE_DOSSIER = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "dossier");
+
+    public static final QName TYPE_CONTACTITEM = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactItem");
+
+    public static final QName TYPE_CONTACT = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contact");
+
+    public static final QName TYPE_COMPANYPROPERTIES = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "companyProperties");
+
     //================ Aspects ==========================
-    public static final String ASPECT_KOYA_ACTIVABLE = "activable";
-    public static final QName QNAME_KOYA_ACTIVABLE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, ASPECT_KOYA_ACTIVABLE);
-    public static final String ASPECTSHORTPREFIX_KOYA_ACTIVABLE = "koya:activable";
+    public static final QName ASPECT_ACTIVABLE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "activable");
 
-    public static final String ASPECT_KOYA_MAILUNIQUE = "mailunique";
-    public static final QName QNAME_KOYA_MAILUNIQUE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, ASPECT_KOYA_MAILUNIQUE);
-    public static final String ASPECTSHORTPREFIX_KOYA_MAILUNIQUE = "koya:mailunique";
-    //================= Propriétés sur les aspects
-    public static final String PROPASPECT_KOYA_ISACTIVE = "isActive";
-    public static final QName QNAME_PROPASPECT_KOYA_ISACTIVE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, PROPASPECT_KOYA_ISACTIVE);
-    public static final String PROPASPECTSHORTPREFIX_KOYA_ISACTIVE = "koya:isActive";
+    public static final QName ASPECT_MAILUNIQUE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "mailunique");
+    //================= Aspects Properties
+    public static final QName PROP_ISACTIVE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "isActive");
 
-    public static final String PROPASPECT_KOYA_MAIL = "mail";
-    public static final QName QNAME_PROPASPECT_KOYA_MAIL = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, PROPASPECT_KOYA_MAIL);
-    public static final String PROPASPECTSHORTPREFIX_KOYA_MAIL = "koya:mail";
+    public static final QName PROP_MAIL = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "mail");
+
+    //=================  Types Properties =========================
+    public static final QName PROP_CONTACTITEM_VALUE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactItemValue");
+
+    public static final QName PROP_CONTACTITEM_TYPE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactItemType");
+
+    public static final QName PROP_CONTACT_TITLE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactTitle");
+
+    public static final QName PROP_ADDRESS = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "address");
+
+    public static final QName PROP_DESCRIPTION = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "description");
+
+    public static final QName PROP_LEGALINFOS = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "legalInformations");
+
+    //================= Type associations ===========================================
+    public static final QName ASSOC_CONTACT_USER = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");
 
 }

@@ -51,12 +51,12 @@
         <property name="modelService" ref="modelService" />
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="fileFolderService" ref="FileFolderService" />
+        <property name="searchService" ref="SearchService"/>
     </bean>     
     
     <!--Spaces Handling service-->
     <bean name="spaceService" class="fr.itldev.koya.alfservice.SpaceService">
         <property name="nodeService" ref="NodeService"/>
-        <property name="searchService" ref="SearchService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="companyService" ref="companyService"/>
         <property name="koyaAclService" ref="koyaAclService"/>

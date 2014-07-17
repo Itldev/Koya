@@ -21,10 +21,14 @@ package fr.itldev.koya.alfservice;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.CompanyProperties;
+import fr.itldev.koya.model.impl.Contact;
+import fr.itldev.koya.model.impl.ContactItem;
+import fr.itldev.koya.model.impl.GeoPos;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.SalesOffer;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,12 +37,17 @@ import java.util.Map;
 import java.util.Properties;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentWriter;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
@@ -57,7 +66,11 @@ public class CompanyService {
     private static final String SITE_PRESET = "site-dashboard";
     private static final String DESC = "Koya Company";
     private static final String KOYA_CONFIG = "koya-config";
+
     private static final String PREFS_FILE_NAME = "preferences.properties";
+    private static final String LOGO_FILE_NAME_PREFIX = "logo";
+    private static final String COMPANYPROPERTIES_FILE_NAME = "company.properties";
+
     private final Logger logger = Logger.getLogger(CompanyService.class);
     // service beans
     protected SiteService siteService;
@@ -67,6 +80,7 @@ public class CompanyService {
     protected ModelService modelService;
     private AuthenticationService authenticationService;
     private FileFolderService fileFolderService;
+    private SearchService searchService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setSiteService(SiteService siteService) {
@@ -95,6 +109,10 @@ public class CompanyService {
 
     public void setFileFolderService(FileFolderService fileFolderService) {
         this.fileFolderService = fileFolderService;
+    }
+
+    public void setSearchService(SearchService searchService) {
+        this.searchService = searchService;
     }
 
     // </editor-fold>
@@ -156,6 +174,9 @@ public class CompanyService {
     }
 
     /**
+     * ================= Preferences Methods ===========================
+     */
+    /**
      * Get company preferences from properties file.
      *
      * @param companyName
@@ -164,24 +185,11 @@ public class CompanyService {
      */
     public Preferences getPreferences(String companyName) throws KoyaServiceException {
         Preferences prefs = new Preferences();
-
         Company c = koyaNodeService.companyBuilder(companyName);
-        NodeRef prefFileNodeRef = getPreferencesFile(c);
+        Properties compProperties = koyaNodeService.readPropertiesFileContent(getCompanyConfigFile(c, PREFS_FILE_NAME));
 
-        if (prefFileNodeRef != null) {
-            //read content
-            ContentReader contentReader = fileFolderService.getReader(prefFileNodeRef);
-            Properties compProperties = new Properties();
-            try {
-                compProperties.load(contentReader.getContentInputStream());
-            } catch (IOException | ContentIOException ex) {
-                logger.error("Error loading company '" + companyName + "' properties : " + ex.toString());
-            } catch (NullPointerException ex) {
-                //exception thrown when properties file is empty
-            }
-            for (Object k : compProperties.keySet()) {
-                prefs.put((String) k, compProperties.get(k));
-            }
+        for (Object k : compProperties.keySet()) {
+            prefs.put((String) k, compProperties.get(k));
         }
 
         return prefs;
@@ -197,7 +205,7 @@ public class CompanyService {
     public void commitPreferences(String companyName, Preferences prefsToCommit) throws KoyaServiceException {
 
         Company c = koyaNodeService.companyBuilder(companyName);
-        NodeRef prefFileNodeRef = getPreferencesFile(c);
+        NodeRef prefFileNodeRef = getCompanyConfigFile(c, PREFS_FILE_NAME);
 
         if (prefFileNodeRef != null) {
             fileFolderService.delete(prefFileNodeRef);
@@ -217,16 +225,131 @@ public class CompanyService {
         }
     }
 
-    private NodeRef getPreferencesFile(Company c) {
-        NodeRef prefFileNodeRef = null;
-        try {
-            prefFileNodeRef = nodeService.getChildByName(
-                    getKoyaConfigNodeRef(c.getNodeRefasObject(), false), ContentModel.ASSOC_CONTAINS, PREFS_FILE_NAME);
-        } catch (Exception ex) {
+    /**
+     * ================= Properties Methods ==============================
+     */
+    /**
+     * Get Company properties.
+     *
+     * @param companyName
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public CompanyProperties getProperties(String companyName) throws KoyaServiceException {
+
+        Company c = koyaNodeService.companyBuilder(companyName);
+        CompanyProperties cp = new CompanyProperties(companyName);
+
+        NodeRef companyPropertiesNodeRef = getCompanyConfigFile(c, COMPANYPROPERTIES_FILE_NAME);
+
+        if (companyPropertiesNodeRef == null) {
+            FileInfo fi = fileFolderService.create(getKoyaConfigNodeRef(c.getNodeRefasObject(), true),
+                    COMPANYPROPERTIES_FILE_NAME, KoyaModel.TYPE_COMPANYPROPERTIES);
+            companyPropertiesNodeRef = fi.getNodeRef();
         }
-        return prefFileNodeRef;
+
+        if (companyPropertiesNodeRef != null) {
+            //if geographic aspect is set,  get latitude and longitude
+            if (nodeService.hasAspect(companyPropertiesNodeRef, ContentModel.ASPECT_GEOGRAPHIC)) {
+                cp.setGeoPos(new GeoPos(
+                        (Double) nodeService.getProperty(companyPropertiesNodeRef, ContentModel.PROP_LATITUDE),
+                        (Double) nodeService.getProperty(companyPropertiesNodeRef, ContentModel.PROP_LONGITUDE)));
+            }
+
+            //address, description,legal informations - company properties attributes
+            cp.setCompanyAddress((String) nodeService.getProperty(companyPropertiesNodeRef, KoyaModel.PROP_ADDRESS));
+            cp.setDescription((String) nodeService.getProperty(companyPropertiesNodeRef, KoyaModel.PROP_DESCRIPTION));
+            cp.setLegalInformations((String) nodeService.getProperty(companyPropertiesNodeRef, KoyaModel.PROP_LEGALINFOS));
+
+            for (ChildAssociationRef car : nodeService.getChildAssocs(companyPropertiesNodeRef)) {
+
+                NodeRef currentNodeRef = car.getChildRef();
+                QName currentNodeRefType = nodeService.getType(currentNodeRef);
+                String currentNodeRefName = (String) nodeService.getProperty(currentNodeRef, ContentModel.PROP_NAME);
+
+                if (currentNodeRefName.startsWith(LOGO_FILE_NAME_PREFIX)) {
+                    /**
+                     * Each file wich name starts with logo is considered as
+                     * company logo.
+                     *
+                     * If contact or contactItem name, starts with 'logo', it
+                     * won't be used as it should be
+                     */
+                    cp.setLogoNodeRef(car.getChildRef().toString());
+                } else if (currentNodeRefType.equals(KoyaModel.TYPE_CONTACTITEM)) {
+                    try {
+                        ContactItem companyCi = new ContactItem();
+
+                        companyCi.setValue((String) nodeService.getProperty(currentNodeRef, KoyaModel.PROP_CONTACTITEM_VALUE));
+                        companyCi.setType(Integer.valueOf((String) nodeService.getProperty(currentNodeRef, KoyaModel.PROP_CONTACTITEM_TYPE)));
+                        cp.getContactItems().add(companyCi);
+                    } catch (NumberFormatException | InvalidNodeRefException ex) {
+                        //silent exception catching : if error occurs no contact created
+                    }
+
+                } else if (currentNodeRefType.equals(KoyaModel.TYPE_CONTACT)) {
+                    Contact contact = new Contact();
+
+                    contact.setTitle((String) nodeService.getProperty(currentNodeRef, KoyaModel.PROP_CONTACT_TITLE));
+
+                    //========= get associated user informations
+                    List<AssociationRef> assocRefs = nodeService.getTargetAssocs(currentNodeRef, KoyaModel.ASSOC_CONTACT_USER);
+                    //there must be exactly one associated user
+                    if (assocRefs.size() != 1) {
+                        logger.error("Error retrieving contact asociated user : skip");
+                        break;
+                    }
+                    NodeRef userNodeRef = assocRefs.get(0).getTargetRef();
+
+                    contact.setUserNodeRef(userNodeRef.toString());
+                    contact.setFirstName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_FIRSTNAME));
+                    contact.setLastName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_LASTNAME));
+
+                    ContactItem contactMail = new ContactItem();
+                    contactMail.setType(ContactItem.TYPE_MAIL);
+                    contactMail.setValue((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));
+
+                    contact.getContactItems().add(contactMail);
+
+                    // ========= get additionnal contacts =======
+                    for (ChildAssociationRef carContact : nodeService.getChildAssocs(currentNodeRef)) {
+                        NodeRef currentContactNodeRef = carContact.getChildRef();
+                        if (nodeService.getType(currentContactNodeRef).equals(KoyaModel.TYPE_CONTACTITEM)) {
+                            try {
+
+                                ContactItem contactCi = new ContactItem();
+                                contactCi.setValue((String) nodeService.getProperty(currentContactNodeRef, KoyaModel.PROP_CONTACTITEM_VALUE));
+                                contactCi.setType(Integer.valueOf((String) nodeService.getProperty(currentContactNodeRef, KoyaModel.PROP_CONTACTITEM_TYPE)));
+                                contact.getContactItems().add(contactCi);
+                            } catch (NumberFormatException | InvalidNodeRefException ex) {
+                                //silent exception catching : if error occurs no contact created
+                            }
+                        }
+                    }
+
+                    cp.getContacts().add(contact);
+                }
+
+            }
+        }
+
+        return cp;
     }
 
+    /**
+     *
+     * @param companyName
+     * @param compProperties
+     * @throws KoyaServiceException
+     */
+    public void commitProperties(String companyName, CompanyProperties compProperties) throws KoyaServiceException {
+        Company c = koyaNodeService.companyBuilder(companyName);
+        //TODO implement this method
+    }
+
+    /**
+     * =========================================================================
+     */
     /**
      * Site name normalisation method
      *
@@ -268,8 +391,8 @@ public class CompanyService {
      */
     public Boolean isKoyaCompany(NodeRef n) {
 
-        return nodeService.getType(n).equals(KoyaModel.QNAME_KOYA_COMPANY)
-                && nodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE);
+        return nodeService.getType(n).equals(KoyaModel.TYPE_COMPANY)
+                && nodeService.hasAspect(n, KoyaModel.ASPECT_ACTIVABLE);
     }
 
     /**
@@ -307,5 +430,24 @@ public class CompanyService {
 
         }
         return koyaConfigRef;
+    }
+
+    /**
+     * Returns company specific file : file stored in 'koya-config' company
+     * directory.
+     *
+     * retuns null if file doesn't exists.
+     *
+     * @param c
+     * @return
+     */
+    private NodeRef getCompanyConfigFile(Company c, String fileName) {
+        NodeRef prefFileNodeRef = null;
+        try {
+            prefFileNodeRef = nodeService.getChildByName(
+                    getKoyaConfigNodeRef(c.getNodeRefasObject(), false), ContentModel.ASSOC_CONTAINS, fileName);
+        } catch (Exception ex) {
+        }
+        return prefFileNodeRef;
     }
 }

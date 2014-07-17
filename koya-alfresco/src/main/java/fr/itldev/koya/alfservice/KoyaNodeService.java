@@ -26,8 +26,10 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.nodelocator.AncestorNodeLocator;
@@ -45,6 +48,8 @@ import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentData;
+import org.alfresco.service.cmr.repository.ContentIOException;
+import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -130,14 +135,14 @@ public class KoyaNodeService {
     public void setActiveStatus(NodeRef n, Boolean activeValue) {
 
         //TODO limit actions to activable nodes (check model)
-        if (nodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE)) {
+        if (nodeService.hasAspect(n, KoyaModel.ASPECT_ACTIVABLE)) {
             //if node exists with activable aspect, update value.
-            nodeService.setProperty(n, KoyaModel.QNAME_PROPASPECT_KOYA_ISACTIVE, activeValue);
+            nodeService.setProperty(n, KoyaModel.PROP_ISACTIVE, activeValue);
         } else {
             //add aspect with value
             Map<QName, Serializable> props = new HashMap<>();
-            props.put(KoyaModel.QNAME_PROPASPECT_KOYA_ISACTIVE, activeValue);
-            nodeService.addAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE, props);
+            props.put(KoyaModel.PROP_ISACTIVE, activeValue);
+            nodeService.addAspect(n, KoyaModel.ASPECT_ACTIVABLE, props);
         }
     }
 
@@ -150,8 +155,8 @@ public class KoyaNodeService {
      * @return
      */
     public Boolean isActive(NodeRef n) {
-        return unsecuredNodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE)
-                && (Boolean) unsecuredNodeService.getProperty(n, KoyaModel.QNAME_PROPASPECT_KOYA_ISACTIVE);
+        return unsecuredNodeService.hasAspect(n, KoyaModel.ASPECT_ACTIVABLE)
+                && (Boolean) unsecuredNodeService.getProperty(n, KoyaModel.PROP_ISACTIVE);
     }
 
     /**
@@ -179,9 +184,9 @@ public class KoyaNodeService {
                     //Build object according to type                
                     QName typeFav = nodeService.getType(n);
 
-                    if (typeFav.equals(KoyaModel.QNAME_KOYA_SPACE)) {
+                    if (typeFav.equals(KoyaModel.TYPE_SPACE)) {
                         favourites.add(nodeSpaceBuilder(n));
-                    } else if (typeFav.equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+                    } else if (typeFav.equals(KoyaModel.TYPE_DOSSIER)) {
                         favourites.add(nodeDossierBuilder(n));
                     } else {
                         favourites.add(nodeDirBuilder(n));
@@ -208,7 +213,7 @@ public class KoyaNodeService {
             if (k.startsWith(FAVOURITES_PREF_COMPANIES) && ((Boolean) prefs.get(k)).equals(Boolean.TRUE)) {
 
                 String compName = k.substring(FAVOURITES_PREF_COMPANIES.length() + 1);
-                try {                   
+                try {
                     favourites.add(companyBuilder(compName));
                 } catch (Exception e) {//In case of non existant company
                 }
@@ -313,11 +318,11 @@ public class KoyaNodeService {
     public SecuredItem nodeRef2SecuredItem(NodeRef nodeRef) throws KoyaServiceException {
         SecuredItem si = null;
         QName type = nodeService.getType(nodeRef);
-        if (type.equals(KoyaModel.QNAME_KOYA_COMPANY)) {
+        if (type.equals(KoyaModel.TYPE_COMPANY)) {
             si = companyBuilder(nodeRef);
-        } else if (type.equals(KoyaModel.QNAME_KOYA_SPACE)) {
+        } else if (type.equals(KoyaModel.TYPE_SPACE)) {
             si = nodeSpaceBuilder(nodeRef);
-        } else if (type.equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+        } else if (type.equals(KoyaModel.TYPE_DOSSIER)) {
             si = nodeDossierBuilder(nodeRef);
         } else if (type.equals(ContentModel.TYPE_FOLDER) && nodeIsChildOfDossier(nodeRef)) {
             si = nodeDirBuilder(nodeRef);
@@ -534,8 +539,8 @@ public class KoyaNodeService {
      * @return
      */
     public Boolean isKoyaCompany(NodeRef n) {
-        return unsecuredNodeService.getType(n).equals(KoyaModel.QNAME_KOYA_COMPANY)
-                && unsecuredNodeService.hasAspect(n, KoyaModel.QNAME_KOYA_ACTIVABLE);
+        return unsecuredNodeService.getType(n).equals(KoyaModel.TYPE_COMPANY)
+                && unsecuredNodeService.hasAspect(n, KoyaModel.ASPECT_ACTIVABLE);
     }
 
     /**
@@ -587,9 +592,9 @@ public class KoyaNodeService {
                 && isKoyaCompany(unsecuredNodeService.getPrimaryParent(parentNr).getParentRef()))) {
             //If parent is a company or doclib node (which primary parent is a company)
             return companyBuilder(parentNr);
-        } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_SPACE)) {
+        } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.TYPE_SPACE)) {
             return nodeSpaceBuilder(parentNr);
-        } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+        } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.TYPE_DOSSIER)) {
             return nodeDossierBuilder(parentNr);
         } else if (nodeIsChildOfDossier(parentNr)) {
             return nodeContentBuilder(parentNr);
@@ -640,7 +645,7 @@ public class KoyaNodeService {
      */
     public SecuredItem getCompany(NodeRef nodeRef) throws KoyaServiceException {
         Map params = new HashMap(1);
-        params.put(AncestorNodeLocator.TYPE_KEY, KoyaModel.QNAME_KOYA_COMPANY);
+        params.put(AncestorNodeLocator.TYPE_KEY, KoyaModel.TYPE_COMPANY);
 
         NodeRef companyNR = ancestorNodeLocator.getNode(nodeRef, params);
 
@@ -665,7 +670,7 @@ public class KoyaNodeService {
         try {
             NodeRef parent = unsecuredNodeService.getPrimaryParent(nodeRef).getParentRef();
 
-            if (unsecuredNodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_DOSSIER)) {
+            if (unsecuredNodeService.getType(parent).equals(KoyaModel.TYPE_DOSSIER)) {
                 return true;
             } else {
                 return nodeIsChildOfDossier(parent);
@@ -694,10 +699,39 @@ public class KoyaNodeService {
     public Company getNodeCompany(NodeRef n) throws KoyaServiceException {
         if (n == null) {
             return null;
-        } else if (unsecuredNodeService.getType(n).equals(KoyaModel.QNAME_KOYA_COMPANY)) {
+        } else if (unsecuredNodeService.getType(n).equals(KoyaModel.TYPE_COMPANY)) {
             return companyBuilder(n);
         } else {
             return getNodeCompany(unsecuredNodeService.getPrimaryParent(n).getParentRef());
         }
+    }
+
+    /**
+     * Read file content. Null if any error occurs
+     *
+     * @param fileNr
+     * @return
+     */
+    public String readFileContent(NodeRef fileNr) {
+        try {
+            ContentReader contentReader = fileFolderService.getReader(fileNr);
+            return contentReader.getContentString();
+        } catch (ContentIOException ex) {
+            //silent exception catching : content remains null if occurs
+        }
+        return null;
+    }
+
+    public Properties readPropertiesFileContent(NodeRef fileNr) {
+        Properties props = new Properties();
+        if (fileNr != null) {
+            ContentReader contentReader = fileFolderService.getReader(fileNr);
+            try {
+                props.load(contentReader.getContentInputStream());
+            } catch (IOException | ContentIOException ex) {
+                //silent exception catching
+            }
+        }
+        return props;
     }
 }

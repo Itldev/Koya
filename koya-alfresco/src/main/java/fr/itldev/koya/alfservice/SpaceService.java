@@ -28,13 +28,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -47,7 +45,6 @@ public class SpaceService {
     private final Logger logger = Logger.getLogger(this.getClass());
 
     private NodeService nodeService;
-    private SearchService searchService;
     private KoyaNodeService koyaNodeService;
     private CompanyService companyService;
     private KoyaAclService koyaAclService;
@@ -58,10 +55,7 @@ public class SpaceService {
         this.nodeService = nodeService;
     }
 
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
-    }
-
+   
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
@@ -97,10 +91,10 @@ public class SpaceService {
 
         NodeRef nrParent = null;
 
-        if (nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
+        if (nodeService.getType(parent).equals(KoyaModel.TYPE_SPACE)) {
             //if parent is a space, select his node
             nrParent = parent;
-        } else if (nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_COMPANY)) {
+        } else if (nodeService.getType(parent).equals(KoyaModel.TYPE_COMPANY)) {
             //if it's a company, select documentLibrary's node
             nrParent = getDocLibNodeRef(parent);
         } else {
@@ -115,7 +109,7 @@ public class SpaceService {
         ChildAssociationRef car = nodeService.createNode(nrParent,
                 ContentModel.ASSOC_CONTAINS,
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
-                KoyaModel.QNAME_KOYA_SPACE,
+                KoyaModel.TYPE_SPACE,
                 properties);
         koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
 
@@ -151,7 +145,7 @@ public class SpaceService {
 
         for (final FileInfo fi : fileFolderService.listFolders(rootNodeRef)) {
 
-            if (fi.getType().equals(KoyaModel.QNAME_KOYA_SPACE)) {
+            if (fi.getType().equals(KoyaModel.TYPE_SPACE)) {
                 Space space = koyaNodeService.nodeSpaceBuilder(fi.getNodeRef());
                 space.setChildSpaces(listRecursive(fi.getNodeRef(), depth - 1));
                 spaces.add(space);
@@ -172,7 +166,7 @@ public class SpaceService {
 
         String name = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
 
-        if (nodeService.getType(dest).equals(KoyaModel.QNAME_KOYA_COMPANY)) {
+        if (nodeService.getType(dest).equals(KoyaModel.TYPE_COMPANY)) {
             dest = getDocLibNodeRef(dest);
         }
         logger.trace("move " + name + " to " + (String) nodeService.getProperty(dest, ContentModel.PROP_NAME));

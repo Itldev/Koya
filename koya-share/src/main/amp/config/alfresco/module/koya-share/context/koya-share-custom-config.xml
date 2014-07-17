@@ -1,0 +1,61 @@
+<alfresco-config>
+    <config evaluator="string-compare" condition="DocumentLibrary" replace="true">
+        
+        <types>
+            <type name="koya:container">
+                <subtype name="koya:space" />
+                <subtype name="koya:dossier" />
+                <subtype name="koya:contact" />
+                <subtype name="koya:companyProperties" />                
+            </type>
+
+            <type name="koya:contactItem"/>
+        </types>
+        
+        <!--
+         Create Content menu items, can be of 3 types matching the usual doclib action config:
+
+         * "link" - accepts a "href" param that will be passed a nodeRef token for substitution, used for external links
+         * "pagelink" - accepts a "page" param that will be passed a nodeRef token for substitution, used for Share links
+         * "javascript" - accepts & "function" param of an action that will get the current folder item as first argument.
+
+         I.e.
+         <content id="plain-text" label="create-content.text" icon="text" type="pagelink">
+            <param name="page">create-content?destination={nodeRef}&amp;itemId=cm:content&amp;mimeType=text/plain</param>
+            <permissions>
+               <permission allow="true">SomeUserPermissions</permission>
+            </permissions>
+         </content>
+
+         Note that the "CreateChildren" permission is always required and will disable the entire menu if no granted for a folder.
+
+           Also note that the old/untyped simple config still is allowed, the config snippet below will automatically be
+           converted to a "pagelink" as in the example above.
+           <content id="plain-text" label="create-content.text" icon="text" itemid="cm:content" mimetype="text/plain" permission="SomeUserPermissions"/>
+        -->
+        <create-content>
+            <content id="folder" label="create-content.folder" icon="folder" index="5" type="javascript">
+                         <param name="function">onNewFolder</param>
+            </content>
+            <content id="space" label="koya.menu.space" type="pagelink" index="10">
+                <param name="page">create-content?destination={nodeRef}&amp;itemId=koya:space</param>
+            </content>
+            <content id="dossier" label="koya.menu.dossier" type="pagelink" index="20">
+                <param name="page">create-content?destination={nodeRef}&amp;itemId=koya:dossier</param>
+            </content>                        
+            <content id="companyProperties" label="koya.menu.companyproperties" type="pagelink" index="30">
+                <param name="page">create-content?destination={nodeRef}&amp;itemId=koya:companyProperties</param>
+            </content>
+            <content id="contact" label="koya.menu.contact"  index="40" type="pagelink">
+                <param name="page">create-content?destination={nodeRef}&amp;itemId=koya:contact</param>       
+            </content>                
+            <content id="contactItem" label="koya.menu.contactitem"  index="50" type="pagelink">
+                <param name="page">create-content?destination={nodeRef}&amp;itemId=koya:contactItem</param>  
+            </content>
+ 
+        </create-content>
+
+        <create-content-by-template>true</create-content-by-template>
+    </config>
+    
+</alfresco-config>

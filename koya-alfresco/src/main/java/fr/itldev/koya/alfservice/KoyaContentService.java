@@ -116,7 +116,7 @@ public class KoyaContentService {
     // </editor-fold>
     public Directory createDir(String name, NodeRef parent) throws KoyaServiceException {
 
-        if (!(nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_DOSSIER)
+        if (!(nodeService.getType(parent).equals(KoyaModel.TYPE_DOSSIER)
                 || nodeService.getType(parent).equals(ContentModel.TYPE_FOLDER))) {
             throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_INVALID_PARENT_TYPE);
         }

@@ -24,9 +24,9 @@
 <model name="koya:koyamodel" xmlns="http://www.alfresco.org/model/dictionary/1.0"
        schemaLocation="http://alfresco-model-editor.googlecode.com/svn/trunk/spring-surf-alfresco-embedded/config/alfresco/model/modelSchema.xsd">
     <!-- Optional meta-data about the model -->
-    <description>Modele de données Koya</description>
+    <description>Koya Data Model</description>
     <author>Itldev</author>
-    <version>0.1</version>
+    <version>0.2</version>
     <!-- Imports are required to allow references to definitions in other models
     -->
     
@@ -43,6 +43,16 @@
 
     <constraints>
         <constraint name="koya:mailUniqueConstraint" type="fr.itldev.koya.constraint.UniqueMailConstraint" />
+        
+        <constraint name="koya:contactItemsTypes" type="LIST">
+            <parameter name="allowedValues">
+                <list>
+                    <value>1</value>
+                    <value>2</value>
+                    <value>3</value>
+                </list>
+            </parameter>
+        </constraint>
     </constraints>
 
     <types>
@@ -60,7 +70,113 @@
         <type name="koya:dossier">
             <title>dossier</title> 
             <parent>koya:container</parent>           
-        </type>        
+        </type> 
+        
+        
+        <!--
+        Companies properties and contacts
+        -->
+        
+        <type name="koya:contactItem">
+            <title>Koya Contact Item</title>
+            <parent>cm:content</parent>
+            <properties>
+                <property name="koya:contactItemValue">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:contactItemType">
+                    <type>d:text</type>
+                    <constraints>
+                        <constraint ref="koya:contactItemsTypes" />
+                    </constraints>  
+                </property>     
+            </properties>
+        </type>
+        
+        
+        <type name="koya:contact">
+            <title>Koya Contact</title>
+            <parent>koya:container</parent>
+            <properties>
+                <property name="koya:contactTitle">
+                    <type>d:text</type>
+                </property>                                             
+            </properties>    
+            <associations>
+                <association name="koya:contactUserAssoc">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </source>
+                    <target>
+                        <class>cm:person</class>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </target>
+                </association>
+                <child-association name="koya:ccontactItemsAssoc">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </source>
+                    <target>
+                        <class>koya:contactItem</class>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </target>
+                    <duplicate>false</duplicate>
+                    <propagateTimestamps>true</propagateTimestamps>
+                </child-association>
+            </associations>            
+        </type>
+        
+        <type name="koya:companyProperties">
+            <title>Company properties</title>
+            <parent>koya:container</parent>
+            <properties>
+                <property name="koya:address">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:description">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:legalInformations">
+                    <type>d:text</type>
+                </property>                                                                     
+            </properties>    
+            <associations>                
+                <child-association name="koya:contactItemsAssoc">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </source>
+                    <target>
+                        <class>koya:contactItem</class>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </target>
+                    <duplicate>false</duplicate>
+                    <propagateTimestamps>true</propagateTimestamps>
+                </child-association>
+                
+                <child-association name="koya:contactsAssoc">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </source>
+                    <target>
+                        <class>koya:contact</class>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </target>
+                    <duplicate>false</duplicate>
+                    <propagateTimestamps>true</propagateTimestamps>
+                </child-association>
+                      
+            </associations> 
+                            
+        </type>
+                                
         
     </types>
       

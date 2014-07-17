@@ -80,7 +80,7 @@ public class DossierService {
         }
 
         //parent must be a Space
-        if (!nodeService.getType(parent).equals(KoyaModel.QNAME_KOYA_SPACE)) {
+        if (!nodeService.getType(parent).equals(KoyaModel.TYPE_SPACE)) {
             throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_NOT_IN_SPACE);
         }
         //checks if dossier's name already exists
@@ -96,9 +96,9 @@ public class DossierService {
 
         ChildAssociationRef car = nodeService.createNode(parent, ContentModel.ASSOC_CONTAINS,
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
-                KoyaModel.QNAME_KOYA_DOSSIER,
+                KoyaModel.TYPE_DOSSIER,
                 properties);
-        nodeService.addAspect(car.getChildRef(), KoyaModel.QNAME_KOYA_ACTIVABLE, null);
+        nodeService.addAspect(car.getChildRef(), KoyaModel.ASPECT_ACTIVABLE, null);
 
         return koyaNodeService.nodeDossierBuilder(car.getChildRef());
     }
@@ -113,7 +113,7 @@ public class DossierService {
         List<Dossier> dossiers = new ArrayList<>();
 
         for (final FileInfo fi : fileFolderService.listFolders(parent)) {
-            if (fi.getType().equals(KoyaModel.QNAME_KOYA_DOSSIER)) {        
+            if (fi.getType().equals(KoyaModel.TYPE_DOSSIER)) {        
                 dossiers.add(koyaNodeService.nodeDossierBuilder(fi.getNodeRef()));
             }
         }
