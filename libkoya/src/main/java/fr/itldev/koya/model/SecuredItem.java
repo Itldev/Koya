@@ -23,7 +23,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
 
-public abstract class SecuredItem {
+public abstract class SecuredItem implements ContentTyped {
 
     //fields that should be escpaed before serialization
     public static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
@@ -141,6 +141,7 @@ public abstract class SecuredItem {
      *
      * @return
      */
+    @Override
     public String getContentType() {
         return this.getClass().getCanonicalName();
     }
@@ -150,6 +151,7 @@ public abstract class SecuredItem {
      *
      * @param contentType
      */
+    @Override
     public void setContentType(String contentType) {
     }
 

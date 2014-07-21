@@ -110,7 +110,9 @@
     </bean>
     
     <!--Profiles Handling Service-->
-    <bean name="profileService" class="fr.itldev.koya.alfservice.ProfileService"/>    
+    <bean name="profileService" class="fr.itldev.koya.alfservice.ProfileService">    
+        <property name="siteService" ref="SiteService"/> 
+    </bean>
     <!--Question/Answer Handling service-->
     <bean name="qaService" class="fr.itldev.koya.alfservice.QaService"/>
     <!--Statistics Handling Service-->

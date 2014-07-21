@@ -60,7 +60,7 @@
     
     
     
-      <!-- get current properties-->
+    <!-- get current properties-->
     <bean id="webscript.fr.itldev.koya.company.properties.get" 
           class="fr.itldev.koya.webscript.company.GetProperties"
           parent="webscript">                
@@ -73,6 +73,14 @@
           class="fr.itldev.koya.webscript.company.CommitProperties"
           parent="webscript">                
         <property name="companyService" ref="companyService" />        
+    </bean>
+    
+    
+    <!-- get available roles-->
+    <bean id="webscript.fr.itldev.koya.company.roles.get" 
+          class="fr.itldev.koya.webscript.company.GetRoles"
+          parent="webscript">                
+        <property name="profileService" ref="profileService" />        
     </bean>
     
     <!--
@@ -289,7 +297,20 @@
 
     </bean>
     
-    
+    <!-- get user role for a company -->
+    <bean id="webscript.fr.itldev.koya.user.role.get" 
+          class="fr.itldev.koya.webscript.user.GetRole"
+          parent="webscript">                
+        <property name="profileService" ref="profileService" />        
+    </bean>
+
+    <!-- set user role for a company -->
+    <bean id="webscript.fr.itldev.koya.user.setrole.get" 
+          class="fr.itldev.koya.webscript.user.SetRole"
+          parent="webscript">                
+        <property name="profileService" ref="profileService" />        
+    </bean>
+
     <!--
     ==================================================================
     ========================== Shares ==============================
