@@ -22,6 +22,7 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
@@ -141,87 +142,75 @@ public class UserService {
      *
      * @param queryStartsWith
      * @param maxResults - 0 = no limit
+     * @param companyName
+     * @param companyRolesFilter
      * @return
      */
-    public List<User> find(String queryStartsWith, int maxResults) {
-        String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\"" + queryStartsWith + "*\" OR @cm\\:firstName:\"" + queryStartsWith + "*\" OR @cm\\:email:\"" + queryStartsWith + "*\" )";
-
-        logger.trace(luceneRequest);
+    public List<User> find(String queryStartsWith, int maxResults,
+            String companyName, List<String> companyRolesFilter) {
         List<User> users = new ArrayList<>();
 
-        ResultSet rs = null;
-        try {
-            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
-            for (ResultSetRow r : rs) {
-                users.add(buildUser(r.getNodeRef()));
+        if (queryStartsWith == null) {
+            queryStartsWith = "";
+        }
+        queryStartsWith = queryStartsWith.toLowerCase();
+
+        //application global search
+        if (companyName == null) {
+
+            String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\""
+                    + queryStartsWith + "*\" OR @cm\\:firstName:\""
+                    + queryStartsWith + "*\" OR @cm\\:email:\""
+                    + queryStartsWith + "*\" )";
+
+            logger.trace(luceneRequest);
+            ResultSet rs = null;
+            try {
+                rs = searchService.query(
+                        StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+                        SearchService.LANGUAGE_LUCENE, luceneRequest);
+                for (ResultSetRow r : rs) {
+                    users.add(buildUser(r.getNodeRef()));
+                    if (users.size() >= maxResults) {
+                        break;
+                    }
+                }
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+            }
+        } else {
+
+            //TODO apply user filter
+            Map<String, String> companyMembers = new HashMap<>();
+            if (companyRolesFilter != null && companyRolesFilter.size() > 0) {
+                for (String role : companyRolesFilter) {
+                    companyMembers.putAll(siteService.listMembers(
+                            companyName, null, role, 0, true));
+                }
+            } else {
+                companyMembers.putAll(siteService.listMembers(
+                        companyName, null, null, 0, true));
+            }
+
+            for (String userName : companyMembers.keySet()) {
+                //remove from results where query is not name|firstname|email substring
+                //---> prevent display changed mail adress (username not changed )
+                User u = buildUser(personService.getPerson(userName));
+                if (u.getName().toLowerCase().startsWith(queryStartsWith)
+                        || u.getFirstName().toLowerCase().startsWith(queryStartsWith)
+                        || u.getEmail().toLowerCase().startsWith(queryStartsWith)) {
+                    users.add(buildUser(personService.getPerson(userName)));
+                }
+
                 if (users.size() >= maxResults) {
                     break;
                 }
             }
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
+
         }
 
-        logger.trace(users.size() + " results found");
-
-        return users;
-    }
-
-    /**
-     *
-     * Find users per company who username starts with defined query.
-     *
-     * TODO improve implementation using cache --> can be with long lot of users
-     * TODO load tests
-     *
-     * @param userFilter
-     * @param roleFilter
-     * @param maxResults
-     * @param companyName
-     * @return
-     */
-    public List<User> findInCompany(String userFilter, String roleFilter, int maxResults, String companyName) {
-        List<User> users = new ArrayList<>();
-
-        /**
-         * find users userName who mail adress can match userFilter.
-         */
-        List<String> userNameMailRequested = new ArrayList<>();
-        String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"*" + userFilter + "*\"";
-        ResultSet rs = null;
-        try {
-            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
-            for (ResultSetRow r : rs) {
-                userNameMailRequested.add((String) nodeService.getProperty(r.getNodeRef(), ContentModel.PROP_USERNAME));
-            }
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-        }
-
-        Map<String, String> members = siteService.listMembers(companyName, "*" + userFilter + "*", roleFilter, maxResults, true);
-
-        for (String usernameByMail : userNameMailRequested) {
-            members.putAll(siteService.listMembers(companyName, usernameByMail, roleFilter, maxResults, true));
-        }
-
-        for (String userName : members.keySet()) {
-            //remove from results where query is not name|firstname|email substring
-            //---> prevent display changed mail adress (username not changed )
-            User u = buildUser(personService.getPerson(userName));
-            if (u.getName().contains(userFilter)
-                    || u.getFirstName().contains(userFilter)
-                    || u.getEmail().contains(userFilter)) {
-                users.add(buildUser(personService.getPerson(userName)));
-            }
-
-            if (users.size() >= maxResults) {
-                break;
-            }
-        }
         logger.trace(users.size() + " results found");
 
         return users;

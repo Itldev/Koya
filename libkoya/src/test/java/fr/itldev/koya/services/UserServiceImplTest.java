@@ -112,12 +112,13 @@ public class UserServiceImplTest extends TestCase {
             fail();
         }
     }
+
     @Test
     public void testFindUsers() throws IOException, AlfrescoServiceException {
         User user = userService.login("admin", "admin");
 
         try {
-            userService.find(user, "l", 10);
+            userService.find(user, "l", 10, null, null);
         } catch (AlfrescoServiceException ex) {
             fail();
         }

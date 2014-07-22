@@ -95,14 +95,20 @@ public interface UserService {
      * find users list wich first/last name or email starts with query. Return
      * list limitated by maxResults.
      *
+     * if company is not null limit results to company scope. rolesFilter can
+     * refine results in this company context (not taken in account if no
+     * company is set)
+     *
      * @param userLog
      * @param query
      * @param maxResults
      * @param company
+     * @param rolesFilter
      * @return
      * @throws AlfrescoServiceException
      */
-    List<User> find(User userLog, String query, Integer maxResults, Company... company) throws AlfrescoServiceException;
+    List<User> find(User userLog, String query, Integer maxResults,
+            Company company, List<String> rolesFilter) throws AlfrescoServiceException;
 
     List<Notification> getNotifications(User userLog);
 

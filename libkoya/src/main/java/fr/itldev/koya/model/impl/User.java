@@ -66,6 +66,9 @@ public final class User {
     }
 
     public String getFirstName() {
+        if (firstName == null) {
+            return "";
+        }
         return firstName;
     }
 
@@ -74,6 +77,9 @@ public final class User {
     }
 
     public String getName() {
+        if (name == null) {
+            return "";
+        }
         return name;
     }
 
@@ -90,6 +96,9 @@ public final class User {
     }
 
     public String getEmail() {
+        if (email == null) {
+            return "";
+        }
         return email;
     }
 

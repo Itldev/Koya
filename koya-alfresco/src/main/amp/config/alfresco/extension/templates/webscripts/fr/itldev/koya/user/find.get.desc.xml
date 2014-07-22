@@ -21,10 +21,15 @@
 
 <webscript>
     <shortname>Find Users</shortname>
-    <description>Find Users</description>
+    <description>Find Users 
+        all parameters are optionnal :
+        c : limit results to specified company
+        q : starts with filter : used on lastname, firstname anf email fields
+        m : max results (10 by default)
+        r : comma separated roles list filter - available if company filter is set
+    </description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/user/find/{query}/{maxresults}</url>
-        <url>/fr/itldev/koya/user/find/{query}/{maxresults}/{sitename}</url>
+    <url>/fr/itldev/koya/user/find?query={query}&amp;maxResults={maxresults}&amp;companyName={companyName}&amp;roleFilter={roleFilter}</url>   
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
