@@ -1,6 +1,7 @@
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.model.json.SharingWrapper;
@@ -16,13 +17,17 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
 
     protected static final String REST_POST_SHAREITEMS = "/s/fr/itldev/koya/share/shareitems";
     protected static final String REST_GET_SHAREDUSERS = "/s/fr/itldev/koya/share/sharedusers/{noderef}";
+    protected static final String REST_GET_SHAREDITEMS = "/s/fr/itldev/koya/share/listusershares/{userName}/{companyName}";
 
     /**
-     * Shared SecuredItems to a list of users (pre created or not)
+     * Shares SecuredItems to a list of users (pre created or not)
      *
      * @param user
      * @param sharedItems
      * @param usersMails
+     * @param serverPath
+     * @param acceptUrl
+     * @param rejectUrl
      */
     @Override
     public void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails, String serverPath, String acceptUrl, String rejectUrl) {
@@ -74,6 +79,27 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
             throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
 
+    }
+
+    /**
+     * Get all securedItems shared for specified user on a company.
+     *
+     * @param userLogged
+     * @param userToGetShares
+     * @param c
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public List<SecuredItem> sharedItems(User userLogged, User userToGetShares, Company c) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_SHAREDITEMS,
+                ItlAlfrescoServiceWrapper.class, userToGetShares.getUserName(), c.getName());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            return ret.getItems();
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
     }
 
 }
