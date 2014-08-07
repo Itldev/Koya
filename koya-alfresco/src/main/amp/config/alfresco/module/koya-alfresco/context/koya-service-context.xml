@@ -51,7 +51,6 @@
         <property name="modelService" ref="modelService" />
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="fileFolderService" ref="FileFolderService" />
-        <property name="searchService" ref="SearchService"/>
     </bean>     
     
     <!--Spaces Handling service-->
@@ -97,6 +96,9 @@
         <property name="searchService" ref="SearchService"/>
         <property name="authenticationService" ref="AuthenticationService"/>
         <property name="siteService" ref="SiteService"/>
+        <property name="invitationService" ref="invitationService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="actionService" ref="ActionService"/>
     </bean>
    
     <!--Data Import/Export Service-->

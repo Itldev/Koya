@@ -214,7 +214,8 @@ public class KoyaShareService extends KoyaAclService {
         return users;
     }
 
-    private User createUserForSharing(List<SecuredItem> sharedItems, String newUserMail, String serverPath, String acceptUrl, String rejectUrl) throws KoyaServiceException {
+    private User createUserForSharing(List<SecuredItem> sharedItems,
+            String newUserMail, String serverPath, String acceptUrl, String rejectUrl) throws KoyaServiceException {
         logger.error("create user : " + newUserMail + " and share " + sharedItems.size() + " elements");
 
         Set<Company> invitedTo = new HashSet<>();
@@ -228,7 +229,10 @@ public class KoyaShareService extends KoyaAclService {
                 company = koyaNodeService.getNodeCompany(si.getNodeRefasObject());
             }
             if (company != null && invitedTo.add(company)) {
-                Invitation invitation = invitationService.inviteNominated(null, newUserMail, newUserMail, Invitation.ResourceType.WEB_SITE, company.getName(), ROLE_SITE_CONSUMER, serverPath, acceptUrl, rejectUrl);
+                Invitation invitation = invitationService.inviteNominated(
+                        null, newUserMail, newUserMail,
+                        Invitation.ResourceType.WEB_SITE, company.getName(),
+                        ROLE_SITE_CONSUMER, serverPath, acceptUrl, rejectUrl);
                 u = userService.getUserByUsername(invitation.getInviteeUserName());
             }
         }

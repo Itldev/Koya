@@ -83,6 +83,14 @@
         <property name="profileService" ref="profileService" />        
     </bean>
     
+    
+    <!-- Check if user is manager on specified company-->
+    <bean id="webscript.fr.itldev.koya.company.ismanager.get" 
+          class="fr.itldev.koya.webscript.company.IsManager"
+          parent="webscript">                
+        <property name="companyService" ref="companyService" />    
+    </bean>
+    
     <!--
     ==================================================================
     ========================== Sale Offers ==================
@@ -309,6 +317,26 @@
           class="fr.itldev.koya.webscript.user.SetRole"
           parent="webscript">                
         <property name="profileService" ref="profileService" />        
+    </bean>
+    
+    
+    
+    <bean id="webscript.fr.itldev.koya.user.invite.post" 
+          class="fr.itldev.koya.webscript.user.Invite"
+          parent="webscript">                
+        <property name="userService" ref="userService" />   
+    </bean>
+    
+    <bean id="webscript.fr.itldev.koya.user.revoke.get" 
+          class="fr.itldev.koya.webscript.user.Revoke"
+          parent="webscript">                
+        <property name="userService" ref="userService" /> 
+    </bean>
+    
+    <bean id="webscript.fr.itldev.koya.user.listconnect.get"
+          class="fr.itldev.koya.webscript.user.ListConnect"
+          parent="webscript">                
+        <property name="userService" ref="userService" /> 
     </bean>
 
     <!--

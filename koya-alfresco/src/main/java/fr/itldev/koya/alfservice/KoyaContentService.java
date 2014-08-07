@@ -267,7 +267,7 @@ public class KoyaContentService {
              */
             importZip.setExecuteAsynchronously(false);
             actionService.executeAction(importZip, zipFile);      
-        } catch (Exception ex) {
+        } catch (InvalidNodeRefException ex) {
             throw new KoyaServiceException(KoyaErrorCodes.ZIP_EXTRACTION_PROCESS_ERROR, ex);
         }
 

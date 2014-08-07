@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Get Roles</shortname>
-    <description>Get all available roles for a company</description>
+    <shortname>Invite a user to a company with rolename</shortname>
+    <description>Invite a user to a company with rolename</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/company/roles/{companyName}</url>
+    <url>/fr/itldev/koya/user/invite</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

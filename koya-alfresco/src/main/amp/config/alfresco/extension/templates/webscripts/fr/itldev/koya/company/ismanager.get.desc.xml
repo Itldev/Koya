@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Get Roles</shortname>
-    <description>Get all available roles for a company</description>
+    <shortname>Checks if logged user is company manager</shortname>
+    <description>Checks if logged user is company manager</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/company/roles/{companyName}</url>
+    <url>/fr/itldev/koya/company/ismanager/{companyName}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

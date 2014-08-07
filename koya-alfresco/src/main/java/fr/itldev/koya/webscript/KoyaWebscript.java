@@ -52,6 +52,8 @@ public abstract class KoyaWebscript extends AbstractWebScript {
     public static final String WSCONST_QUERY = "query";
     public static final String WSCONST_ROLEFILTER = "roleFilter";
     public static final String WSCONST_MAXRESULTS = "maxResults";
+    public static final String WSCONST_EMAIL = "email";
+    public static final String WSCONST_COMPANIESFILTER = "companiesFilter";
 
     private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 

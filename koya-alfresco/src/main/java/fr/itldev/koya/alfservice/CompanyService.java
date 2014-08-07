@@ -76,7 +76,6 @@ public class CompanyService {
     protected ModelService modelService;
     private AuthenticationService authenticationService;
     private FileFolderService fileFolderService;
-    private SearchService searchService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setSiteService(SiteService siteService) {
@@ -105,10 +104,6 @@ public class CompanyService {
 
     public void setFileFolderService(FileFolderService fileFolderService) {
         this.fileFolderService = fileFolderService;
-    }
-
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
     }
 
     // </editor-fold>
@@ -167,6 +162,17 @@ public class CompanyService {
     public SalesOffer getSalesOffer(String offerName) {
         return null;
 
+    }
+
+    /**
+     * Checks if current logged user is company manager on specified company.
+     *
+     * @param companyName
+     * @return
+     */
+    public Boolean isCompanyManager(String companyName) {
+        return siteService.getMembersRole(companyName, authenticationService.getCurrentUserName()).
+                equals(KoyaAclService.ROLE_SITE_MANAGER);
     }
 
     /**

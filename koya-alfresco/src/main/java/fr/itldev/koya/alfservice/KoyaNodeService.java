@@ -26,7 +26,6 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;

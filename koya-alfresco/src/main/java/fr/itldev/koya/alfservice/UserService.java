@@ -19,14 +19,23 @@
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.impl.UserConnection;
+import fr.itldev.koya.model.json.InviteWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.invitation.Invitation;
+import org.alfresco.service.cmr.invitation.InvitationService;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -38,6 +47,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.PropertyMap;
 import org.apache.log4j.Logger;
+import org.springframework.util.Assert;
 
 /**
  *
@@ -47,10 +57,13 @@ public class UserService {
     private final Logger logger = Logger.getLogger(this.getClass());
 
     protected NodeService nodeService;
-    private PersonService personService;
+    protected PersonService personService;
     protected SearchService searchService;
-    private MutableAuthenticationService authenticationService;
-    private SiteService siteService;
+    protected MutableAuthenticationService authenticationService;
+    protected SiteService siteService;
+    protected InvitationService invitationService;
+    protected KoyaNodeService koyaNodeService;
+    protected ActionService actionService;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -70,6 +83,18 @@ public class UserService {
 
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
+    }
+
+    public void setInvitationService(InvitationService invitationService) {
+        this.invitationService = invitationService;
+    }
+
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
+    }
+
+    public void setActionService(ActionService actionService) {
+        this.actionService = actionService;
     }
 
     /**
@@ -270,6 +295,80 @@ public class UserService {
                 return users.get(0);
             }
         }
+    }
+
+    /**
+     * Invite user identified by username to company with defined roleName
+     *
+     *
+     * @param inviteWrapper
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public void invite(InviteWrapper inviteWrapper) throws KoyaServiceException {
+
+        String userMail = inviteWrapper.getEmail();
+        String companyName = inviteWrapper.getCompanyName();
+        String roleName = inviteWrapper.getRoleName();
+        String serverPath = inviteWrapper.getServerPath();
+        String acceptUrl = inviteWrapper.getAcceptUrl();
+        String rejectUrl = inviteWrapper.getRejectUrl();
+
+        Assert.notNull(serverPath, "serverPath is null");
+        Assert.notNull(acceptUrl, "acceptUrl is null");
+        Assert.notNull(rejectUrl, "rejectUrl is null");
+
+        Company c = koyaNodeService.companyBuilder(companyName);
+
+        User u = null;
+        try {
+            u = getUser(userMail);
+        } catch (KoyaServiceException kex) {
+            //do nothing if exception thrown
+        }
+
+        if (u == null) {
+             invitationService.inviteNominated(null, userMail, userMail,
+                    Invitation.ResourceType.WEB_SITE, c.getName(),
+                    roleName, serverPath, acceptUrl, rejectUrl);
+
+        } else {
+
+            //custom invitation process --> TODO replace with workflow procedure
+            // 1 - Attribute role to existing user 
+            //TODO check previously existing role in site
+            siteService.setMembership(c.getName(), u.getUserName(), roleName);
+            // 2 - Send  template mail.
+        }
+    }
+
+    /**
+     * Revoke user access to defined company.
+     *
+     * @param userName
+     * @param companyName
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public void revoke(String userName, String companyName) throws KoyaServiceException {
+        siteService.removeMembership(companyName, userName);
+
+        //Launch backend action that cleans all users specific permissions in company
+        //Only delete specific permissions on dossiers 
+        try {
+            Map<String, Serializable> paramsClean = new HashMap<>();
+            paramsClean.put("userName", userName);
+            Action cleanUserAuth = actionService.createAction("cleanPermissions", paramsClean);
+            cleanUserAuth.setExecuteAsynchronously(true);
+            actionService.executeAction(cleanUserAuth, siteService.getSite(companyName).getNodeRef());
+        } catch (InvalidNodeRefException ex) {
+            throw new KoyaServiceException(0, "");//TODO 
+        }
+
+    }
+
+    public List<UserConnection> getConnectionLog(String userName, List<String> companyFilter, Integer maxResults) {
+        List<UserConnection> connectionLog = new ArrayList<>();
+        //TODO build full connection log
+        return connectionLog;
     }
 
 }

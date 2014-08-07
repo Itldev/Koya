@@ -15,7 +15,7 @@ public class Permissions {
     private final Integer PERM_DELETE = 2;
     private final Integer PERM_SHARE = 3;
     private final Integer PERM_READPROPERTIES = 4;
-    private final Integer PERM_DOWNLOAD = 4;
+    private final Integer PERM_DOWNLOAD = 5;
 
     private String username;
     private Map<Integer, Boolean> perms = new HashMap<>();

@@ -21,6 +21,7 @@ package fr.itldev.koya.services;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.model.impl.UserRole;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
@@ -77,4 +78,49 @@ public interface SecuService {
      */
     void setUserRole(User userLogged, Company c, String userNameSetRole, String roleName) throws AlfrescoServiceException;
 
+    /**
+     * Invite user identified by email on company with rolename granted.
+     *
+     * @param userLogged
+     * @param c
+     * @param userEmail
+     * @param roleName
+     * @param serverPath
+     * @param acceptUrl
+     * @param rejectUrl
+     * @throws AlfrescoServiceException
+     */
+    void inviteUser(User userLogged, Company c, String userEmail, String roleName,
+            String serverPath, String acceptUrl, String rejectUrl) throws AlfrescoServiceException;
+
+    /**
+     *
+     * @param userLogged
+     * @param userToGetConnections
+     * @param companyFilter
+     * @param maxResults
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    List<UserConnection> listUserConnections(User userLogged, User userToGetConnections, List<Company> companyFilter, Integer maxResults) throws AlfrescoServiceException;
+
+    /**
+     * revoke all user Acces on specified company.
+     *
+     * @param userLogged
+     * @param c
+     * @param u
+     * @throws AlfrescoServiceException
+     */
+    void revokeAccess(User userLogged, Company c, User u) throws AlfrescoServiceException;
+
+    /**
+     * Checks if user logged is company manager.
+     *
+     * @param userLogged
+     * @param c
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    Boolean isCompanyManager(User userLogged, Company c) throws AlfrescoServiceException;
 }

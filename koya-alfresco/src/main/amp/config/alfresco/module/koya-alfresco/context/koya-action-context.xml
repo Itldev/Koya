@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
 <!--
 
     Koya is an alfresco module that provides a corporate orientated dataroom.
@@ -19,13 +20,14 @@
 
 -->
 
-<webscript>
-    <shortname>Get Roles</shortname>
-    <description>Get all available roles for a company</description>
-    <family>Itldev</family>
-    <url>/fr/itldev/koya/company/roles/{companyName}</url>
-    <authentication>user</authentication>    
-    <format default="json"/>
-</webscript>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans>
+    
+    <bean id="cleanPermissions" class="fr.itldev.koya.action.CleanUserPermissionsActionExecuter" parent="action-executer">
+        <property name="nodeService" ref="NodeService"/>
+        <property name="permissionService" ref="permissionService" />
+         <property name="searchService" ref="SearchService" />
+    </bean>
 
-	
+    
+</beans>
