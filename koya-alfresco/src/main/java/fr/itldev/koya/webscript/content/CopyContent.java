@@ -41,7 +41,7 @@ public class CopyContent extends KoyaWebscript {
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
         NodeRef node = new NodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
         NodeRef parent = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_PARENTNODEREF));
-        wrapper.addItem(koyaContentService.move(node, parent));
+        wrapper.addItem(koyaContentService.copy(node, parent));
         return wrapper;
     }
 
