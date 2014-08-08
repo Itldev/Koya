@@ -265,6 +265,14 @@
         <property name="koyaNodeService" ref="koyaNodeService" />     
     </bean>
     
+    <!--send email-->
+    <bean id="webscript.fr.itldev.koya.global.mail.post" 
+          class="fr.itldev.koya.webscript.global.SendMail"
+          parent="webscript">                
+        <property name="actionService" ref="ActionService" />
+        <property name="authenticationService" ref="authenticationService"/>
+    </bean>
+    
     
     <!--
     ==================================================================

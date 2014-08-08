@@ -20,6 +20,7 @@ package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public interface AlfrescoService {
@@ -32,5 +33,13 @@ public interface AlfrescoService {
      * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
     MetaInfos getServerInfos(User user) throws AlfrescoServiceException;
+    
+    /**
+     * 
+     * @param user
+     * @param wrapper
+     * @throws AlfrescoServiceException 
+     */
+    void sendMail(User user,MailWrapper wrapper)throws AlfrescoServiceException;
 
 }

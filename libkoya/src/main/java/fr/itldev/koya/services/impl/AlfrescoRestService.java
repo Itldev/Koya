@@ -18,24 +18,23 @@
  */
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.log4j.Logger;
 import org.springframework.web.client.RestTemplate;
 
 public class AlfrescoRestService implements AlfrescoService {
 
     protected static final String DESERIALISATION_ERROR = "Object deserialisation error";
     private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos";
+    private static final String REST_POST_MAIL = "/s/fr/itldev/koya/global/mail";
 
     private String alfrescoServerUrl;
 
@@ -77,6 +76,30 @@ public class AlfrescoRestService implements AlfrescoService {
             throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
 
+    }
+
+    /**
+     *
+     * @param user
+     * @param wrapper
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public void sendMail(User user, MailWrapper wrapper) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = null;
+
+        if (user == null) {
+            ret = getTemplate().postForObject(
+                    alfrescoServerUrl + REST_POST_MAIL + "?guest=true", wrapper, ItlAlfrescoServiceWrapper.class);
+        } else {
+            ret = user.getRestTemplate().postForObject(
+                    alfrescoServerUrl + REST_POST_MAIL, wrapper, ItlAlfrescoServiceWrapper.class);
+        }
+
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
     }
 
     /*
