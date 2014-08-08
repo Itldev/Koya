@@ -184,6 +184,13 @@
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />   
     </bean>
+    
+    <!--content copy-->
+    <bean id="webscript.fr.itldev.koya.content.copy.post" 
+          class="fr.itldev.koya.webscript.content.CopyContent"
+          parent="webscript">                
+        <property name="koyaContentService" ref="koyaContentService" />   
+    </bean>
    
     
     <!-- zip content-->

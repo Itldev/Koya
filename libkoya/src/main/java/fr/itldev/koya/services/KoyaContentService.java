@@ -39,9 +39,13 @@ public interface KoyaContentService extends AlfrescoService {
 
     Document upload(User user, Resource r, Dossier dossier) throws AlfrescoServiceException;
 
-    Content move(User user, Content aDeplacer, Directory desination) throws AlfrescoServiceException;
+    Content move(User user, Content toMove, Directory desination) throws AlfrescoServiceException;
 
-    Content move(User user, Content aDeplacer, Dossier desination) throws AlfrescoServiceException;
+    Content move(User user, Content toMove, Dossier desination) throws AlfrescoServiceException;
+
+    Content copy(User user, Content toCopy, Directory desination) throws AlfrescoServiceException;
+
+    Content copy(User user, Content toCopy, Dossier desination) throws AlfrescoServiceException;
 
     List<Content> list(User user, Dossier dossier, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException;
 

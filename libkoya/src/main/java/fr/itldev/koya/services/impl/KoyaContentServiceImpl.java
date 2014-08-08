@@ -52,6 +52,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_POST_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list/{onlyFolders}?maxdepth={maxdepth}";
     private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list/{onlyFolders}";
     private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move/{parentNodeRef}";
+    private static final String REST_POST_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{parentNodeRef}";
     private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
     private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
@@ -81,13 +82,23 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     @Override
-    public Content move(User user, Content aDeplacer, Directory desination) throws AlfrescoServiceException {
-        return moveImpl(user, aDeplacer, desination);
+    public Content move(User user, Content toMove, Directory desination) throws AlfrescoServiceException {
+        return moveImpl(user, toMove, desination);
     }
 
     @Override
-    public Content move(User user, Content aDeplacer, Dossier desination) throws AlfrescoServiceException {
-        return moveImpl(user, aDeplacer, desination);
+    public Content move(User user, Content toMove, Dossier desination) throws AlfrescoServiceException {
+        return moveImpl(user, toMove, desination);
+    }
+
+    @Override
+    public Content copy(User user, Content toCopy, Directory desination) throws AlfrescoServiceException {
+        return copyImpl(user, toCopy, desination);
+    }
+
+    @Override
+    public Content copy(User user, Content toCopy, Dossier desination) throws AlfrescoServiceException {
+        return copyImpl(user, toCopy, desination);
     }
 
     @Override
@@ -161,6 +172,16 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private Content moveImpl(User user, Content contenu, Container parent) throws AlfrescoServiceException {
         ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_MOVECONTENT, contenu, ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            return (Content) ret.getItems().get(0);
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    private Content copyImpl(User user, Content contenu, Container parent) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_COPYCONTENT, contenu, ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return (Content) ret.getItems().get(0);
         } else {

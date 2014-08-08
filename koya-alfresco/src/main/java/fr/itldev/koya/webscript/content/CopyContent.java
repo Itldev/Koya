@@ -26,10 +26,10 @@ import org.alfresco.service.cmr.repository.NodeRef;
 
 /**
  *
- * Move Content Webscript.
+ * Copy Content Webscript.
  *
  */
-public class MoveContent extends KoyaWebscript {
+public class CopyContent extends KoyaWebscript {
 
     private KoyaContentService koyaContentService;
 

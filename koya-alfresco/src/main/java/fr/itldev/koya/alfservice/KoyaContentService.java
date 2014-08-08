@@ -147,6 +147,22 @@ public class KoyaContentService {
         return koyaNodeService.nodeContentBuilder(fInfo.getNodeRef());
     }
 
+    public Content copy(NodeRef toCopy, NodeRef dest) throws KoyaServiceException {
+
+        String newName = (String) nodeService.getProperty(toCopy, ContentModel.PROP_NAME);
+
+        FileInfo fInfo;
+        try {
+            fInfo = fileFolderService.copy(toCopy, dest, newName);
+        } catch (FileExistsException fex) {
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
+        } catch (FileNotFoundException ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
+        }
+
+        return koyaNodeService.nodeContentBuilder(fInfo.getNodeRef());
+    }
+
     /**
      * List Content recursive from parent noderef.
      *
@@ -266,7 +282,7 @@ public class KoyaContentService {
              * zip.
              */
             importZip.setExecuteAsynchronously(false);
-            actionService.executeAction(importZip, zipFile);      
+            actionService.executeAction(importZip, zipFile);
         } catch (InvalidNodeRefException ex) {
             throw new KoyaServiceException(KoyaErrorCodes.ZIP_EXTRACTION_PROCESS_ERROR, ex);
         }
