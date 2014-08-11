@@ -43,9 +43,11 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 public abstract class KoyaWebscript extends AbstractWebScript {
 
     public static final String WSCONST_NODEREF = "nodeRef";
+    public static final String WSCONST_NAME = "name";
     public static final String WSCONST_NBANCESTOR = "nbAncestor";
     public static final String WSCONST_PARENTNODEREF = "parentNodeRef";
     public static final String WSCONST_USERNAME = "userName";
+    public static final String WSCONST_USERNAMES = "userNames";
     public static final String WSCONST_COMPANYNAME = "companyName";
     public static final String WSCONST_ROLENAME = "roleName";
     public static final String WSCONST_ONLYFOLDERS = "onlyFolders";

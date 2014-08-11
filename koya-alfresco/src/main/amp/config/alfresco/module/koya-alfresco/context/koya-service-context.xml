@@ -66,7 +66,7 @@
     <bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
         <property name="nodeService" ref="NodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="fileFolderService" ref="FileFolderService"/>
+        <property name="fileFolderService" ref="FileFolderService"/>      
     </bean>
 
     <!--Contents handling service-->
@@ -125,6 +125,14 @@
     
     <!--Mailing Service-->
     <bean name="mailingService" class="fr.itldev.koya.alfservice.MailingService"/>
+    
+  
+     <!--Node Responsibility Service-->
+    <bean name="nodeResponsibilityService" class="fr.itldev.koya.alfservice.NodeResponsibilityService">
+        <property name="nodeService" ref="NodeService"/>        
+        <property name="userService" ref="userService"/>
+        <property name="ownableService" ref="ownableService"/>
+    </bean>
     
 <!--    
     

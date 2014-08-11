@@ -19,30 +19,40 @@
 package fr.itldev.koya.webscript.dossier;
 
 import fr.itldev.koya.alfservice.DossierService;
+import fr.itldev.koya.alfservice.NodeResponsibilityService;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
 
 /**
  *
- * Add Dossier Webscript
+ * Add one or many persons in charge of specified dossier.
  *
  */
-public class AddDossier extends KoyaWebscript {
+public class AddResponsible extends KoyaWebscript {
 
     /*services*/
-    private DossierService dossierService;
+    private NodeResponsibilityService nodeResponsibilityService;
 
-    public void setDossierService(DossierService dossierService) {
-        this.dossierService = dossierService;
+    public void setNodeResponsibilityService(NodeResponsibilityService nodeResponsibilityService) {
+        this.nodeResponsibilityService = nodeResponsibilityService;
     }
 
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        String name = (String) jsonPostMap.get(WSCONST_NAME);
-        NodeRef parent = new NodeRef((String) urlParams.get(WSCONST_PARENTNODEREF));
-        wrapper.addItem(dossierService.create(name, parent, null));
+        NodeRef nodeRef = new NodeRef((String) urlParams.get(WSCONST_NODEREF));
+        String userNames = (String) urlParams.get(WSCONST_USERNAMES);
+
+        List<String> respToadd = new ArrayList<>();
+        //seperate comma separedted usernames list
+        for (String u : userNames.split(",")) {
+            respToadd.add(u.trim());
+        }
+
+        nodeResponsibilityService.addResponsible(nodeRef, respToadd);
 
         return wrapper;
     }

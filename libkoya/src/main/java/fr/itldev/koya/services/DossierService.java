@@ -70,4 +70,54 @@ public interface DossierService extends AlfrescoService {
      */
     List<Dossier> list(User user, Space space, String... filter) throws AlfrescoServiceException;
 
+    /**
+     * List all users in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    List<User> listResponsibles(User user, Dossier dossier) throws AlfrescoServiceException;
+
+    /**
+     * Adds a user in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsible
+     * @throws AlfrescoServiceException
+     */
+    void addResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException;
+
+    /**
+     * Add a list of users in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsibles
+     * @throws AlfrescoServiceException
+     */
+    void addResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException;
+
+    /**
+     * Remove a user in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsible
+     * @throws AlfrescoServiceException
+     */
+    void delResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException;
+
+    /**
+     * Remove a list of users in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsibles
+     * @throws AlfrescoServiceException
+     */
+    void delResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException;
+
 }

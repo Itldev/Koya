@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.model.impl;
 
+import java.util.Objects;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -159,4 +160,27 @@ public final class User {
     public NodeRef getNodeRefasObject() {
         return new NodeRef(this.nodeRef);
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(this.userName);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final User other = (User) obj;
+        if (!Objects.equals(this.userName, other.userName)) {
+            return false;
+        }
+        return true;
+    }
+
 }

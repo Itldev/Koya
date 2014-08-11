@@ -37,10 +37,9 @@ public class ListDossier extends KoyaWebscript {
         this.dossierService = dossierService;
     }
 
-
     @Override
     public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef parent = new NodeRef((String) jsonPostMap.get("nodeRef"));
+        NodeRef parent = new NodeRef((String) jsonPostMap.get(WSCONST_NODEREF));
         wrapper.addItems(dossierService.list(parent));
         wrapper.setStatusOK();
         return wrapper;

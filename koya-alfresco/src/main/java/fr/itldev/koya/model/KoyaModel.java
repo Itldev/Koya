@@ -46,6 +46,8 @@ public class KoyaModel {
     public static final QName ASPECT_ACTIVABLE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "activable");
 
     public static final QName ASPECT_MAILUNIQUE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "mailunique");
+
+    public static final QName ASPECT_RESPONSABILTY = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "responsability");
     //================= Aspects Properties
     public static final QName PROP_ISACTIVE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "isActive");
 
@@ -66,5 +68,8 @@ public class KoyaModel {
 
     //================= Type associations ===========================================
     public static final QName ASSOC_CONTACT_USER = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");
+
+    //================= Aspect associations ===========================================
+    public static final QName ASSOC_RESPONSIBLES = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "responsibles");
 
 }

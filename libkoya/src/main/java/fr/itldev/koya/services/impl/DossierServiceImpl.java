@@ -33,6 +33,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 
     private static final String REST_POST_ADDDOSSIER = "/s/fr/itldev/koya/dossier/add/{parentNodeRef}";
     private static final String REST_POST_LISTCHILD = "/s/fr/itldev/koya/dossier/list?filter={filter}";
+    private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
+    private static final String REST_GET_ADDRESP = "/s/fr/itldev/koya/dossier/resp/add/{nodeRef}?userNames={userNames}";
+    private static final String REST_GET_DELRESP = "/s/fr/itldev/koya/dossier/resp/del/{nodeRef}?userNames={userNames}";
 
     private KoyaContentService KoyaContentService;
 
@@ -55,13 +58,13 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      * Creates a new Dossier with content in a zip file
      *
      * TODO make this process atomic
-     * 
+     *
      * @param user
      * @param dossier
      * @param parentSpace
      * @param zipFile
-     * 
-     * 
+     *
+     *
      * @return
      * @throws AlfrescoServiceException
      */
@@ -73,13 +76,20 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
         return d;
     }
 
+    /**
+     *
+     * @param user
+     * @param dossier
+     * @return
+     * @throws AlfrescoServiceException
+     */
     @Override
     public Dossier edit(User user, Dossier dossier) throws AlfrescoServiceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
-     * Liste tous les dossiers d'un espace
+     * List all Space Dossiers
      *
      * @param user
      * @param space
@@ -91,10 +101,118 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
         if (filter.length == 1) {
             filtre = filter[0];
         }
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTCHILD, space, ItlAlfrescoServiceWrapper.class, filtre);
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_LISTCHILD, space, ItlAlfrescoServiceWrapper.class, filtre);
         if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             return ret.getItems();
         } else {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    /**
+     * List all users in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public List<User> listResponsibles(User user, Dossier dossier) throws AlfrescoServiceException {
+
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_LISTRESP, ItlAlfrescoServiceWrapper.class, dossier.getNodeRef());
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            return ret.getItems();
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    /**
+     * Adds a user in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsible
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public void addResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_ADDRESP, ItlAlfrescoServiceWrapper.class,
+                dossier.getNodeRef(), responsible.getUserName());
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    /**
+     * Add a list of users in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsibles
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public void addResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException {
+
+        String userNames = "";
+        String sep = "";
+        for (User u : responsibles) {
+            userNames += sep + u.getUserName();
+            sep = ",";
+        }
+
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_ADDRESP,
+                ItlAlfrescoServiceWrapper.class, dossier.getNodeRef(), userNames);
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    /**
+     * Remove a user in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsible
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public void delResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_DELRESP,
+                ItlAlfrescoServiceWrapper.class, dossier.getNodeRef(), responsible.getUserName());
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
+    /**
+     * Remove a list of users in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsibles
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public void delResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException {
+
+        String userNames = "";
+        String sep = "";
+        for (User u : responsibles) {
+            userNames += sep + u.getUserName();
+            sep = ",";
+        }
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_DELRESP,
+                ItlAlfrescoServiceWrapper.class, dossier.getNodeRef(), userNames);
+        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
             throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
         }
     }

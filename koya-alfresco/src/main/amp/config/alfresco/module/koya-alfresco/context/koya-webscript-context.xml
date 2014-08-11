@@ -146,17 +146,40 @@
     ==================================================================
     -->
     
-    <!--création d'un dossier-->
+    <!--create Dossier-->
     <bean id="webscript.fr.itldev.koya.dossier.add.post" 
           class="fr.itldev.koya.webscript.dossier.AddDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
     </bean>
-    <!--liste les dossiers-->
+    <!--list Dossiers-->
     <bean id="webscript.fr.itldev.koya.dossier.list.post" 
           class="fr.itldev.koya.webscript.dossier.ListDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
+    </bean>
+    
+    
+    <!--list dossier responsibles-->
+    <bean id="webscript.fr.itldev.koya.dossier.listresponsible.get" 
+          class="fr.itldev.koya.webscript.dossier.ListResponsible"
+          parent="webscript">                
+        <property name="nodeResponsibilityService" ref="nodeResponsibilityService" />
+    </bean>
+    
+    
+    <!-- add dossier responsibles-->
+    <bean id="webscript.fr.itldev.koya.dossier.addresponsible.get" 
+          class="fr.itldev.koya.webscript.dossier.AddResponsible"
+          parent="webscript">                
+        <property name="nodeResponsibilityService" ref="nodeResponsibilityService" />
+    </bean>
+    
+    <!--del dossier responsibles-->
+    <bean id="webscript.fr.itldev.koya.dossier.delresponsible.get" 
+          class="fr.itldev.koya.webscript.dossier.DelResponsible"
+          parent="webscript">                
+        <property name="nodeResponsibilityService" ref="nodeResponsibilityService" />
     </bean>
        
     <!--

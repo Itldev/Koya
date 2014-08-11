@@ -23,6 +23,8 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
@@ -53,15 +55,47 @@ public class DossierServiceImplTest extends TestCase {
     @Autowired
     private DossierService dossierService;
 
+    @Autowired
+    private SecuService secuService;
+
     private Company companyTests;
     private Space spaceTests;
     User admin;
 
+    private List<User> testUsers;
+
     @Before
-    public void createSpace() throws RestClientException, AlfrescoServiceException {
+    public void init() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
         companyTests = companyService.create(admin, new Company("company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
         spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
+
+        //create to 2 test users if they don't exists (ie while nb users < 3)
+        List<User> users = userService.find(admin, null, 10, companyTests, null);
+        while (users.size() < 3) {
+
+            try {
+                String randomPart = Integer.toString(new Random().nextInt(1000));
+                String mail = "userdossiertest" + randomPart + "@test.com";
+                String userName = "userdossiertest" + randomPart + "_test_com";
+
+                secuService.inviteUser(admin, companyTests, mail,
+                        "SiteManager", "", "", "");
+                secuService.setUserRole(admin, companyTests, userName, "SiteManager");
+                users = userService.find(admin, null, 10, companyTests, null);
+            } catch (Exception ex) {
+                //silent catch any exception to execute a new try
+            }
+        }
+
+        //select 2 test users = 2 users that are not admin
+        testUsers = new ArrayList<>();
+        for (User u : users) {
+            if (!u.getUserName().equals("admin")) {
+                testUsers.add(u);
+            }
+        }
+
     }
 
     @After
@@ -86,4 +120,49 @@ public class DossierServiceImplTest extends TestCase {
         dossierService.create(admin, new Dossier("doss4"), spaceTests);
         assertEquals(4, dossierService.list(admin, spaceTests).size());
     }
+
+    @Test
+    public void testListResponsibles() throws AlfrescoServiceException {
+        Dossier d = dossierService.create(admin, new Dossier("dossLstResp"), spaceTests);
+        List<User> resp = dossierService.listResponsibles(admin, d);
+        assertEquals(resp.size(), 1);
+        assertEquals(resp.get(0), admin);
+
+    }
+
+    @Test
+    public void testAddDelResponsibles() throws AlfrescoServiceException {
+
+        Dossier d = dossierService.create(admin, new Dossier("dossAddDelResp"), spaceTests);
+        List<User> resp = dossierService.listResponsibles(admin, d);
+        assertEquals(resp.size(), 1);//creator automticly set as responsible
+
+        User u1 = testUsers.get(0);
+        User u2 = testUsers.get(1);
+
+        //Add a new responsibles --> now 2 reponsibles
+        dossierService.addResponsible(admin, d, u1);
+        assertEquals(2, dossierService.listResponsibles(admin, d).size());
+        //adding twice same user shouldn't be taken in account
+        dossierService.addResponsible(admin, d, u1);
+        assertEquals(2, dossierService.listResponsibles(admin, d).size());
+
+        //del a responsible --> now only 1
+        dossierService.delResponsible(admin, d, admin);
+        assertEquals(1, dossierService.listResponsibles(admin, d).size());
+        assertEquals(u1, dossierService.listResponsibles(admin, d).get(0));
+        //remove non responsive shouldn't have impact
+        dossierService.delResponsible(admin, d, admin);
+        assertEquals(1, dossierService.listResponsibles(admin, d).size());
+
+        //Add / del collection test
+        dossierService.addResponsible(admin, d, testUsers);
+        assertEquals(2, dossierService.listResponsibles(admin, d).size());
+        //2 because u1 is already in responsibles list
+
+        dossierService.delResponsible(admin, d, testUsers);
+        assertEquals(0, dossierService.listResponsibles(admin, d).size());
+
+    }
+
 }
