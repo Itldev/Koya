@@ -122,4 +122,14 @@ public interface UserService {
      */
     void validateInvitation(User user, String inviteId, String inviteTicket) throws AlfrescoServiceException;
 
+    /**
+     * Get user Object from email.
+     *
+     * @param user
+     * @param email
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    User getUserFromEmail(User user, String email) throws AlfrescoServiceException;
+
 }

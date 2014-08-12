@@ -316,6 +316,30 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         }
     }
 
+    /**
+     * Get user Object from email.
+     *
+     * @param user
+     * @param email
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public User getUserFromEmail(User user, String email) throws AlfrescoServiceException {
+        Map emailPostWrapper = new HashMap();
+        emailPostWrapper.put("authKey", email);
+
+        ItlAlfrescoServiceWrapper ret = getTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper,
+                ItlAlfrescoServiceWrapper.class, user.getTicketAlfresco());
+
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
+            return (User) ret.getItems().get(0);
+        } else {
+            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        }
+    }
+
     private class RestClient extends RestTemplate {
 //        http://forum.spring.io/forum/spring-projects/web/114029-preemptive-basic-authentication-with-resttemplate
 
