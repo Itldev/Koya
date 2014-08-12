@@ -16,6 +16,7 @@ public class Permissions {
     private final Integer PERM_SHARE = 3;
     private final Integer PERM_READPROPERTIES = 4;
     private final Integer PERM_DOWNLOAD = 5;
+    private final Integer PERM_WRITEPROPERTIES = 6;
 
     private String username;
     private Map<Integer, Boolean> perms = new HashMap<>();
@@ -58,6 +59,10 @@ public class Permissions {
     public void canReadProperties(Boolean perm) {
         perms.put(PERM_READPROPERTIES, perm);
     }
+    
+    public void canWriteProperties(Boolean perm) {
+        perms.put(PERM_WRITEPROPERTIES, perm);
+    }
 
     /*
      *
@@ -90,8 +95,13 @@ public class Permissions {
     }
 
     @JsonIgnore
-    public Boolean getReadProperties() {
+    public Boolean getCanReadProperties() {
         return perms.get(PERM_READPROPERTIES);
+    }
+    
+     @JsonIgnore
+    public Boolean getCanWriteProperties() {
+        return perms.get(PERM_WRITEPROPERTIES);
     }
 
 }

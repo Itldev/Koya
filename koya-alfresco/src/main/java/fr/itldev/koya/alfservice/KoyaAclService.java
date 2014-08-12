@@ -13,16 +13,16 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 
 public class KoyaAclService {
-
+    
     protected static final String ROLE_SITE_CONSUMER = "SiteConsumer";
     protected static final String ROLE_SITE_COLLABORATOR = "SiteCollaborator";
     protected static final String ROLE_SITE_CONTRIBUTOR = "SiteContributor";
     protected static final String ROLE_SITE_MANAGER = "SiteManager";
-
+    
     protected static final String PERMISSION_READ = "Read";
-
+    
     private final Logger logger = Logger.getLogger(this.getClass());
-
+    
     protected PermissionService permissionService;
     protected KoyaNodeService koyaNodeService;
     protected NodeService nodeService;
@@ -32,15 +32,15 @@ public class KoyaAclService {
     public void setPermissionService(PermissionService permissionService) {
         this.permissionService = permissionService;
     }
-
+    
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
-
+    
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-
+    
     public void setAuthenticationService(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
@@ -82,9 +82,9 @@ public class KoyaAclService {
      */
     public void setSpaceDossierDefaultAccess(NodeRef n) throws KoyaServiceException {
         permissionService.setInheritParentPermissions(n, false);
-
+        
         Company c = koyaNodeService.getNodeCompany(n);
-
+        
         permissionService.setPermission(n, buildCompanyAuthorityName(c, ROLE_SITE_COLLABORATOR), ROLE_SITE_COLLABORATOR, true);
         permissionService.setPermission(n, buildCompanyAuthorityName(c, ROLE_SITE_CONTRIBUTOR), ROLE_SITE_CONTRIBUTOR, true);
         permissionService.setPermission(n, buildCompanyAuthorityName(c, ROLE_SITE_MANAGER), ROLE_SITE_MANAGER, true);
@@ -110,12 +110,13 @@ public class KoyaAclService {
      * @return
      */
     public Permissions getPermissions(NodeRef n) {
-
+        
         Permissions p = new Permissions(authenticationService.getCurrentUserName());
-
+        
         p.canAddChild(permissionService.hasPermission(n, PermissionService.ADD_CHILDREN).equals(AccessStatus.ALLOWED));
         p.canDelete(permissionService.hasPermission(n, PermissionService.DELETE_NODE).equals(AccessStatus.ALLOWED));
-        p.canReadProperties(permissionService.hasPermission(n, PermissionService.WRITE).equals(AccessStatus.ALLOWED));
+        p.canReadProperties(permissionService.hasPermission(n, PermissionService.READ_PROPERTIES).equals(AccessStatus.ALLOWED));
+        p.canWriteProperties(permissionService.hasPermission(n, PermissionService.WRITE_PROPERTIES).equals(AccessStatus.ALLOWED));
 
         /*
          * TODO define here these extra permissions policy.
@@ -128,9 +129,9 @@ public class KoyaAclService {
         p.canDownload(permissionService.hasPermission(n, PermissionService.WRITE).equals(AccessStatus.ALLOWED));
         //user can share if he's domain admin         
         p.canShare(permissionService.hasPermission(n, PermissionService.DELETE).equals(AccessStatus.ALLOWED));
-
+        
         return p;
-
+        
     }
-
+    
 }
