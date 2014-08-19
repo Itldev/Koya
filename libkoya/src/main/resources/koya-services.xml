@@ -45,7 +45,7 @@
                     <bean id="httpClient" class="org.apache.commons.httpclient.HttpClient">
                         <constructor-arg>
                             <bean id="httpClientParams" class="org.apache.commons.httpclient.params.HttpClientParams">
-                                <property name="authenticationPreemptive" value="true"/>
+                                <property name="authenticationPreemptive" value="false"/>
                                 <property name="connectionManagerClass"
                                           value="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager"/>
                             </bean>
