@@ -66,7 +66,7 @@ public abstract class SecuredItem implements ContentTyped {
         this.name = name;
     }
 
-    public Boolean isUserFavourite() {
+    public Boolean getUserFavourite() {
         return userFavourite;
     }
 
