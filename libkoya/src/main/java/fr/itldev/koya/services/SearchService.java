@@ -1,18 +1,20 @@
 package fr.itldev.koya.services;
 
+import fr.itldev.koya.model.Container;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
 import java.util.List;
-import java.util.Set;
 
 public interface SearchService {
 
     /**
+     * Execute basic search for all securedItems from securedItem defined as base.
      *
      * @param user
-     * @param filters
+     * @param base
+     * @param searchexpr
      * @return
      */
-    List<SecuredItem> search(User user, Set filters);//cf alfresco search services options (paging infos etc)
+    List<SecuredItem> search(User user, Container base, String searchexpr);
 
 }

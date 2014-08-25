@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services.impl;
 
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
@@ -35,6 +36,7 @@ public class AlfrescoRestService implements AlfrescoService {
     protected static final String DESERIALISATION_ERROR = "Object deserialisation error";
     private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos";
     private static final String REST_POST_MAIL = "/s/fr/itldev/koya/global/mail";
+    private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
 
     private String alfrescoServerUrl;
 
@@ -102,9 +104,30 @@ public class AlfrescoRestService implements AlfrescoService {
         }
     }
 
+    /**
+     * Get SecuredItem from noderef reference.
+     *
+     * @param user
+     * @param nodeRef
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public SecuredItem getSecuredItem(User user, String nodeRef) throws AlfrescoServiceException {
+        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_SECUREDITEM,
+                        ItlAlfrescoServiceWrapper.class, nodeRef);
+
+        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)
+                && ret.getNbitems() == 1) {
+            return (SecuredItem) ret.getItems().get(0);
+        }
+        return null;
+    }
     /*
      * ================ Utils methods ==================
      */
+
     /**
      * Extracts noderef parts.
      *

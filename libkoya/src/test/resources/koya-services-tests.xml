@@ -113,5 +113,8 @@
     
     <bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl" parent="abstractRestService"/>
     <bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl" parent="abstractRestService"/>
+    
+    
+    <bean id="searchService" class="fr.itldev.koya.services.impl.SearchServiceImpl" parent="abstractRestService"/>
 
 </beans>

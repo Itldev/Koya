@@ -30,6 +30,7 @@ import fr.itldev.koya.model.json.DiskSizeWrapper;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
@@ -53,7 +54,6 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list/{onlyFolders}";
     private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move/{parentNodeRef}";
     private static final String REST_POST_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{parentNodeRef}";
-    private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
     private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
 
@@ -161,12 +161,8 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
         AlfrescoUploadReturn upReturn = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
 
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_SECUREDITEM, ItlAlfrescoServiceWrapper.class, upReturn.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (Document) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return (Document) getSecuredItem(user, upReturn.getNodeRef());
+
     }
 
     private Content moveImpl(User user, Content contenu, Container parent) throws AlfrescoServiceException {
@@ -221,7 +217,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
             return con.getInputStream();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new AlfrescoServiceException(e.getMessage(), e);
         }
     }
