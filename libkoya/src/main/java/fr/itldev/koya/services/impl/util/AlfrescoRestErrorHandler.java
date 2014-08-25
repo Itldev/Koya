@@ -18,7 +18,6 @@
  */
 package fr.itldev.koya.services.impl.util;
 
-import fr.itldev.koya.services.exceptions.AlfrescoAuthenticationException;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,28 +42,36 @@ public class AlfrescoRestErrorHandler implements ResponseErrorHandler {
     @Override
     public void handleError(ClientHttpResponse clienthttpresponse) throws IOException {
 
-        if (clienthttpresponse.getStatusCode() == HttpStatus.FORBIDDEN) {
-            throw new AlfrescoAuthenticationException("Erreur 403 : Acces Denied ");
-        }
-
         if (!statusOK.contains(clienthttpresponse.getStatusCode())) {
+            AlfrescoServiceException ex;
+            if (clienthttpresponse.getStatusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR)) {
+                java.util.Scanner s = new java.util.Scanner(clienthttpresponse.getBody()).useDelimiter("\\A");
+                String message = s.hasNext() ? s.next() : "";
 
-            java.util.Scanner s = new java.util.Scanner(clienthttpresponse.getBody()).useDelimiter("\\A");
-            String message = s.hasNext() ? s.next() : "";
+                /*
+                 Try to get any Koya Error code if exists
+                 */
+                Integer koyaErrorCode = null;
 
-            /*
-             Try to get any Koya Error code if exists
-             */
-            Integer koyaErrorCode = null;
+                Matcher matcher = ERRORCODEPATTERN.matcher(message);
+                if (matcher.find()) {
+                    koyaErrorCode = Integer.valueOf(matcher.group(1));
+                }
 
-            Matcher matcher = ERRORCODEPATTERN.matcher(message);
-            if (matcher.find()) {
-                koyaErrorCode = Integer.valueOf(matcher.group(1));
+                ex = new AlfrescoServiceException("Erreur "
+                        + clienthttpresponse.getStatusCode() + " : "
+                        + clienthttpresponse.getStatusText(), koyaErrorCode);
+            } else if (clienthttpresponse.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+                ex = new AlfrescoServiceException("Acces Denied");
+                ex.setHttpErrorCode(clienthttpresponse.getStatusCode().value());
+
+            } else {
+                ex = new AlfrescoServiceException();
+                ex.setHttpErrorCode(clienthttpresponse.getStatusCode().value());
+                throw ex;
             }
+            throw ex;
 
-            throw new AlfrescoServiceException("Erreur "
-                    + clienthttpresponse.getStatusCode() + " : "
-                    + clienthttpresponse.getStatusText(), koyaErrorCode);
         }
     }
 

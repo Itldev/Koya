@@ -19,7 +19,6 @@
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.exceptions.AlfrescoAuthenticationException;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.IOException;
 import junit.framework.TestCase;
@@ -27,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestClientException;
@@ -51,9 +51,14 @@ public class UserServiceImplTest extends TestCase {
         assertNotNull(admin);
     }
 
-    @Test(expected = AlfrescoAuthenticationException.class)
+    @Test
     public void testUnknownLogin() throws Exception {
-        User userUnknown = userService.login("unknown", "unknown");
+
+        try {
+            User userUnknown = userService.login("unknown", "unknown");
+        } catch (AlfrescoServiceException aex) {
+            assertEquals(aex.getHttpErrorCode().intValue(), HttpStatus.FORBIDDEN.value());
+        }
     }
 
     @Test
