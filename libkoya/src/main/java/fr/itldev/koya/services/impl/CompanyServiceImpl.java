@@ -143,6 +143,10 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     public String getPreference(User user, Company c, String preferenceKey) throws AlfrescoServiceException {
         String pref = user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_SINGLEPREFERENCES, String.class, c.getName(), preferenceKey);
+
+        //remove starting and finishing Quotes if exists       
+        pref = pref.replaceAll("^\"|\"$", "");
+
         return pref;
     }
 
