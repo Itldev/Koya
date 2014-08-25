@@ -20,15 +20,12 @@ package fr.itldev.koya.webscript.company;
 
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import fr.itldev.koya.webscript.content.AddContent;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -50,22 +47,6 @@ public class CommitPreferences extends AbstractWebScript {
     }
 
     /**
-     * Extracts URL paramters.
-     *
-     *
-     * @param req
-     * @return
-     */
-    protected Map<String, String> getUrlParamsMap(WebScriptRequest req) {
-        Map<String, String> params = new HashMap<>();
-        params.putAll(req.getServiceMatch().getTemplateVars());
-        for (String k : req.getParameterNames()) {
-            params.put(k, req.getParameter(k));
-        }
-        return params;
-    }
-
-    /**
      *
      * @param req
      * @param res
@@ -73,7 +54,7 @@ public class CommitPreferences extends AbstractWebScript {
      */
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        String companyName = (String) getUrlParamsMap(req).get(KoyaWebscript.WSCONST_COMPANYNAME);
+        String companyName = (String) KoyaWebscript.getUrlParamsMap(req).get(KoyaWebscript.WSCONST_COMPANYNAME);
         ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
 
         try {

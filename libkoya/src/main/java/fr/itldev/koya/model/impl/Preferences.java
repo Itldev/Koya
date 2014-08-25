@@ -38,21 +38,4 @@ public final class Preferences extends HashMap<String, Object> {
 
         return ts.toString();
     }
-
-    /**
-     * Useful method to deserialize content.
-     *
-     * @return
-     */
-    public String getContentType() {
-        return this.getClass().getCanonicalName();
-    }
-
-    /**
-     * Implemented for deserialization compatibility
-     *
-     * @param contentType
-     */
-    public void setContentType(String contentType) {
-    }
 }

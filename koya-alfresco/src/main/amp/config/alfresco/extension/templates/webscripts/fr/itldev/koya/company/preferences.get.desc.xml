@@ -21,9 +21,13 @@
 
 <webscript>
     <shortname>Get Company preferences</shortname>
-    <description>Get Company preferences</description>
+    <description>Get Company preferences
+        if no preference key submitted, return all company preferences in a serialized Preference Object.
+        else returns single preference value. blank if not exists or any error.
+    </description>
     <family>Itldev</family>
     <url>/fr/itldev/koya/company/preferences/{companyName}</url>
+    <url>/fr/itldev/koya/company/preferences/{companyName}?preferenceKey={preferenceKey}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

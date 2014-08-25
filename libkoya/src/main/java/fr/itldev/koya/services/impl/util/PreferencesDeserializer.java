@@ -36,18 +36,18 @@ public class PreferencesDeserializer extends JsonDeserializer<Preferences> {
     @Override
     public Preferences deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
         Preferences pref = new Preferences();
-        deserialisationRecursive(jp.readValueAsTree(), "", "", pref);
+        recursiveDeserialize(jp.readValueAsTree(), "", "", pref);
         
         return pref;
     }
     
-    private void deserialisationRecursive(JsonNode n, String key, String keySep, Preferences pref) {
+    private void recursiveDeserialize(JsonNode n, String key, String keySep, Preferences pref) {
         
         if (n.isContainerNode()) {
             Iterator<Entry<String, JsonNode>> it = n.getFields();
             while (it.hasNext()) {
                 Entry<String, JsonNode> e = it.next();
-                deserialisationRecursive(e.getValue(), key + keySep + e.getKey(), ".", pref);
+                recursiveDeserialize(e.getValue(), key + keySep + e.getKey(), ".", pref);
             }
             
         } else {

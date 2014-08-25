@@ -44,7 +44,6 @@ public class PreferencesSerializer extends JsonSerializer<Preferences> {
             jgen.writeObjectField(k.toString(), hierchicalPrefs.get(k));
 
         }
-        jgen.writeObjectField("contentType", t.getContentType());
         jgen.writeEndObject();
     }
 

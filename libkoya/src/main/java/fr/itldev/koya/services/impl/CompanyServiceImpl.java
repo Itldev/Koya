@@ -36,6 +36,7 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     private static final String REST_DEL_DELCOMPANY = "/s/api/sites/{shortname}";
     private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}";
     private static final String REST_GET_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
+    private static final String REST_GET_SINGLEPREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}?preferenceKey={preferenceKey}";
     private static final String REST_POST_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
 
     private static final String REST_GET_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
@@ -124,13 +125,25 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     @Override
     public Preferences getPreferences(User user, Company c) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, ItlAlfrescoServiceWrapper.class, c.getName());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (Preferences) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        Preferences prefs = user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, Preferences.class, c.getName());
+        return prefs;
+    }
+
+    /**
+     * Get single Preference identified by preferenceKey for a company
+     *
+     * @param user
+     * @param c
+     * @param preferenceKey
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public String getPreference(User user, Company c, String preferenceKey) throws AlfrescoServiceException {
+        String pref = user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_SINGLEPREFERENCES, String.class, c.getName(), preferenceKey);
+        return pref;
     }
 
     @Override

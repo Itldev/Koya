@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -56,6 +57,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
     public static final String WSCONST_MAXRESULTS = "maxResults";
     public static final String WSCONST_EMAIL = "email";
     public static final String WSCONST_COMPANIESFILTER = "companiesFilter";
+    public static final String WSCONST_PREFKEY = "preferenceKey";
 
     private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 
@@ -66,7 +68,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
      * @return
      * @throws java.io.IOException
      */
-    protected Map<String, Object> getJsonMap(WebScriptRequest req) throws IOException {
+    public static Map<String, Object> getJsonMap(WebScriptRequest req) throws IOException {
 
         JSONParser parser = new JSONParser();
         //TODO improve json POST reading
@@ -86,7 +88,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
      * @param req
      * @return
      */
-    protected Map<String, String> getUrlParamsMap(WebScriptRequest req) {
+    public static Map<String, String> getUrlParamsMap(WebScriptRequest req) {
         Map<String, String> params = new HashMap<>();
         params.putAll(req.getServiceMatch().getTemplateVars());
         for (String k : req.getParameterNames()) {
@@ -126,7 +128,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
      * @param jsonWrapper
      * @return
      */
-    private String escapeWrapper(String jsonWrapper) {
+    public static String escapeWrapper(String jsonWrapper) {
 
         for (String fieldName : SecuredItem.ESCAPED_FIELDS_NAMES) {
             //match on name attribute
@@ -138,6 +140,11 @@ public abstract class KoyaWebscript extends AbstractWebScript {
         }
 
         return jsonWrapper;
+    }
+
+    public static String getObjectAsJson(Object o) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(o);
     }
 
     public abstract ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception;

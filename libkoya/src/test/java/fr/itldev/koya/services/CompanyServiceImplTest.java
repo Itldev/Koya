@@ -22,7 +22,9 @@ import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.exceptions.AlfrescoServerException;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
@@ -116,6 +118,21 @@ public class CompanyServiceImplTest extends TestCase {
         Preferences p = companyService.getPreferences(admin, created);
 
         assertTrue(p.size() == 0);
+    }
+
+    @Test
+    public void testGetPrefNotExistCompany() throws AlfrescoServiceException {
+        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+        assertTrue(offresCom.size() > 0);
+        SalesOffer sel = offresCom.get(0);
+        Company notExists = new Company("company_" + new Random().nextInt(1000), sel);
+
+        try {
+            Preferences p = companyService.getPreferences(admin, notExists);
+            fail("should throw exception because company doesnt exists");
+        } catch (AlfrescoServerException aex) {
+            assertEquals(aex.getKoyaErrorCode(), KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+        }
     }
 
     @Test

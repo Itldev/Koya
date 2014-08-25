@@ -43,7 +43,6 @@ import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
@@ -188,13 +187,42 @@ public class CompanyService {
     public Preferences getPreferences(String companyName) throws KoyaServiceException {
         Preferences prefs = new Preferences();
         Company c = koyaNodeService.companyBuilder(companyName);
-        Properties compProperties = koyaNodeService.readPropertiesFileContent(getCompanyConfigFile(c, PREFS_FILE_NAME));
+
+        Properties compProperties;
+        try {
+            compProperties = koyaNodeService.readPropertiesFileContent(getCompanyConfigFile(c, PREFS_FILE_NAME));
+        } catch (NullPointerException nex) {
+            return prefs;
+        }
 
         for (Object k : compProperties.keySet()) {
             prefs.put((String) k, compProperties.get(k));
         }
 
         return prefs;
+    }
+
+    /**
+     * Get single preference identified by a key for a company
+     *
+     * @param companyName
+     * @param preferenceKey
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public String getPreference(String companyName, String preferenceKey) throws KoyaServiceException {
+        Company c = koyaNodeService.companyBuilder(companyName);
+        Properties compProperties;
+        try {
+            compProperties = koyaNodeService.readPropertiesFileContent(getCompanyConfigFile(c, PREFS_FILE_NAME));
+        } catch (NullPointerException nex) {
+            return "";
+        }
+        try {
+            return compProperties.getProperty(preferenceKey);
+        } catch (Exception ex) {
+            return "";
+        }
     }
 
     /**

@@ -181,7 +181,7 @@ public class UserService {
         queryStartsWith = queryStartsWith.toLowerCase();
 
         //application global search
-        if (companyName == null) {
+        if (companyName == null || companyName.isEmpty()) {
 
             String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\""
                     + queryStartsWith + "*\" OR @cm\\:firstName:\""
@@ -327,7 +327,7 @@ public class UserService {
         }
 
         if (u == null) {
-             invitationService.inviteNominated(null, userMail, userMail,
+            invitationService.inviteNominated(null, userMail, userMail,
                     Invitation.ResourceType.WEB_SITE, c.getName(),
                     roleName, serverPath, acceptUrl, rejectUrl);
 

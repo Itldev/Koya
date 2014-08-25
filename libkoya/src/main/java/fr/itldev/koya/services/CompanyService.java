@@ -92,16 +92,27 @@ public interface CompanyService extends AlfrescoService {
     void loadSalesOfferHistory(User admin, Company c) throws AlfrescoServiceException;
 
     /**
-     * refresh preferences for a company.
+     * get All preferences for a company.
      *
      * Unsaved local preferences will be erased.
      *
      * @param user
      * @param c
      * @return
-     * @throws AlfrescoServiceException
+     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
      */
     public Preferences getPreferences(User user, Company c) throws AlfrescoServiceException;
+
+    /**
+     * Get single Preference identified by preferenceKey for a company.
+     *
+     * @param user
+     * @param c
+     * @param preferenceKey
+     * @return
+     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
+     */
+    public String getPreference(User user, Company c, String preferenceKey) throws AlfrescoServiceException;
 
     /**
      * Commit localy modified preferences.
