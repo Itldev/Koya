@@ -19,7 +19,6 @@
 package fr.itldev.koya.services.impl.util;
 
 import fr.itldev.koya.services.exceptions.AlfrescoAuthenticationException;
-import fr.itldev.koya.services.exceptions.AlfrescoServerException;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,7 +62,7 @@ public class AlfrescoRestErrorHandler implements ResponseErrorHandler {
                 koyaErrorCode = Integer.valueOf(matcher.group(1));
             }
 
-            throw new AlfrescoServerException("Erreur "
+            throw new AlfrescoServiceException("Erreur "
                     + clienthttpresponse.getStatusCode() + " : "
                     + clienthttpresponse.getStatusText(), koyaErrorCode);
         }

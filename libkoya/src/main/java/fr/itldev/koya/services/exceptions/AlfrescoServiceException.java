@@ -18,34 +18,33 @@
  */
 package fr.itldev.koya.services.exceptions;
 
-public class AlfrescoServiceException extends Exception {
+import org.springframework.web.client.RestClientException;
 
+public class AlfrescoServiceException extends RestClientException {
+    
     private Integer koyaErrorCode;
-
+    
     public Integer getKoyaErrorCode() {
         return koyaErrorCode;
     }
-
-    public AlfrescoServiceException() {
-    }
-
+    
     public AlfrescoServiceException(String string, Throwable ex) {
         super(string, ex);
     }
-
+    
     public AlfrescoServiceException(Integer koyaErrorCode) {
-        super();
+        super("");
         this.koyaErrorCode = koyaErrorCode;
     }
-
+    
     public AlfrescoServiceException(String string, Integer koyaErrorCode) {
         super(string);
         this.koyaErrorCode = koyaErrorCode;
     }
-
+    
     public AlfrescoServiceException(String string, Throwable ex, Integer koyaErrorCode) {
         super(string, ex);
         this.koyaErrorCode = koyaErrorCode;
     }
-
+    
 }
