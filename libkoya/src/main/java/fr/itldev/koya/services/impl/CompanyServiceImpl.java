@@ -144,7 +144,10 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
         String pref = user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_SINGLEPREFERENCES, String.class, c.getName(), preferenceKey);
 
-        //remove starting and finishing Quotes if exists       
+        if (pref == null) {
+            return "";
+        }
+        //remove starting and finishing Quotes if exists    
         pref = pref.replaceAll("^\"|\"$", "");
 
         return pref;
