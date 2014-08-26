@@ -132,4 +132,21 @@ public interface UserService {
      */
     User getUserFromEmail(User user, String email) throws AlfrescoServiceException;
 
+    /**
+     * Set wether or not a user receive an email notification on every document added
+     * 
+     * @param user
+     * @param notify
+     * @throws AlfrescoServiceException 
+     */
+    void setEmailNotification(User user, boolean notify) throws AlfrescoServiceException;
+    
+    /**
+     * 
+     * @param user
+     * @return true if user notify on each new document.
+     * @throws AlfrescoServiceException 
+     */
+    Boolean getEmailNotification(User user) throws AlfrescoServiceException;
+
 }

@@ -131,10 +131,11 @@ public class UserService {
         if (personService.personExists(userToModify.getUserName())) {
             NodeRef userNr = personService.getPerson(userToModify.getUserName());
 
-            //update 4 fields : firstname,lastname,email,password            
+            //update 4 fields : firstname,lastname,email,emailFeedDisabled         
             nodeService.setProperty(userNr, ContentModel.PROP_FIRSTNAME, userToModify.getFirstName());
             nodeService.setProperty(userNr, ContentModel.PROP_LASTNAME, userToModify.getName());
             nodeService.setProperty(userNr, ContentModel.PROP_EMAIL, userToModify.getEmail());
+            nodeService.setProperty(userNr, ContentModel.PROP_EMAIL_FEED_DISABLED, userToModify.getEmailFeedDisabled());
 
             //TODO change password if necessary + uncrypted password
             //nodeService.setProperty(userNr, ContentModel.PROP_PASSWORD, userToModify.getPassword());
@@ -249,6 +250,7 @@ public class UserService {
         u.setFirstName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_FIRSTNAME));
         u.setName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_LASTNAME));
         u.setEmail((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));
+        u.setEmailFeedDisabled((Boolean) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL_FEED_DISABLED));
         u.setNodeRef(userNodeRef.toString());
 
         return u;

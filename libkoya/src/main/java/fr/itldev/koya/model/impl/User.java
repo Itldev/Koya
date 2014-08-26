@@ -40,6 +40,8 @@ public final class User {
     private Boolean enabled;
     @JsonProperty("email")
     private String email;
+    @JsonProperty("emailFeedDisabled")
+    private Boolean emailFeedDisabled;
     @JsonIgnore
     private String password;
 
@@ -105,6 +107,18 @@ public final class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+//
+//    public Boolean isEmailFeedDisabled() {
+//        return emailFeedDisabled;
+//    }
+
+    public Boolean getEmailFeedDisabled() {
+        return emailFeedDisabled;
+    }
+
+    public void setEmailFeedDisabled(Boolean emailFeedDisabled) {
+        this.emailFeedDisabled = emailFeedDisabled;
     }
 
     public String getPassword() {

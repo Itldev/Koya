@@ -417,5 +417,24 @@
           parent="webscript">
         <property name="moduleService" ref="moduleService" />   
     </bean>
- 
+    
+    
+    <!--
+    ==================================================================
+    ========================== Notificationd  ========================
+    ==================================================================
+    -->
+    
+    <bean id="webscript.fr.itldev.koya.user.emailnotification.post" 
+              class="fr.itldev.koya.webscript.user.NotificationStatus"
+              parent="webscript">
+        <property name="emailNotificationService" ref="emailNotificationService" />   
+    </bean>
+<!--    
+    <bean id="webscript.fr.itldev.koya.user.notificationstatus.get" 
+                  class="fr.itldev.koya.webscript.user.NotificationStatus"
+                  parent="webscript">
+        <property name="emailNotificationService" ref="emailNotificationService" />   
+    </bean>-->
+
 </beans>

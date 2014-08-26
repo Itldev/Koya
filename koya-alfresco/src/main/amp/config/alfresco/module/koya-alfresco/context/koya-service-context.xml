@@ -25,7 +25,7 @@
     
     
     <!--    For all Alfresco services, we defaultly use Upper case bean reference because
-    if salfly calls service : http://alfrescoshare.wordpress.com/2010/01/06/alfresco-coding-best-practice-how-to-safely-call-java-services/
+    if safely calls service : http://alfrescoshare.wordpress.com/2010/01/06/alfresco-coding-best-practice-how-to-safely-call-java-services/
     -->
     
     <!--Global Koya nodes util services-->
@@ -182,4 +182,26 @@
 
     <bean id="nameBasedUserNameGenerator" class="fr.itldev.koya.repo.security.authentication.EmailBasedNameGenerator" />
     
+    
+    <bean id="emailNotificationService" class="fr.itldev.koya.alfservice.EmailNotificationService">
+        <property name="actionService" ref="actionService"/> 
+        <property name="ruleService" ref="ruleService"/> 
+        <property name="userService" ref="userService"/> 
+        <property name="koyaShareService" ref="koyaShareService"/> 
+        
+        <property name="feedEmailTemplateLocation" ref="emailNotificationTemplateLocation"/>
+        <property name="fileFolderService" ref="FileFolderService"/>
+        <property name="searchService" ref="SearchService"/>
+        <property name="namespaceService" ref="NamespaceService"/>
+        <property name="nodeService" ref="NodeService"/>
+        <property name="transactionService" ref="transactionService"/>
+    	<property name="repository" ref="repositoryHelper"/>
+    	<property name="repoAdminService" ref="RepoAdminService"/>
+    </bean>
+    
+    <bean id="emailNotificationTemplateLocation" class="org.alfresco.repo.dictionary.RepositoryLocation">
+        <property name="path" value="/app:company_home/app:dictionary/app:email_templates/app:notify_email_templates/cm:notify_user_email.html.ftl"/>
+        <property name="queryLanguage" value="xpath"/>
+    </bean>
+   
 </beans>
