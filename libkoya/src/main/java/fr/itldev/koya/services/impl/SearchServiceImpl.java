@@ -45,13 +45,18 @@ public class SearchServiceImpl extends AlfrescoRestService implements SearchServ
      */
     @Override
     public List<SecuredItem> search(User user, Container base, String searchexpr) {
-        Assert.notNull(base);
+
+        String baseNodeRef = "";
+
+        if (base != null) {
+            baseNodeRef = base.getNodeRef();
+        }
 
         List<SecuredItem> itemsFound = new ArrayList<>();
 
         Map result = user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_SEARCH, Map.class, processSearchExpr(searchexpr),
-                DEFAULT_MAXITEMS, base.getNodeRef(), "");
+                DEFAULT_MAXITEMS, baseNodeRef, "");
 
         for (Map itemMap : (List<Map>) result.get(SEARCHRESULTKEY_ITEMS)) {
 
