@@ -146,7 +146,8 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="permissionService" ref="PermissionService"/>     
         <property name="nodeService" ref="NodeService"/>       
-        <property name="authenticationService" ref="AuthenticationService"/>      
+        <property name="authenticationService" ref="AuthenticationService"/>    
+        <property name="searchService" ref="SearchService"/>  
     </bean>
     
     <!--Secured Items Sharing service-->
@@ -187,16 +188,13 @@
         <property name="actionService" ref="actionService"/> 
         <property name="ruleService" ref="ruleService"/> 
         <property name="userService" ref="userService"/> 
-        <property name="koyaShareService" ref="koyaShareService"/> 
-        
         <property name="feedEmailTemplateLocation" ref="emailNotificationTemplateLocation"/>
         <property name="fileFolderService" ref="FileFolderService"/>
         <property name="searchService" ref="SearchService"/>
         <property name="namespaceService" ref="NamespaceService"/>
         <property name="nodeService" ref="NodeService"/>
         <property name="transactionService" ref="transactionService"/>
-    	<property name="repository" ref="repositoryHelper"/>
-    	<property name="repoAdminService" ref="RepoAdminService"/>
+        <property name="koyaAclService" ref="koyaAclService"/>
     </bean>
     
     <bean id="emailNotificationTemplateLocation" class="org.alfresco.repo.dictionary.RepositoryLocation">

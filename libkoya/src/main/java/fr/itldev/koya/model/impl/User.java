@@ -108,12 +108,14 @@ public final class User {
     public void setEmail(String email) {
         this.email = email;
     }
-//
-//    public Boolean isEmailFeedDisabled() {
-//        return emailFeedDisabled;
-//    }
 
     public Boolean getEmailFeedDisabled() {
+        if (emailFeedDisabled == null) {
+            emailFeedDisabled = false;
+        }
+        /*
+         TODO check real value at user building 
+         */
         return emailFeedDisabled;
     }
 

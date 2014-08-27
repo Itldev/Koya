@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 /**
  * get the notification status of the user
  *
- * @author nico
  */
 public class NotificationStatus extends KoyaWebscript {
     
@@ -38,10 +37,7 @@ public class NotificationStatus extends KoyaWebscript {
         
         return wrapper;
     }
-    
-    public EmailNotificationService getEmailNotificationService() {
-        return emailNotificationService;
-    }
+      
     
     public void setEmailNotificationService(EmailNotificationService emailNotificationService) {
         this.emailNotificationService = emailNotificationService;

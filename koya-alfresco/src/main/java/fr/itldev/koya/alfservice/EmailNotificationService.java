@@ -1,12 +1,14 @@
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,165 +23,110 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionCondition;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.action.CompositeAction;
-import org.alfresco.service.cmr.admin.RepoAdminService;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.repository.TemplateService;
 import org.alfresco.service.cmr.rule.Rule;
 import org.alfresco.service.cmr.rule.RuleService;
 import org.alfresco.service.cmr.rule.RuleType;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
-import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.util.ModelUtil;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  *
- * @author nico
  */
 public class EmailNotificationService {
 
     protected static Log logger = LogFactory.getLog(FeedNotifier.class);
-    private ActionService actionService;
-    private RuleService ruleService;
-    private RepositoryLocation feedEmailTemplateLocation;
+    protected ActionService actionService;
+    protected RuleService ruleService;
+    protected RepositoryLocation feedEmailTemplateLocation;
     private NamespaceService namespaceService;
-    private FileFolderService fileFolderService;
-    private SearchService searchService;
-    private NodeService nodeService;
-    private TransactionService transactionService;
-
-    private Repository repository;
-    private RepoAdminService repoAdminService;
-
-    private UserService userService;
-    private KoyaShareService koyaShareService;
+    protected FileFolderService fileFolderService;
+    protected SearchService searchService;
+    protected NodeService nodeService;
+    protected TransactionService transactionService;
+    protected KoyaAclService koyaAclService;
+    protected UserService userService;
 
     private static final String RULE_NAME_EMAIL = "email_notification_rule";
     private static final String MSG_EMAIL_SUBJECT = "activities.feed.notifier.email.subject";
 
-    public ActionService getActionService() {
-        return actionService;
-    }
+    private static List<QName> TYPEFILTER_DOSSIER = Collections.unmodifiableList(new ArrayList<QName>() {
+        {
+            add(KoyaModel.TYPE_DOSSIER);
+        }
+    });
 
+    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     public void setActionService(ActionService actionService) {
         this.actionService = actionService;
-    }
-
-    public RuleService getRuleService() {
-        return ruleService;
     }
 
     public void setRuleService(RuleService ruleService) {
         this.ruleService = ruleService;
     }
 
-    public UserService getUserService() {
-        return userService;
-    }
-
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
 
-    public KoyaShareService getKoyaShareService() {
-        return koyaShareService;
-    }
-
-    public void setKoyaShareService(KoyaShareService koyaShareService) {
-        this.koyaShareService = koyaShareService;
-    }
-
-    public RepositoryLocation getFeedEmailTemplateLocation() {
-        return feedEmailTemplateLocation;
+    public void setKoyaAclService(KoyaAclService koyaAclService) {
+        this.koyaAclService = koyaAclService;
     }
 
     public void setFeedEmailTemplateLocation(RepositoryLocation feedEmailTemplateLocation) {
         this.feedEmailTemplateLocation = feedEmailTemplateLocation;
     }
 
-    public NamespaceService getNamespaceService() {
-        return namespaceService;
-    }
-
     public void setNamespaceService(NamespaceService namespaceService) {
         this.namespaceService = namespaceService;
-    }
-
-    public FileFolderService getFileFolderService() {
-        return fileFolderService;
     }
 
     public void setFileFolderService(FileFolderService fileFolderService) {
         this.fileFolderService = fileFolderService;
     }
 
-    public SearchService getSearchService() {
-        return searchService;
-    }
-
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
-    }
-
-    public NodeService getNodeService() {
-        return nodeService;
     }
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
 
-    public TransactionService getTransactionService() {
-        return transactionService;
-    }
-
     public void setTransactionService(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
 
-    public Repository getRepository() {
-        return repository;
-    }
-
-    public void setRepository(Repository repository) {
-        this.repository = repository;
-    }
-
-    public RepoAdminService getRepoAdminService() {
-        return repoAdminService;
-    }
-
-    public void setRepoAdminService(RepoAdminService repoAdminService) {
-        this.repoAdminService = repoAdminService;
-    }
-
-    public void enableNotificationRules(String username, boolean enable) throws KoyaServiceException {
-//        actionService.;
-
-    }
-
+    //</editor-fold>
     public List<Rule> getEmailNotificationRule(String username) throws KoyaServiceException {
         List<Rule> res = new ArrayList<>();
 
         User u = userService.getUserByUsername(username);
-        List<SecuredItem> sharedItems = koyaShareService.listItemsShared(u);
 
-        for (SecuredItem item : sharedItems) {
+        /**
+         * Get list of all Read availables secured items for users.
+         *
+         * Limited to
+         */
+        List<SecuredItem> readableDossiers = koyaAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
+
+        for (SecuredItem item : readableDossiers) {
             logger.debug("getEmailNotificationRule SecuredItem: " + item.getName());
 
             NodeRef nodeRef = item.getNodeRefasObject();
             List<Rule> rules = ruleService.getRules(nodeRef, false, RuleType.INBOUND);
 
             for (Rule r : rules) {
-                if (RULE_NAME_EMAIL.equals(r.getTitle()) 
-                        && ((ArrayList<String>)((CompositeAction) r.getAction()).getAction(0).getParameterValue(MailActionExecuter.PARAM_TO_MANY)).contains(username)) {
+                if (RULE_NAME_EMAIL.equals(r.getTitle())
+                        && ((ArrayList<String>) ((CompositeAction) r.getAction()).getAction(0).getParameterValue(MailActionExecuter.PARAM_TO_MANY)).contains(username)) {
                     res.add(r);
                 }
             }
@@ -191,59 +138,65 @@ public class EmailNotificationService {
     public void addRemoveUser(String username, boolean add) throws KoyaServiceException {
 
         User u = userService.getUserByUsername(username);
-        List<SecuredItem> sharedItems = koyaShareService.listItemsShared(u);
-        for (SecuredItem item : sharedItems) {
-            if (Dossier.class.isAssignableFrom(item.getClass())) {
-                logger.debug("addRemoveUser SecuredItem: " + item.getName());
 
-               final NodeRef nodeRef = item.getNodeRefasObject();
-                List<Rule> rules = ruleService.getRules(nodeRef, true, RuleType.INBOUND);
+        /**
+         * Get list of all Read availables secured items for users.
+         *
+         * Limited to Dossiers
+         */
+        List<SecuredItem> readableDossiers = koyaAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
 
-                boolean ruleFound = false;
-                for (final Rule r : rules) {
-                    if (RULE_NAME_EMAIL.equals(r.getTitle())) {
+        for (SecuredItem item : readableDossiers) {
+            logger.debug("addRemoveUser SecuredItem: " + item.getName());
 
-                        final Action a = ((CompositeAction) r.getAction()).getAction(0);
-                        final ArrayList<String> usernames = (a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) != null) ? (ArrayList<String>) a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) : new ArrayList();
+            final NodeRef nodeRef = item.getNodeRefasObject();
+            List<Rule> rules = ruleService.getRules(nodeRef, true, RuleType.INBOUND);
 
-                        if (add && !usernames.contains(username)) {
-                            //Add user to notification
-                            usernames.add(username);
-                        } else if (!add && usernames.contains(username)) {
-                            //Remove user
-                            usernames.remove(username);
+            boolean ruleFound = false;
+            for (final Rule r : rules) {
+                if (RULE_NAME_EMAIL.equals(r.getTitle())) {
 
-                        }
+                    final Action a = ((CompositeAction) r.getAction()).getAction(0);
+                    final ArrayList<String> usernames = (a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) != null) ? (ArrayList<String>) a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) : new ArrayList();
 
-                        AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
-                            @Override
-                            public Object doWork() throws Exception {
-                                transactionService.getRetryingTransactionHelper().doInTransaction(
-                                        new RetryingTransactionHelper.RetryingTransactionCallback<Object>() {
-                                            @Override
-                                            public Object execute() {
-                                                if (usernames.isEmpty()) {
+                    if (add && !usernames.contains(username)) {
+                        //Add user to notification
+                        usernames.add(username);
+                    } else if (!add && usernames.contains(username)) {
+                        //Remove user
+                        usernames.remove(username);
 
-                                                    ruleService.removeRule(nodeRef, r);
-                                                } else {
-                                                    a.setParameterValue(MailActionExecuter.PARAM_TO_MANY, usernames);
-
-                                                    ruleService.saveRule(nodeRef, r);
-                                                }
-                                                return null;
-                                            }
-                                        });
-                                return null;
-                            }
-                        });
-                        ruleFound = true;
-                        break;
                     }
-                }
-                if (add && !ruleFound) {
-                    createRule(item.getNodeRefasObject(), username);
+
+                    AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
+                        @Override
+                        public Object doWork() throws Exception {
+                            transactionService.getRetryingTransactionHelper().doInTransaction(
+                                    new RetryingTransactionHelper.RetryingTransactionCallback<Object>() {
+                                        @Override
+                                        public Object execute() {
+                                            if (usernames.isEmpty()) {
+
+                                                ruleService.removeRule(nodeRef, r);
+                                            } else {
+                                                a.setParameterValue(MailActionExecuter.PARAM_TO_MANY, usernames);
+
+                                                ruleService.saveRule(nodeRef, r);
+                                            }
+                                            return null;
+                                        }
+                                    });
+                            return null;
+                        }
+                    });
+                    ruleFound = true;
+                    break;
                 }
             }
+            if (add && !ruleFound) {
+                createRule(item.getNodeRefasObject(), username);
+            }
+
         }
     }
 

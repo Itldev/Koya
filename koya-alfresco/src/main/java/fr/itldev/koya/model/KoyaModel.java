@@ -18,6 +18,9 @@
  */
 package fr.itldev.koya.model;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.alfresco.repo.site.SiteModel;
 import org.alfresco.service.namespace.QName;
 
@@ -71,5 +74,18 @@ public class KoyaModel {
 
     //================= Aspect associations ===========================================
     public static final QName ASSOC_RESPONSIBLES = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "responsibles");
+
+    /**
+     * Used because koya namespace is not registered
+     * 
+     * TODO register koya namespace
+     */
+    public static final Map<QName, String> TYPES_SHORT_PREFIX = Collections.unmodifiableMap(new HashMap<QName, String>() {
+        {
+            put(TYPE_COMPANY, "st:site");
+            put(TYPE_SPACE, "koya:space");
+            put(TYPE_DOSSIER, "koya:dossier");
+        }
+    });
 
 }
