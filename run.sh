@@ -73,5 +73,5 @@ else
         OPTS="$OPTS -Dalfresco.home="
 fi
 
-MAVEN_OPTS="$OPTS" mvn clean install -P $PROFILES $MVNOPTS
+MAVEN_OPTS="$OPTS" mvn  -T 1C clean install -P $PROFILES $MVNOPTS
 
