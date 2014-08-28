@@ -425,7 +425,7 @@
     ==================================================================
     -->
     
-    <bean id="webscript.fr.itldev.koya.user.emailnotification.post" 
+    <bean id="webscript.fr.itldev.koya.user.emailnotification.get" 
               class="fr.itldev.koya.webscript.user.NotificationStatus"
               parent="webscript">
         <property name="emailNotificationService" ref="emailNotificationService" />   

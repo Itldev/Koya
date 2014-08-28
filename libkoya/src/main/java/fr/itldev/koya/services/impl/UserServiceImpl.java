@@ -23,7 +23,6 @@ import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
-import fr.itldev.koya.model.json.BooleanWrapper;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -80,7 +79,8 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/user/validateinvitation/{inviteId}/{inviteTicket}/{password}";
 
     //====== Notifications
-    private static final String REST_POST_EMAILNOTIFICATION = "/s/fr/itldev/koya/user/emailnotification/{userName}";
+    private static final String REST_GET_EMAILNOTIFICATION = "/s/fr/itldev/koya/user/emailnotification/{userName}";
+    private static final String REST_GET_EMAILNOTIFICATION_ENABLE = "/s/fr/itldev/koya/user/emailnotification/{userName}/{enable}";
 
     private BeanFactory beanFactory;
 
@@ -394,28 +394,16 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
     @Override
     public void setEmailNotification(User user, boolean notify) throws AlfrescoServiceException {
-        JSONObject usernameJSON = new JSONObject();
-        usernameJSON.put("username", user.getUserName());
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_EMAILNOTIFICATION + "/{enable}", usernameJSON, ItlAlfrescoServiceWrapper.class, user.getUserName(), notify);
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
-
+        user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_EMAILNOTIFICATION_ENABLE,
+                        Boolean.class, user.getUserName(), notify);
     }
 
     @Override
     public Boolean getEmailNotification(User user) throws AlfrescoServiceException {
-        JSONObject usernameJSON = new JSONObject();
-        usernameJSON.put("username", user.getUserName());
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_EMAILNOTIFICATION, usernameJSON, ItlAlfrescoServiceWrapper.class, user.getUserName());
-
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return ((BooleanWrapper) ret.getItems().get(0)).getValue();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl()
+                        + REST_GET_EMAILNOTIFICATION, Boolean.class, user.getUserName());
     }
 
 }

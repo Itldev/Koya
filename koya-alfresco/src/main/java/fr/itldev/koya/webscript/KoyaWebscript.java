@@ -58,6 +58,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
     public static final String WSCONST_EMAIL = "email";
     public static final String WSCONST_COMPANIESFILTER = "companiesFilter";
     public static final String WSCONST_PREFKEY = "preferenceKey";
+    public static final String WSCONST_ENABLE = "enable";
 
     private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 

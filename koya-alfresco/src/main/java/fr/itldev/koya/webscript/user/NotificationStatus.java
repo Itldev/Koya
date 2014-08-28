@@ -2,45 +2,41 @@ package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.EmailNotificationService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.json.BooleanWrapper;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
+
 /**
  * get the notification status of the user
  *
  */
-public class NotificationStatus extends KoyaWebscript {
-    
-    private Logger logger = Logger.getLogger(this.getClass());
-    
-    private static final String WSCONST_ENABLE = "enable";
-    EmailNotificationService emailNotificationService;
-    
+public class NotificationStatus extends AbstractWebScript {
+
+    private EmailNotificationService emailNotificationService;
+
+    public void setEmailNotificationService(EmailNotificationService emailNotificationService) {
+        this.emailNotificationService = emailNotificationService;
+    }
+
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        
-        String strEnable = (String) urlParams.get(WSCONST_ENABLE);
-        String username = (String) urlParams.get(WSCONST_USERNAME);
-        
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+        String strEnable = (String) urlParams.get(KoyaWebscript.WSCONST_ENABLE);
+        String username = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
+        String response;
         try {
             if (strEnable != null) {
                 emailNotificationService.addRemoveUser(username, Boolean.valueOf(strEnable));
             }
-            wrapper.addItem(new BooleanWrapper(!emailNotificationService.getEmailNotificationRule(username).isEmpty()));
-            
+            response = KoyaWebscript.getObjectAsJson(!emailNotificationService.getEmailNotificationRule(username).isEmpty());
         } catch (KoyaServiceException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(ex.getErrorCode());
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-        
-        return wrapper;
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
-      
-    
-    public void setEmailNotificationService(EmailNotificationService emailNotificationService) {
-        this.emailNotificationService = emailNotificationService;
-    }
-    
 }

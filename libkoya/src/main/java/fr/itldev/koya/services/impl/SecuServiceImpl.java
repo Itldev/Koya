@@ -23,13 +23,11 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.model.impl.UserRole;
-import fr.itldev.koya.model.json.BooleanWrapper;
 import fr.itldev.koya.model.json.InviteWrapper;
 import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.SecuService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
-import org.apache.log4j.Logger;
 
 public class SecuServiceImpl extends AlfrescoRestService implements SecuService {
 
