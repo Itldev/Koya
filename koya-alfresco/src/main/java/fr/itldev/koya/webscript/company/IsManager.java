@@ -19,16 +19,20 @@
 package fr.itldev.koya.webscript.company;
 
 import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.model.json.BooleanWrapper;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Checks if currently logged user has manager role on specified company.
  *
  */
-public class IsManager extends KoyaWebscript {
+public class IsManager extends AbstractWebScript {
 
     private CompanyService companyService;
 
@@ -37,9 +41,19 @@ public class IsManager extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
         String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
-        wrapper.addItem(new BooleanWrapper(companyService.isCompanyManager(companyName)));
-        return wrapper;
+
+        String response;
+
+        try {
+            response = KoyaWebscript.getObjectAsJson(companyService.isCompanyManager(companyName));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 }

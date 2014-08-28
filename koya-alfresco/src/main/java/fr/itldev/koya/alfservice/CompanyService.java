@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.site.SiteDoesNotExistException;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.AssociationRef;
@@ -169,9 +170,13 @@ public class CompanyService {
      * @param companyName
      * @return
      */
-    public Boolean isCompanyManager(String companyName) {
-        return siteService.getMembersRole(companyName, authenticationService.getCurrentUserName()).
-                equals(KoyaAclService.ROLE_SITE_MANAGER);
+    public Boolean isCompanyManager(String companyName) throws KoyaServiceException {
+        try {
+            return siteService.getMembersRole(companyName, authenticationService.getCurrentUserName()).
+                    equals(KoyaAclService.ROLE_SITE_MANAGER);
+        } catch (SiteDoesNotExistException ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+        }
     }
 
     /**

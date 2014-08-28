@@ -191,15 +191,10 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
      */
     @Override
     public Boolean isCompanyManager(User userLogged, Company c) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_ISCOMPANYMANAGER,
-                ItlAlfrescoServiceWrapper.class, c.getName());
 
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ((BooleanWrapper) ret.getItems().get(0)).getValue();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return userLogged.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_ISCOMPANYMANAGER,
+                        Boolean.class, c.getName(), c.getName());
 
     }
 }
