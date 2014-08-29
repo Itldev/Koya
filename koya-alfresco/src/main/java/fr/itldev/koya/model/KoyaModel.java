@@ -30,6 +30,7 @@ import org.alfresco.service.namespace.QName;
  */
 public class KoyaModel {
 
+    public static final String KOYA_URI = "http://www.itldev.fr/koyamodel";
     public static final String NAMESPACE_KOYA_CONTENT_MODEL = "http://www.itldev.fr/koyamodel/content/1.0";
     public static final String NAMESPACE_ALFRESCO_ROOT = "http://www.alfresco.org/model/site/1.0";
     // ============= Types ===============

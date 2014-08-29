@@ -32,7 +32,7 @@ public class NotificationStatus extends AbstractWebScript {
             if (strEnable != null) {
                 emailNotificationService.addRemoveUser(username, Boolean.valueOf(strEnable));
             }
-            response = KoyaWebscript.getObjectAsJson(!emailNotificationService.getEmailNotificationRule(username).isEmpty());
+            response = KoyaWebscript.getObjectAsJson(emailNotificationService.isUserNotified(username));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

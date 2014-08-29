@@ -1,16 +1,24 @@
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.SharingWrapper;
+import fr.itldev.koya.policies.SharePolicies.AfterSharePolicy;
+import fr.itldev.koya.policies.SharePolicies.AfterUnsharePolicy;
+import fr.itldev.koya.policies.SharePolicies.BeforeSharePolicy;
+import fr.itldev.koya.policies.SharePolicies.BeforeUnsharePolicy;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.alfresco.repo.policy.ClassPolicyDelegate;
+import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.invitation.Invitation;
@@ -34,6 +42,28 @@ public class KoyaShareService extends KoyaAclService {
     private SiteService siteService;
     private FileFolderService fileFolderService;
     private InvitationService invitationService;
+    /**
+     * controls policy delegates
+     */
+    private PolicyComponent policyComponent;
+    /*
+     * Policy delegates
+     */
+    private ClassPolicyDelegate<BeforeSharePolicy> beforeShareDelegate;
+    private ClassPolicyDelegate<AfterSharePolicy> afterShareDelegate;
+    private ClassPolicyDelegate<BeforeUnsharePolicy> beforeUnshareDelegate;
+    private ClassPolicyDelegate<AfterUnsharePolicy> afterUnshareDelegate;
+
+    /**
+     * Registers the share policies
+     */
+    public void init() {
+        // Register the various policies
+        beforeShareDelegate = policyComponent.registerClassPolicy(BeforeSharePolicy.class);
+        afterShareDelegate = policyComponent.registerClassPolicy(AfterSharePolicy.class);
+        beforeUnshareDelegate = policyComponent.registerClassPolicy(BeforeUnsharePolicy.class);
+        afterUnshareDelegate = policyComponent.registerClassPolicy(AfterUnsharePolicy.class);
+    }
 
     public void setSpaceService(SpaceService spaceService) {
         this.spaceService = spaceService;
@@ -57,6 +87,10 @@ public class KoyaShareService extends KoyaAclService {
 
     public void setInvitationService(InvitationService invitationService) {
         this.invitationService = invitationService;
+    }
+
+    public void setPolicyComponent(PolicyComponent policyComponent) {
+        this.policyComponent = policyComponent;
     }
 
     /**
@@ -94,11 +128,13 @@ public class KoyaShareService extends KoyaAclService {
 
             //give permissions to user on nodes
             for (SecuredItem si : sharedItems) {
+                beforeShareDelegate.get(nodeService.getType(si.getNodeRefasObject())).beforeShareItem(si.getNodeRefasObject(), u.getUserName());
                 if (Dossier.class.isAssignableFrom(si.getClass())) {
                     grantDossierShare((Dossier) si, u);
                 } else {
                     logger.error("Unsupported sharing type " + si.getClass().getSimpleName());
                 }
+                afterShareDelegate.get(nodeService.getType(si.getNodeRefasObject())).afterShareItem(si.getNodeRefasObject(), u.getUserName());
             }
 
         }
@@ -111,18 +147,20 @@ public class KoyaShareService extends KoyaAclService {
         //share elements to users specified by email
         for (String userMail : sharingWrapper.getSharingUsersMails()) {
 
-            try {
+//            try {
                 User u = userService.getUser(userMail);
                 for (SecuredItem si : sharedItems) {
+                    beforeUnshareDelegate.get(nodeService.getType(si.getNodeRefasObject())).beforeUnshareItem(si.getNodeRefasObject(), u.getUserName());
                     if (Dossier.class.isAssignableFrom(si.getClass())) {
                         revokeDossierShare((Dossier) si, u);
                     } else {
                         logger.error("Unsupported unsharing type " + si.getClass().getSimpleName());
                     }
+                    afterUnshareDelegate.get(nodeService.getType(si.getNodeRefasObject())).afterUnshareItem(si.getNodeRefasObject(), u.getUserName());
                 }
-            } catch (KoyaServiceException kex) {
-                //do nothing if exception thrown
-            }
+//            } catch (KoyaServiceException kex) {
+//                //do nothing if exception thrown
+//            }
         }
 
     }

@@ -106,6 +106,11 @@ public class EmailNotificationService {
     }
 
     //</editor-fold>
+    public boolean isUserNotified(String username) throws KoyaServiceException {
+        //TODO : use an aspect on user to save the value
+        return !getEmailNotificationRule(username).isEmpty();
+    }
+
     public List<Rule> getEmailNotificationRule(String username) throws KoyaServiceException {
         List<Rule> res = new ArrayList<>();
 
@@ -150,58 +155,62 @@ public class EmailNotificationService {
             logger.debug("addRemoveUser SecuredItem: " + item.getName());
 
             final NodeRef nodeRef = item.getNodeRefasObject();
-            List<Rule> rules = ruleService.getRules(nodeRef, true, RuleType.INBOUND);
 
-            boolean ruleFound = false;
-            for (final Rule r : rules) {
-                if (RULE_NAME_EMAIL.equals(r.getTitle())) {
-
-                    final Action a = ((CompositeAction) r.getAction()).getAction(0);
-                    final ArrayList<String> usernames = (a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) != null) ? (ArrayList<String>) a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) : new ArrayList();
-
-                    if (add && !usernames.contains(username)) {
-                        //Add user to notification
-                        usernames.add(username);
-                    } else if (!add && usernames.contains(username)) {
-                        //Remove user
-                        usernames.remove(username);
-
-                    }
-
-                    AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
-                        @Override
-                        public Object doWork() throws Exception {
-                            transactionService.getRetryingTransactionHelper().doInTransaction(
-                                    new RetryingTransactionHelper.RetryingTransactionCallback<Object>() {
-                                        @Override
-                                        public Object execute() {
-                                            if (usernames.isEmpty()) {
-
-                                                ruleService.removeRule(nodeRef, r);
-                                            } else {
-                                                a.setParameterValue(MailActionExecuter.PARAM_TO_MANY, usernames);
-
-                                                ruleService.saveRule(nodeRef, r);
-                                            }
-                                            return null;
-                                        }
-                                    });
-                            return null;
-                        }
-                    });
-                    ruleFound = true;
-                    break;
-                }
-            }
-            if (add && !ruleFound) {
-                createRule(item.getNodeRefasObject(), username);
-            }
-
+            addRemoveUser(nodeRef, username, add);
         }
     }
 
-    private void createRule(NodeRef nodeRef, String username) {
-        Rule rule = new Rule();
+    public void addRemoveUser(final NodeRef nodeRef, String username, boolean add) throws KoyaServiceException {
+        List<Rule> rules = ruleService.getRules(nodeRef, true, RuleType.INBOUND);
+
+        boolean ruleFound = false;
+        for (final Rule r : rules) {
+            if (RULE_NAME_EMAIL.equals(r.getTitle())) {
+
+                final Action a = ((CompositeAction) r.getAction()).getAction(0);
+                final ArrayList<String> usernames = (a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) != null) ? (ArrayList<String>) a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) : new ArrayList();
+
+                if (add && !usernames.contains(username)) {
+                    //Add user to notification
+                    usernames.add(username);
+                } else if (!add && usernames.contains(username)) {
+                    //Remove user
+                    usernames.remove(username);
+
+                }
+
+                AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
+                    @Override
+                    public Object doWork() throws Exception {
+                        transactionService.getRetryingTransactionHelper().doInTransaction(
+                                new RetryingTransactionHelper.RetryingTransactionCallback<Object>() {
+                                    @Override
+                                    public Object execute() {
+                                        if (usernames.isEmpty()) {
+
+                                            ruleService.removeRule(nodeRef, r);
+                                        } else {
+                                            a.setParameterValue(MailActionExecuter.PARAM_TO_MANY, usernames);
+
+                                            ruleService.saveRule(nodeRef, r);
+                                        }
+                                        return null;
+                                    }
+                                });
+                        return null;
+                    }
+                });
+                ruleFound = true;
+                break;
+            }
+        }
+        if (add && !ruleFound) {
+            createRule(nodeRef, username);
+        }
+    }
+
+    private void createRule(final NodeRef nodeRef, String username) {
+        final Rule rule = new Rule();
         rule.setRuleType(RuleType.INBOUND);
         rule.setTitle(RULE_NAME_EMAIL);
         rule.applyToChildren(true); // set this to true if you want to cascade to sub folders
@@ -229,8 +238,13 @@ public class EmailNotificationService {
         action.setParameterValues(ruleParameters);
 
         compositeAction.addAction(action);
-
-        ruleService.saveRule(nodeRef, rule); // Save the rule to your nodeRef
+        AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
+            @Override
+            public Object doWork() throws Exception {
+                ruleService.saveRule(nodeRef, rule); // Save the rule to your nodeRef
+                return null;
+            }
+        });
     }
 
     protected String getEmailTemplateRef() {

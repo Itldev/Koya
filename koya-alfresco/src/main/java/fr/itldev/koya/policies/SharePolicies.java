@@ -3,58 +3,71 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package fr.itldev.koya.policies;
+
 import fr.itldev.koya.model.KoyaModel;
 import org.alfresco.repo.policy.ClassPolicy;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 
-
 public interface SharePolicies {
 
-    public interface BeforeSharePolicy extends ClassPolicy
-    {
-        public static final QName QNAME = QName.createQName(KoyaModel.KOYA_URI, "beforeShare");
+    public static final String NAMESPACE = KoyaModel.KOYA_URI;
+
+    public interface BeforeSharePolicy extends ClassPolicy {
+
+        public static final String NAMESPACE = KoyaModel.KOYA_URI;
+
+        public static final QName QNAME = QName.createQName(KoyaModel.KOYA_URI, "beforeShareItem");
+
         /**
          * Called before an item is shared.
-         * 
+         *
          * @param nodeRef the reference to the item about to be shared
          * @param username username the item is about to be shared whith
          */
         public void beforeShareItem(NodeRef nodeRef, String username);
     }
-    
-    public interface AfterSharePolicy extends ClassPolicy
-    {
-        public static final QName QNAME = QName.createQName(KoyaModel.KOYA_URI, "afterShare");
+
+    public interface AfterSharePolicy extends ClassPolicy {
+
+        public static final String NAMESPACE = KoyaModel.KOYA_URI;
+
+        public static final QName QNAME = QName.createQName(KoyaModel.KOYA_URI, "afterShareItem");
+
         /**
          * Called after an item has been shared.
-         * 
+         *
          * @param nodeRef the reference to the item has been shared
          * @param username username the item has been shared whith
          */
         public void afterShareItem(NodeRef nodeRef, String username);
     }
-    
-    public interface BeforeUnsharePolicy extends ClassPolicy
-    {
-        public static final QName QNAME = QName.createQName(KoyaModel.KOYA_URI, "beforeUnshare");
+
+    public interface BeforeUnsharePolicy extends ClassPolicy {
+
+        public static final String NAMESPACE = KoyaModel.KOYA_URI;
+
+        public static final QName QNAME = QName.createQName(KoyaModel.KOYA_URI, "beforeUnshareItem");
+
         /**
          * Called before an item is unshared.
-         * 
+         *
          * @param nodeRef the reference to the item about to be unshared
          * @param username username the item is about to be unshared from
          */
         public void beforeUnshareItem(NodeRef nodeRef, String username);
     }
-    
-    public interface AfterUnsharePolicy extends ClassPolicy
-    {
-        public static final QName QNAME = QName.createQName(KoyaModel.KOYA_URI, "afterUnshare");
+
+    public interface AfterUnsharePolicy extends ClassPolicy {
+
+        public static final String NAMESPACE = KoyaModel.KOYA_URI;
+
+        public static final QName QNAME = QName.createQName(KoyaModel.KOYA_URI, "afterUnshareItem");
+
         /**
          * Called after an item has been unshared.
-         * 
+         *
          * @param nodeRef the reference to the item has been unshared
          * @param username username the item is about has been unshared from
          */

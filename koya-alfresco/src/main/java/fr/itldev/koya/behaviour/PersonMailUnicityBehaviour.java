@@ -49,13 +49,19 @@ public class PersonMailUnicityBehaviour implements
     @Override
     public void onCreateNode(ChildAssociationRef childAssocRef) {
 
-        NodeRef person = childAssocRef.getChildRef();
+        final NodeRef person = childAssocRef.getChildRef();
         String mail = (String) nodeService.getProperty(person, ContentModel.PROP_EMAIL);
 
         //add koya:mailunique aspect on person --> execute mail unicity constraint
-        Map<QName, Serializable> props = new HashMap<>();
+        final Map<QName, Serializable> props = new HashMap<>();
         props.put(KoyaModel.PROP_MAIL, mail);
-        nodeService.addAspect(person, KoyaModel.ASPECT_MAILUNIQUE, props);
+        AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Object>() {
+            @Override
+            public Object doWork() throws Exception {
+                nodeService.addAspect(person, KoyaModel.ASPECT_MAILUNIQUE, props);
+                return null;
+            }
+        });
 
     }
 
