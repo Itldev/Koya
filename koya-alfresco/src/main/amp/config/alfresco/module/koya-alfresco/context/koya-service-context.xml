@@ -151,7 +151,9 @@
     </bean>
     
     <!--Secured Items Sharing service-->
-    <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService" parent="koyaAclService">
+    <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService"
+         init-method="init" parent="koyaAclService">
+        <property name="policyComponent" ref="policyComponent"/>
         <property name="spaceService" ref="spaceService"/>  
         <property name="dossierService" ref="dossierService"/> 
         <property name="userService" ref="userService"/>
