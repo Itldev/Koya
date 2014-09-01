@@ -34,7 +34,7 @@ function main()
         return null;
     }
     var salesOffers = eval('(' + result.response + ')');
-    model.salesOffers = salesOffers.items;
+    model.salesOffers = salesOffers;
 
 
     var remoteUrl = "/fr/itldev/koya/listfolder/app:company_home/app:dictionary/app:koya_space_templates",

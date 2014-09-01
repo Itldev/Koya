@@ -38,19 +38,23 @@ function main()
     // Call the repo to create the st:site folder structure
     var conn = remote.connect("alfresco");
 //   var repoResponse = conn.post("/api/sites", clientRequest, "application/json");
-    var repoResponse = conn.get("/fr/itldev/koya/company/add/" + stringUtils.urlEncode(clientJSON.title) + "/" + stringUtils.urlEncode(clientJSON.salesOffer)+"/"+encodeURIComponent(clientJSON.spaceTemplate));
+    var repoResponse = conn.get("/fr/itldev/koya/company/add/" + stringUtils.urlEncode(clientJSON.title) + "/" + stringUtils.urlEncode(clientJSON.salesOffer) + "/" + encodeURIComponent(clientJSON.spaceTemplate));
 
 
     if (repoResponse.status === 401)
     {
         status.setCode(repoResponse.status, "error.loggedOut");
     }
+    if (repoResponse.status === 500)
+    {
+        status.setCode(repoResponse.status, repoResponse.message);
+    }
     else
     {
-        var repoJSON = eval('(' + repoResponse + ')');
+        var company = eval('(' + repoResponse + ')');
         // Check if we got a positive result from create site
-        if (repoJSON.items[0]) {
-            model.shortName = repoJSON.items[0].name;
+        if (company) {
+            model.shortName = company.name;
             // Yes we did, now create the Surf objects in the web-tier and the associated configuration elements
             // Retry a number of times until success - remove the site on total failure
             for (var r = 0; r < 3 && !model.success; r++) {
@@ -65,11 +69,6 @@ function main()
                 conn.del("/api/sites/" + encodeURIComponent(model.shortName));
                 status.setCode(status.STATUS_INTERNAL_SERVER_ERROR, "error.create");
             }
-        }
-        else if (repoJSON.status.code)
-        {
-            // Default error handler to report failure to create st:site folder
-            status.setCode(repoJSON.status.code, repoJSON.message);
         }
     }
 }
