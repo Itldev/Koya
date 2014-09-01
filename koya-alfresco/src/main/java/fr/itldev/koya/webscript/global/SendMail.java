@@ -56,7 +56,6 @@ public class SendMail extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-       
 
         try {
 
@@ -65,12 +64,40 @@ public class SendMail extends AbstractWebScript {
             logger.error(mw.toString());
 
             //TODO get authentication info (guest or not --> snder or not )
-            Action mail = actionService.createAction(MailActionExecuter.NAME, wrapperToParams(mw));
-
             try {
-                actionService.executeAction(mail, null);
+                /**
+                 * Create 1 action per recipient as they must be registered user
+                 * https://forums.alfresco.com/forum/developer-discussions/repository-services/mailactionexecuterparamtomany-parameter-not-working
+                 * 
+                 * TODO find multi user mail sending way
+                 */
+
+                for (String recipient : mw.getTo()) {
+
+                    /**
+                     * Params Setting
+                     */
+                    Map<String, Serializable> paramsMail = new HashMap<>();
+                    // String currentUserName = authenticationService.getCurrentUserName();
+                    paramsMail.put(MailActionExecuter.PARAM_TO, recipient);
+                    if (mw.getFrom() != null) {
+                        paramsMail.put(MailActionExecuter.PARAM_FROM, mw.getFrom());
+                    }
+                    paramsMail.put(MailActionExecuter.PARAM_SUBJECT, mw.getSubject());
+                    paramsMail.put(MailActionExecuter.PARAM_TEXT, mw.getContent());
+
+                    //            paramsMail.put(MailActionExecuter.PARAM_SUBJECT_PARAMS, "");
+                    //            paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, "");//noderef
+                    //            paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, "");//model ???
+                    /**
+                     * Action execution
+                     */
+                    actionService.executeAction(actionService.createAction(
+                            MailActionExecuter.NAME, paramsMail), null);
+                }
+
             } catch (Exception ex) {
-                logger.error(ex.toString());
+                logger.error( ex.toString());
                 throw new KoyaServiceException(0);
             }
 
@@ -81,34 +108,6 @@ public class SendMail extends AbstractWebScript {
         res.setContentType("application/json");
 
         res.getWriter().write("");
-    }
-
-    private Map<String, Serializable> wrapperToParams(MailWrapper mw) {
-        Map<String, Serializable> paramsMail = new HashMap<>();
-
-        String currentUserName = authenticationService.getCurrentUserName();
-
-        String to = "";
-        String sep = "";
-        for (String dest : mw.getTo()) {
-            to += sep + dest;
-            sep = ";";
-        }
-        paramsMail.put(MailActionExecuter.PARAM_TO, to);
-
-        if (mw.getFrom() != null) {
-            paramsMail.put(MailActionExecuter.PARAM_FROM, mw.getFrom());
-        }
-
-        paramsMail.put(MailActionExecuter.PARAM_SUBJECT, mw.getSubject());
-
-        //content treat !!!!
-        paramsMail.put(MailActionExecuter.PARAM_TEXT, mw.getContent());
-
-//            paramsMail.put(MailActionExecuter.PARAM_SUBJECT_PARAMS, "");
-//            paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, "");//noderef
-//            paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, "");//model ???
-        return paramsMail;
     }
 
 }
