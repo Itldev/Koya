@@ -1,11 +1,16 @@
 package fr.itldev.koya.webscript.space;
 
 import fr.itldev.koya.alfservice.ModelService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
-public class ApplyTemplates extends KoyaWebscript {
+public class ApplyTemplates extends AbstractWebScript {
 
     ModelService modelService;
 
@@ -14,11 +19,20 @@ public class ApplyTemplates extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        wrapper.addItem(modelService.companyInitTemplate(
-                urlParams.get("shortname"), urlParams.get("templatename")));
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        return wrapper;
+        //TODO use standard name
+        String shortname = (String) urlParams.get(KoyaWebscript.WSCONST_SHORTNAME);
+        String templatename = (String) urlParams.get(KoyaWebscript.WSCONST_TEMPLATENAME);
+
+        try {
+            modelService.companyInitTemplate(shortname, templatename);
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write("");
     }
 
 }

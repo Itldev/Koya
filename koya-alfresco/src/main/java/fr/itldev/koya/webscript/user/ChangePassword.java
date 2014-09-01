@@ -19,20 +19,26 @@
 package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * change user Own password
  *
- * TODO allow admin (or company admin) to change password without given previous one.
+ * TODO allow admin (or company admin) to change password without given previous
+ * one.
  *
  * TODO encrypt password with user key?
  *
  *
  */
-public class ChangePassword extends KoyaWebscript {
+public class ChangePassword extends AbstractWebScript {
 
     private UserService userService;
 
@@ -41,10 +47,18 @@ public class ChangePassword extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+
         String oldpwd = (String) urlParams.get("oldpwd");
         String newpwd = (String) urlParams.get("newpwd");
-        userService.changePassword(oldpwd, newpwd);
-        return wrapper;
+
+        try {
+            userService.changePassword(oldpwd, newpwd);
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write("");
     }
 }

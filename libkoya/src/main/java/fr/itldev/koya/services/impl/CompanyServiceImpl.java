@@ -18,20 +18,20 @@
  */
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Preferences;
+import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.CompanyService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.client.RestClientException;
 
 public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService {
 
-    private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add";
+    private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add/{name}/{salesoffer}/{template}";
     private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
     private static final String REST_DEL_DELCOMPANY = "/s/api/sites/{shortname}";
     private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}";
@@ -58,33 +58,22 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     @Override
     public Company create(User admin, Company c, String template) throws RestClientException, AlfrescoServiceException {
 
-        //TODO verifications (nom + offrecom)
-        //TODO encodage s.getTitre (url compliant) : pas urgent car il s'agit d'un POC non utilisé via cette librairie
-        ItlAlfrescoServiceWrapper ret = admin.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_POST_ADDCOMPANY + "/" + c.getTitle() + "/" + c.getCurrentSaleOffer().getName() + "/" + template, ItlAlfrescoServiceWrapper.class);
-
-        //TODO effectuer la requete sur un script coté share (si existant) afin de rendre dispo le site -- sitedata.newPreset()...
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (Company) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        //TODO verifications (name + offrecom)
+        return admin.getRestTemplate().getForObject(getAlfrescoServerUrl()
+                + REST_POST_ADDCOMPANY, Company.class, c.getTitle(), c.getCurrentSaleOffer().getName(), template);
     }
 
     @Override
     public List<Company> list(User admin) throws RestClientException, AlfrescoServiceException {//TODO search filter
-        ItlAlfrescoServiceWrapper ret = admin.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LISTCOMPANY, ItlAlfrescoServiceWrapper.class);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return fromJSON(new TypeReference<List<Company>>() {
+        }, admin.getRestTemplate()
+                .getForObject(getAlfrescoServerUrl() + REST_GET_LISTCOMPANY, String.class));
     }
 
     /**
-     * Méthode de suppression d'une société
+     * Company removing method
      *
-     * Implémentée mais pas utilisée : en pratique, on préférera désactiver une
-     * société (site) plutot que de la supprimer.
+     * Never used.
      *
      *
      * @param admin
@@ -103,13 +92,9 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
         if (active.length == 1) {
             filterActif = active[0];
         }
-
-        ItlAlfrescoServiceWrapper ret = admin.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LISTOFFERS, ItlAlfrescoServiceWrapper.class, filterActif);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return fromJSON(new TypeReference<List<SalesOffer>>() {
+        }, admin.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_LISTOFFERS, String.class, filterActif));
 
     }
 
@@ -125,9 +110,8 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     @Override
     public Preferences getPreferences(User user, Company c) throws AlfrescoServiceException {
-        Preferences prefs = user.getRestTemplate().
+        return user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, Preferences.class, c.getName());
-        return prefs;
     }
 
     /**
@@ -142,7 +126,8 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     @Override
     public String getPreference(User user, Company c, String preferenceKey) throws AlfrescoServiceException {
         String pref = user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl() + REST_GET_SINGLEPREFERENCES, String.class, c.getName(), preferenceKey);
+                getForObject(getAlfrescoServerUrl() + REST_GET_SINGLEPREFERENCES,
+                        String.class, c.getName(), preferenceKey);
 
         if (pref == null) {
             return "";
@@ -155,30 +140,22 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     @Override
     public void commitPreferences(User user, Company c, Preferences p) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
-                postForObject(getAlfrescoServerUrl() + REST_POST_PREFERENCES, p, ItlAlfrescoServiceWrapper.class, c.getName());
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        user.getRestTemplate().
+                postForObject(getAlfrescoServerUrl() + REST_POST_PREFERENCES,
+                        p, String.class, c.getName());
+
     }
 
     @Override
     public CompanyProperties getProperties(User user, Company c) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl() + REST_GET_PROPERTIES, ItlAlfrescoServiceWrapper.class, c.getName());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (CompanyProperties) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_PROPERTIES,
+                        CompanyProperties.class, c.getName());
     }
 
     @Override
     public void commitProperties(User user, Company c, CompanyProperties p) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
-                postForObject(getAlfrescoServerUrl() + REST_POST_PROPERTIES, p, ItlAlfrescoServiceWrapper.class, c.getName());
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        user.getRestTemplate().
+                postForObject(getAlfrescoServerUrl() + REST_POST_PROPERTIES, p, String.class, c.getName());
     }
 }

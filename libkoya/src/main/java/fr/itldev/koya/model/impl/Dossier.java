@@ -18,18 +18,18 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.Activable;
-import fr.itldev.koya.model.Container;
-import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.SubSpace;
+import fr.itldev.koya.model.interfaces.Activable;
+import fr.itldev.koya.model.interfaces.Container;
+import fr.itldev.koya.model.interfaces.Content;
+import fr.itldev.koya.model.interfaces.SubSpace;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public final class Dossier extends SubSpace implements Container, Activable {
+public final class Dossier extends SecuredItem implements Container, Activable, SubSpace {
 
     private Boolean active = Boolean.TRUE;
 
@@ -100,6 +100,11 @@ public final class Dossier extends SubSpace implements Container, Activable {
     }
 
     public Dossier() {
+    }
+
+    @Override
+    public String getType() {
+        return "dossier";
     }
 
 }

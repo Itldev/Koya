@@ -1,9 +1,8 @@
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.ContentTyped;
 import java.util.Objects;
 
-public class UserRole implements ContentTyped {
+public class UserRole {
 
     String name;
 
@@ -37,22 +36,4 @@ public class UserRole implements ContentTyped {
         return true;
     }
 
-    /**
-     * Useful method to deserialize content.
-     *
-     * @return
-     */
-    @Override
-    public String getContentType() {
-        return this.getClass().getCanonicalName();
-    }
-
-    /**
-     * Implemented for deserialization compatibility
-     *
-     * @param contentType
-     */
-    @Override
-    public void setContentType(String contentType) {
-    }
 }

@@ -3,34 +3,38 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.webscript.salesoffer;
 
 import fr.itldev.koya.alfservice.SalesOfferService;
 import fr.itldev.koya.model.impl.SalesOffer;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * List available Sales Offer
  *
  */
-public class ListOffer extends KoyaWebscript {
+public class ListOffer extends AbstractWebScript {
 
     private SalesOfferService salesOfferService;
 
@@ -39,8 +43,8 @@ public class ListOffer extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        //TODO implementation ... Stub impl
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+
         Map<String, String> dataOffre1 = new HashMap<>();
         Map<String, String> dataOffre2 = new HashMap<>();
 
@@ -54,10 +58,13 @@ public class ListOffer extends KoyaWebscript {
         dataOffre2.put("name", "offre2");
         dataOffre2.put("active", "true");
 
-        wrapper.addItem(new SalesOffer(dataOffre1));
-        wrapper.addItem(new SalesOffer(dataOffre2));
+        List<SalesOffer> soList = new ArrayList<>();
+        soList.add(new SalesOffer(dataOffre1));
+        soList.add(new SalesOffer(dataOffre2));
 
-        return wrapper;
+        String response = KoyaWebscript.getObjectAsJson(soList);
+
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
-
 }

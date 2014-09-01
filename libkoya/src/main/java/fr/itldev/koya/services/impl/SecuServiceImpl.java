@@ -24,10 +24,11 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.model.impl.UserRole;
 import fr.itldev.koya.model.json.InviteWrapper;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.SecuService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.util.List;
+import org.codehaus.jackson.type.TypeReference;
 
 public class SecuServiceImpl extends AlfrescoRestService implements SecuService {
 
@@ -52,40 +53,25 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
 
     @Override
     public List<UserRole> listAvailableRoles(User userLogged, Company c) throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_AVAILABLEROLES, ItlAlfrescoServiceWrapper.class, c.getName());
-
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return fromJSON(new TypeReference<List<UserRole>>() {
+        }, userLogged.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_AVAILABLEROLES, String.class, c.getName()));
     }
 
     @Override
     public UserRole getUserRole(User userLogged, Company c, User userToGetRole) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().getForObject(
+        return userLogged.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_USERROLE,
-                ItlAlfrescoServiceWrapper.class, c.getName(), userToGetRole.getUserName());
-
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (UserRole) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                UserRole.class, c.getName(), userToGetRole.getUserName());
     }
 
     @Override
-    public void setUserRole(User userLogged, Company c, String userNameSetRole, String roleName) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().getForObject(
+    public void setUserRole(User userLogged, Company c, String userNameSetRole,
+            String roleName) throws AlfrescoServiceException {
+        userLogged.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_SETUSERROLE,
-                ItlAlfrescoServiceWrapper.class, c.getName(),
+                String.class, c.getName(),
                 userNameSetRole, roleName);
-
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
     }
 
     /**
@@ -112,13 +98,9 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
         iw.setServerPath(serverPath);
         iw.setRejectUrl(rejectUrl);
 
-        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().postForObject(
+        userLogged.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_GET_INVITEUSER, iw,
-                ItlAlfrescoServiceWrapper.class);
-
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                String.class);
     }
 
     /**
@@ -149,15 +131,11 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
             maxRes = maxResults.toString();
         }
 
-        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_LISTUSERCONNECTIONS, ItlAlfrescoServiceWrapper.class,
-                userToGetConnections.getUserName(), companiesFilter, maxRes);
+        return fromJSON(new TypeReference<List<UserConnection>>() {
+        }, userLogged.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_LISTUSERCONNECTIONS, String.class,
+                userToGetConnections.getUserName(), companiesFilter, maxRes));
 
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
     }
 
     /**
@@ -170,13 +148,9 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
      */
     @Override
     public void revokeAccess(User userLogged, Company c, User u) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().getForObject(
+        userLogged.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_REVOKEUSERACCESS,
-                ItlAlfrescoServiceWrapper.class, c.getName(), u.getUserName());
-
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                String.class, c.getName(), u.getUserName());
     }
 
     /**

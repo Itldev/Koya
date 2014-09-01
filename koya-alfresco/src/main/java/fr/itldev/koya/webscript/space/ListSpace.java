@@ -19,16 +19,19 @@
 package fr.itldev.koya.webscript.space;
 
 import fr.itldev.koya.alfservice.SpaceService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.webscript.KoyaWebscript;
+import fr.itldev.koya.exception.KoyaServiceException;import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  */
-public class ListSpace extends KoyaWebscript {
+public class ListSpace extends AbstractWebScript {
 
-    private static final String URL_PARAM_MAXDEPTH = "maxdepth";
     private static final Integer DEFAULT_MAX_DEPTH = 50;
 
     private SpaceService spaceService;
@@ -37,22 +40,25 @@ public class ListSpace extends KoyaWebscript {
         this.spaceService = spaceService;
     }
 
- 
-
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        String name = (String) jsonPostMap.get("name");
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        Integer depth;
-
-        if (urlParams.containsKey(URL_PARAM_MAXDEPTH)) {
-            depth = new Integer((String) urlParams.get(URL_PARAM_MAXDEPTH));
-        } else {
-            depth = DEFAULT_MAX_DEPTH;
+        String name = (String) jsonPostMap.get(KoyaWebscript.WSCONST_NAME);
+        String response;
+        try {
+            Integer depth;
+            if (urlParams.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
+                depth = new Integer((String) urlParams.get(KoyaWebscript.WSCONST_MAXDEPTH));
+            } else {
+                depth = DEFAULT_MAX_DEPTH;
+            }
+            response = KoyaWebscript.getObjectAsJson(spaceService.list(name, depth));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-
-        wrapper.addItems(spaceService.list(name, depth));
-        return wrapper;
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
-
 }

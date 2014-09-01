@@ -21,13 +21,14 @@ package fr.itldev.koya.webscript.content;
 import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
+import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
@@ -54,33 +55,19 @@ public class AddContent extends AbstractWebScript {
      */
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
-
+        Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
+        String response;
         try {
             ObjectMapper mapper = new ObjectMapper();
-
-            // try {
             Directory dir = mapper.readValue(req.getContent().getReader(), Directory.class);
-
-            NodeRef parent = new NodeRef(req.getServiceMatch().getTemplateVars().get("parentNodeRef"));
-            Directory dirCreated = koyaContentService.createDir(dir.getName(), parent);
-            wrapper.addItem(dirCreated);
-            wrapper.setStatusOK();
+            NodeRef parent = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_PARENTNODEREF));
+            response = KoyaWebscript.getObjectAsJson(koyaContentService.createDir(dir.getName(), parent));
         } catch (KoyaServiceException ex) {
-            wrapper.setStatusFail(ex.getMessage());
-            wrapper.setErrorCode(ex.getErrorCode());
-        } catch (IOException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.CONTENT_CREATION_INVALID_TYPE);
-        } catch (Exception ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+
         }
-
         res.setContentType("application/json");
-
-        res.getWriter().write(wrapper.getAsJSON());
-        logger.trace(wrapper.getAsJSON());
+        res.getWriter().write(response);
     }
 
 }

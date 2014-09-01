@@ -19,18 +19,22 @@
 package fr.itldev.koya.webscript.global;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Delete secured item webscript.
  *
  */
-public class Delete extends KoyaWebscript {
+public class Delete extends AbstractWebScript {
 
-    private static final String URL_PARAM_NODEREF = "nodeRef";
     private KoyaNodeService koyaNodeService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
@@ -38,12 +42,17 @@ public class Delete extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(
-            ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams,
-            Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef deleteItem = new NodeRef(urlParams.get(URL_PARAM_NODEREF));
-        koyaNodeService.delete(deleteItem);
-        return wrapper;
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+        NodeRef deleteItem = new NodeRef(urlParams.get(KoyaWebscript.WSCONST_NODEREF));
+
+        try {
+            koyaNodeService.delete(deleteItem);
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write("");
     }
 
 }

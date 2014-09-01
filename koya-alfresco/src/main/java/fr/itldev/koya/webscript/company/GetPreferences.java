@@ -65,6 +65,6 @@ public class GetPreferences extends AbstractWebScript {
         }
 
         res.setContentType("application/json");
-        res.getWriter().write(KoyaWebscript.escapeWrapper(response));
+        res.getWriter().write(response);
     }
 }

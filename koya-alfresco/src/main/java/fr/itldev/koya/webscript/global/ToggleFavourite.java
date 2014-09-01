@@ -19,10 +19,13 @@
 package fr.itldev.koya.webscript.global;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Set/unset Favourite status on node
@@ -31,7 +34,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
  *
  *
  */
-public class ToggleFavourite extends KoyaWebscript {
+public class ToggleFavourite extends AbstractWebScript {
 
     private KoyaNodeService koyaNodeService;
 
@@ -40,12 +43,13 @@ public class ToggleFavourite extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        Boolean userFavourite = (Boolean) jsonPostMap.get("userFavourite");
-        NodeRef conteneur = new NodeRef((String) jsonPostMap.get("nodeRef"));
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+        Boolean userFavourite = (Boolean) jsonPostMap.get(KoyaWebscript.WSCONST_USERFAVOURITE);
+        NodeRef conteneur = new NodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
         koyaNodeService.setFavouriteStatus(conteneur, userFavourite);
-
-        return wrapper;
+        res.setContentType("application/json");
+        res.getWriter().write("");
     }
 
 }

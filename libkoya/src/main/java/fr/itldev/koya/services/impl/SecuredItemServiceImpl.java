@@ -20,10 +20,10 @@ package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.SecuredItemService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.client.RestTemplate;
 
 public class SecuredItemServiceImpl extends AlfrescoRestService implements SecuredItemService {
@@ -64,12 +64,9 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
      */
     @Override
     public void delete(User user, SecuredItem securedItem) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+        user.getRestTemplate().getForObject(
                 alfrescoServerUrl + REST_GET_DELITEM,
-                ItlAlfrescoServiceWrapper.class, securedItem.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_NOK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                String.class, securedItem.getNodeRef());
     }
 
     /**
@@ -81,14 +78,10 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
      */
     @Override
     public void rename(User user, SecuredItem securedItem, String newName) throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+        user.getRestTemplate().getForObject(
                 alfrescoServerUrl + REST_GET_RENAMEITEM,
-                ItlAlfrescoServiceWrapper.class, newName,
+                String.class, newName,
                 securedItem.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_NOK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
     }
 
     /**
@@ -103,15 +96,10 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
     public SecuredItem getParent(User user, SecuredItem securedItem)
             throws AlfrescoServiceException {
 
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_GETPARENT, securedItem,
-                ItlAlfrescoServiceWrapper.class, 1);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)
-                && ret.getNbitems() == 1) {
-            return (SecuredItem) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return fromJSON(new TypeReference<List<SecuredItem>>() {
+        }, user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_GETPARENT_INFINITE,
+                securedItem, String.class)).get(0);
     }
 
     /**
@@ -126,15 +114,10 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
     @Override
     public List<SecuredItem> getParents(User user, SecuredItem securedItem)
             throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+        return fromJSON(new TypeReference<List<SecuredItem>>() {
+        }, user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_GETPARENT_INFINITE,
-                securedItem, ItlAlfrescoServiceWrapper.class);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (List<SecuredItem>) ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                securedItem, String.class));
     }
 
 }

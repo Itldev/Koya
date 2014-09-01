@@ -23,9 +23,9 @@ import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -47,7 +47,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -109,22 +109,17 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         //Get User Object
         Map emailPostWrapper = new HashMap();
         emailPostWrapper.put("authKey", authKey);
-        User user = null;
-        ItlAlfrescoServiceWrapper ret = getTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper, ItlAlfrescoServiceWrapper.class, ticket);
+        User user = getTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper,
+                User.class, ticket);
 
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            user = (User) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
         //Authentication ticket integration
         user.setTicketAlfresco(ticket.toString());
         try {
             //set users authenticated rest template
             user.setRestTemplate(getAuthenticatedRestTemplate(user.getUserName(), password));
         } catch (MalformedURLException ex) {
-            throw new AlfrescoServiceException(ex.toString(), ret.getErrorCode());
+            throw new AlfrescoServiceException(ex.toString());
         }
         //load users rest prefrences
         loadPreferences(user);
@@ -236,19 +231,14 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
     @Override
     public void commitProperties(User userLog, User userToCommitProps) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToCommitProps, ItlAlfrescoServiceWrapper.class);
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        userLog.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS, userToCommitProps, String.class);
     }
 
     @Override
     public void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLog.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_CHANGEPASSWORD, ItlAlfrescoServiceWrapper.class, oldPassword, newPassword);
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        userLog.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_CHANGEPASSWORD, String.class, oldPassword, newPassword);
     }
 
     /**
@@ -270,7 +260,6 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     @Override
     public List<User> find(User userLog, String query, Integer maxResults,
             Company company, List<String> rolesFilter) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret;
 
         String companyName = "";
         String roles = "";
@@ -286,14 +275,10 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
             }
         }
 
-        ret = userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_FINDUSERS,
-                ItlAlfrescoServiceWrapper.class, query, maxResults, companyName, roles);
+        return fromJSON(new TypeReference<List<User>>() {
+        }, userLog.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_FINDUSERS,
+                String.class, query, maxResults, companyName, roles));
 
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (List<User>) ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
     }
 
     @Override
@@ -312,13 +297,9 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
      */
     @Override
     public void validateInvitation(User user, String inviteId, String inviteTicket) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret;
+        getTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, user, String.class, inviteId, inviteTicket, user.getPassword());
 
-        ret = getTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, user, ItlAlfrescoServiceWrapper.class, inviteId, inviteTicket, user.getPassword());
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
     }
 
     /**
@@ -333,16 +314,9 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     public User getUserFromEmail(User user, String email) throws AlfrescoServiceException {
         Map emailPostWrapper = new HashMap();
         emailPostWrapper.put("authKey", email);
-
-        ItlAlfrescoServiceWrapper ret = getTemplate().postForObject(
+        return getTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper,
-                ItlAlfrescoServiceWrapper.class, user.getTicketAlfresco());
-
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (User) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                User.class, user.getTicketAlfresco());
     }
 
     private class RestClient extends RestTemplate {

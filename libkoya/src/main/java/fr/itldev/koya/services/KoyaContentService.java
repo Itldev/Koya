@@ -18,12 +18,12 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.Content;
 import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.InputStream;
 import java.util.List;

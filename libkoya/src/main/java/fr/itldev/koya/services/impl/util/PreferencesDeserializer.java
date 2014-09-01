@@ -30,39 +30,39 @@ import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.JsonDeserializer;
 
 public class PreferencesDeserializer extends JsonDeserializer<Preferences> {
-    
+
     private Logger logger = Logger.getLogger(this.getClass());
-    
+
     @Override
     public Preferences deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
         Preferences pref = new Preferences();
         recursiveDeserialize(jp.readValueAsTree(), "", "", pref);
-        
+
         return pref;
     }
-    
+
     private void recursiveDeserialize(JsonNode n, String key, String keySep, Preferences pref) {
-        
+
         if (n.isContainerNode()) {
             Iterator<Entry<String, JsonNode>> it = n.getFields();
             while (it.hasNext()) {
                 Entry<String, JsonNode> e = it.next();
                 recursiveDeserialize(e.getValue(), key + keySep + e.getKey(), ".", pref);
             }
-            
+
         } else {
             //exclude contentType attribute
-            if (!key.equals(ItlAlfrescoServiceWrapperDeserializer.ATTRIBUTE_CONTENT_TYPE)) {               
-                if (n.isBoolean()) {
-                    pref.put(key, n.getBooleanValue());
-                } else if (n.isTextual()) {
-                    pref.put(key, n.getTextValue());
-                } else {
-                    logger.error("unhandled type for deserialization : " + key);
-                }
+            // if (!key.equals(ItlAlfrescoServiceWrapperDeserializer.ATTRIBUTE_CONTENT_TYPE)) {               
+            if (n.isBoolean()) {
+                pref.put(key, n.getBooleanValue());
+            } else if (n.isTextual()) {
+                pref.put(key, n.getTextValue());
+            } else {
+                logger.error("unhandled type for deserialization : " + key);
             }
+            // }
         }
-        
+
     }
-    
+
 }

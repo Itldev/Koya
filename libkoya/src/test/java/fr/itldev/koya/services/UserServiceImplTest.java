@@ -128,4 +128,6 @@ public class UserServiceImplTest extends TestCase {
             fail();
         }
     }
+
+    //TODO test change password
 }

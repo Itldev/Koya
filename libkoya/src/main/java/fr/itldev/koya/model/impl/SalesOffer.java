@@ -18,7 +18,7 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.Activable;
+import fr.itldev.koya.model.interfaces.Activable;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
@@ -107,6 +107,11 @@ public final class SalesOffer extends SecuredItem implements Activable {
     @Override
     public void setActive(Boolean active) {
         //TODO activation
+    }
+    
+     @Override
+    public String getType() {
+        return "salesoffer";
     }
 
 }

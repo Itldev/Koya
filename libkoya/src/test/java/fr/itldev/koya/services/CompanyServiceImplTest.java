@@ -112,7 +112,10 @@ public class CompanyServiceImplTest extends TestCase {
         assertTrue(offresCom.size() > 0);
         SalesOffer sel = offresCom.get(0);
 
-        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel), "default");
+        Company created = companyService.create(admin, 
+                new Company("company_" + new Random().nextInt(1000), sel), "default");
+
+        System.out.println("comp = " + created);
 
         Preferences p = companyService.getPreferences(admin, created);
 

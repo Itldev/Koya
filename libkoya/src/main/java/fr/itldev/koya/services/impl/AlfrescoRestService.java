@@ -21,7 +21,6 @@ package fr.itldev.koya.services.impl;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -29,6 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.client.RestTemplate;
 
 public class AlfrescoRestService implements AlfrescoService {
@@ -68,16 +69,8 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     @Override
     public MetaInfos getServerInfos(User user) throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
-                alfrescoServerUrl + REST_GET_SERVERINFOS, ItlAlfrescoServiceWrapper.class);
-
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ((MetaInfos) ret.getItems().get(0));
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
-
+        return user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_SERVERINFOS, MetaInfos.class);
     }
 
     /**
@@ -88,20 +81,14 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     @Override
     public void sendMail(User user, MailWrapper wrapper) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = null;
-
         if (user == null) {
-            ret = getTemplate().postForObject(
-                    alfrescoServerUrl + REST_POST_MAIL + "?guest=true", wrapper, ItlAlfrescoServiceWrapper.class);
+            getTemplate().postForObject(
+                    alfrescoServerUrl + REST_POST_MAIL + "?guest=true", wrapper, String.class);
         } else {
-            ret = user.getRestTemplate().postForObject(
-                    alfrescoServerUrl + REST_POST_MAIL, wrapper, ItlAlfrescoServiceWrapper.class);
+            user.getRestTemplate().postForObject(
+                    alfrescoServerUrl + REST_POST_MAIL, wrapper, String.class);
         }
 
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
     }
 
     /**
@@ -114,15 +101,9 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     @Override
     public SecuredItem getSecuredItem(User user, String nodeRef) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().
+        return user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_SECUREDITEM,
-                        ItlAlfrescoServiceWrapper.class, nodeRef);
-
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)
-                && ret.getNbitems() == 1) {
-            return (SecuredItem) ret.getItems().get(0);
-        }
-        return null;
+                        SecuredItem.class, nodeRef);
     }
     /*
      * ================ Utils methods ==================
@@ -167,6 +148,27 @@ public class AlfrescoRestService implements AlfrescoService {
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1)
                 + (si ? "" : "i");
         return String.format("%.1f %so", bytes / Math.pow(unit, exp), pre);
+    }
+
+    /**
+     * Return typed object from json string.
+     *
+     *
+     * @param <T>
+     * @param type
+     * @param jsonPacket
+     * @return
+     */
+    public static <T> T fromJSON(final TypeReference<T> type,
+            final String jsonPacket) {
+        T data = null;
+
+        try {
+            data = new ObjectMapper().readValue(jsonPacket, type);
+        } catch (Exception e) {
+            // Handle the problem
+        }
+        return data;
     }
 
 }

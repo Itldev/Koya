@@ -18,18 +18,39 @@
  */
 package fr.itldev.koya.model;
 
+import com.google.common.collect.HashBiMap;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.SalesOffer;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.Template;
 import java.io.IOException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonSubTypes;
+import org.codehaus.jackson.annotate.JsonSubTypes.Type;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.ObjectMapper;
 
-public abstract class SecuredItem implements ContentTyped {
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes({
+    @Type(value = Company.class, name = "company"),
+    @Type(value = Space.class, name = "space"),
+    @Type(value = Dossier.class, name = "dossier"),
+    @Type(value = Directory.class, name = "directory"),
+    @Type(value = Document.class, name = "document"),
+    @Type(value = SalesOffer.class, name = "salesoffer"),
+    @Type(value = Template.class, name = "template")})
+public abstract class SecuredItem {
 
     //fields that should be escpaed before serialization
-    public static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
-
+    // public final static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
     private String nodeRef;
-    private String path;
     private String name;
     private Boolean shared;
 
@@ -40,14 +61,6 @@ public abstract class SecuredItem implements ContentTyped {
 
     public String getNodeRef() {
         return nodeRef;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public void setNodeRef(String nodeRef) {
@@ -94,9 +107,8 @@ public abstract class SecuredItem implements ContentTyped {
     public SecuredItem() {
     }
 
-    public SecuredItem(String nodeRef, String path, String name) {
+    public SecuredItem(String nodeRef, String name) {
         this.nodeRef = nodeRef;
-        this.path = path;
         this.name = name;
     }
 
@@ -141,18 +153,14 @@ public abstract class SecuredItem implements ContentTyped {
      *
      * @return
      */
-    @Override
-    public String getContentType() {
-        return this.getClass().getCanonicalName();
-    }
+    public abstract String getType();
 
     /**
      * Implemented for deserialization compatibility
      *
      * @param contentType
      */
-    @Override
-    public void setContentType(String contentType) {
+    public void setType(String contentType) {
     }
 
 }

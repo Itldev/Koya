@@ -18,33 +18,28 @@
  */
 package fr.itldev.koya.webscript;
 
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  */
-public abstract class KoyaWebscript extends AbstractWebScript {
+public abstract class KoyaWebscript {
 
     public static final String WSCONST_NODEREF = "nodeRef";
     public static final String WSCONST_NAME = "name";
+    public static final String WSCONST_SHORTNAME = "shortname";
+    public static final String WSCONST_TEMPLATENAME = "templatename";
     public static final String WSCONST_NBANCESTOR = "nbAncestor";
     public static final String WSCONST_PARENTNODEREF = "parentNodeRef";
     public static final String WSCONST_USERNAME = "userName";
@@ -59,6 +54,10 @@ public abstract class KoyaWebscript extends AbstractWebScript {
     public static final String WSCONST_COMPANIESFILTER = "companiesFilter";
     public static final String WSCONST_PREFKEY = "preferenceKey";
     public static final String WSCONST_ENABLE = "enable";
+    public static final String WSCONST_MAXDEPTH = "maxdepth";
+    public static final String WSCONST_USERFAVOURITE = "userFavourite";
+    public static final String WSCONST_NEWNAME = "newName";
+    public static final String WSCONST_ACTIVE = "active";
 
     private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 
@@ -98,30 +97,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
         return params;
     }
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
-        logger.trace(this.getClass().getSimpleName() + " - Webscript Executed by " + AuthenticationUtil.getRunAsUser());
-
-        //TODO url params et url template
-        try {
-            wrapper = koyaExecute(wrapper, getUrlParamsMap(req), getJsonMap(req));
-            wrapper.setStatusOK();
-        } catch (KoyaServiceException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(ex.getErrorCode());
-        } catch (Exception ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
-        }
-
-        res.setContentType("application/json");
-
-        String response = escapeWrapper(wrapper.getAsJSON());
-        res.getWriter().write(response);
-        logger.trace(response);
-
-    }
+    public final static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
 
     /**
      * escapes identified fields after json serialization
@@ -129,9 +105,9 @@ public abstract class KoyaWebscript extends AbstractWebScript {
      * @param jsonWrapper
      * @return
      */
-    public static String escapeWrapper(String jsonWrapper) {
+    private static String escapeWrapper(String jsonWrapper) {
 
-        for (String fieldName : SecuredItem.ESCAPED_FIELDS_NAMES) {
+        for (String fieldName : ESCAPED_FIELDS_NAMES) {
             //match on name attribute
             Pattern p = Pattern.compile("\\\"" + fieldName + "\\\":\\\"([^\\\"]*)\\\"");
             Matcher m = p.matcher(jsonWrapper);
@@ -145,9 +121,7 @@ public abstract class KoyaWebscript extends AbstractWebScript {
 
     public static String getObjectAsJson(Object o) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(o);
+        return escapeWrapper(mapper.writeValueAsString(o));
     }
-
-    public abstract ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception;
 
 }

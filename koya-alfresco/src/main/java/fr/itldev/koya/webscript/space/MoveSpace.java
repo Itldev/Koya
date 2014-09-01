@@ -19,15 +19,20 @@
 package fr.itldev.koya.webscript.space;
 
 import fr.itldev.koya.alfservice.SpaceService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  */
-public class MoveSpace extends KoyaWebscript {
+public class MoveSpace extends AbstractWebScript {
 
     private SpaceService spaceService;
 
@@ -36,12 +41,20 @@ public class MoveSpace extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef node = new NodeRef((String) jsonPostMap.get(WSCONST_NODEREF));
-        NodeRef parent = new NodeRef((String) urlParams.get(WSCONST_PARENTNODEREF));
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+        NodeRef node = new NodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
+        NodeRef parent = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_PARENTNODEREF));
 
-        wrapper.addItem(spaceService.move(node, parent));
-        return wrapper;
+        String response;
+        try {
+            response = KoyaWebscript.getObjectAsJson(spaceService.move(node, parent));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 
 }

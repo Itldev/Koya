@@ -19,11 +19,13 @@
 package fr.itldev.koya.webscript.content;
 
 import fr.itldev.koya.alfservice.KoyaContentService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
@@ -32,14 +34,10 @@ import org.apache.log4j.Logger;
  *
  *
  */
-public class ListContent extends KoyaWebscript {
+public class ListContent extends AbstractWebScript {
 
-    private static final String URL_PARAM_MAXDEPTH = "maxdepth";
     private static final Integer DEFAULT_MAX_DEPTH = 50;
 
-    private final Logger logger = Logger.getLogger(ListContent.class);
-
-    /*services*/
     private KoyaContentService koyaContentService;
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
@@ -47,21 +45,23 @@ public class ListContent extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef parent = new NodeRef((String) jsonPostMap.get("nodeRef"));
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+        Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 
+        NodeRef parent = new NodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
         Integer depth;
 
-        if (urlParams.containsKey(URL_PARAM_MAXDEPTH)) {
-            depth = new Integer((String) urlParams.get(URL_PARAM_MAXDEPTH));
+        if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
+            depth = new Integer((String) urlParamsMap.get(KoyaWebscript.WSCONST_MAXDEPTH));
         } else {
             depth = DEFAULT_MAX_DEPTH;
         }
+        Boolean onlyFolders = ((String) urlParamsMap.get(KoyaWebscript.WSCONST_ONLYFOLDERS)).equals("true");
 
-        Boolean onlyFolders = ((String) urlParams.get(WSCONST_ONLYFOLDERS)).equals("true");
-
-        wrapper.addItems(koyaContentService.list(parent, depth, onlyFolders));
-        return wrapper;
+        String response = KoyaWebscript.getObjectAsJson(koyaContentService.list(parent, depth, onlyFolders));
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 
 }

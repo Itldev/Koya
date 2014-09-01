@@ -19,14 +19,18 @@
 package fr.itldev.koya.webscript.company;
 
 import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
-import java.util.Map;
+import java.io.IOException;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * List Companies.
  */
-public class ListCompany extends KoyaWebscript {
+public class ListCompany extends AbstractWebScript {
 
     private CompanyService companyService;
 
@@ -34,16 +38,16 @@ public class ListCompany extends KoyaWebscript {
         this.companyService = companyService;
     }
 
- 
-
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-
-        /**
-         * TODO handle optionnal active parameter 
-         */
-        wrapper.addItems(companyService.list());
-        return wrapper;
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        String response;
+        try {
+            response = KoyaWebscript.getObjectAsJson(companyService.list());
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 
 }

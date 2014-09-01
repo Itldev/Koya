@@ -19,10 +19,15 @@
 package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Get User by Authentication Key.
@@ -32,7 +37,7 @@ import org.apache.log4j.Logger;
  *
  *
  */
-public class GetByAuthKey extends KoyaWebscript {
+public class GetByAuthKey extends AbstractWebScript {
 
     private Logger logger = Logger.getLogger(this.getClass());
 
@@ -43,9 +48,18 @@ public class GetByAuthKey extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        wrapper.addItem(userService.getUser((String) jsonPostMap.get("authKey")));
-        return wrapper;
-    }
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, Object> jsonMap = KoyaWebscript.getJsonMap(req);
 
+        String authKey = (String) jsonMap.get("authKey");
+        String response;
+
+        try {
+            response = KoyaWebscript.getObjectAsJson(userService.getUser(authKey));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
+    }
 }

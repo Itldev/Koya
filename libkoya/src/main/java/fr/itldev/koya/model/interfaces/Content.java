@@ -16,14 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.model.impl;
+package fr.itldev.koya.model.interfaces;
 
-import fr.itldev.koya.model.SecuredItem;
+public interface Content extends AlfrescoNode {
 
-public final class Template extends SecuredItem {
-
-    @Override
-    public String getType() {
-        return "template";
-    }
 }

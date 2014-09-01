@@ -20,13 +20,11 @@ package fr.itldev.koya.webscript.share;
 
 import fr.itldev.koya.alfservice.KoyaShareService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.model.json.SharingWrapper;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
@@ -35,8 +33,6 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  *
  */
 public class ShareItems extends AbstractWebScript {
-
-    private final Logger logger = Logger.getLogger(ShareItems.class);
 
     private KoyaShareService koyaShareService;
 
@@ -52,7 +48,6 @@ public class ShareItems extends AbstractWebScript {
      */
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -63,19 +58,11 @@ public class ShareItems extends AbstractWebScript {
             } else {
                 koyaShareService.unShareItems(sw);
             }
-            wrapper.setStatusOK();
         } catch (KoyaServiceException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(ex.getErrorCode());
-        } catch (IOException ex) {
-            logger.error(ex.toString());
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-
         res.setContentType("application/json");
-
-        res.getWriter().write(wrapper.getAsJSON());
+        res.getWriter().write("");
     }
 
 }

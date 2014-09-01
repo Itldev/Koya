@@ -19,16 +19,21 @@
 package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.ProfileService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Set User's role on specified company.
  *
  *
  */
-public class SetRole extends KoyaWebscript {
+public class SetRole extends AbstractWebScript {
 
     private ProfileService profileService;
 
@@ -37,12 +42,18 @@ public class SetRole extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
         String username = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
         String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
         String roleName = (String) urlParams.get(KoyaWebscript.WSCONST_ROLENAME);
-        profileService.setUserRole(username, companyName, roleName);
-        return wrapper;
+        try {
+            profileService.setUserRole(username, companyName, roleName);
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write("");
     }
 
 }

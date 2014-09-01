@@ -19,17 +19,22 @@
 package fr.itldev.koya.webscript.global;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  * Get Secured Item parents webscript.
  *
  */
-public class GetParent extends KoyaWebscript {
+public class GetParent extends AbstractWebScript {
 
     private KoyaNodeService koyaNodeService;
 
@@ -38,17 +43,26 @@ public class GetParent extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef node = new NodeRef((String) jsonPostMap.get(WSCONST_NODEREF));
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+
+        NodeRef node = new NodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
+
         Integer nbAncestor;
         try {
-            nbAncestor = Integer.valueOf((String) urlParams.get(WSCONST_NBANCESTOR));
+            nbAncestor = Integer.valueOf((String) urlParams.get(KoyaWebscript.WSCONST_NBANCESTOR));
         } catch (NumberFormatException ex) {
             nbAncestor = KoyaNodeService.NB_ANCESTOR_INFINTE;
         }
+        String response;
+        try {
+            response = KoyaWebscript.getObjectAsJson(koyaNodeService.getParentsList(node, nbAncestor));
 
-        wrapper.addItems(koyaNodeService.getParentsList(node, nbAncestor));
-        return wrapper;
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
-
 }

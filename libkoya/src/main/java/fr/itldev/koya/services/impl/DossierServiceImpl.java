@@ -22,11 +22,12 @@ import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.util.List;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.core.io.Resource;
 
 public class DossierServiceImpl extends AlfrescoRestService implements DossierService {
@@ -45,13 +46,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 
     @Override
     public Dossier create(User user, Dossier dossier, Space parentSpace) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_ADDDOSSIER, dossier, ItlAlfrescoServiceWrapper.class, parentSpace.getNodeRef());
-
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (Dossier) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return user.getRestTemplate().postForObject(getAlfrescoServerUrl()
+                + REST_POST_ADDDOSSIER, dossier, Dossier.class, parentSpace.getNodeRef());
     }
 
     /**
@@ -97,17 +93,15 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      */
     @Override
     public List<Dossier> list(User user, Space space, String... filter) throws AlfrescoServiceException {
-        String filtre = "";
+        String filterStr = "";
         if (filter.length == 1) {
-            filtre = filter[0];
+            filterStr = filter[0];
         }
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_LISTCHILD, space, ItlAlfrescoServiceWrapper.class, filtre);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+
+        return fromJSON(new TypeReference<List<Dossier>>() {
+        }, user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_LISTCHILD, space, String.class, filterStr));
+
     }
 
     /**
@@ -120,14 +114,10 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      */
     @Override
     public List<User> listResponsibles(User user, Dossier dossier) throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_LISTRESP, ItlAlfrescoServiceWrapper.class, dossier.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return fromJSON(new TypeReference<List<User>>() {
+        }, user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl()
+                        + REST_GET_LISTRESP, String.class, dossier.getNodeRef()));
     }
 
     /**
@@ -140,12 +130,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      */
     @Override
     public void addResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_ADDRESP, ItlAlfrescoServiceWrapper.class,
+        user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_ADDRESP, String.class,
                 dossier.getNodeRef(), responsible.getUserName());
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
     }
 
     /**
@@ -166,12 +153,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
             sep = ",";
         }
 
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+        user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDRESP,
-                ItlAlfrescoServiceWrapper.class, dossier.getNodeRef(), userNames);
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                String.class, dossier.getNodeRef(), userNames);
     }
 
     /**
@@ -184,12 +168,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      */
     @Override
     public void delResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+        user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP,
-                ItlAlfrescoServiceWrapper.class, dossier.getNodeRef(), responsible.getUserName());
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                String.class, dossier.getNodeRef(), responsible.getUserName());
     }
 
     /**
@@ -209,12 +190,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
             userNames += sep + u.getUserName();
             sep = ",";
         }
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
+        user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP,
-                ItlAlfrescoServiceWrapper.class, dossier.getNodeRef(), userNames);
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                String.class, dossier.getNodeRef(), userNames);
     }
 
 }

@@ -18,7 +18,8 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.interfaces.Content;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
@@ -91,7 +92,7 @@ public class KoyaContentServiceImplTest extends TestCase {
     public void testCreateDir() throws AlfrescoServiceException {
         Content dir = koyaContentService.create(admin, new Directory("dir"), dossierTests);
         assertNotNull("error creating directory", dir);
-        securedItemService.delete(admin, dir);
+        securedItemService.delete(admin, (SecuredItem) dir);
     }
 
     @Test
@@ -105,7 +106,7 @@ public class KoyaContentServiceImplTest extends TestCase {
         } catch (AlfrescoServiceException aex) {
             assertEquals(aex.getKoyaErrorCode(), KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
         } finally {
-            securedItemService.delete(admin, dir);
+            securedItemService.delete(admin, (SecuredItem) dir);
         }
     }
 
@@ -143,7 +144,7 @@ public class KoyaContentServiceImplTest extends TestCase {
 
         assertEquals(1, koyaContentService.list(admin, (Directory) dir, true, 1).size());
         assertEquals(0, koyaContentService.list(admin, (Directory) dir2, true, 1).size());
-        koyaContentService.move(admin, sDir, (Directory) dir2);
+        koyaContentService.move(admin, (Content) sDir, (Directory) dir2);
         assertEquals(0, koyaContentService.list(admin, (Directory) dir, true, 1).size());
         assertEquals(1, koyaContentService.list(admin, (Directory) dir2, true, 1).size());
     }
@@ -156,7 +157,7 @@ public class KoyaContentServiceImplTest extends TestCase {
         Content sDir2 = koyaContentService.create(admin, new Directory("subdir"), (Directory) dir2);
 
         try {
-            koyaContentService.move(admin, sDir, (Directory) dir2);
+            koyaContentService.move(admin, (Content) sDir, (Directory) dir2);
         } catch (AlfrescoServiceException aex) {
             assertEquals(aex.getKoyaErrorCode(), KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
         }
@@ -218,7 +219,7 @@ public class KoyaContentServiceImplTest extends TestCase {
         Content dir3 = koyaContentService.create(admin, new Directory("dir3"), dossierTests);
         Content sdir = koyaContentService.create(admin, new Directory("sousrep"), (Directory) dir3);
 
-        assertEquals(dir3, securedItemService.getParent(admin, sdir));
+        assertEquals(dir3, securedItemService.getParent(admin, (SecuredItem) sdir));
     }
 
     @Test
@@ -286,7 +287,6 @@ public class KoyaContentServiceImplTest extends TestCase {
     public void testRenameDir() throws AlfrescoServiceException {
 
         Directory renameDir = (Directory) koyaContentService.create(admin, new Directory("oldName"), dossierTests);
-
         for (Content c : koyaContentService.list(admin, dossierTests, false)) {
             if (c.getName().equals("newName")) {
                 fail();
@@ -322,6 +322,7 @@ public class KoyaContentServiceImplTest extends TestCase {
         }
 
     }
+
     @Test
     public void testImportTreeAsZip() throws AlfrescoServiceException {
 
@@ -333,10 +334,8 @@ public class KoyaContentServiceImplTest extends TestCase {
                 fail();
             }
         }
-        
-        //TODO fix this test - generate faled to import zip file : should work ...
-        
 
+        //TODO fix this test - generate faled to import zip file : should work ...
 //        koyaContentService.importZipedContent(admin, upDoc);
 //        boolean rootExists = false;
 //        for (Content c : koyaContentService.list(admin, dossierTests, false)) {
@@ -348,6 +347,5 @@ public class KoyaContentServiceImplTest extends TestCase {
 //        if (!rootExists) {
 //            fail();
 //        }
-
     }
 }

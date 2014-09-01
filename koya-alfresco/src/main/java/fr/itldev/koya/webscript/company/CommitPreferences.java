@@ -21,14 +21,12 @@ package fr.itldev.koya.webscript.company;
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Preferences;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
-import fr.itldev.koya.webscript.content.AddContent;
 import java.io.IOException;
-import org.apache.log4j.Logger;
+import java.util.Map;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
@@ -39,7 +37,6 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class CommitPreferences extends AbstractWebScript {
 
-    private final Logger logger = Logger.getLogger(AddContent.class);
     private CompanyService companyService;
 
     public void setCompanyService(CompanyService companyService) {
@@ -54,28 +51,19 @@ public class CommitPreferences extends AbstractWebScript {
      */
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        String companyName = (String) KoyaWebscript.getUrlParamsMap(req).get(KoyaWebscript.WSCONST_COMPANYNAME);
-        ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+
+        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
 
         try {
             ObjectMapper mapper = new ObjectMapper();
             Preferences p = mapper.readValue(req.getContent().getReader(), Preferences.class);
             companyService.commitPreferences(companyName, p);
-            wrapper.setStatusOK();
         } catch (KoyaServiceException ex) {
-            wrapper.setStatusFail(ex.getMessage());
-            wrapper.setErrorCode(ex.getErrorCode());
-        } catch (IOException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.CONTENT_CREATION_INVALID_TYPE);
-        } catch (Exception ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-
         res.setContentType("application/json");
+        res.getWriter().write("");
 
-        res.getWriter().write(wrapper.getAsJSON());
-        logger.trace(wrapper.getAsJSON());
     }
 }

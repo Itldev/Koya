@@ -19,19 +19,22 @@
 package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Find users from query (fields starts with) with max results.
  *
  *
  */
-public class Find extends KoyaWebscript {
+public class Find extends AbstractWebScript {
 
     private Logger logger = Logger.getLogger(this.getClass());
     private static final Integer DEFAULT_MAXRESULTS = 10;
@@ -43,17 +46,19 @@ public class Find extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper,
-            Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+
         String query = (String) urlParams.get(KoyaWebscript.WSCONST_QUERY);
         String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
+        String response;
+
         Integer maxResults;
         try {
             maxResults = Integer.valueOf((String) urlParams.get(KoyaWebscript.WSCONST_MAXRESULTS));
         } catch (NumberFormatException e) {
             maxResults = DEFAULT_MAXRESULTS;
         }
-
         List<String> rolesFilter = new ArrayList<>();
         try {
             for (String uniqueRole : ((String) urlParams.get(KoyaWebscript.WSCONST_ROLEFILTER)).split(",")) {
@@ -62,10 +67,10 @@ public class Find extends KoyaWebscript {
         } catch (Exception ex) {
             //silent exception
         }
-
-        wrapper.addItems(userService.find(query, maxResults,
+        response = KoyaWebscript.getObjectAsJson(userService.find(query, maxResults,
                 companyName, rolesFilter));
-        return wrapper;
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 
 }

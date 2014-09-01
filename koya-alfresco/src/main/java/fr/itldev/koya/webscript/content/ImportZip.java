@@ -19,11 +19,16 @@
 package fr.itldev.koya.webscript.content;
 
 import fr.itldev.koya.alfservice.KoyaContentService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
@@ -32,7 +37,7 @@ import org.apache.log4j.Logger;
  *
  *
  */
-public class ImportZip extends KoyaWebscript {
+public class ImportZip extends AbstractWebScript {
 
     private final Logger logger = Logger.getLogger(ImportZip.class);
 
@@ -44,10 +49,16 @@ public class ImportZip extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef zipNodeRef = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-        koyaContentService.importZip(zipNodeRef);
-        return wrapper;
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
+        NodeRef zipNodeRef = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_NODEREF));
+        try {
+            koyaContentService.importZip(zipNodeRef);
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write("");
     }
 
 }

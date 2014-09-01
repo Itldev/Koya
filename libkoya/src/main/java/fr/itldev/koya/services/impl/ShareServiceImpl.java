@@ -3,11 +3,12 @@ package fr.itldev.koya.services.impl;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.model.json.SharingWrapper;
 import fr.itldev.koya.services.ShareService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.util.List;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  *
@@ -32,11 +33,10 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
     @Override
     public void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails, String serverPath, String acceptUrl, String rejectUrl) {
 
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+        user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_SHAREITEMS,
-                new SharingWrapper(sharedItems, usersMails, serverPath, acceptUrl, rejectUrl), ItlAlfrescoServiceWrapper.class);
-
-        int n = ret.getItems().size();
+                new SharingWrapper(sharedItems, usersMails,
+                        serverPath, acceptUrl, rejectUrl), String.class);
 
         //TODO analyse return
     }
@@ -51,11 +51,9 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
     @Override
     public void unShareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails) {
 
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+        user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_SHAREITEMS,
-                new SharingWrapper(sharedItems, usersMails, Boolean.TRUE), ItlAlfrescoServiceWrapper.class);
-
-        int n = ret.getItems().size();
+                new SharingWrapper(sharedItems, usersMails, Boolean.TRUE), String.class);
 
         //TODO analyse return
     }
@@ -71,13 +69,9 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
     @Override
     public List<User> sharedUsers(User user, SecuredItem item) throws AlfrescoServiceException {
 
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_SHAREDUSERS, ItlAlfrescoServiceWrapper.class, item.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return fromJSON(new TypeReference<List<User>>() {
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_SHAREDUSERS, String.class, item.getNodeRef()));
 
     }
 
@@ -92,14 +86,11 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
      */
     @Override
     public List<SecuredItem> sharedItems(User userLogged, User userToGetShares, Company c) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = userLogged.getRestTemplate().getForObject(
+
+        return fromJSON(new TypeReference<List<SecuredItem>>() {
+        }, userLogged.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_SHAREDITEMS,
-                ItlAlfrescoServiceWrapper.class, userToGetShares.getUserName(), c.getName());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                String.class, userToGetShares.getUserName(), c.getName()));
     }
 
 }

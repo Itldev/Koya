@@ -42,11 +42,4 @@ public class MetaInfos {
     public MetaInfos() {
     }
 
-    public String getContentType() {
-        return this.getClass().getCanonicalName();
-    }
-
-    public void setContentType(String c) {
-    }
-
 }

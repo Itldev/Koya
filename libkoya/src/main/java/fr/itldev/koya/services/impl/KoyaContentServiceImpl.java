@@ -18,8 +18,8 @@
  */
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.Container;
-import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.interfaces.Container;
+import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
@@ -27,9 +27,9 @@ import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.DiskSizeWrapper;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.codehaus.jackson.type.TypeReference;
 import org.json.simple.JSONObject;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -116,32 +117,33 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         if (parent.getNodeRef() == null) {
             throw new AlfrescoServiceException("parent noderef must be set", 0);
         }
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
+        return (Content) user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_ADDCONTENT, content,
-                ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (Content) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+                SecuredItem.class, parent.getNodeRef());
     }
 
     private List<Content> listContent(User user, SecuredItem container, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret;
+        List<SecuredItem> lstSi = new ArrayList<>();
+
         if (depth.length > 0) {
-            ret = user.getRestTemplate().postForObject(
-                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT_DEPTH_OPTION, container, ItlAlfrescoServiceWrapper.class, onlyFolders, depth[0]);
+            lstSi = fromJSON(new TypeReference<List<SecuredItem>>() {
+            }, user.getRestTemplate().postForObject(
+                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT_DEPTH_OPTION,
+                    container, String.class, onlyFolders, depth[0]));
         } else {
-            ret = user.getRestTemplate().postForObject(
-                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT, container, ItlAlfrescoServiceWrapper.class, onlyFolders);
+            lstSi = fromJSON(new TypeReference<List<SecuredItem>>() {
+            }, user.getRestTemplate().postForObject(
+                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT, container, String.class, onlyFolders));
         }
 
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+        /**
+         * Convert in content list
+         */
+        List<Content> retLst = new ArrayList<>();
+        for (SecuredItem si : lstSi) {
+            retLst.add((Content) si);
         }
+        return retLst;
     }
 
     /**
@@ -166,28 +168,19 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     private Content moveImpl(User user, Content contenu, Container parent) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_MOVECONTENT, contenu, ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (Content) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return (Content) user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_MOVECONTENT, contenu, SecuredItem.class, parent.getNodeRef());
     }
 
     private Content copyImpl(User user, Content contenu, Container parent) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_COPYCONTENT, contenu, ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (Content) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return (Content) user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_COPYCONTENT, contenu, SecuredItem.class, parent.getNodeRef());
     }
 
     @Override
     public Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException {
-        DiskSizeWrapper ret = user.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_DISKSIZE, DiskSizeWrapper.class, securedItem.getNodeRef());
+        DiskSizeWrapper ret = user.getRestTemplate().getForObject(getAlfrescoServerUrl()
+                + REST_GET_DISKSIZE, DiskSizeWrapper.class, securedItem.getNodeRef());
         return ret.getSize();
     }
 
@@ -224,14 +217,8 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
     @Override
     public void importZipedContent(User user, Document zipFile) throws AlfrescoServiceException {
-
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate()
+        user.getRestTemplate()
                 .getForObject(getAlfrescoServerUrl() + REST_GET_IMPORTZIP,
-                        ItlAlfrescoServiceWrapper.class, zipFile.getNodeRef());
-
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
-
+                        String.class, zipFile.getNodeRef());
     }
 }

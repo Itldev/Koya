@@ -17,7 +17,7 @@
  * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
  */
 
-package fr.itldev.koya.model;
+package fr.itldev.koya.model.interfaces;
 
 /**
  * Defines Koya object That may be activated.
@@ -25,7 +25,7 @@ package fr.itldev.koya.model;
  * Alfresco aspect koya:activable equivalent
  *
  */
-public interface Activable {
+public interface Activable extends AlfrescoNode {
 
     public Boolean getActive();
 

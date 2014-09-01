@@ -19,26 +19,39 @@
 package fr.itldev.koya.webscript.company;
 
 import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Get company current properties.
  *
  */
-public class GetProperties extends KoyaWebscript {
-    
+public class GetProperties extends AbstractWebScript {
+
     private CompanyService companyService;
-    
+
     public void setCompanyService(CompanyService companyService) {
         this.companyService = companyService;
     }
-    
+
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+
         String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
-        wrapper.addItem(companyService.getProperties(companyName));
-        return wrapper;
+        String response;
+        try {
+            response = KoyaWebscript.getObjectAsJson(companyService.getProperties(companyName));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 }

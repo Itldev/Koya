@@ -19,15 +19,19 @@
 package fr.itldev.koya.webscript.global;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
-import java.util.Map;
+import java.io.IOException;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Get Users favourites
  *
  */
-public class GetFavourites extends KoyaWebscript {
+public class GetFavourites extends AbstractWebScript {
 
     private KoyaNodeService koyaNodeService;
 
@@ -35,13 +39,18 @@ public class GetFavourites extends KoyaWebscript {
         this.koyaNodeService = koyaNodeService;
     }
 
-
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(
-            ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams,
-            Map<String, Object> jsonPostMap) throws Exception {
-        wrapper.addItems(koyaNodeService.getFavourites());
-        return wrapper;
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+
+        String response;
+
+        try {
+            response = KoyaWebscript.getObjectAsJson(koyaNodeService.getFavourites());
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 
 }

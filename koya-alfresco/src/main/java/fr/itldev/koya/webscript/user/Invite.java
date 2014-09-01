@@ -21,12 +21,11 @@ package fr.itldev.koya.webscript.user;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.json.InviteWrapper;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
@@ -47,25 +46,16 @@ public class Invite extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
 
         try {
             ObjectMapper mapper = new ObjectMapper();
             InviteWrapper iw = mapper.readValue(req.getContent().getReader(), InviteWrapper.class);
 
             userService.invite(iw);
-            wrapper.setStatusOK();
         } catch (KoyaServiceException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(ex.getErrorCode());
-        } catch (IOException ex) {
-            logger.error(ex.toString());
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-
         res.setContentType("application/json");
-
-        res.getWriter().write(wrapper.getAsJSON());
+        res.getWriter().write("");
     }
 }

@@ -19,19 +19,22 @@
 package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * List User's connection log
  *
  *
  */
-public class ListConnect extends KoyaWebscript {
+public class ListConnect extends AbstractWebScript {
 
     private Logger logger = Logger.getLogger(this.getClass());
     private static final Integer DEFAULT_MAXRESULTS = 0;//infinite
@@ -43,10 +46,11 @@ public class ListConnect extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper,
-            Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
         String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
+        String response;
 
         Integer maxResults;
         try {
@@ -63,9 +67,10 @@ public class ListConnect extends KoyaWebscript {
         } catch (Exception ex) {
             //silent exception
         }
+        response = KoyaWebscript.getObjectAsJson(userService.getConnectionLog(userName, companiesFilter, maxResults));
 
-        wrapper.addItems(userService.getConnectionLog(userName, companiesFilter, maxResults));
-        return wrapper;
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 
 }

@@ -18,15 +18,15 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.Container;
-import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.interfaces.Container;
+import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.SecuredItem;
 import java.util.ArrayList;
 import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public final class Directory extends Content implements Container {
+public final class Directory extends SecuredItem implements Container, Content {
 
     @JsonProperty("childdir")
     private List<Directory> childDir = new ArrayList<>();
@@ -42,12 +42,12 @@ public final class Directory extends Content implements Container {
         return content;
     }
 
-    public void setChildren(List<? extends SecuredItem> children) {
-        for (SecuredItem s : children) {
-            if (Directory.class.isAssignableFrom(s.getClass())) {
-                childDir.add((Directory) s);
-            } else if (Document.class.isAssignableFrom(s.getClass())) {
-                childDoc.add((Document) s);
+    public void setChildren(List<Content> children) {
+        for (Content c : children) {
+            if (Directory.class.isAssignableFrom(c.getClass())) {
+                childDir.add((Directory) c);
+            } else if (Document.class.isAssignableFrom(c.getClass())) {
+                childDoc.add((Document) c);
             }
         }
     }
@@ -74,11 +74,16 @@ public final class Directory extends Content implements Container {
     }
 
     public Directory(String name) {
-        super(name);
+        this.setName(name);
     }
 
-    public Directory(String nodeRef, String path, String name) {
-        super(nodeRef, path, name);
+    public Directory(String nodeRef, String name) {
+        super(nodeRef, name);
+    }
+
+    @Override
+    public String getType() {
+        return "directory";
     }
 
 }

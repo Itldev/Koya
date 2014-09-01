@@ -19,17 +19,22 @@
 package fr.itldev.koya.webscript.dossier;
 
 import fr.itldev.koya.alfservice.NodeResponsibilityService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  * Get All persons in charge of specified dossier.
  *
  */
-public class ListResponsible extends KoyaWebscript {
+public class ListResponsible extends AbstractWebScript {
 
     /*services*/
     private NodeResponsibilityService nodeResponsibilityService;
@@ -39,10 +44,18 @@ public class ListResponsible extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef nodeRef = new NodeRef((String) urlParams.get(WSCONST_NODEREF));
-        wrapper.addItems(nodeResponsibilityService.listResponsibles(nodeRef));
-        return wrapper;
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+
+        NodeRef nodeRef = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
+        String response;
+        try {
+            response = KoyaWebscript.getObjectAsJson(nodeResponsibilityService.listResponsibles(nodeRef));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 
 }

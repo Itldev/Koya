@@ -18,7 +18,8 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.interfaces.Content;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
@@ -92,13 +93,13 @@ public class GenericServiceImplTest extends TestCase {
     @Test
     public void testgetParent() throws AlfrescoServiceException {
         Content dir = koyaContentService.create(admin, new Directory("dir"), dossierTests);
-        assertTrue(securedItemService.getParent(admin, dir).getName().equals("doss1"));
+        assertTrue(securedItemService.getParent(admin, (SecuredItem) dir).getName().equals("doss1"));
     }
 
     @Test
     public void testgetParents1() throws AlfrescoServiceException {
         Content dir = koyaContentService.create(admin, new Directory("dir2"), dossierTests);
-        assertEquals(securedItemService.getParents(admin, dir).size(), 3);
+        assertEquals(securedItemService.getParents(admin, (SecuredItem) dir).size(), 3);
     }
 
     @Test

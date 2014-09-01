@@ -19,17 +19,22 @@
 package fr.itldev.koya.webscript.company;
 
 import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.SalesOffer;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  * Add Company.
  *
  */
-public class AddCompany extends KoyaWebscript {
+public class AddCompany extends AbstractWebScript {
 
     private static final String ARG_NAME = "name";
     private static final String ARG_TEMPLATE = "template";
@@ -42,19 +47,20 @@ public class AddCompany extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
         String name = urlParams.get(ARG_NAME);
         String template = urlParams.get(ARG_TEMPLATE);
-        /**
-         *
-         * TODO handle sale offer
-         *
-         */
-        SalesOffer so = companyService.getSalesOffer(urlParams.get(ARG_SALESOFFER));
+        String response;
 
-        wrapper.addItem(companyService.create(name, so, template));
-        return wrapper;
+        try {
+            SalesOffer so = companyService.getSalesOffer(urlParams.get(ARG_SALESOFFER));
+            response = KoyaWebscript.getObjectAsJson(companyService.create(name, so, template));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
-
 }

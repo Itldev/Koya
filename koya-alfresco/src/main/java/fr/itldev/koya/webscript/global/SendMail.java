@@ -19,9 +19,7 @@
 package fr.itldev.koya.webscript.global;
 
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.model.json.MailWrapper;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -33,6 +31,7 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
@@ -57,7 +56,7 @@ public class SendMail extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
+       
 
         try {
 
@@ -75,19 +74,13 @@ public class SendMail extends AbstractWebScript {
                 throw new KoyaServiceException(0);
             }
 
-            wrapper.setStatusOK();
         } catch (KoyaServiceException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(ex.getErrorCode());
-        } catch (IOException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
 
         res.setContentType("application/json");
 
-        res.getWriter().write(wrapper.getAsJSON());
-        logger.trace(wrapper.getAsJSON());
+        res.getWriter().write("");
     }
 
     private Map<String, Serializable> wrapperToParams(MailWrapper mw) {

@@ -19,7 +19,7 @@
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
@@ -596,7 +596,7 @@ public class KoyaNodeService {
         } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.TYPE_DOSSIER)) {
             return nodeDossierBuilder(parentNr);
         } else if (nodeIsChildOfDossier(parentNr)) {
-            return nodeContentBuilder(parentNr);
+            return (SecuredItem) nodeContentBuilder(parentNr);
         } else {
             throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODE_HIERACHY);
         }

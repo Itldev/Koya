@@ -181,8 +181,6 @@ public class KoyaAclService {
             orSep = " OR ";
         }
 
-        logger.debug(luceneRequest);
-
         ResultSet rs = null;
         try {
             rs = searchService.query(

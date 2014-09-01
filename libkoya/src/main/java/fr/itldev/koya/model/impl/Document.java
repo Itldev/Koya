@@ -18,22 +18,23 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.interfaces.Content;
+import fr.itldev.koya.model.SecuredItem;
 
-public final class Document extends Content {
+public final class Document extends SecuredItem implements Content {
 
     private Long byteSize;
     private String mimeType;
-    
+
     public Document() {
     }
 
     public Document(String name) {
-        super(name);
+        this.setName(name);
     }
 
-    public Document(String nodeRef, String path, String name) {
-        super(nodeRef, path, name);
+    public Document(String nodeRef, String name) {
+        super(nodeRef, name);
     }
 
     public Long getByteSize() {
@@ -50,6 +51,11 @@ public final class Document extends Content {
 
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
+    }
+
+    @Override
+    public String getType() {
+        return "document";
     }
 
 }

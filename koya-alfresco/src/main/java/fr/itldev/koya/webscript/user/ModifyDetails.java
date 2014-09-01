@@ -21,12 +21,11 @@ package fr.itldev.koya.webscript.user;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
@@ -34,44 +33,27 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  * Modify user details
  */
 public class ModifyDetails extends AbstractWebScript {
-
+    
     private Logger logger = Logger.getLogger(this.getClass());
-
+    
     private UserService userService;
-
+    
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
-
-    /**
-     *
-     * @param req
-     * @param res
-     * @throws IOException
-     */
+    
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        ItlAlfrescoServiceWrapper wrapper = new ItlAlfrescoServiceWrapper();
-
+        
         try {
-
             ObjectMapper mapper = new ObjectMapper();
             User u = mapper.readValue(req.getContent().getReader(), User.class);
             userService.modifyUser(u);
-
-            wrapper.setStatusOK();
         } catch (KoyaServiceException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(ex.getErrorCode());
-        } catch (IOException ex) {
-            wrapper.setStatusFail(ex.toString());
-            wrapper.setErrorCode(KoyaErrorCodes.UNHANDLED);
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-
         res.setContentType("application/json");
-
-        res.getWriter().write(wrapper.getAsJSON());
-        logger.trace(wrapper.getAsJSON());
+        res.getWriter().write("");
     }
-
+    
 }

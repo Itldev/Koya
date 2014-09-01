@@ -18,8 +18,8 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.Activable;
-import fr.itldev.koya.model.Container;
+import fr.itldev.koya.model.interfaces.Container;
+import fr.itldev.koya.model.interfaces.Activable;
 import fr.itldev.koya.model.SecuredItem;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,5 +119,10 @@ public final class Company extends SecuredItem implements Container, Activable {
     @Override
     public String toString() {
         return "Company {" + "name=" + getName() + ", title=" + title + ", nodeRef=" + getNodeRef() + '}';
+    }
+
+    @Override
+    public String getType() {
+        return "company";
     }
 }

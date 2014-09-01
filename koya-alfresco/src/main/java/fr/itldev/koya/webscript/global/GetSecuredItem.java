@@ -19,17 +19,20 @@
 package fr.itldev.koya.webscript.global;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  *
  */
-public class GetSecuredItem extends KoyaWebscript {
-
-    private static final String URL_PARAM_NODEREF = "nodeRef";
+public class GetSecuredItem extends AbstractWebScript {
 
     private KoyaNodeService koyaNodeService;
 
@@ -38,9 +41,19 @@ public class GetSecuredItem extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        wrapper.addItem(koyaNodeService.nodeRef2SecuredItem((String) urlParams.get(URL_PARAM_NODEREF)));
-        return wrapper;
-    }
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+        String nodeRefStr = (String) urlParams.get(KoyaWebscript.WSCONST_NODEREF);
 
+        String response;
+
+        try {
+            response = KoyaWebscript.getObjectAsJson(
+                    koyaNodeService.nodeRef2SecuredItem(nodeRefStr));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
+    }
 }

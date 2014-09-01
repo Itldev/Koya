@@ -19,17 +19,22 @@
 package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Revoke user's company access.
  *
  *
  */
-public class Revoke extends KoyaWebscript {
+public class Revoke extends AbstractWebScript {
 
     private Logger logger = Logger.getLogger(this.getClass());
 
@@ -40,14 +45,17 @@ public class Revoke extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper,
-            Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
         String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
         String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
-
-        userService.revoke(userName, companyName);
-        return wrapper;
+        try {
+            userService.revoke(userName, companyName);
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write("");
     }
 
 }

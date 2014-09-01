@@ -18,21 +18,25 @@
  */
 package fr.itldev.koya.webscript.dossier;
 
-import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.NodeResponsibilityService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  * Del one or many persons in charge of specified dossier.
  *
  */
-public class DelResponsible extends KoyaWebscript {
+public class DelResponsible extends AbstractWebScript {
 
     /*services*/
     private NodeResponsibilityService nodeResponsibilityService;
@@ -42,20 +46,25 @@ public class DelResponsible extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        NodeRef nodeRef = new NodeRef((String) urlParams.get(WSCONST_NODEREF));
-        String userNames = (String) urlParams.get(WSCONST_USERNAMES);
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+        NodeRef nodeRef = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
+        String userNames = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAMES);
 
-        List<String> respToDel = new ArrayList<>();
-        //seperate comma separedted usernames list
-        for (String u : userNames.split(",")) {
-            respToDel.add(u.trim());
+        try {
+            List<String> respToDel = new ArrayList<>();
+            //seperate comma separedted usernames list
+            for (String u : userNames.split(",")) {
+                respToDel.add(u.trim());
+            }
+
+            //extract submitted responsibles list
+            nodeResponsibilityService.delResponsible(nodeRef, respToDel);
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-
-        //extract submitted responsibles list
-        nodeResponsibilityService.delResponsible(nodeRef, respToDel);
-
-        return wrapper;
+        res.setContentType("application/json");
+        res.getWriter().write("");
     }
 
 }

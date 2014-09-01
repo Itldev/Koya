@@ -1,6 +1,6 @@
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.Container;
+import fr.itldev.koya.model.interfaces.Container;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
 import java.util.List;

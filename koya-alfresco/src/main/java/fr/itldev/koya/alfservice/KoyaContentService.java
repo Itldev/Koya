@@ -19,8 +19,9 @@
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.Content;
+import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
@@ -37,7 +38,6 @@ import java.util.Map;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
 import javax.servlet.http.HttpServletResponse;
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;

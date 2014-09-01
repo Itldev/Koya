@@ -22,10 +22,11 @@ import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
 import fr.itldev.koya.services.SpaceService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.util.List;
+import org.codehaus.jackson.type.TypeReference;
 
 public class SpaceServiceImpl extends AlfrescoRestService implements SpaceService {
 
@@ -46,13 +47,9 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
      */
     @Override
     public Space create(User user, Space space, SecuredItem parent) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_ADDSPACE, space, ItlAlfrescoServiceWrapper.class, parent.getNodeRef());
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK) && ret.getNbitems() == 1) {
-            return (Space) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_ADDSPACE,
+                space, Space.class, parent.getNodeRef());
     }
 
     @Override
@@ -73,25 +70,20 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
 
     @Override
     public List<Space> list(User user, Company company, Integer... depth) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret;
         if (depth.length > 0) {
-            ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTSPACE_DEPTH_OPTION, company, ItlAlfrescoServiceWrapper.class, depth[0]);
+            return fromJSON(new TypeReference<List<Space>>() {
+            }, user.getRestTemplate().postForObject(getAlfrescoServerUrl()
+                    + REST_POST_LISTSPACE_DEPTH_OPTION, company, String.class, depth[0]));
         } else {
-            ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_LISTSPACE, company, ItlAlfrescoServiceWrapper.class);
-        }
-
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return ret.getItems();
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
+            return fromJSON(new TypeReference<List<Space>>() {
+            }, user.getRestTemplate().postForObject(getAlfrescoServerUrl()
+                    + REST_POST_LISTSPACE, company, String.class));
         }
     }
 
     private void changeActivityStatus(User user, Space space) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_TOGGLEACTIVE, space, ItlAlfrescoServiceWrapper.class);
-        if (!ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_TOGGLEACTIVE,
+                space, String.class);
     }
 
     @Override
@@ -105,13 +97,9 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
     }
 
     private Space movePrivate(User user, Space toMove, String newParentNodeRef) throws AlfrescoServiceException {
-        ItlAlfrescoServiceWrapper ret = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_MOVESPACE, toMove, ItlAlfrescoServiceWrapper.class, newParentNodeRef);
-        if (ret.getStatus().equals(ItlAlfrescoServiceWrapper.STATUS_OK)) {
-            return (Space) ret.getItems().get(0);
-        } else {
-            throw new AlfrescoServiceException(ret.getMessage(), ret.getErrorCode());
-        }
+        return user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_MOVESPACE,
+                toMove, Space.class, newParentNodeRef);
     }
 
 }

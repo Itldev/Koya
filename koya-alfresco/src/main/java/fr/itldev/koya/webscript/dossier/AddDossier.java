@@ -19,17 +19,22 @@
 package fr.itldev.koya.webscript.dossier;
 
 import fr.itldev.koya.alfservice.DossierService;
-import fr.itldev.koya.model.json.ItlAlfrescoServiceWrapper;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
  * Add Dossier Webscript
  *
  */
-public class AddDossier extends KoyaWebscript {
+public class AddDossier extends AbstractWebScript {
 
     /*services*/
     private DossierService dossierService;
@@ -39,12 +44,21 @@ public class AddDossier extends KoyaWebscript {
     }
 
     @Override
-    public ItlAlfrescoServiceWrapper koyaExecute(ItlAlfrescoServiceWrapper wrapper, Map<String, String> urlParams, Map<String, Object> jsonPostMap) throws Exception {
-        String name = (String) jsonPostMap.get(WSCONST_NAME);
-        NodeRef parent = new NodeRef((String) urlParams.get(WSCONST_PARENTNODEREF));
-        wrapper.addItem(dossierService.create(name, parent, null));
+    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+        Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
+        String name = (String) jsonPostMap.get(KoyaWebscript.WSCONST_NAME);
+        NodeRef parent = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_PARENTNODEREF));
 
-        return wrapper;
+        String response;
+
+        try {
+            response = KoyaWebscript.getObjectAsJson(dossierService.create(name, parent, null));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
+        res.setContentType("application/json");
+        res.getWriter().write(response);
     }
 
 }

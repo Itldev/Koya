@@ -16,20 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.model;
+package fr.itldev.koya.model.interfaces;
 
-public abstract class Content extends SecuredItem {
-
-    // </editor-fold>
-    public Content() {
-    }
-
-    public Content(String name) {
-        this.setName(name);
-    }
-
-    public Content(String nodeRef, String path, String name) {
-        super(nodeRef, path, name);
-    }
+public interface Container extends AlfrescoNode {
 
 }
