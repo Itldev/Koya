@@ -18,6 +18,8 @@
  */
 package fr.itldev.koya.model.impl;
 
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.interfaces.AlfrescoNode;
 import java.util.Objects;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -26,7 +28,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.web.client.RestTemplate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class User {
+public final class User extends SecuredItem implements AlfrescoNode{
 
     @JsonProperty("nodeRef")
     private String nodeRef;
@@ -52,10 +54,12 @@ public final class User {
     @JsonIgnore
     private RestTemplate restTemplate;
 
+    @Override
     public String getNodeRef() {
         return nodeRef;
     }
 
+    @Override
     public void setNodeRef(String nodeRef) {
         this.nodeRef = nodeRef;
     }
@@ -79,6 +83,7 @@ public final class User {
         this.firstName = firstName;
     }
 
+    @Override
     public String getName() {
         if (name == null) {
             return "";
@@ -86,6 +91,7 @@ public final class User {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -180,6 +186,11 @@ public final class User {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String getType() {
+        return "user";
     }
 
 }

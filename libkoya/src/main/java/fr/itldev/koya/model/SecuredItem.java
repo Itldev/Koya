@@ -18,7 +18,6 @@
  */
 package fr.itldev.koya.model;
 
-import com.google.common.collect.HashBiMap;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
@@ -26,6 +25,7 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Template;
+import fr.itldev.koya.model.impl.User;
 import java.io.IOException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -45,7 +45,8 @@ import org.codehaus.jackson.map.ObjectMapper;
     @Type(value = Directory.class, name = "directory"),
     @Type(value = Document.class, name = "document"),
     @Type(value = SalesOffer.class, name = "salesoffer"),
-    @Type(value = Template.class, name = "template")})
+    @Type(value = Template.class, name = "template"),
+    @Type(value = User.class, name = "user")})
 public abstract class SecuredItem {
 
     //fields that should be escpaed before serialization
