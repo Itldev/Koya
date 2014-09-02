@@ -130,4 +130,9 @@ public class GenericServiceImplTest extends TestCase {
 
     }
 
+    @Test
+    public void checkMatchTest() {
+        assertTrue(alfrescoService.checkLibVersionMatch());
+    }
+
 }

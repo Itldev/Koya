@@ -27,6 +27,12 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public interface AlfrescoService {
 
     /**
+     * Checks if library version match with server one.
+     * @return 
+     */
+    Boolean checkLibVersionMatch();
+
+    /**
      * Get Informations about server and modules.
      *
      * @param user
@@ -48,7 +54,7 @@ public interface AlfrescoService {
      *
      * @param user
      * @param nodeRef
-     * @return 
+     * @return
      * @throws AlfrescoServiceException
      */
     SecuredItem getSecuredItem(User user, String nodeRef) throws AlfrescoServiceException;

@@ -24,20 +24,24 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.impl.util.KoyaUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.client.RestTemplate;
 
 public class AlfrescoRestService implements AlfrescoService {
 
-    protected static final String DESERIALISATION_ERROR = "Object deserialisation error";
+    private final Logger logger = Logger.getLogger(this.getClass());
+
     private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos";
     private static final String REST_POST_MAIL = "/s/fr/itldev/koya/global/mail";
     private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
+    private static final String REST_GET_LIBVERSION = "/s/fr/itldev/koya/meta/libversion";
 
     private String alfrescoServerUrl;
 
@@ -61,6 +65,23 @@ public class AlfrescoRestService implements AlfrescoService {
     }
 
     // </editor-fold>
+    /**
+     * Check if library version match with server one.
+     */
+    @Override
+    public Boolean checkLibVersionMatch() {
+        String serverVersion = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LIBVERSION, String.class);
+        String localVersion = KoyaUtil.getLibKoyaVersion();
+
+        Boolean match = localVersion.equals(serverVersion);
+        if (!match) {
+            logger.warn("LibKoya server version doesn't match local version"
+                    + " (server=" + serverVersion + ";local=" + localVersion + " )");
+        }
+
+        return localVersion.equals(serverVersion);
+    }
+
     /**
      * Get Informations about server and modules.
      *
