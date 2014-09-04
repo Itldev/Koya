@@ -29,7 +29,9 @@ function main() {
 
             else if (field.name == "file" && field.isFile)
             {
-                filename = field.filename;
+                originalFilename = field.filename;
+                filename = originalFilename.trim().replaceAll("\\\"+|\\\*+|\\\\+|>+|<+|\\\?+|\\\/+|:+|\\\|+", "").replaceAll("\\\.+$", "");
+                rename = filename !== field.filename;
                 title = field.filename;
                 content = field.content;
             }
@@ -70,9 +72,12 @@ function main() {
         upload.properties.title = title;
         upload.save();
 
+        
         model.filename = upload.name;
+        model.originalFilename = originalFilename;
+        model.rename = rename;
         model.size = upload.properties.content.size;
-
+        
     } catch (e) {
         model.error = "Uploaded error : " + e.toString();
         return;
@@ -84,6 +89,8 @@ function main() {
 
 
 var filename = null;
+var originalFilename=null;
+var rename = null;
 var content = null;
 var title = "";
 var parentnoderef = "";
@@ -91,6 +98,8 @@ var parentnoderef = "";
 //model
 
 model.filename = "";
+model.originalFilename="";
+model.rename = false;
 model.size = 0;
 model.error = "";
 

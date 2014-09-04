@@ -25,6 +25,8 @@
                 "error" : "${error}",
                 </#if>
                 "filename" : "${filename}",
+                "originalFilename" : "${originalFilename}",
+                "rename" :  ${rename?string("true", "false")},
                 "size" : "${size}"
                 
 	}
