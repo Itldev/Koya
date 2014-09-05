@@ -24,7 +24,7 @@ function main() {
         {
             if (field.name == "parentnoderef")
             {
-                parentnoderef = field.value;
+                parentNodeRef = field.value;
             }
 
             else if (field.name == "file" && field.isFile)
@@ -53,7 +53,7 @@ function main() {
 
 
     try {
-        var upParent = search.findNode(parentnoderef);
+        var upParent = search.findNode(parentNodeRef);
 
 
         if (upParent == null) {
@@ -72,33 +72,41 @@ function main() {
         upload.properties.title = title;
         upload.save();
 
-        
+
         model.filename = upload.name;
         model.originalFilename = originalFilename;
         model.rename = rename;
         model.size = upload.properties.content.size;
         
+        nodeRef= upload.nodeRef;
+        siteShortName = upload.siteShortName;
     } catch (e) {
         model.error = "Uploaded error : " + e.toString();
         return;
     }
 
+    var activityData = {
+        title: filename,
+        nodeRef: nodeRef.toString(),
+        parentNodeRef: parentNodeRef.toString()
+    };
 
+    activities.postActivity("org.alfresco.documentlibrary.file-added", siteShortName, "sd", jsonUtils.toJSONString(activityData));
 
 }
 
 
-var filename = null;
-var originalFilename=null;
-var rename = null;
-var content = null;
-var title = "";
-var parentnoderef = "";
+var filename, originalFilename, siteShortName;
+var rename;
+var content;
+var title;
+var parentNodeRef;
+var nodeRef;
 
 //model
 
 model.filename = "";
-model.originalFilename="";
+model.originalFilename = "";
 model.rename = false;
 model.size = 0;
 model.error = "";
