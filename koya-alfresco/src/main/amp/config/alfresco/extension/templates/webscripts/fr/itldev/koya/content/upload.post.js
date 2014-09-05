@@ -91,7 +91,7 @@ function main() {
         parentNodeRef: parentNodeRef.toString()
     };
 
-    activities.postActivity("org.alfresco.documentlibrary.file-added", siteShortName, "sd", jsonUtils.toJSONString(activityData));
+    activities.postActivity("org.alfresco.documentlibrary.file-added", siteShortName, "koya", jsonUtils.toJSONString(activityData));
 
 }
 

@@ -41,7 +41,7 @@
     </bean>
     
     <bean id="InstantNotificationMaintainerBehaviour" class="fr.itldev.koya.behaviour.InstantNotificationMaintainerBehaviour"
-          init-method="init"  depends-on="fr.itldev.koya.dictionaryBootstrap">
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
         <property name="policyComponent" ref="policyComponent" />
         <property name="emailNotificationService" ref="emailNotificationService"/>
     </bean>

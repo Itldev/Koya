@@ -40,6 +40,8 @@
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="koyaShareService" ref="koyaShareService"/>
         <property name="koyaAclService" ref="koyaAclService"/>
+        <property name="activityService" ref="activityService"/>
+        <property name="siteService" ref="SiteService"/>
     </bean>
     
     <!--Companies handling service-->
@@ -152,7 +154,7 @@
     
     <!--Secured Items Sharing service-->
     <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService"
-         init-method="init" parent="koyaAclService">
+          init-method="init" parent="koyaAclService">
         <property name="policyComponent" ref="policyComponent"/>
         <property name="spaceService" ref="spaceService"/>  
         <property name="dossierService" ref="dossierService"/> 
