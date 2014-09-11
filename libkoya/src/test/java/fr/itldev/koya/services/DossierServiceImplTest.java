@@ -135,7 +135,7 @@ public class DossierServiceImplTest extends TestCase {
 
         Dossier d = dossierService.create(admin, new Dossier("dossAddDelResp"), spaceTests);
         List<User> resp = dossierService.listResponsibles(admin, d);
-        assertEquals(resp.size(), 1);//creator automticly set as responsible
+        assertEquals(resp.size(), 1);//creator automaticly set as responsible
 
         User u1 = testUsers.get(0);
         User u2 = testUsers.get(1);

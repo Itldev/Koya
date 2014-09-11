@@ -36,5 +36,4 @@ public class KoyaPermissionCollaborator extends KoyaPermission {
         return perms;
     }
 
-
 }

@@ -18,7 +18,6 @@
  */
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
@@ -400,7 +399,6 @@ public class KoyaNodeService {
          */
         e.setNodeRef(spaceNodeRef.toString());
         e.setName((String) unsecuredNodeService.getProperty(spaceNodeRef, ContentModel.PROP_NAME));
-        e.setActive(isActive(spaceNodeRef));
 
         /**
          * User context attributes
@@ -423,7 +421,6 @@ public class KoyaNodeService {
          */
         d.setNodeRef(dossierNodeRef.toString());
         d.setName((String) unsecuredNodeService.getProperty(dossierNodeRef, ContentModel.PROP_NAME));
-        d.setActive(isActive(dossierNodeRef));
         d.setLastModifiedDate((Date) unsecuredNodeService.getProperty(dossierNodeRef, ContentModel.PROP_MODIFIED));
 
         /**

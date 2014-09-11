@@ -18,9 +18,7 @@ public class KoyaPermissionConsumer extends KoyaPermission {
     }
 
     public static List<KoyaPermission> getAll() {
-
         List<KoyaPermission> all = new ArrayList<>();
-
         all.add(KoyaPermissionConsumer.CLIENT);
         all.add(KoyaPermissionConsumer.PARTNER);
         all.add(KoyaPermissionConsumer.CLIENTCONTRIBUTOR);
@@ -36,5 +34,4 @@ public class KoyaPermissionConsumer extends KoyaPermission {
         }
         return perms;
     }
-
 }

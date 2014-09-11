@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -71,20 +70,13 @@ public class AddResponsible extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
         NodeRef nodeRef = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-        String userNames = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAMES);
+        String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
 
         try {
-            //TODO single action service --> Only 1 User/role set at time
 
-            //seperate comma separedted usernames list
-            String[] uNames = userNames.split(",");
-            if (uNames.length == 1) {
-                SubSpaceCollaboratorsAclService.shareSecuredItem(
-                        (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
-                        userService.getUserByUsername(uNames[0]).getEmail(), KoyaPermissionCollaborator.RESPONSIBLE, "", "", "");
-            } else {
-                throw new WebScriptException("KoyaError bad mail resp length");
-            }
+            SubSpaceCollaboratorsAclService.shareSecuredItem(
+                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
+                    userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.RESPONSIBLE, "", "", "");
 
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

@@ -20,7 +20,6 @@
 package fr.itldev.koya.model.impl;
 
 import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.interfaces.Activable;
 import fr.itldev.koya.model.interfaces.Container;
 import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.interfaces.SubSpace;
@@ -30,7 +29,7 @@ import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public final class Dossier extends SecuredItem implements Container, Activable, SubSpace {
+public final class Dossier extends SecuredItem implements Container, SubSpace {
 
     private Boolean active = Boolean.TRUE;
 
@@ -43,15 +42,6 @@ public final class Dossier extends SecuredItem implements Container, Activable, 
     private Date lastModifiedDate;
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    @Override
-    public Boolean getActive() {
-        return active;
-    }
-
-    @Override
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
 
     @JsonIgnore
     public List<Content> getChildren() {

@@ -21,9 +21,8 @@
 
 <webscript>
     <shortname>Add Dossiers Responsible</shortname>
-    <description>Add Dossiers Responsible</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/dossier/resp/add/{nodeRef}?userNames={userNames}</url>
+    <url>/fr/itldev/koya/dossier/resp/add/{userName}/{nodeRef}</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>

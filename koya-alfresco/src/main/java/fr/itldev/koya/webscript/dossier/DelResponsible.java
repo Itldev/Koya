@@ -18,12 +18,10 @@
  */
 package fr.itldev.koya.webscript.dossier;
 
-import com.ibm.icu.impl.USerializedSet;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.SubSpace;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
@@ -34,7 +32,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -73,22 +70,17 @@ public class DelResponsible extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
         NodeRef nodeRef = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-        String userNames = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAMES);
+        String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
 
         try {
-            //seperate comma separedted usernames list
-            String[] uNames = userNames.split(",");
-            if (uNames.length == 1) {
-                User u = userService.getUserByUsername(uNames[0]);
-                SubSpaceCollaboratorsAclService.unShareSecuredItem(
-                        (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
-                        u.getEmail(), KoyaPermissionCollaborator.RESPONSIBLE);
-                SubSpaceCollaboratorsAclService.unShareSecuredItem(
-                        (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
-                        u.getEmail(), KoyaPermissionCollaborator.MEMBER);
-            } else {
-                throw new WebScriptException("KoyaError bad mail resp length");
-            }
+
+            SubSpaceCollaboratorsAclService.unShareSecuredItem(
+                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
+                    userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.MEMBER);
+
+            SubSpaceCollaboratorsAclService.unShareSecuredItem(
+                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
+                    userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.RESPONSIBLE);
 
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -43,7 +42,6 @@ public abstract class KoyaWebscript {
     public static final String WSCONST_NBANCESTOR = "nbAncestor";
     public static final String WSCONST_PARENTNODEREF = "parentNodeRef";
     public static final String WSCONST_USERNAME = "userName";
-    public static final String WSCONST_USERNAMES = "userNames";
     public static final String WSCONST_COMPANYNAME = "companyName";
     public static final String WSCONST_ROLENAME = "roleName";
     public static final String WSCONST_ONLYFOLDERS = "onlyFolders";
@@ -58,8 +56,6 @@ public abstract class KoyaWebscript {
     public static final String WSCONST_USERFAVOURITE = "userFavourite";
     public static final String WSCONST_NEWNAME = "newName";
     public static final String WSCONST_ACTIVE = "active";
-
-    private final Logger logger = Logger.getLogger(KoyaWebscript.class);
 
     /**
      * Extracts JSON POST data.

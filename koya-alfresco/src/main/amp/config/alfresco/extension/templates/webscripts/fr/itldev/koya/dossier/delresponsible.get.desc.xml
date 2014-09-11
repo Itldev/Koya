@@ -23,7 +23,7 @@
     <shortname>Delete Dossiers Responsible</shortname>
     <description>Delete Dossiers Responsible</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/dossier/resp/del/{nodeRef}?userNames={userNames}</url>
+    <url>/fr/itldev/koya/dossier/resp/del/{userName}/{nodeRef}</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>

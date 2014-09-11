@@ -3,23 +3,21 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.interfaces.Activable;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
@@ -33,7 +31,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * already attributed to a company.
  *
  */
-public final class SalesOffer extends SecuredItem implements Activable {
+public final class SalesOffer extends SecuredItem {
 
     private static List<String> mandatoryProperties = asList("template", "nodeRef", "name", "active");
 
@@ -62,12 +60,6 @@ public final class SalesOffer extends SecuredItem implements Activable {
     @JsonIgnore
     public Boolean getMultiSpaces() {
         return Boolean.getBoolean(data.get("multiSpaces"));
-    }
-
-    @JsonIgnore
-    @Override
-    public Boolean getActive() {
-        return Boolean.getBoolean(data.get("active"));
     }
 
     @JsonIgnore
@@ -106,13 +98,7 @@ public final class SalesOffer extends SecuredItem implements Activable {
     }
 
     @Override
-    public void setActive(Boolean active) {
-        //TODO activation
-    }
-    
-     @Override
     public String getType() {
         return "salesoffer";
     }
-
 }

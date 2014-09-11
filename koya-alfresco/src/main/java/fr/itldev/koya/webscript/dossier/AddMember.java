@@ -21,15 +21,11 @@ package fr.itldev.koya.webscript.dossier;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
-import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.interfaces.SubSpace;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -64,20 +60,13 @@ public class AddMember extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
         NodeRef nodeRef = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-        String userNames = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAMES);
+        String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
 
         try {
-            //TODO single action service --> Only 1 User/role set at time
 
-            //seperate comma separedted usernames list
-            String[] uNames = userNames.split(",");
-            if (uNames.length == 1) {
-                SubSpaceCollaboratorsAclService.shareSecuredItem(
-                        (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
-                        userService.getUserByUsername(uNames[0]).getEmail(), KoyaPermissionCollaborator.MEMBER, "", "", "");
-            } else {
-                throw new WebScriptException("KoyaError bad mail resp length");
-            }
+            SubSpaceCollaboratorsAclService.shareSecuredItem(
+                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
+                    userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.MEMBER, "", "", "");
 
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

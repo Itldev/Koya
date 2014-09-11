@@ -35,10 +35,13 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     private static final String REST_POST_ADDDOSSIER = "/s/fr/itldev/koya/dossier/add/{parentNodeRef}";
     private static final String REST_POST_LISTCHILD = "/s/fr/itldev/koya/dossier/list?filter={filter}";
     private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
+
     private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/dossier/member/list/{nodeRef}";
-    private static final String REST_GET_ADDRESP = "/s/fr/itldev/koya/dossier/resp/add/{nodeRef}?userNames={userNames}";
-    private static final String REST_GET_ADDMEMBER = "/s/fr/itldev/koya/dossier/member/add/{nodeRef}?userNames={userNames}";
-    private static final String REST_GET_DELRESP = "/s/fr/itldev/koya/dossier/resp/del/{nodeRef}?userNames={userNames}";
+
+    private static final String REST_GET_ADDRESP = "/s/fr/itldev/koya/dossier/resp/add/{userName}/{nodeRef}";
+    private static final String REST_GET_ADDMEMBER = "/s/fr/itldev/koya/dossier/member/add/{userName}/{nodeRef}";
+
+    private static final String REST_GET_DELRESP = "/s/fr/itldev/koya/dossier/resp/del/{userName}/{nodeRef}";
 
     private KoyaContentService KoyaContentService;
 
@@ -150,14 +153,14 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     public void addResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDRESP, String.class,
-                dossier.getNodeRef(), responsible.getUserName());
+                responsible.getUserName(), dossier.getNodeRef());
     }
 
     @Override
     public void addMember(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDMEMBER, String.class,
-                dossier.getNodeRef(), responsible.getUserName());
+                responsible.getUserName(), dossier.getNodeRef());
     }
 
     /**
@@ -170,17 +173,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      */
     @Override
     public void addResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException {
-
-        String userNames = "";
-        String sep = "";
         for (User u : responsibles) {
-            userNames += sep + u.getUserName();
-            sep = ",";
+            addResponsible(user, dossier, u);
         }
-
-        user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_ADDRESP,
-                String.class, dossier.getNodeRef(), userNames);
     }
 
     /**
@@ -195,7 +190,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     public void removeKoyaCollaboratorRole(User user, Dossier dossier, User collaborator) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP,
-                String.class, dossier.getNodeRef(), collaborator.getUserName());
+                String.class, dossier.getNodeRef(), collaborator.getUserName()
+        );
+
     }
 
     /**
@@ -210,7 +207,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     public void delMemberOrResponsible(User user, Dossier dossier, User memberOrResp) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP,
-                String.class, dossier.getNodeRef(), memberOrResp.getUserName());
+                String.class, memberOrResp.getUserName(), dossier.getNodeRef());
     }
 
 }

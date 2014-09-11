@@ -22,7 +22,7 @@
 <webscript>
     <shortname>Add Dossiers member</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/dossier/member/add/{nodeRef}?userNames={userNames}</url>
+    <url>/fr/itldev/koya/dossier/member/add/{userName}/{nodeRef}</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>
