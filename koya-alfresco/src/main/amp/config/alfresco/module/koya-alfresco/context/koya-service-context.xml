@@ -144,6 +144,14 @@
         <property name="sysAdminParams" ref="sysAdminParams"/>
     </bean>
 
+    <bean id="InviteHelper" class="org.alfresco.repo.invitation.KoyaInviteHelper">
+        <property name="serviceRegistry" ref="ServiceRegistry"/>
+        <property name="repositoryHelper" ref="repositoryHelper"/>
+        <property name="messageService" ref="messageService"/>
+        <property name="siteService" ref="SiteService"/>
+    </bean>
+
+
     <bean id="nameBasedUserNameGenerator" class="fr.itldev.koya.repo.security.authentication.EmailBasedNameGenerator" />
     
     

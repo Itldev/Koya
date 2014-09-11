@@ -130,7 +130,8 @@ public class ValidateInvitation extends AbstractWebScript {
                             invitationService.accept(invitationId, inviteTicket);
                         } catch (Exception ex) {
                             //TODO detect already accepted/rejected invitation -> KoyaErrorCodes.INVITATION_ALREADY_COMPLETED
-                            //startTask.getState().equals(WorkflowTaskState.COMPLETED condition is always true even if not already accepted ...
+                            //startTask.getState().equals(WorkflowTaskState.COMPLETED 
+                            //condition is always true even if not already accepted ...
                             return ex;
                         }
                         return null;
@@ -161,7 +162,7 @@ public class ValidateInvitation extends AbstractWebScript {
                 }
             }
 
-        } catch (KoyaServiceException ex) {       
+        } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");

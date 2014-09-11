@@ -625,7 +625,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
                 if (taskTypeMatches(task, taskTypes)) {
                     if (properties != null) {
                         getWorkflowService().updateTask(task.getId(), properties, null, null);
-                    }
+                    }                    
                     getWorkflowService().endTask(task.getId(), transition);
                     return;
                 }
