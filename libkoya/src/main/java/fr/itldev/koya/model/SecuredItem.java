@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.model;
 
 import fr.itldev.koya.model.impl.Company;
@@ -27,6 +26,7 @@ import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Template;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.interfaces.AlfrescoNode;
 import java.io.IOException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -48,19 +48,18 @@ import org.codehaus.jackson.map.ObjectMapper;
     @Type(value = SalesOffer.class, name = "salesoffer"),
     @Type(value = Template.class, name = "template"),
     @Type(value = User.class, name = "user")})
-public abstract class SecuredItem {
-
+public abstract class SecuredItem implements AlfrescoNode {
+    
     //fields that should be escpaed before serialization
     // public final static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
     private String nodeRef;
     private String name;
-    private Boolean shared;
 
-    private Permissions permissions;
 
     private Boolean userFavourite;
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 
+    @Override
     public String getNodeRef() {
         return nodeRef;
     }
@@ -73,6 +72,7 @@ public abstract class SecuredItem {
         this.nodeRef = nodeRef.toString();
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -81,28 +81,13 @@ public abstract class SecuredItem {
         this.name = name;
     }
 
+    @Override
     public Boolean getUserFavourite() {
         return userFavourite;
     }
 
     public void setUserFavourite(Boolean userFavourite) {
         this.userFavourite = userFavourite;
-    }
-
-    public Boolean isShared() {
-        return shared;
-    }
-
-    public void setShared(Boolean shared) {
-        this.shared = shared;
-    }
-
-    public Permissions getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Permissions permissions) {
-        this.permissions = permissions;
     }
 
     // </editor-fold>
@@ -115,6 +100,7 @@ public abstract class SecuredItem {
     }
 
     @JsonIgnore
+    @Override
     public NodeRef getNodeRefasObject() {
         return new NodeRef(this.nodeRef);
     }

@@ -4,7 +4,7 @@
     <groupId>fr.itldev</groupId>
     <artifactId>libkoya</artifactId>
     <packaging>jar</packaging>
-    <name>[Koya] java client lib</name>
+    <name>[Koya] java lib</name>
 
 
     <parent>

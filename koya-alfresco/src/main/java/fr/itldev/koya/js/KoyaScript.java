@@ -3,28 +3,30 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.js;
 
-import fr.itldev.koya.alfservice.KoyaAclService;
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.KoyaShareService;
 import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,10 +40,11 @@ import org.alfresco.service.ServiceRegistry;
  */
 public class KoyaScript extends BaseProcessorExtension {
 
-    private KoyaAclService koyaAclService;
+    private SubSpaceAclService subSpaceAclService;
     private KoyaNodeService koyaNodeService;
-    private KoyaShareService koyaShareService;
     private UserService userService;
+    private CompanyService companyService;
+
     private ServiceRegistry serviceRegistry;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
@@ -49,8 +52,8 @@ public class KoyaScript extends BaseProcessorExtension {
         this.serviceRegistry = serviceRegistry;
     }
 
-    public void setKoyaAclService(KoyaAclService koyaAclService) {
-        this.koyaAclService = koyaAclService;
+    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
+        this.subSpaceAclService = subSpaceAclService;
     }
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
@@ -61,8 +64,8 @@ public class KoyaScript extends BaseProcessorExtension {
         this.userService = userService;
     }
 
-    public void setKoyaShareService(KoyaShareService koyaShareService) {
-        this.koyaShareService = koyaShareService;
+    public void setCompanyService(CompanyService companyService) {
+        this.companyService = companyService;
     }
 
     //</editor-fold>
@@ -73,10 +76,10 @@ public class KoyaScript extends BaseProcessorExtension {
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public List<ScriptNode> listUsersWhoCanAccesNode(ScriptNode n) throws KoyaServiceException {
-
+    public List<ScriptNode> listConsumersAccess(ScriptNode n) throws KoyaServiceException {
         List<ScriptNode> users = new ArrayList<>();
-        for (User u : koyaShareService.listUsersAccessShare(koyaNodeService.nodeRef2SecuredItem(n.getNodeRef()))) {
+        SecuredItem s = koyaNodeService.nodeRef2SecuredItem(n.getNodeRef());
+        for (User u : subSpaceAclService.listUsers(s, KoyaPermissionConsumer.getAll())) {
             users.add(new ScriptNode(u.getNodeRefasObject(), serviceRegistry));
         }
 
@@ -88,10 +91,15 @@ public class KoyaScript extends BaseProcessorExtension {
      * @param n
      * @return
      */
-    public List<ScriptNode> listNodesSharedWithUser(ScriptNode n) throws KoyaServiceException {
+    public List<ScriptNode> listUserNodes(ScriptNode n) throws KoyaServiceException {
         List<ScriptNode> sharedElements = new ArrayList<>();
-        for (SecuredItem s : koyaShareService.listItemsShared(userService.buildUser(n.getNodeRef()))) {
-            sharedElements.add(new ScriptNode(s.getNodeRefasObject(), serviceRegistry));
+
+        for (Company c : companyService.list()) {
+            for (SecuredItem s : subSpaceAclService.listSecuredItems(c,
+                    userService.buildUser(n.getNodeRef()),
+                    KoyaPermission.getAll())) {
+                sharedElements.add(new ScriptNode(s.getNodeRefasObject(), serviceRegistry));
+            }
         }
         return sharedElements;
     }
@@ -105,10 +113,9 @@ public class KoyaScript extends BaseProcessorExtension {
      */
     public List<ScriptNode> listReadableSecuredItems(ScriptNode n) throws KoyaServiceException {
         List<ScriptNode> readableSecuredItems = new ArrayList<>();
-        for (SecuredItem s : koyaShareService.getReadableSecuredItem(userService.buildUser(n.getNodeRef()), null)) {
+        for (SecuredItem s : subSpaceAclService.getReadableSecuredItem(userService.buildUser(n.getNodeRef()), null)) {
             readableSecuredItems.add(new ScriptNode(s.getNodeRefasObject(), serviceRegistry));
         }
         return readableSecuredItems;
     }
-
 }

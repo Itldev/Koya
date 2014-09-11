@@ -19,7 +19,7 @@
 
 package fr.itldev.koya.webscript.company;
 
-import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
@@ -35,12 +35,13 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class IsManager extends AbstractWebScript {
 
-    private CompanyService companyService;
+    private CompanyAclService companyAclService;
 
-    public void setCompanyService(CompanyService companyService) {
-        this.companyService = companyService;
+    public void setCompanyAclService(CompanyAclService companyAclService) {
+        this.companyAclService = companyAclService;
     }
-
+    
+    
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
@@ -49,7 +50,7 @@ public class IsManager extends AbstractWebScript {
         String response;
 
         try {
-            response = KoyaWebscript.getObjectAsJson(companyService.isCompanyManager(companyName));
+            response = KoyaWebscript.getObjectAsJson(companyAclService.isCompanyManager(companyName));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

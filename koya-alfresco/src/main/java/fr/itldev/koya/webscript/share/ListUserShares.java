@@ -3,26 +3,34 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.webscript.share;
 
-import fr.itldev.koya.alfservice.KoyaShareService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SubSpaceConsumersAclService;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
@@ -36,10 +44,20 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class ListUserShares extends AbstractWebScript {
 
-    private KoyaShareService koyaShareService;
+    private SubSpaceConsumersAclService subSpaceConsumersAclService;
+    private KoyaNodeService koyaNodeService;
+    private UserService userService;
 
-    public void setKoyaShareService(KoyaShareService koyaShareService) {
-        this.koyaShareService = koyaShareService;
+    public void setSubSpaceConsumersAclService(SubSpaceConsumersAclService subSpaceConsumersAclService) {
+        this.subSpaceConsumersAclService = subSpaceConsumersAclService;
+    }
+
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
@@ -50,7 +68,9 @@ public class ListUserShares extends AbstractWebScript {
         String response;
 
         try {
-            response = KoyaWebscript.getObjectAsJson(koyaShareService.listItemsShared(userName, companyName));
+            User u = userService.getUserByUsername(userName);
+            Company c = koyaNodeService.companyBuilder(companyName);
+            response = KoyaWebscript.getObjectAsJson(subSpaceConsumersAclService.listSecuredItems(c, u, KoyaPermissionConsumer.getAll()));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

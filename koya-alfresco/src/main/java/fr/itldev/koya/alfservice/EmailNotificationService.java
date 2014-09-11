@@ -3,26 +3,25 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.alfservice;
 
+import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public class EmailNotificationService {
     protected SearchService searchService;
     protected NodeService nodeService;
     protected TransactionService transactionService;
-    protected KoyaAclService koyaAclService;
+    protected SubSpaceAclService subSpaceAclService;
     protected UserService userService;
 
     private static final String RULE_NAME_EMAIL = "email_notification_rule";
@@ -96,8 +95,8 @@ public class EmailNotificationService {
         this.userService = userService;
     }
 
-    public void setKoyaAclService(KoyaAclService koyaAclService) {
-        this.koyaAclService = koyaAclService;
+    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
+        this.subSpaceAclService = subSpaceAclService;
     }
 
     public void setFeedEmailTemplateLocation(RepositoryLocation feedEmailTemplateLocation) {
@@ -140,7 +139,7 @@ public class EmailNotificationService {
          *
          * Limited to
          */
-        List<SecuredItem> readableDossiers = koyaAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
+        List<SecuredItem> readableDossiers = subSpaceAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
 
         for (SecuredItem item : readableDossiers) {
             logger.debug("getEmailNotificationRule SecuredItem: " + item.getName());
@@ -168,7 +167,7 @@ public class EmailNotificationService {
          *
          * Limited to Dossiers
          */
-        List<SecuredItem> readableDossiers = koyaAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
+        List<SecuredItem> readableDossiers = subSpaceAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
 
         for (SecuredItem item : readableDossiers) {
             logger.debug("addRemoveUser SecuredItem: " + item.getName());
@@ -187,7 +186,8 @@ public class EmailNotificationService {
             if (RULE_NAME_EMAIL.equals(r.getTitle())) {
 
                 final Action a = ((CompositeAction) r.getAction()).getAction(0);
-                final ArrayList<String> usernames = (a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) != null) ? (ArrayList<String>) a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) : new ArrayList();
+                final ArrayList<String> usernames = (a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) != null)
+                        ? (ArrayList<String>) a.getParameterValue(MailActionExecuter.PARAM_TO_MANY) : new ArrayList();
 
                 if (add && !usernames.contains(username)) {
                     //Add user to notification

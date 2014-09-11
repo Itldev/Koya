@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -48,7 +47,6 @@ public class SpaceService {
     private NodeService nodeService;
     private KoyaNodeService koyaNodeService;
     private CompanyService companyService;
-    private KoyaAclService koyaAclService;
     private FileFolderService fileFolderService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
@@ -56,17 +54,12 @@ public class SpaceService {
         this.nodeService = nodeService;
     }
 
-   
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
 
     public void setCompanyService(CompanyService companyService) {
         this.companyService = companyService;
-    }
-
-    public void setKoyaAclService(KoyaAclService koyaAclService) {
-        this.koyaAclService = koyaAclService;
     }
 
     public void setFileFolderService(FileFolderService fileFolderService) {
@@ -78,13 +71,12 @@ public class SpaceService {
      * Space creation in a valid Container : Space or Company
      *
      * @param name
-     * @param parent
+     * @param target
      * @param prop
      * @return
      * @throws KoyaServiceException
      */
-    public Space create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
-
+    public Space create(String name, NodeRef target, Map<String, String> prop) throws KoyaServiceException {
         //Space must have a name
         if (name == null || name.isEmpty()) {
             throw new KoyaServiceException(KoyaErrorCodes.SPACE_EMPTY_NAME);
@@ -92,12 +84,12 @@ public class SpaceService {
 
         NodeRef nrParent = null;
 
-        if (nodeService.getType(parent).equals(KoyaModel.TYPE_SPACE)) {
+        if (nodeService.getType(target).equals(KoyaModel.TYPE_SPACE)) {
             //if parent is a space, select his node
-            nrParent = parent;
-        } else if (nodeService.getType(parent).equals(KoyaModel.TYPE_COMPANY)) {
+            nrParent = target;
+        } else if (nodeService.getType(target).equals(KoyaModel.TYPE_COMPANY)) {
             //if it's a company, select documentLibrary's node
-            nrParent = getDocLibNodeRef(parent);
+            nrParent = getDocLibNodeRef(target);
         } else {
             throw new KoyaServiceException(KoyaErrorCodes.SPACE_INVALID_PARENT);
         }

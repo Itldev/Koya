@@ -26,14 +26,66 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ">
     
-    
-    <!--Apply acl on dossier or space node creation-->
-    <bean id="DefaultAclOnCreateBehaviour" class="fr.itldev.koya.behaviour.DefaultAclOnCreateBehaviour" init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
-        <property name="koyaAclService" ref="koyaAclService" />
+    <!-- ============== Permissions Behaviours ================ -->
+    <!--Initialize default acl on dossier or space node creation-->
+    <bean id="ApplyDefaultAclOnCreate" class="fr.itldev.koya.behaviour.security.ApplyDefaultAclOnCreate" 
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
+        <property name="subSpaceAclService" ref="subSpaceAclService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
         <property name="policyComponent" ref="policyComponent" />
     </bean>
     
-       
+    <!-- Give KoyaResponsible Permission to owner on node creation-->
+    <bean id="SetOwnerAsResponsibleOnCreate" class="fr.itldev.koya.behaviour.security.SetOwnerAsResponsibleOnCreate" 
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
+        <property name="SubSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="nodeService" ref="NodeService" />
+        <property name="policyComponent" ref="policyComponent" />
+    </bean>
+    
+    <!--revoke Koya specific permissions on dossier or space before delete -->
+    <bean id="RevokeKoyaPermissionsBeforeDelete"
+          class="fr.itldev.koya.behaviour.security.RevokeKoyaPermissionsBeforeDelete" 
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
+        <property name="subSpaceAclService" ref="subSpaceAclService" />
+        <property name="policyComponent" ref="policyComponent" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
+    </bean>
+    
+    
+    <!-- Update parent node after grant subspace permission -->
+    <bean id="UpdateParentNodesAfterGrantKoyaPermission"
+          class="fr.itldev.koya.behaviour.security.UpdateParentNodesAfterGrantKoyaPermission" 
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
+        <property name="subSpaceAclService" ref="subSpaceAclService" />
+        <property name="policyComponent" ref="policyComponent" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="nodeService" ref="NodeService" />
+        <property name="permissionService" ref="PermissionService"/>
+    </bean>
+    
+    
+    <!--Update parent node before revoke subspace permission--> 
+    <bean id="UpdateParentNodesBeforeRevokeKoyaPermission"
+          class="fr.itldev.koya.behaviour.security.UpdateParentNodesBeforeRevokeKoyaPermission" 
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
+        <property name="subSpaceAclService" ref="subSpaceAclService" />
+        <property name="policyComponent" ref="policyComponent" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="nodeService" ref="NodeService" />
+        <property name="permissionService" ref="PermissionService"/>
+        <property name="siteService" ref="SiteService"/>
+    </bean>
+    
+           
+                  
+                         
+                                
+                                       
+                                                     
+    
+    
     <bean id="PersonMailUnicityBehaviour" class="fr.itldev.koya.behaviour.PersonMailUnicityBehaviour" 
           init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
         <property name="policyComponent" ref="policyComponent" />
@@ -44,6 +96,13 @@
           init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
         <property name="policyComponent" ref="policyComponent" />
         <property name="emailNotificationService" ref="emailNotificationService"/>
+        <property name="userService" ref="userService"/>
+    </bean>
+    
+    <bean id="ShareNotificationBehaviour" class="fr.itldev.koya.behaviour.ShareNotificationBehaviour"
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
+        <property name="policyComponent" ref="policyComponent" />
+       
     </bean>
     
     

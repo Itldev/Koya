@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.Company;
@@ -149,11 +148,11 @@ public class DossierServiceImplTest extends TestCase {
         assertEquals(2, dossierService.listResponsibles(admin, d).size());
 
         //del a responsible --> now only 1
-        dossierService.delResponsible(admin, d, admin);
+        dossierService.delMemberOrResponsible(admin, d, admin);
         assertEquals(1, dossierService.listResponsibles(admin, d).size());
         assertEquals(u1, dossierService.listResponsibles(admin, d).get(0));
         //remove non responsive shouldn't have impact
-        dossierService.delResponsible(admin, d, admin);
+        dossierService.delMemberOrResponsible(admin, d, admin);
         assertEquals(1, dossierService.listResponsibles(admin, d).size());
 
         //Add / del collection test
@@ -161,7 +160,9 @@ public class DossierServiceImplTest extends TestCase {
         assertEquals(2, dossierService.listResponsibles(admin, d).size());
         //2 because u1 is already in responsibles list
 
-        dossierService.delResponsible(admin, d, testUsers);
+        for (User u : testUsers) {
+            dossierService.delMemberOrResponsible(admin, d, u);
+        }
         assertEquals(0, dossierService.listResponsibles(admin, d).size());
 
     }

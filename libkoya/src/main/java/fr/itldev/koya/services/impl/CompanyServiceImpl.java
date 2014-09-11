@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.impl.Company;
@@ -34,6 +33,9 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add/{name}/{salesoffer}/{template}";
     private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
+    private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/company/members/{companyName}";
+    private static final String REST_GET_LISTMEMBERS_ROLEFILTER = "/s/fr/itldev/koya/company/members/{companyName}/{roleFilter}";
+
     private static final String REST_DEL_DELCOMPANY = "/s/api/sites/{shortname}";
     private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}";
     private static final String REST_GET_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
@@ -44,11 +46,7 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     private static final String REST_POST_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
 
     /**
-     * Méthode de creation d'une nouvelle société
-     *
-     * TODO la création d'un site compatible avec share nécesite des action coté
-     * share pour avoir un dashboard valides :
-     * share/WEB-INF/classes/alfresco/site-webscripts/org/alfresco/modules/create-site.post.json.js
+     * Company creation
      *
      * @param admin
      * @param c
@@ -85,6 +83,38 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     @Override
     public void delete(User admin, Company comapny) throws RestClientException, AlfrescoServiceException {
         admin.getRestTemplate().delete(getAlfrescoServerUrl() + REST_DEL_DELCOMPANY, comapny.getName());
+    }
+
+    /**
+     * List CompanyMembers by type filter setted.
+     *
+     * @param userLogged
+     * @param company
+     * @param rolesFilter
+     * @return
+     */
+    @Override
+    public List<User> listMembers(User userLogged, Company company, List<String> rolesFilter)
+            throws RestClientException, AlfrescoServiceException {
+
+        if (rolesFilter == null) {
+            return fromJSON(new TypeReference<List<User>>() {
+            }, userLogged.getRestTemplate().getForObject(
+                    getAlfrescoServerUrl() + REST_GET_LISTMEMBERS, String.class, company.getName()));
+        } else {
+
+            String filterString = "";
+            String sep = "";
+            for (String role : rolesFilter) {
+                filterString += sep + role;
+                sep = ",";
+            }
+
+            return fromJSON(new TypeReference<List<User>>() {
+            }, userLogged.getRestTemplate().getForObject(
+                    getAlfrescoServerUrl() + REST_GET_LISTMEMBERS_ROLEFILTER, String.class, company.getName(), filterString));
+        }
+
     }
 
     @Override

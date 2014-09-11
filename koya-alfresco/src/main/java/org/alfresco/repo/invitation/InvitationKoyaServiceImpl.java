@@ -3,27 +3,22 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
- */
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
 package org.alfresco.repo.invitation;
 
+import fr.itldev.koya.model.permissions.SitePermission;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
@@ -34,6 +29,7 @@ import java.util.Set;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteModel;
+import org.alfresco.repo.transaction.TransactionalResourceHelper;
 import org.alfresco.repo.workflow.WorkflowModel;
 import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 import org.alfresco.repo.workflow.jbpm.JBPMEngine;
@@ -50,6 +46,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.workflow.WorkflowAdminService;
 import org.alfresco.service.cmr.workflow.WorkflowDefinition;
+import org.alfresco.service.cmr.workflow.WorkflowException;
 import org.alfresco.service.cmr.workflow.WorkflowPath;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
 import org.alfresco.service.namespace.QName;
@@ -60,7 +57,18 @@ import org.apache.commons.logging.LogFactory;
 /**
  * @see org.alfresco.repo.invitation.InvitationServiceImpl
  *
- * @author nico
+ *
+ * This service overrides classic invitation service. User search is now only on
+ * email field ()
+ *
+ *
+ *
+ * startNominatedInvite method
+ *
+ *
+ *
+ *
+ *
  */
 public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
@@ -68,15 +76,13 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
     private WorkflowAdminService workflowAdminService;
 
-    private int maxUserNameGenRetries = MAX_NUM_INVITEE_USER_NAME_GEN_TRIES;
+    private final int maxUserNameGenRetries = MAX_NUM_INVITEE_USER_NAME_GEN_TRIES;
 
     /**
      * Start the invitation process for a NominatedInvitation
      *
      * @param inviteeUserName Alfresco user name of the invitee
      * @param resourceType
-     * @param Invitation
-     * @param ResourceType resourceType
      * @param resourceName
      * @param inviteeRole
      * @param serverPath
@@ -113,7 +119,6 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
      * @param inviteeLastName
      * @param inviteeEmail
      * @param resourceType
-     * @param Invitation .ResourceType resourceType
      * @param resourceName
      * @param inviteeRole
      * @param serverPath
@@ -256,7 +261,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
         // create a person node for the invitee with generated invitee user name
         // and other provided person property values
-        final Map<QName, Serializable> properties = new HashMap<QName, Serializable>();
+        final Map<QName, Serializable> properties = new HashMap<>();
         properties.put(ContentModel.PROP_USERNAME, inviteeUserName);
         properties.put(ContentModel.PROP_FIRSTNAME, inviteeFirstName);
         properties.put(ContentModel.PROP_LASTNAME, inviteeLastName);
@@ -265,6 +270,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         final String finalUserName = inviteeUserName;
         AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Object>() {
             @SuppressWarnings("synthetic-access")
+            @Override
             public Object doWork() throws Exception {
                 NodeRef person = getPersonService().createPerson(properties);
                 //MNT-9101 Share: Cancelling an invitation for a disabled user, the user gets deleted in the process.
@@ -335,7 +341,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         // if a person already exists who has the given invitee email address
         //
         // 1) obtain invitee user name from first person found having the
-        // invitee email address, first name and last name
+        // invitee email address
         // 2) handle error conditions -
         // (invitee already has an invitation in progress for the given site,
         // or he/she is already a member of the given site
@@ -351,7 +357,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
                 // invitee email address
                 NodeRef personRef = peopleWithInviteeEmail.iterator().next();
 
-                // got a match on email, lastname, firstname
+                // got a match on email
                 // get invitee user name of that person
                 Serializable userNamePropertyVal = this.getNodeService().getProperty(personRef, ContentModel.PROP_USERNAME);
                 inviteeUserName = DefaultTypeConverter.INSTANCE.convert(String.class, userNamePropertyVal);
@@ -404,6 +410,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
         String inviteePassword = created ? AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<String>() {
             @SuppressWarnings("synthetic-access")
+            @Override
             public String doWork() {
                 return createInviteeDisabledAccount(initeeUserNameFinal);
             }
@@ -431,7 +438,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         String workflowDescription = generateWorkflowDescription(siteInfo, "invitation.nominated.workflow.description");
 
         // create workflow properties
-        Map<QName, Serializable> workflowProps = new HashMap<QName, Serializable>(32);
+        Map<QName, Serializable> workflowProps = new HashMap<>(32);
         workflowProps.put(WorkflowModel.PROP_WORKFLOW_DESCRIPTION, workflowDescription);
         workflowProps.put(WorkflowModelNominatedInvitation.WF_PROP_INVITER_USER_NAME, inviterUserName);
         workflowProps.put(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_USER_NAME, inviteeUserName);
@@ -533,8 +540,14 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
     private void checkManagerRole(String userId, Invitation.ResourceType resourceType, String siteShortName) {
         // if inviter is not the site manager then throw web script exception
         String inviterRole = getSiteService().getMembersRole(siteShortName, userId);
-        if ((inviterRole == null) || (inviterRole.equals(SiteModel.SITE_MANAGER) == false)) {
 
+        /**
+         * Koya modification : allow Collaborators to send invitation
+         */
+        if ((inviterRole != null)
+                && (inviterRole.equals(SitePermission.MANAGER.toString())
+                || inviterRole.equals(SitePermission.COLLABORATOR.toString()))) {
+        } else {
             Object objs[] = {userId, siteShortName};
             throw new InvitationExceptionForbidden("invitation.invite.not_site_manager", objs);
         }
@@ -542,6 +555,85 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
     private int getMaxUserNameGenRetries() {
         return maxUserNameGenRetries;
+    }
+
+    /**
+     * Validator for invitationId
+     *
+     * @param invitationId
+     */
+    private void validateInvitationId(String invitationId) {
+        final String ID_SEPERATOR_REGEX = "\\$";
+        String[] parts = invitationId.split(ID_SEPERATOR_REGEX);
+        if (parts.length != 2) {
+            Object objs[] = {invitationId};
+            throw new InvitationExceptionUserError("invitation.error.invalid_inviteId_format", objs);
+        }
+    }
+
+    private WorkflowTask getStartTask(String invitationId) {
+        validateInvitationId(invitationId);
+        WorkflowTask startTask = null;
+        try {
+            startTask = getWorkflowService().getStartTask(invitationId);
+        } catch (WorkflowException we) {
+            // Do nothing
+        }
+        if (startTask == null) {
+            Object objs[] = {invitationId};
+            throw new InvitationExceptionNotFound("invitation.error.not_found", objs);
+        }
+        return startTask;
+    }
+
+    @Override
+    public Invitation accept(String invitationId, String ticket) {
+        WorkflowTask startTask = getStartTask(invitationId);
+        NominatedInvitation invitation = getNominatedInvitation(startTask);
+        if (invitation == null) {
+            throw new InvitationException("State error, accept may only be called on a nominated invitation.");
+        }
+        // Check invitationId and ticket match
+        if (invitation.getTicket().equals(ticket) == false) {
+            //TODO localise msg
+            String msg = "Response to invite has supplied an invalid ticket. The response to the invitation could thus not be processed";
+            throw new InvitationException(msg);
+        }
+        endInvitation(startTask,
+                WorkflowModelNominatedInvitation.WF_TRANSITION_ACCEPT, null,
+                WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING, WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING);
+
+        //MNT-9101 Share: Cancelling an invitation for a disabled user, the user gets deleted in the process.
+        /*
+        
+         KOYA removed Code : fixes invitation by Manager bug
+        
+        
+         NodeRef person = personService.getPersonOrNull(invitation.getInviterUserName());
+         if (person != null && nodeService.hasAspect(person, ContentModel.ASPECT_ANULLABLE)) {            
+         nodeService.removeAspect(person, ContentModel.ASPECT_ANULLABLE);
+         }*/
+        return invitation;
+    }
+
+    private void endInvitation(WorkflowTask startTask, String transition, Map<QName, Serializable> properties, QName... taskTypes) {
+        // Deleting a person can cancel their invitations. Cancelling invitations can delete inactive persons! So prevent infinite looping here
+        if (TransactionalResourceHelper.getSet(getClass().getName()).add(startTask.getPath().getInstance().getId())) {
+            List<WorkflowTask> tasks = getWorkflowService().getTasksForWorkflowPath(startTask.getPath().getId());
+            if (tasks.size() == 1) {
+                WorkflowTask task = tasks.get(0);
+                if (taskTypeMatches(task, taskTypes)) {
+                    if (properties != null) {
+                        getWorkflowService().updateTask(task.getId(), properties, null, null);
+                    }
+                    getWorkflowService().endTask(task.getId(), transition);
+                    return;
+                }
+            }
+            // Throw exception if the task not found.
+            Object objs[] = {startTask.getPath().getInstance().getId()};
+            throw new InvitationExceptionUserError("invitation.invite.already_finished", objs);
+        }
     }
 
 }

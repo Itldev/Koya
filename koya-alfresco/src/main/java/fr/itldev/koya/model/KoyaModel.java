@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.model;
 
 import java.util.Collections;
@@ -52,7 +51,6 @@ public class KoyaModel {
 
     public static final QName ASPECT_MAILUNIQUE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "mailunique");
 
-    public static final QName ASPECT_RESPONSABILTY = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "responsability");
     //================= Aspects Properties
     public static final QName PROP_ISACTIVE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "isActive");
 
@@ -74,12 +72,9 @@ public class KoyaModel {
     //================= Type associations ===========================================
     public static final QName ASSOC_CONTACT_USER = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");
 
-    //================= Aspect associations ===========================================
-    public static final QName ASSOC_RESPONSIBLES = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "responsibles");
-
     /**
      * Used because koya namespace is not registered
-     * 
+     *
      * TODO register koya namespace
      */
     public static final Map<QName, String> TYPES_SHORT_PREFIX = Collections.unmodifiableMap(new HashMap<QName, String>() {

@@ -43,6 +43,16 @@
         <property name="companyService" ref="companyService" />        
     </bean>
     
+    
+    <!-- list members-->
+    <bean id="webscript.fr.itldev.koya.company.listMembers.get" 
+          class="fr.itldev.koya.webscript.company.ListMembers"
+          parent="webscript">                
+        <property name="companyAclService" ref="companyAclService" />       
+        <property name="koyaNodeService" ref="koyaNodeService" />        
+    </bean>
+    
+    
     <!-- get current preferences-->
     <bean id="webscript.fr.itldev.koya.company.preferences.get" 
           class="fr.itldev.koya.webscript.company.GetPreferences"
@@ -80,7 +90,8 @@
     <bean id="webscript.fr.itldev.koya.company.roles.get" 
           class="fr.itldev.koya.webscript.company.GetRoles"
           parent="webscript">                
-        <property name="profileService" ref="profileService" />        
+        <property name="companyAclService" ref="companyAclService" />       
+        <property name="koyaNodeService" ref="koyaNodeService" />        
     </bean>
     
     
@@ -88,7 +99,7 @@
     <bean id="webscript.fr.itldev.koya.company.ismanager.get" 
           class="fr.itldev.koya.webscript.company.IsManager"
           parent="webscript">                
-        <property name="companyService" ref="companyService" />    
+        <property name="companyAclService" ref="companyAclService" />    
     </bean>
     
     <!--
@@ -164,7 +175,8 @@
     <bean id="webscript.fr.itldev.koya.dossier.listresponsible.get" 
           class="fr.itldev.koya.webscript.dossier.ListResponsible"
           parent="webscript">                
-        <property name="nodeResponsibilityService" ref="nodeResponsibilityService" />
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="SubSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService"/>
     </bean>
     
     
@@ -172,14 +184,38 @@
     <bean id="webscript.fr.itldev.koya.dossier.addresponsible.get" 
           class="fr.itldev.koya.webscript.dossier.AddResponsible"
           parent="webscript">                
-        <property name="nodeResponsibilityService" ref="nodeResponsibilityService" />
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="SubSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService"/>
+        <property name="userService" ref="userService"/>
     </bean>
     
-    <!--del dossier responsibles-->
+    
+     <!--list dossier members-->
+    <bean id="webscript.fr.itldev.koya.dossier.listmember.get" 
+          class="fr.itldev.koya.webscript.dossier.ListMember"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="SubSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService"/>
+    </bean>
+    
+    
+    <!-- add dossier responsibles-->
+    <bean id="webscript.fr.itldev.koya.dossier.addmember.get" 
+          class="fr.itldev.koya.webscript.dossier.AddMember"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="SubSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService"/>
+        <property name="userService" ref="userService"/>
+    </bean>
+    
+    <!--del dossier responsibles or members -->
     <bean id="webscript.fr.itldev.koya.dossier.delresponsible.get" 
           class="fr.itldev.koya.webscript.dossier.DelResponsible"
           parent="webscript">                
-        <property name="nodeResponsibilityService" ref="nodeResponsibilityService" />
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="SubSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService"/>
+        <property name="userService" ref="userService"/>
+
     </bean>
        
     <!--
@@ -304,6 +340,15 @@
     </bean>
     
     
+    
+    <!-- Get Permissions on node -->
+    <bean id="webscript.fr.itldev.koya.global.secu.permissions.get" 
+          class="fr.itldev.koya.webscript.global.secu.GetPermissions"
+          parent="webscript">                
+        <property name="subSpaceAclService" ref="subSpaceAclService" />      
+    </bean>
+    
+    
     <!--
     ==================================================================
     ========================== Users ==============================
@@ -347,14 +392,18 @@
     <bean id="webscript.fr.itldev.koya.user.role.get" 
           class="fr.itldev.koya.webscript.user.GetRole"
           parent="webscript">                
-        <property name="profileService" ref="profileService" />        
+        <property name="koyaNodeService" ref="koyaNodeService" />      
+        <property name="userService" ref="userService" />      
+        <property name="companyAclService" ref="companyAclService" />        
     </bean>
 
     <!-- set user role for a company -->
     <bean id="webscript.fr.itldev.koya.user.setrole.get" 
           class="fr.itldev.koya.webscript.user.SetRole"
           parent="webscript">                
-        <property name="profileService" ref="profileService" />        
+        <property name="companyAclService" ref="companyAclService" />        
+        <property name="koyaNodeService" ref="koyaNodeService" />        
+        <property name="userService" ref="userService" />        
     </bean>
     
     
@@ -362,13 +411,17 @@
     <bean id="webscript.fr.itldev.koya.user.invite.post" 
           class="fr.itldev.koya.webscript.user.Invite"
           parent="webscript">                
-        <property name="userService" ref="userService" />   
+        <property name="companyAclService" ref="companyAclService" /> 
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
     </bean>
     
     <bean id="webscript.fr.itldev.koya.user.revoke.get" 
           class="fr.itldev.koya.webscript.user.Revoke"
           parent="webscript">                
+        <property name="companyAclService" ref="companyAclService" /> 
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
         <property name="userService" ref="userService" /> 
+
     </bean>
     
     <bean id="webscript.fr.itldev.koya.user.listconnect.get"
@@ -387,20 +440,33 @@
     <bean id="webscript.fr.itldev.koya.share.shareitems.post" 
           class="fr.itldev.koya.webscript.share.ShareItems"
           parent="webscript">                
-        <property name="koyaShareService" ref="koyaShareService" />   
+        <property name="subSpaceConsumersAclService" ref="subSpaceConsumersAclService" />   
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     <!-- items shared with users -->
     <bean id="webscript.fr.itldev.koya.share.sharedusers.get" 
           class="fr.itldev.koya.webscript.share.SharedUsers"
           parent="webscript">
-        <property name="koyaShareService" ref="koyaShareService" />   
+        <property name="subSpaceAclService" ref="subSpaceAclService" />   
+        <property name="koyaNodeService" ref="koyaNodeService" />   
+
     </bean>
     
     <bean id="webscript.fr.itldev.koya.share.listusershares.get" 
           class="fr.itldev.koya.webscript.share.ListUserShares"
           parent="webscript">
-        <property name="koyaShareService" ref="koyaShareService" />   
+        <property name="subSpaceConsumersAclService" ref="subSpaceConsumersAclService" />   
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="userService" ref="userService"/>
+    </bean>
+    
+    
+    <bean id="webscript.fr.itldev.koya.share.consumer.get" 
+          class="fr.itldev.koya.webscript.share.IsSharedConsumer"
+          parent="webscript">
+        <property name="subSpaceAclService" ref="subSpaceAclService" />   
+        <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
     
        
@@ -424,6 +490,15 @@
     </bean>
     
     
+    <!-- Dump company all subspaces node permissions
+    for debug 
+    -->
+    <bean id="webscript.fr.itldev.koya.meta.dumpPermissions.get" 
+          class="fr.itldev.koya.webscript.meta.DumpPermissions"
+          parent="webscript">
+        <property name="debuggerService" ref="debuggerService" />   
+        <property name="spaceService" ref="spaceService" />   
+    </bean>
     <!--
     ==================================================================
     ========================== Notifications  ========================
@@ -431,8 +506,8 @@
     -->
     
     <bean id="webscript.fr.itldev.koya.user.emailnotification.get" 
-              class="fr.itldev.koya.webscript.user.NotificationStatus"
-              parent="webscript">
+          class="fr.itldev.koya.webscript.user.NotificationStatus"
+          parent="webscript">
         <property name="emailNotificationService" ref="emailNotificationService" />   
     </bean>
 

@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -99,7 +98,7 @@ public class DossierService {
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
                 KoyaModel.TYPE_DOSSIER,
                 properties);
-        nodeService.addAspect(car.getChildRef(), KoyaModel.ASPECT_ACTIVABLE, null);
+        koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
 
         return koyaNodeService.nodeDossierBuilder(car.getChildRef());
     }
@@ -115,7 +114,8 @@ public class DossierService {
 
         for (final FileInfo fi : fileFolderService.listFolders(parent)) {
             if (fi.getType().equals(KoyaModel.TYPE_DOSSIER)) {
-                dossiers.add(koyaNodeService.nodeDossierBuilder(fi.getNodeRef()));
+                Dossier dossier = koyaNodeService.nodeDossierBuilder(fi.getNodeRef());
+                dossiers.add(dossier);
             }
         }
         return dossiers;

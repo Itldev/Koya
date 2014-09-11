@@ -28,6 +28,7 @@
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-js-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-model-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-service-context.xml" />
+    <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-acl-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-webscript-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-sample-context.xml" /> 
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-template-bootstrap-context.xml" />

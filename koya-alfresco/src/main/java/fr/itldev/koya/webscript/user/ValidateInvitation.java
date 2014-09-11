@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.UserService;
@@ -128,13 +127,10 @@ public class ValidateInvitation extends AbstractWebScript {
                     public Exception doWork() throws Exception {
 
                         try {
-
                             invitationService.accept(invitationId, inviteTicket);
                         } catch (Exception ex) {
-                            logger.error("Error duaring invitation accept" + ex.toString());
                             //TODO detect already accepted/rejected invitation -> KoyaErrorCodes.INVITATION_ALREADY_COMPLETED
                             //startTask.getState().equals(WorkflowTaskState.COMPLETED condition is always true even if not already accepted ...
-
                             return ex;
                         }
                         return null;
@@ -165,7 +161,7 @@ public class ValidateInvitation extends AbstractWebScript {
                 }
             }
 
-        } catch (KoyaServiceException ex) {
+        } catch (KoyaServiceException ex) {       
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");

@@ -38,10 +38,9 @@
         <property name="companyService" ref="companyService"/>
         <property name="fileFolderService" ref="FileFolderService" />
         <property name="authenticationService" ref="AuthenticationService" />
-        <property name="koyaShareService" ref="koyaShareService"/>
-        <property name="koyaAclService" ref="koyaAclService"/>
         <property name="activityService" ref="activityService"/>
         <property name="siteService" ref="SiteService"/>
+        <property name="ancestorNodeLocator" ref="ancestorNodeLocator"/>
     </bean>
     
     <!--Companies handling service-->
@@ -52,7 +51,7 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="modelService" ref="modelService" />
         <property name="authenticationService" ref="AuthenticationService" />
-        <property name="fileFolderService" ref="FileFolderService" />
+        <property name="fileFolderService" ref="FileFolderService" />      
     </bean>     
     
     <!--Spaces Handling service-->
@@ -60,7 +59,6 @@
         <property name="nodeService" ref="NodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="companyService" ref="companyService"/>
-        <property name="koyaAclService" ref="koyaAclService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
     </bean> 
     
@@ -79,7 +77,6 @@
         <property name="contentService" ref="contentService"/>
         <property name="namespaceService" ref="NamespaceService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
-        <property name="koyaAclService" ref="koyaAclService"/>     
         <property name="actionService" ref="ActionService"/>
     </bean>
    
@@ -100,7 +97,6 @@
         <property name="siteService" ref="SiteService"/>
         <property name="invitationService" ref="invitationService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="actionService" ref="ActionService"/>
     </bean>
    
     <!--Data Import/Export Service-->
@@ -113,10 +109,6 @@
         <property name="siteService" ref="SiteService"/>
     </bean>
     
-    <!--Profiles Handling Service-->
-    <bean name="profileService" class="fr.itldev.koya.alfservice.ProfileService">    
-        <property name="siteService" ref="SiteService"/> 
-    </bean>
     <!--Question/Answer Handling service-->
     <bean name="qaService" class="fr.itldev.koya.alfservice.QaService"/>
     <!--Statistics Handling Service-->
@@ -129,40 +121,7 @@
     <bean name="mailingService" class="fr.itldev.koya.alfservice.MailingService"/>
     
   
-     <!--Node Responsibility Service-->
-    <bean name="nodeResponsibilityService" class="fr.itldev.koya.alfservice.NodeResponsibilityService">
-        <property name="nodeService" ref="NodeService"/>        
-        <property name="userService" ref="userService"/>
-        <property name="ownableService" ref="ownableService"/>
-    </bean>
     
-<!--    
-    
-    
-    ACL Services
-    
-    
-    -->
-    <!--Koya specific Permissions service-->
-    <bean name="koyaAclService" class="fr.itldev.koya.alfservice.KoyaAclService">     
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="permissionService" ref="PermissionService"/>     
-        <property name="nodeService" ref="NodeService"/>       
-        <property name="authenticationService" ref="AuthenticationService"/>    
-        <property name="searchService" ref="SearchService"/>  
-    </bean>
-    
-    <!--Secured Items Sharing service-->
-    <bean name="koyaShareService" class="fr.itldev.koya.alfservice.KoyaShareService"
-          init-method="init" parent="koyaAclService">
-        <property name="policyComponent" ref="policyComponent"/>
-        <property name="spaceService" ref="spaceService"/>  
-        <property name="dossierService" ref="dossierService"/> 
-        <property name="userService" ref="userService"/>
-        <property name="siteService" ref="SiteService"/>            
-        <property name="fileFolderService" ref="FileFolderService"/>     
-        <property name="invitationService" ref="invitationService"/>
-    </bean>
     
     <!--  Invitation Service Configuration File --> 
     <bean id="invitationService" class="org.alfresco.repo.invitation.InvitationKoyaServiceImpl" init-method="init">
@@ -198,12 +157,20 @@
         <property name="namespaceService" ref="NamespaceService"/>
         <property name="nodeService" ref="NodeService"/>
         <property name="transactionService" ref="transactionService"/>
-        <property name="koyaAclService" ref="koyaAclService"/>
+        <property name="subSpaceAclService" ref="subSpaceAclService"/>
     </bean>
     
     <bean id="emailNotificationTemplateLocation" class="org.alfresco.repo.dictionary.RepositoryLocation">
         <property name="path" value="/app:company_home/app:dictionary/app:email_templates/app:notify_email_templates/cm:notify_user_email.html.ftl"/>
         <property name="queryLanguage" value="xpath"/>
+    </bean>
+    
+    <!--Service used for ddebugging-->
+    <bean id="debuggerService" class="fr.itldev.koya.alfservice.DebuggerService">
+        <property name="serviceRegistry" ref="ServiceRegistry"/>        
+        <property name="nodeService" ref="NodeService"/>
+        <property name="permissionService" ref="permissionService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
    
 </beans>

@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.SalesOffer;
@@ -31,9 +30,7 @@ import org.springframework.web.client.RestClientException;
 public interface CompanyService extends AlfrescoService {
 
     /**
-     * Création d'une nouvelle société.
-     *
-     * TODO passer un paramètre de template.
+     * Company creation
      *
      * @param admin
      * @param c
@@ -54,8 +51,7 @@ public interface CompanyService extends AlfrescoService {
     List<Company> list(User admin) throws RestClientException, AlfrescoServiceException;
 
     /**
-     * Suppression d'une société - méthode spécifique comparée à la suppression
-     * d'un noeud classique car il s'agit d'un site au sens Alfresco.
+     * Company deletion
      *
      * @param admin
      * @param company
@@ -65,7 +61,19 @@ public interface CompanyService extends AlfrescoService {
     void delete(User admin, Company company) throws RestClientException, AlfrescoServiceException;
 
     /**
-     * Liste les offres commerciales disponibles.
+     * List CompanyMembers by type filter setted.
+     *
+     * @param userLogged
+     * @param company
+     * @param rolesFilter
+     * @return
+     */
+    List<User> listMembers(User userLogged, Company company, List<String> rolesFilter) throws RestClientException, AlfrescoServiceException;
+
+    
+    
+    /**
+     * List Sales Offers
      *
      * @param admin
      * @param active
@@ -75,7 +83,7 @@ public interface CompanyService extends AlfrescoService {
     List<SalesOffer> listSalesOffer(User admin, Boolean... active) throws AlfrescoServiceException;
 
     /**
-     * Charge l'offre commerciale en cours dans la société.
+     * Change current sales offer for a company
      *
      * @param admin
      * @param s
@@ -84,7 +92,7 @@ public interface CompanyService extends AlfrescoService {
     void loadCurrentSalesOffer(User admin, Company s) throws AlfrescoServiceException;
 
     /**
-     * Charge l'historique des offres commerciales de la société.
+     * Loads Sales Offer History
      *
      * @param admin
      * @param c

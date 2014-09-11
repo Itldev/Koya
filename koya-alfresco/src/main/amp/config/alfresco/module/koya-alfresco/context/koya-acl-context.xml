@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    Koya is an alfresco module that provides a corporate orientated dataroom.
+
+    Copyright (C) Itl Developpement 2014
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+
+-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans> 
+    
+    
+    <bean name="companyAclService" class="fr.itldev.koya.alfservice.security.CompanyAclService">
+        <property name="siteService" ref="siteService"/>
+        <property name="authenticationService" ref="AuthenticationService" />
+        <property name="userService" ref="userService"/>
+        <property name="invitationService" ref="invitationService"/>
+        <property name="actionService" ref="ActionService"/>
+        <property name="authorityService" ref="AuthorityService"/>
+    </bean>
+    
+    
+    <bean name="subSpaceAclService" class="fr.itldev.koya.alfservice.security.SubSpaceAclService"
+          init-method="init">     
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="permissionService" ref="PermissionService"/>     
+        <property name="nodeService" ref="NodeService"/>       
+        <property name="authenticationService" ref="AuthenticationService"/>    
+        <property name="searchService" ref="SearchService"/> 
+        <property name="authorityService" ref="authorityService"/> 
+        <property name="siteService" ref="SiteService"/>       
+        <property name="invitationService" ref="invitationService"/>       
+        <property name="userService" ref="userService"/>       
+        <property name="companyService" ref="companyService"/>
+        <property name="policyComponent" ref="policyComponent"/>    
+        <property name="spaceService" ref="spaceService"/>  
+        <property name="dossierService" ref="dossierService"/>  
+        <property name="companyAclService" ref="companyAclService"/>
+    </bean>
+    
+    
+    <bean name="subSpaceConsumersAclService"
+          class="fr.itldev.koya.alfservice.security.SubSpaceConsumersAclService" 
+          parent="subSpaceAclService">     
+    </bean>
+    
+    <bean name="SubSpaceCollaboratorsAclService"
+          class="fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService" 
+          parent="subSpaceAclService">      
+    </bean>
+   
+</beans>

@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.Dossier;
@@ -82,6 +81,16 @@ public interface DossierService extends AlfrescoService {
     List<User> listResponsibles(User user, Dossier dossier) throws AlfrescoServiceException;
 
     /**
+     * List all users members of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    List<User> listMembers(User user, Dossier dossier) throws AlfrescoServiceException;
+
+    /**
      * Adds a user in charge of specified Dossier.
      *
      * @param user
@@ -90,6 +99,16 @@ public interface DossierService extends AlfrescoService {
      * @throws AlfrescoServiceException
      */
     void addResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException;
+
+    /**
+     * Adds a user member of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @param responsible
+     * @throws AlfrescoServiceException
+     */
+    void addMember(User user, Dossier dossier, User responsible) throws AlfrescoServiceException;
 
     /**
      * Add a list of users in charge of specified Dossier.
@@ -102,23 +121,23 @@ public interface DossierService extends AlfrescoService {
     void addResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException;
 
     /**
-     * Remove a user in charge of specified Dossier.
+     * Removes any collaborator role set on dossier.
      *
      * @param user
      * @param dossier
-     * @param responsible
+     * @param collaborator
      * @throws AlfrescoServiceException
      */
-    void delResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException;
+    void removeKoyaCollaboratorRole(User user, Dossier dossier, User collaborator) throws AlfrescoServiceException;
 
     /**
-     * Remove a list of users in charge of specified Dossier.
+     * Remove user member or responsible of specified Dossier.
      *
      * @param user
      * @param dossier
-     * @param responsibles
+     * @param memberOrResp
      * @throws AlfrescoServiceException
      */
-    void delResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException;
+    void delMemberOrResponsible(User user, Dossier dossier, User memberOrResp) throws AlfrescoServiceException;
 
 }

@@ -3,22 +3,22 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
+import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
@@ -30,6 +30,7 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.util.List;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class SecuServiceImpl extends AlfrescoRestService implements SecuService {
 
@@ -41,16 +42,7 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
             + "companiesFilter={companiesFilter}&maxResults={maxResults}";
     private static final String REST_GET_REVOKEUSERACCESS = "/s/fr/itldev/koya/user/revoke/{companyName}/{userName}";
     private static final String REST_GET_ISCOMPANYMANAGER = "/s/fr/itldev/koya/company/ismanager/{companyName}";
-
-    @Override
-    public List<User> usersGrantedDirect(User user, SecuredItem item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public List<User> usersGrantedInherit(User user, SecuredItem item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    private static final String REST_GET_PERMISSIONS = "/s/fr/itldev/koya/global/secu/permissions/{nodeRef}";
 
     @Override
     public List<UserRole> listAvailableRoles(User userLogged, Company c) throws AlfrescoServiceException {
@@ -170,4 +162,24 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
                         Boolean.class, c.getName(), c.getName());
 
     }
+
+    /**
+     * Get permissions on defined secured Item
+     *
+     * @param user
+     * @param s
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public Permissions getPermissions(User user, SecuredItem s) throws AlfrescoServiceException {
+        if (s == null) {
+            return null;
+        }
+        return user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_PERMISSIONS,
+                        Permissions.class, s.getNodeRef());
+
+    }
+
 }

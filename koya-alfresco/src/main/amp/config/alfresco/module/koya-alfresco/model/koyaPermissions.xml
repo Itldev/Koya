@@ -30,33 +30,48 @@
         <namespace uri="http://www.alfresco.org/model/system/1.0" prefix="sys"/>
         <namespace uri="http://www.alfresco.org/model/content/1.0" prefix="cm"/>
         <namespace uri="http://www.alfresco.org/model/site/1.0" prefix="st"/>
+        <namespace uri="http://www.itldev.fr/koyamodel/content/1.0" prefix="koya" />
     </namespaces>
   
-    <permissionSet type="st:site" expose="selected">
-   
+    <permissionSet type="koya:container" expose="selected">
         
-        <permissionGroup name="SiteManager" allowFullControl="true" expose="true" />
-      
-        <permissionGroup name="SiteCollaborator" allowFullControl="false" expose="true">
-            <includePermissionGroup permissionGroup="Collaborator" type="cm:cmobject" />
+        <permissionGroup name="KoyaResponsible" allowFullControl="true" expose="true" />
+        
+        
+        <permissionGroup name="KoyaMember" allowFullControl="false" expose="true">
+             <includePermissionGroup permissionGroup="Contributor" type="cm:cmobject" />
+            <!--<requiredPermission on="node" type="st:site" name="SiteCollaborator" />-->
         </permissionGroup>
+        
+        
+        <!-- 
+            Roles applied to SiteConsumers:
+            
+            KoyaClient : Allow read only control on nodes
+            KoyaPartner : Allow limited write access. TODO 
+        -->
       
-        <permissionGroup name="SiteContributor" allowFullControl="false" expose="true">
-            <includePermissionGroup permissionGroup="Contributor" type="cm:cmobject" />
-        </permissionGroup>
-      
-        <permissionGroup name="SiteConsumer" allowFullControl="false" expose="true">
+        <permissionGroup name="KoyaClient" allowFullControl="false" expose="true">           
             <includePermissionGroup permissionGroup="Consumer" type="cm:cmobject" />
             <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
+            <!--<requiredPermission on="node" type="st:site" name="SiteConsumer" />-->
         </permissionGroup>
         
-        <!--         
-        Koya specific role - a custom contributor 
-        -->
+        <permissionGroup name="KoyaClientContributor" allowFullControl="false" expose="true">           
+            <includePermissionGroup permissionGroup="Consumer" type="cm:cmobject" />
+            <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
+            <!--<requiredPermission on="node" type="st:site" name="SiteConsumer" />-->
+        </permissionGroup>
         
-        <permissionGroup name="SitePartner" allowFullControl="false" expose="true">
-            <includePermissionGroup permissionGroup="Contributor" type="cm:cmobject" />
-        </permissionGroup>      
+        
+        <permissionGroup name="KoyaPartner" allowFullControl="false" expose="true">            
+            <includePermissionGroup permissionGroup="AddChildren" type="sys:base"/>
+            <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
+            <includePermissionGroup type="sys:base" permissionGroup="ReadChildren"/>
+            <!--<requiredPermission on="node" type="st:site" name="SiteConsumer" />-->
+        </permissionGroup>
+      
+             
     </permissionSet>
     
 </permissions>

@@ -28,10 +28,10 @@
         <property name="extensionName">
             <value>koya</value>
         </property>
-        <property name="koyaAclService" ref="koyaAclService"/>
+        <property name="subSpaceAclService" ref="subSpaceAclService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>    
-        <property name="koyaShareService" ref="koyaShareService"/>        
         <property name="userService" ref="userService"/>
+        <property name="companyService" ref="companyService"/>
         <property name="serviceRegistry" ref="ServiceRegistry"/>
     </bean>    
 </beans>

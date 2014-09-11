@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.impl.Document;
@@ -36,7 +35,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     private static final String REST_POST_ADDDOSSIER = "/s/fr/itldev/koya/dossier/add/{parentNodeRef}";
     private static final String REST_POST_LISTCHILD = "/s/fr/itldev/koya/dossier/list?filter={filter}";
     private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
+    private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/dossier/member/list/{nodeRef}";
     private static final String REST_GET_ADDRESP = "/s/fr/itldev/koya/dossier/resp/add/{nodeRef}?userNames={userNames}";
+    private static final String REST_GET_ADDMEMBER = "/s/fr/itldev/koya/dossier/member/add/{nodeRef}?userNames={userNames}";
     private static final String REST_GET_DELRESP = "/s/fr/itldev/koya/dossier/resp/del/{nodeRef}?userNames={userNames}";
 
     private KoyaContentService KoyaContentService;
@@ -122,6 +123,22 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     }
 
     /**
+     * List all users in charge of specified Dossier.
+     *
+     * @param user
+     * @param dossier
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public List<User> listMembers(User user, Dossier dossier) throws AlfrescoServiceException {
+        return fromJSON(new TypeReference<List<User>>() {
+        }, user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl()
+                        + REST_GET_LISTMEMBERS, String.class, dossier.getNodeRef()));
+    }
+
+    /**
      * Adds a user in charge of specified Dossier.
      *
      * @param user
@@ -133,6 +150,13 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     public void addResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDRESP, String.class,
+                dossier.getNodeRef(), responsible.getUserName());
+    }
+
+    @Override
+    public void addMember(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
+        user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_ADDMEMBER, String.class,
                 dossier.getNodeRef(), responsible.getUserName());
     }
 
@@ -160,40 +184,33 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     }
 
     /**
-     * Remove a user in charge of specified Dossier.
+     * Removes any collaborator role set on dossier.
      *
      * @param user
      * @param dossier
-     * @param responsible
+     * @param collaborator
      * @throws AlfrescoServiceException
      */
     @Override
-    public void delResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
+    public void removeKoyaCollaboratorRole(User user, Dossier dossier, User collaborator) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP,
-                String.class, dossier.getNodeRef(), responsible.getUserName());
+                String.class, dossier.getNodeRef(), collaborator.getUserName());
     }
 
     /**
-     * Remove a list of users in charge of specified Dossier.
+     * Remove user member or responsible of specified Dossier.
      *
      * @param user
      * @param dossier
-     * @param responsibles
+     * @param memberOrResp
      * @throws AlfrescoServiceException
      */
     @Override
-    public void delResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException {
-
-        String userNames = "";
-        String sep = "";
-        for (User u : responsibles) {
-            userNames += sep + u.getUserName();
-            sep = ",";
-        }
+    public void delMemberOrResponsible(User user, Dossier dossier, User memberOrResp) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP,
-                String.class, dossier.getNodeRef(), userNames);
+                String.class, dossier.getNodeRef(), memberOrResp.getUserName());
     }
 
 }

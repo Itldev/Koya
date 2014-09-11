@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -36,7 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.site.SiteDoesNotExistException;
+import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.AssociationRef;
@@ -46,6 +46,7 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.site.SiteVisibility;
@@ -75,8 +76,8 @@ public class CompanyService {
     protected NodeService unprotNodeService;
     protected KoyaNodeService koyaNodeService;
     protected ModelService modelService;
-    private AuthenticationService authenticationService;
-    private FileFolderService fileFolderService;
+    protected AuthenticationService authenticationService;
+    protected FileFolderService fileFolderService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setSiteService(SiteService siteService) {
@@ -163,21 +164,6 @@ public class CompanyService {
     public SalesOffer getSalesOffer(String offerName) {
         return null;
 
-    }
-
-    /**
-     * Checks if current logged user is company manager on specified company.
-     *
-     * @param companyName
-     * @return
-     */
-    public Boolean isCompanyManager(String companyName) throws KoyaServiceException {
-        try {
-            return siteService.getMembersRole(companyName, authenticationService.getCurrentUserName()).
-                    equals(KoyaAclService.ROLE_SITE_MANAGER);
-        } catch (SiteDoesNotExistException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
-        }
     }
 
     /**

@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.Company;
@@ -134,19 +133,31 @@ public interface UserService {
     User getUserFromEmail(User user, String email) throws AlfrescoServiceException;
 
     /**
-     * Set wether or not a user receive an email notification on every document added
-     * 
+     * Get user Object from email. Do not fail if any error (like user not
+     * exists)
+     *
+     * @param user
+     * @param email
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    User getUserFromEmailFailProof(User user, String email);
+
+    /**
+     * Set wether or not a user receive an email notification on every document
+     * added
+     *
      * @param user
      * @param notify
-     * @throws AlfrescoServiceException 
+     * @throws AlfrescoServiceException
      */
     void setEmailNotification(User user, boolean notify) throws AlfrescoServiceException;
-    
+
     /**
-     * 
+     *
      * @param user
      * @return true if user notify on each new document.
-     * @throws AlfrescoServiceException 
+     * @throws AlfrescoServiceException
      */
     Boolean getEmailNotification(User user) throws AlfrescoServiceException;
 

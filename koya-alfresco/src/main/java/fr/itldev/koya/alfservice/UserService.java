@@ -3,40 +3,32 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
-import fr.itldev.koya.model.json.InviteWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.invitation.InvitationService;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -48,7 +40,6 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.PropertyMap;
 import org.apache.log4j.Logger;
-import org.springframework.util.Assert;
 
 /**
  *
@@ -64,8 +55,8 @@ public class UserService {
     protected SiteService siteService;
     protected InvitationService invitationService;
     protected KoyaNodeService koyaNodeService;
-    protected ActionService actionService;
 
+    // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
@@ -94,10 +85,7 @@ public class UserService {
         this.koyaNodeService = koyaNodeService;
     }
 
-    public void setActionService(ActionService actionService) {
-        this.actionService = actionService;
-    }
-
+    //</editor-fold>
     /**
      * User creation method.
      *
@@ -301,71 +289,31 @@ public class UserService {
     }
 
     /**
-     * Invite user identified by username to company with defined roleName
+     * Return user found by email. Return null if not found : no exception
+     * thrown
      *
-     *
-     * @param inviteWrapper
-     * @throws fr.itldev.koya.exception.KoyaServiceException
+     * @param authKey
+     * @return
      */
-    public void invite(InviteWrapper inviteWrapper) throws KoyaServiceException {
-
-        String userMail = inviteWrapper.getEmail();
-        String companyName = inviteWrapper.getCompanyName();
-        String roleName = inviteWrapper.getRoleName();
-        String serverPath = inviteWrapper.getServerPath();
-        String acceptUrl = inviteWrapper.getAcceptUrl();
-        String rejectUrl = inviteWrapper.getRejectUrl();
-
-        Assert.notNull(serverPath, "serverPath is null");
-        Assert.notNull(acceptUrl, "acceptUrl is null");
-        Assert.notNull(rejectUrl, "rejectUrl is null");
-
-        Company c = koyaNodeService.companyBuilder(companyName);
-
-        User u = null;
+    public User getUserByEmailFailOver(final String authKey) {
+        String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"" + authKey + "\" ";
+        List<User> users = new ArrayList<>();
+        ResultSet rs = null;
         try {
-            u = getUser(userMail);
-        } catch (KoyaServiceException kex) {
-            //do nothing if exception thrown
+            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
+            for (ResultSetRow r : rs) {
+                users.add(buildUser(r.getNodeRef()));
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
         }
-
-        if (u == null) {
-            invitationService.inviteNominated(null, userMail, userMail,
-                    Invitation.ResourceType.WEB_SITE, c.getName(),
-                    roleName, serverPath, acceptUrl, rejectUrl);
-
+        if (users.isEmpty() || users.size() > 1) {
+            return null;
         } else {
-
-            //custom invitation process --> TODO replace with workflow procedure
-            // 1 - Attribute role to existing user 
-            //TODO check previously existing role in site
-            siteService.setMembership(c.getName(), u.getUserName(), roleName);
-            // 2 - Send  template mail.
+            return users.get(0);
         }
-    }
-
-    /**
-     * Revoke user access to defined company.
-     *
-     * @param userName
-     * @param companyName
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public void revoke(String userName, String companyName) throws KoyaServiceException {
-        siteService.removeMembership(companyName, userName);
-
-        //Launch backend action that cleans all users specific permissions in company
-        //Only delete specific permissions on dossiers 
-        try {
-            Map<String, Serializable> paramsClean = new HashMap<>();
-            paramsClean.put("userName", userName);
-            Action cleanUserAuth = actionService.createAction("cleanPermissions", paramsClean);
-            cleanUserAuth.setExecuteAsynchronously(true);
-            actionService.executeAction(cleanUserAuth, siteService.getSite(companyName).getNodeRef());
-        } catch (InvalidNodeRefException ex) {
-            throw new KoyaServiceException(0, "");//TODO 
-        }
-
     }
 
     public List<UserConnection> getConnectionLog(String userName, List<String> companyFilter, Integer maxResults) {
