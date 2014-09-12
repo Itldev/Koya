@@ -69,6 +69,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find?"
             + "query={query}&maxResults={maxresults}&companyName={companyName}&roleFilter={roleFilter}";
     private static final String REST_GET_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword/{oldpwd}/{newpwd}";
+    private static final String REST_GET_HASPENDINGINVITATION = "/s/fr/itldev/koya/user/invitation/haspending/{userName}/{companyName}";
 
     //===== Preferences
     private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
@@ -392,6 +393,22 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         return user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl()
                         + REST_GET_EMAILNOTIFICATION, Boolean.class, user.getUserName());
+    }
+
+    /**
+     * Checks if user has connect once (or more) to company : ie has validated
+     * invotation link.
+     *
+     * @param userLogger
+     * @param c
+     * @param userChecked
+     * @return
+     */
+    @Override
+    public Boolean hasPendingInvitation(User userLogger, Company c, User userChecked) throws AlfrescoServiceException {
+        return userLogger.getRestTemplate().
+                getForObject(getAlfrescoServerUrl()
+                        + REST_GET_HASPENDINGINVITATION, Boolean.class, userChecked.getUserName(), c.getName());
     }
 
 }

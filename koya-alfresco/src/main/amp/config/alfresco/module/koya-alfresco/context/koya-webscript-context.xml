@@ -190,7 +190,7 @@
     </bean>
     
     
-     <!--list dossier members-->
+    <!--list dossier members-->
     <bean id="webscript.fr.itldev.koya.dossier.listmember.get" 
           class="fr.itldev.koya.webscript.dossier.ListMember"
           parent="webscript">                
@@ -429,6 +429,17 @@
           parent="webscript">                
         <property name="userService" ref="userService" /> 
     </bean>
+
+
+
+    <bean id="webscript.fr.itldev.koya.user.invitation.haspendinginvitation.get"
+          class="fr.itldev.koya.webscript.user.invitation.HasPendingInvitation"
+          parent="webscript">                
+        <property name="companyAclService" ref="companyAclService" /> 
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
+        <property name="userService" ref="userService" /> 
+    </bean>
+
 
     <!--
     ==================================================================

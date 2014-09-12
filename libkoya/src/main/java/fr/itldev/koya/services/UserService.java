@@ -161,4 +161,15 @@ public interface UserService {
      */
     Boolean getEmailNotification(User user) throws AlfrescoServiceException;
 
+    /**
+     * Checks if user has connect once (or more) to company : ie has validated
+     * invotation link.
+     *
+     * @param userLogger
+     * @param c
+     * @param userChecked
+     * @return
+     */
+    Boolean hasPendingInvitation(User userLogger, Company c, User userChecked)throws AlfrescoServiceException;
+
 }

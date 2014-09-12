@@ -178,8 +178,8 @@ public class CompanyAclService {
         }
     }
 
-    public Boolean hasPendingInvitation(String companyName, String userName) throws KoyaServiceException {
-        return listMembersPendingInvitation(companyName, null).contains(userService.getUserByUsername(userName));
+    public Boolean hasPendingInvitation(Company c, User u) throws KoyaServiceException {
+        return listMembersPendingInvitation(c.getName(), null).contains(u);
     }
 
     public SitePermission getSitePermission(Company c, String userMail) {
