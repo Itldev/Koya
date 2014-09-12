@@ -86,6 +86,7 @@ function main() {
     }
 
     var activityData = {
+        name: filename,
         title: filename,
         nodeRef: nodeRef.toString(),
         parentNodeRef: parentNodeRef.toString()

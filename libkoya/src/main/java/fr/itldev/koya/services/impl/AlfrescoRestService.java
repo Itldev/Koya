@@ -37,7 +37,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class AlfrescoRestService implements AlfrescoService {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private static final Logger logger = Logger.getLogger(AlfrescoRestService.class);
 
     private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos";
     private static final String REST_POST_MAIL = "/s/fr/itldev/koya/global/mail";
@@ -189,6 +189,7 @@ public class AlfrescoRestService implements AlfrescoService {
             data = new ObjectMapper().readValue(jsonPacket, type);
         } catch (Exception e) {
             // Handle the problem
+            logger.error(e.getMessage(), e);
         }
         return data;
     }

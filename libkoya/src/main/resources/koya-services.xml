@@ -111,4 +111,5 @@
     
     <bean id="searchService" class="fr.itldev.koya.services.impl.SearchServiceImpl" parent="abstractRestService"/>
 
+    <bean id="notificationService" class="fr.itldev.koya.services.impl.NotificationServiceImpl" parent="abstractRestService"/>
 </beans>

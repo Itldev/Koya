@@ -573,7 +573,7 @@ public class KoyaNodeService {
 
         nodeService.deleteNode(n);
         if (nodeRefType.equals(ContentModel.TYPE_CONTENT)) {
-            activityService.postActivity(ActivityType.FILE_DELETED, siteId, "koya", n, title, nodeRefType, parentNodeRef);
+            activityService.postActivity(ActivityType.FILE_DELETED, siteId, "koya", n, title, nodeRefType, n);
         }
     }
 
