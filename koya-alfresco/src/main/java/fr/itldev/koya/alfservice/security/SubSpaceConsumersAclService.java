@@ -52,17 +52,15 @@ public class SubSpaceConsumersAclService extends SubSpaceAclService {
         Company company = koyaNodeService.getNodeCompany(subSpace.getNodeRefasObject());
         SitePermission userPermissionInCompany = companyAclService.getSitePermission(company, userMail);
 
-        User u;
         Invitation invitation = null;
         //If user can't access specified company then invite him even if he alredy exists in alfresco
         if (userPermissionInCompany == null) {
             invitation = companyAclService.inviteMember(company, userMail, SitePermission.CONSUMER,
                     serverPath, acceptUrl, rejectUrl);
-            u = userService.getUserByUsername(invitation.getInviteeUserName());
-            userPermissionInCompany = SitePermission.CONSUMER;
-        } else {
-            u = userService.getUserByEmailFailOver(userMail);
+            userPermissionInCompany = companyAclService.getSitePermission(company, userMail);
         }
+
+        User u = userService.getUserByEmailFailOver(userMail);
 
         //Now user should exist for company as a site Consumer member
         if (userPermissionInCompany.equals(SitePermission.CONSUMER)) {
