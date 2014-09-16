@@ -173,12 +173,13 @@
         <property name="queryLanguage" value="xpath"/>
     </bean>
     
-    <!--Service used for ddebugging-->
+    <!--Service used for debugging-->
     <bean id="debuggerService" class="fr.itldev.koya.alfservice.DebuggerService">
         <property name="serviceRegistry" ref="ServiceRegistry"/>        
         <property name="nodeService" ref="NodeService"/>
         <property name="permissionService" ref="permissionService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
+         <property name="companyAclService" ref="companyAclService"/>
     </bean>
    
 </beans>

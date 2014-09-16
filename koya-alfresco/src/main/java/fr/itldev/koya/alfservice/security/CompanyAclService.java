@@ -128,7 +128,8 @@ public class CompanyAclService {
             Map<String, String> members = siteService.listMembers(companyName, null,
                     sp.toString(), 0);
             for (String userName : members.keySet()) {
-                if (!authorityService.isAdminAuthority(userName)) {
+                if (!authorityService.isAdminAuthority(userName)
+                        && invitationService.listPendingInvitationsForInvitee(userName).isEmpty()) {
                     usersOfCompanyValidated.add(userService.getUserByUsername(userName));
                 }
             }
@@ -151,10 +152,25 @@ public class CompanyAclService {
         if (permissionsFilter == null || permissionsFilter.isEmpty()) {
             permissionsFilter = SitePermission.getAll();
         }
-        for (Invitation i : invitationService.listPendingInvitationsForResource(Invitation.ResourceType.WEB_SITE, companyName)) {
+
+        for (SitePermission sp : permissionsFilter) {
+            Map<String, String> members = siteService.listMembers(companyName, null,
+                    sp.toString(), 0);
+            for (String userName : members.keySet()) {
+                if (!authorityService.isAdminAuthority(userName)
+                        && !invitationService.listPendingInvitationsForInvitee(userName).isEmpty()) {
+                    usersOfCompanyPendingInvitation.add(userService.getUserByUsername(userName));
+                }
+            }
+        }
+
+        for (Invitation i : invitationService.listPendingInvitationsForResource(
+                Invitation.ResourceType.WEB_SITE, companyName)) {
+            User u = userService.getUserByUsername(i.getInviteeUserName());
             for (SitePermission sp : permissionsFilter) {
-                if (sp.toString().equals(i.getRoleName())) {
-                    usersOfCompanyPendingInvitation.add(userService.getUserByUsername(i.getInviteeUserName()));
+                if (sp.equals(i.getRoleName())
+                        && !usersOfCompanyPendingInvitation.contains(u)) {
+                    usersOfCompanyPendingInvitation.add(u);
                 }
             }
         }
