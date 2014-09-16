@@ -337,6 +337,7 @@
           parent="webscript">                
         <property name="actionService" ref="ActionService" />
         <property name="authenticationService" ref="authenticationService"/>
+        <property name="searchService" ref="SearchService"/>
     </bean>
     
     
