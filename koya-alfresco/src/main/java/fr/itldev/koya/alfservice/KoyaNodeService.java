@@ -754,15 +754,34 @@ public class KoyaNodeService {
         return props;
     }
 
-    public NodeRef getNodeRefLucenePath(String path) {
-        ResultSet resultSet = searchService.query(
-                new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"),
-                SearchService.LANGUAGE_LUCENE, "PATH:\"" + path + "\"");
+    public Properties readPropertiesFileContent(String path) {
+        return readPropertiesFileContent(
+                getNodeRefLucenePath(path));
+    }
 
-        if (resultSet.length() == 1) {
-            return resultSet.getNodeRef(0);
-        } else {
-            logger.error("Invalid lucene path node : " + path);
+    public NodeRef getNodeRefLucenePath(String path) {
+
+        try {
+            ResultSet resultSet = searchService.query(
+                    new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"),
+                    SearchService.LANGUAGE_LUCENE, "PATH:\"" + path + "\"");
+
+            if (resultSet.length() == 1) {
+                return resultSet.getNodeRef(0);
+            } else {
+                logger.error("Invalid lucene path node : " + path);
+            }
+        } catch (Exception ex) {
+            logger.error("invalid lucene path given to getNodeRefLucenePath : path = " + path);
+            /**
+             * TODO throw KoyaServiceException that can be caugth by invitation process
+             * call in KoyaInviteSender 
+             * 
+             * bug not resolved now to make invitation process fail if problem occurs
+             */
+
+//            throw new KoyaServiceException(KoyaErrorCodes.INVALID_LUCENE_PATH,
+//                    "invalid lucene path given to getNodeRefLucenePath : path = " + path);
         }
         return null;
     }

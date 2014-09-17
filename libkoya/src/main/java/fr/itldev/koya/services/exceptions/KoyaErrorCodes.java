@@ -30,6 +30,7 @@ public interface KoyaErrorCodes {
     public static final Integer INVALID_SECUREDITEM_NODEREF = 2;
     public static final Integer INVALID_NODE_HIERACHY = 3;
     public static final Integer DUPLICATE_CHILD_RENAME = 4;
+    public static final Integer INVALID_LUCENE_PATH = 5;
 
     //100 -> companies errors
     public static final Integer COMPANY_EMPTY_TITLE = 100;

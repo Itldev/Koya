@@ -74,8 +74,7 @@ public class ShareMailNotificationBehaviour implements SharePolicies.AfterShareP
                 logger.error("Invalid Share Mail Notification template path : " + templatePath);
                 return;
             }
-            Properties i18n = koyaNodeService.readPropertiesFileContent(
-                    koyaNodeService.getNodeRefLucenePath(i18nPropertiesPath));
+            Properties i18n = koyaNodeService.readPropertiesFileContent(i18nPropertiesPath);
             if (i18n == null) {
                 logger.error("Invalid koya Mail properties path : " + i18nPropertiesPath);
                 return;

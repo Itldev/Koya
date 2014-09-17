@@ -119,18 +119,17 @@ public class KoyaInviteSender extends InviteSender {
 
         /**
          * KOYA : specific email subject
-         * 
+         *
          * TODO create service that return standard exception Code if any error
-         * 
-         * 
+         *
+         *
          */
-        Properties i18n = koyaNodeService.readPropertiesFileContent(
-                koyaNodeService.getNodeRefLucenePath(i18nPropertiesPath));
+        Properties i18n = koyaNodeService.readPropertiesFileContent(i18nPropertiesPath);
         if (i18n == null) {
             logger.error("Invalid koya Mail properties path : " + i18nPropertiesPath);
             return;
         }
-        
+
         mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(EMAIL_SUBJECT).replace("{0}", getSiteName(properties)));
         /**
          *

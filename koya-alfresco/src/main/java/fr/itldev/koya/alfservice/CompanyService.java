@@ -182,6 +182,7 @@ public class CompanyService {
 
         Properties compProperties;
         try {
+            //TODO use lucene path to retrieve node reference.
             compProperties = koyaNodeService.readPropertiesFileContent(getCompanyConfigFile(c, PREFS_FILE_NAME));
         } catch (NullPointerException nex) {
             return prefs;
@@ -206,6 +207,7 @@ public class CompanyService {
         Company c = koyaNodeService.companyBuilder(companyName);
         Properties compProperties;
         try {
+            //TODO use lucene path to retrieve node reference.
             compProperties = koyaNodeService.readPropertiesFileContent(getCompanyConfigFile(c, PREFS_FILE_NAME));
         } catch (NullPointerException nex) {
             return "";
