@@ -119,6 +119,10 @@ public class KoyaInviteSender extends InviteSender {
 
         /**
          * KOYA : specific email subject
+         * 
+         * TODO create service that return standard exception Code if any error
+         * 
+         * 
          */
         Properties i18n = koyaNodeService.readPropertiesFileContent(
                 koyaNodeService.getNodeRefLucenePath(i18nPropertiesPath));

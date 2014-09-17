@@ -56,6 +56,11 @@ public class Permissions {
 //    private static final Integer Lock = 0;
 //    private static final Integer Unlock = 0;
 
+    /**
+     * Koya specific permissions
+     */
+    private static final Integer shareWithCustomer = 15;
+    //
     private String username;
     private String nodeRef;
     private Map<Integer, Boolean> perms = new HashMap<>();
@@ -84,8 +89,8 @@ public class Permissions {
     public void setPerms(Map<Integer, Boolean> perms) {
         this.perms = perms;
     }
-    //</editor-fold>
 
+    //</editor-fold>
     public Permissions() {
     }
 
@@ -153,6 +158,14 @@ public class Permissions {
 
     public void canChangePermissions(Boolean perm) {
         perms.put(ChangePermissions, perm);
+    }
+
+    /*
+     *
+     * === koya specific permissions ===
+     */
+    public void canShareWithCustomer(Boolean perm) {
+        perms.put(shareWithCustomer, perm);
     }
 
     /*
@@ -240,8 +253,8 @@ public class Permissions {
     }
 
     /*
-     *  ========= indirect permissions ========
-     *  
+     *
+     * === koya specific permissions ===
      */
     @JsonIgnore
     public Boolean getCanRename() {
@@ -256,6 +269,16 @@ public class Permissions {
     @JsonIgnore
     public Boolean getCanShare() {
         return getCanChangePermissions();
+    }
+
+    @JsonIgnore
+    public Boolean getCanShareWithCustomers() {
+        return perms.get(shareWithCustomer);
+    }
+
+    @JsonIgnore
+    public Boolean getCanGrantPermissionsOnChildren() {
+        return getCanCreateChildren();
     }
 
 }

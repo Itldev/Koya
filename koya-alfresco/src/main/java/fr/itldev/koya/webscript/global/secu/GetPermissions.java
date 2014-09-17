@@ -19,11 +19,13 @@
 package fr.itldev.koya.webscript.global.secu;
 
 import fr.itldev.koya.alfservice.security.SubSpaceAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
@@ -43,7 +45,12 @@ public class GetPermissions extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
         NodeRef nodeRef = new NodeRef(urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-        String response = KoyaWebscript.getObjectAsJson(subSpaceAclService.getPermissions(nodeRef));
+        String response;
+        try {
+            response = KoyaWebscript.getObjectAsJson(subSpaceAclService.getPermissions(nodeRef));
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        }
         res.setContentType("application/json");
         res.getWriter().write(response);
     }
