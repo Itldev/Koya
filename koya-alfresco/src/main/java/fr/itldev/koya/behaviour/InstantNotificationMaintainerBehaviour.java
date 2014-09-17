@@ -36,7 +36,7 @@ public class InstantNotificationMaintainerBehaviour implements SharePolicies.Aft
 
     /**
      *
-     * TODO refine notifications against Permission :  
+     * TODO refine notifications against Permission :
      *
      */
     protected static Log logger = LogFactory.getLog(InstantNotificationMaintainerBehaviour.class);
@@ -66,7 +66,7 @@ public class InstantNotificationMaintainerBehaviour implements SharePolicies.Aft
     }
 
     @Override
-    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation) {
+    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter) {
         try {
             User u = userService.getUserByEmailFailOver(userMail);
 
@@ -79,7 +79,7 @@ public class InstantNotificationMaintainerBehaviour implements SharePolicies.Aft
     }
 
     @Override
-    public void afterUnshareItem(NodeRef nodeRef, String userMail) {
+    public void afterUnshareItem(NodeRef nodeRef, String userMail, User inviter) {
         try {
             User u = userService.getUserByEmailFailOver(userMail);
 

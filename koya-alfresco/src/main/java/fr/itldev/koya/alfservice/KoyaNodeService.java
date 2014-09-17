@@ -55,6 +55,9 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
@@ -82,6 +85,7 @@ public class KoyaNodeService {
     private ActivityService activityService;
     private SiteService siteService;
     private AncestorNodeLocator ancestorNodeLocator;
+    protected SearchService searchService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -126,6 +130,10 @@ public class KoyaNodeService {
 
     public void setAncestorNodeLocator(AncestorNodeLocator ancestorNodeLocator) {
         this.ancestorNodeLocator = ancestorNodeLocator;
+    }
+
+    public void setSearchService(SearchService searchService) {
+        this.searchService = searchService;
     }
 
     // </editor-fold>
@@ -744,5 +752,18 @@ public class KoyaNodeService {
             }
         }
         return props;
+    }
+
+    public NodeRef getNodeRefLucenePath(String path) {
+        ResultSet resultSet = searchService.query(
+                new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"),
+                SearchService.LANGUAGE_LUCENE, "PATH:\"" + path + "\"");
+
+        if (resultSet.length() == 1) {
+            return resultSet.getNodeRef(0);
+        } else {
+            logger.error("Invalid lucene path node : " + path);
+        }
+        return null;
     }
 }

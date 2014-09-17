@@ -1,6 +1,7 @@
 package fr.itldev.koya.behaviour;
 
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.policies.SharePolicies;
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
@@ -26,7 +27,7 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
     }
 
     @Override
-    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation) {
+    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter) {
         if (invitation == null) {
             /**
              * TODO send koya specific sharing alert

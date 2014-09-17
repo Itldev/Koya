@@ -19,6 +19,7 @@
 package fr.itldev.koya.policies;
 
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.User;
 import org.alfresco.repo.policy.ClassPolicy;
 import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -39,8 +40,9 @@ public interface SharePolicies {
          *
          * @param nodeRef the reference to the item about to be shared
          * @param userMail
+         * @param inviter
          */
-        public void beforeShareItem(NodeRef nodeRef, String userMail);
+        public void beforeShareItem(NodeRef nodeRef, String userMail, User inviter);
     }
 
     public interface AfterSharePolicy extends ClassPolicy {
@@ -55,8 +57,9 @@ public interface SharePolicies {
          * @param nodeRef the reference to the item has been shared
          * @param userMail
          * @param invitation
+         * @param inviter
          */
-        public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation);
+        public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter);
     }
 
     public interface BeforeUnsharePolicy extends ClassPolicy {
@@ -70,8 +73,9 @@ public interface SharePolicies {
          *
          * @param nodeRef the reference to the item about to be unshared
          * @param userMail
+         * @param revoker
          */
-        public void beforeUnshareItem(NodeRef nodeRef, String userMail);
+        public void beforeUnshareItem(NodeRef nodeRef, String userMail, User revoker);
     }
 
     public interface AfterUnsharePolicy extends ClassPolicy {
@@ -85,7 +89,8 @@ public interface SharePolicies {
          *
          * @param nodeRef the reference to the item has been unshared
          * @param userMail
+         * @param revoker
          */
-        public void afterUnshareItem(NodeRef nodeRef, String userMail);
+        public void afterUnshareItem(NodeRef nodeRef, String userMail, User revoker);
     }
 }

@@ -1,0 +1,49 @@
+<view:view xmlns:view="http://www.alfresco.org/view/repository/1.0"
+           xmlns:cm="http://www.alfresco.org/model/content/1.0" xmlns:app="http://www.alfresco.org/model/application/1.0"
+           xmlns:emailserver="http://www.alfresco.org/model/emailserver/1.0">
+
+    <cm:folder view:childName="cm:koya_templates">
+        <app:uifacets />
+        <cm:name>Koya Mail Templates</cm:name>
+        <app:icon>space-icon-default</app:icon>
+        <cm:title>Koya Mail Templates</cm:title>
+        <cm:description></cm:description>
+        <cm:contains>
+            <cm:content view:childName="cm:share-notification.html.ftl">
+                <view:aspects>
+                    <cm:titled />
+                    <cm:author />
+                    <app:inlineeditable />
+                </view:aspects>
+                <view:properties>
+                    <app:editInline>true</app:editInline>
+                    <cm:description></cm:description>
+                    <cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/share-notification.html.ftl|mimetype=text/plain|size=1455|encoding=UTF-8</cm:content>
+                    <cm:title>Share notification Template</cm:title>
+                    <cm:author>Me</cm:author>
+                    <cm:name>share-notification.html.ftl</cm:name>
+                </view:properties>
+                <view:associations></view:associations>
+            </cm:content>        
+             <cm:content view:childName="cm:koyamail_fr.properties">
+                <view:aspects>
+                    <cm:titled />
+                    <cm:author />
+                    <app:inlineeditable />
+                </view:aspects>
+                <view:properties>
+                    <app:editInline>true</app:editInline>
+                    <cm:description></cm:description>
+                    <cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/koyamail_fr.properties|mimetype=text/plain|size=1455|encoding=UTF-8</cm:content>
+                    <cm:title>koyamail_fr.properties</cm:title>
+                    <cm:author>Me</cm:author>
+                    <cm:name>koyamail_fr.properties</cm:name>
+                </view:properties>
+                <view:associations></view:associations>
+            </cm:content>                    
+        </cm:contains>
+    </cm:folder>
+        
+</view:view>
+
+

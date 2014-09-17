@@ -106,4 +106,21 @@
     </bean>
     
     
+    <!-- Send Email notification to share invitee     
+    -->
+    <bean id="ShareMailNotificationBehaviour" class="fr.itldev.koya.behaviour.ShareMailNotificationBehaviour"
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
+        <property name="policyComponent" ref="policyComponent" />
+        <property name="templatePath">
+            <value>${koya.template.share-notification}</value>
+        </property>
+        <property name="i18nPropertiesPath">
+            <value>${koya.i18n.mail}</value>
+        </property>
+        <property name="contentService" ref="contentService"/>
+        <property name="actionService" ref="actionService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />       
+    </bean>
+    
+    
 </beans>

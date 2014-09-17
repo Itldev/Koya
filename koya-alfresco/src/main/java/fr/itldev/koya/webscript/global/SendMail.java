@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import org.alfresco.repo.action.executer.MailActionExecuter;
-import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -98,7 +97,7 @@ public class SendMail extends AbstractWebScript {
                     if (mw.getTemplatePath() != null) {
                         ResultSet resultSet = searchService.query(
                                 new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"),
-                                SearchService.LANGUAGE_LUCENE, mw.getTemplatePath());
+                                SearchService.LANGUAGE_LUCENE, "PATH:\"" + mw.getTemplatePath() + "\"");
                         if (resultSet.length() == 0) {
                             logger.error("Template " + mw.getTemplatePath() + " not found.");
                             return;

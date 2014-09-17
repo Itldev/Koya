@@ -239,7 +239,7 @@ public class EmailNotificationService {
 
         ActionCondition actionCondition = actionService.createActionCondition(IsSubTypeEvaluator.NAME);
 
-        Map<String, Serializable> conditionParameters = new HashMap<String, Serializable>(1);
+        Map<String, Serializable> conditionParameters = new HashMap<>(1);
         conditionParameters.put(IsSubTypeEvaluator.PARAM_TYPE, ContentModel.TYPE_CONTENT); // setting subtypes to CONTENT
         actionCondition.setParameterValues(conditionParameters);
 
@@ -248,7 +248,7 @@ public class EmailNotificationService {
         Action action = actionService.createAction(MailActionExecuter.NAME);	     // Send mail Action            
         action.setExecuteAsynchronously(true);
 
-        Map<String, Serializable> ruleParameters = new HashMap<String, Serializable>(1);
+        Map<String, Serializable> ruleParameters = new HashMap<>(1);
 
         ruleParameters.put(MailActionExecuter.PARAM_TO_MANY, new ArrayList(Arrays.asList(username)));
         ruleParameters.put(MailActionExecuter.PARAM_SUBJECT, "Nouvel élément ajouté");

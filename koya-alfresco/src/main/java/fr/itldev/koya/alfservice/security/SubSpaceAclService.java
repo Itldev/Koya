@@ -234,7 +234,6 @@ public class SubSpaceAclService {
     public void revokeSubSpacePermission(SubSpace subSpace, String authority, KoyaPermission permission) {
         logger.debug("Revoke permission '" + permission.toString() + "' to '" + authority + "' on '" + subSpace.getName() + "'");
         beforeRevokeKoyaPermissionDelegate.get(
-           
                 nodeService.getType(subSpace.getNodeRefasObject()))
                 .beforeRevokeKoyaPermission(subSpace, authority, permission);
         permissionService.deletePermission(subSpace.getNodeRefasObject(),
@@ -244,8 +243,8 @@ public class SubSpaceAclService {
     }
 
     /**
-     
-    /**
+     *
+     * /**
      *
      * @param subSpace
      * @param userMail
@@ -257,11 +256,14 @@ public class SubSpaceAclService {
      */
     public void shareSecuredItem(SubSpace subSpace, String userMail, KoyaPermission perm,
             String serverPath, String acceptUrl, String rejectUrl) throws KoyaServiceException {
+
+        User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
+
         beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .beforeShareItem(subSpace.getNodeRefasObject(), userMail);
+                .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter);
         Invitation invitation = shareSecuredItemImpl(subSpace, userMail, perm, serverPath, acceptUrl, rejectUrl);
         afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation);
+                .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter);
 
     }
 
@@ -272,8 +274,10 @@ public class SubSpaceAclService {
 
     public void unShareSecuredItem(SubSpace subSpace, String userMail, KoyaPermission perm)
             throws KoyaServiceException {
+
+        User revoker = userService.getUserByUsername(authenticationService.getCurrentUserName());
         beforeUnshareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .beforeUnshareItem(subSpace.getNodeRefasObject(), userMail);
+                .beforeUnshareItem(subSpace.getNodeRefasObject(), userMail, revoker);
         logger.debug("Unshare " + subSpace.getName() + " for " + userMail + " permission = " + perm.toString());
 
         //Gets the user involved in unsharing - throws execption if not found
@@ -285,7 +289,7 @@ public class SubSpaceAclService {
             logger.error("Unsupported unsharing type " + subSpace.getClass().getSimpleName());
         }
         afterUnshareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .afterUnshareItem(subSpace.getNodeRefasObject(), userMail);
+                .afterUnshareItem(subSpace.getNodeRefasObject(), userMail, revoker);
 
     }
 
@@ -443,7 +447,7 @@ public class SubSpaceAclService {
      * Return every Readable by user SecuredItem Node found in application.
      *
      * If typesFilter is not null, filter in type class given.
-     * 
+     *
      * TODO move to correct service : nothing to do in Acl service
      *
      *
