@@ -100,8 +100,7 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
    
-    <!--Data Import/Export Service-->
-    <bean name="importExportService" class="fr.itldev.koya.alfservice.ImportExportService"/>
+ 
     <!--Model Handling service-->
     <bean name="modelService" class="fr.itldev.koya.alfservice.ModelService">
         <property name="nodeService" ref="NodeService"/>
@@ -110,18 +109,7 @@
         <property name="siteService" ref="SiteService"/>
     </bean>
     
-    <!--Question/Answer Handling service-->
-    <bean name="qaService" class="fr.itldev.koya.alfservice.QaService"/>
-    <!--Statistics Handling Service-->
-    <bean name="statService" class="fr.itldev.koya.alfservice.StatService"/>
     
-    <!--Alerts Handling Service-->
-    <bean name="alertService" class="fr.itldev.koya.alfservice.AlertService"/>
-    
-    <!--Mailing Service-->
-    <bean name="mailingService" class="fr.itldev.koya.alfservice.MailingService"/>
-    
-  
     
     
     <!--  Invitation Service Configuration File --> 
