@@ -69,7 +69,7 @@ public class SendMail extends AbstractWebScript {
 
             ObjectMapper mapper = new ObjectMapper();
             MailWrapper mw = mapper.readValue(req.getContent().getReader(), MailWrapper.class);
-            logger.error(mw.toString());
+            logger.debug(mw.toString());
 
             //TODO get authentication info (guest or not --> snder or not )
             try {
