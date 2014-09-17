@@ -19,6 +19,7 @@ import org.alfresco.repo.invitation.site.KoyaInviteSender;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.workflow.WorkflowModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.ActionService;
@@ -125,6 +126,30 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
             }
         }, AuthenticationUtil.getSystemUserName());
     }
+    
+    @Override
+     public void acceptNominatedInvitation(Map<String, Object> executionVariables)
+    {
+        final String invitee = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarInviteeUserName);
+        String siteShortName = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarResourceName);
+        String inviter = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarInviterUserName);
+        String role = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarRole);
+        
+        AuthenticationUtil.runAsSystem(new RunAsWork<Void>()
+        {
+            @Override
+            public Void doWork() throws Exception
+            {
+                if (authenticationService.isAuthenticationMutable(invitee))
+                {
+                    authenticationService.setAuthenticationEnabled(invitee, true);
+                }
+                return null;
+            }
+        });
+        addSiteMembership(invitee, siteShortName, role, inviter, false);
+    }
+    
 
     @Override
     public void sendNominatedInvitation(String inviteId, Map<String, Object> executionVariables) {
