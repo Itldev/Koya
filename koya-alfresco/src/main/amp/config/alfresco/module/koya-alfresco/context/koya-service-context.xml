@@ -149,7 +149,10 @@
         <property name="serviceRegistry" ref="ServiceRegistry"/>
         <property name="repositoryHelper" ref="repositoryHelper"/>
         <property name="messageService" ref="messageService"/>
-        <property name="siteService" ref="SiteService"/>
+        <property name="i18nPropertiesPath">
+            <value>${koya.i18n.mail}</value>
+        </property>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
 
 
