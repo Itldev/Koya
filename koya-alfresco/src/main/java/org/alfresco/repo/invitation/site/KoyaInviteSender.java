@@ -126,8 +126,8 @@ public class KoyaInviteSender extends InviteSender {
             logger.error("Invalid koya Mail properties path : " + i18nPropertiesPath);
             return;
         }
-
-        mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(EMAIL_SUBJECT));
+        
+        mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(EMAIL_SUBJECT).replace("{0}", getSiteName(properties)));
         /**
          *
          */
