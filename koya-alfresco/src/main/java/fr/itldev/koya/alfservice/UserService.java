@@ -40,6 +40,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.PropertyMap;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -240,6 +241,7 @@ public class UserService {
         u.setName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_LASTNAME));
         u.setEmail((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));
         u.setEmailFeedDisabled((Boolean) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL_FEED_DISABLED));
+        u.setEnabled(!(Boolean)nodeService.hasAspect(userNodeRef, ContentModel.ASPECT_PERSON_DISABLED));
         u.setNodeRef(userNodeRef.toString());
 
         return u;
@@ -322,4 +324,26 @@ public class UserService {
         return connectionLog;
     }
 
+    /**
+     * Helper method to get the activity data for a user
+     *
+     * @param userMail  user mail
+     * @return
+     */
+    public String getActivityUserData(String userMail) throws KoyaServiceException {
+        User user = getUser(userMail);
+        String memberFN = "";
+        String memberLN = "";
+
+        memberFN = user.getFirstName();
+        memberLN = user.getName();
+
+        JSONObject activityData = new JSONObject();
+        activityData.put("memberUserName", userMail);
+        activityData.put("memberFirstName", memberFN);
+        activityData.put("memberLastName", memberLN);
+        activityData.put("title", (memberFN + " " + memberLN + " ("
+                + userMail + ")").trim());
+        return activityData.toString();
+    }
 }

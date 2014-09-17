@@ -143,6 +143,7 @@
             <ref bean="policyComponent" />
         </property>
         <property name="sysAdminParams" ref="sysAdminParams"/>
+        
     </bean>
 
     <bean id="InviteHelper" class="org.alfresco.repo.invitation.KoyaInviteHelper">

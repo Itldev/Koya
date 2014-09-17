@@ -102,7 +102,10 @@
     <bean id="ShareNotificationBehaviour" class="fr.itldev.koya.behaviour.ShareNotificationBehaviour"
           init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
         <property name="policyComponent" ref="policyComponent" />
-       
+        <property name="siteService" ref="siteService"/>
+        <property name="activityService" ref="activityService"/>
+        <property name="userService" ref="userService"/>
+        <property name="invitationService" ref="invitationService" />
     </bean>
     
     

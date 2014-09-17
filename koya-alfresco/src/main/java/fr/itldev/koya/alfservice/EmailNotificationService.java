@@ -76,7 +76,7 @@ public class EmailNotificationService {
     private static final String RULE_NAME_EMAIL = "email_notification_rule";
     private static final String MSG_EMAIL_SUBJECT = "activities.feed.notifier.email.subject";
 
-    private static List<QName> TYPEFILTER_DOSSIER = Collections.unmodifiableList(new ArrayList<QName>() {
+    private static final List<QName> TYPEFILTER_DOSSIER = Collections.unmodifiableList(new ArrayList<QName>() {
         {
             add(KoyaModel.TYPE_DOSSIER);
         }

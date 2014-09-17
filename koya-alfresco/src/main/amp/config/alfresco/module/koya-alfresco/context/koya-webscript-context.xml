@@ -386,7 +386,9 @@
         <property name="userService" ref="userService" /> 
         <property name="invitationService" ref="invitationService" /> 
         <property name="workflowService" ref="WorkflowService" /> 
-
+        <property name="subSpaceAclService" ref="subSpaceAclService" /> 
+        <property name="activityService" ref="activityService" />
+        <property name="siteService" ref="siteService" />
     </bean>
     
     <!-- get user role for a company -->

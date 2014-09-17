@@ -68,6 +68,7 @@ public interface KoyaErrorCodes {
     public static final Integer INVITATION_PROCESS_USER_MODIFICATION_ERROR = 552;
     public static final Integer INVITATION_PROCESS_ACCEPT_ERROR = 553;
     public static final Integer INVITATION_ALREADY_COMPLETED = 554;
+    public static final Integer INVITATION_PROCESS_POST_ACTIVITY_ERROR = 555;
 
     //600 -> Sales Offer
     public static final Integer SALES_OFFER_LACK_MANDATORY_PROPERTY = 600;

@@ -19,21 +19,33 @@
 package fr.itldev.koya.webscript.user;
 
 import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.NotificationType;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import org.alfresco.query.PagingRequest;
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
+import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -51,6 +63,9 @@ public class ValidateInvitation extends AbstractWebScript {
     private UserService userService;
     private InvitationService invitationService;
     private WorkflowService workflowService;
+    protected SubSpaceAclService subSpaceAclService;
+    protected ActivityService activityService;
+    protected SiteService siteService;
 
     public void setUserService(UserService userService) {
         this.userService = userService;
@@ -62,6 +77,18 @@ public class ValidateInvitation extends AbstractWebScript {
 
     public void setWorkflowService(WorkflowService workflowService) {
         this.workflowService = workflowService;
+    }
+
+    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
+        this.subSpaceAclService = subSpaceAclService;
+    }
+
+    public void setActivityService(ActivityService activityService) {
+        this.activityService = activityService;
+    }
+
+    public void setSiteService(SiteService siteService) {
+        this.siteService = siteService;
     }
 
     @Override
@@ -114,58 +141,108 @@ public class ValidateInvitation extends AbstractWebScript {
 
             if (!invitation.getTicket().equals(inviteTicket)) {
                 throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_TICKET);
-            } else {
-                userInvited.setUserName(invitation.getInviteeUserName());
-                userInvited.setEmail(invitation.getInviteeEmail());
-
-                Map<QName, Serializable> taskProps = startTask.getProperties();
-                final String oldPassword = (String) taskProps.get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_GEN_PASSWORD);
-
-                //First accept invitation
-                Exception eInvite = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
-                    @Override
-                    public Exception doWork() throws Exception {
-
-                        try {
-                            invitationService.accept(invitationId, inviteTicket);
-                        } catch (Exception ex) {
-                            //TODO detect already accepted/rejected invitation -> KoyaErrorCodes.INVITATION_ALREADY_COMPLETED
-                            //startTask.getState().equals(WorkflowTaskState.COMPLETED 
-                            //condition is always true even if not already accepted ...
-                            return ex;
-                        }
-                        return null;
-                    }
-                }, invitation.getInviteeUserName());
-
-                if (eInvite != null) {
-                    throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_ACCEPT_ERROR, eInvite);
-                }
-
-                // then modify user properties and password
-                Exception eModify = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
-                    @Override
-                    public Exception doWork() throws Exception {
-                        try {
-
-                            userService.modifyUser(userInvited);
-                            userService.changePassword(oldPassword, newPassword);
-                        } catch (Exception ex) {
-                            return ex;
-                        }
-                        return null;
-                    }
-                }, invitation.getInviteeUserName());
-
-                if (eModify != null) {
-                    throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
-                }
             }
 
+            userInvited.setUserName(invitation.getInviteeUserName());
+            userInvited.setEmail(invitation.getInviteeEmail());
+
+            Map<QName, Serializable> taskProps = startTask.getProperties();
+            final String oldPassword = (String) taskProps.get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_GEN_PASSWORD);
+
+            //First accept invitation
+            Exception eInvite = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
+                @Override
+                public Exception doWork() throws Exception {
+
+                    try {
+                        invitationService.accept(invitationId, inviteTicket);
+                    } catch (Exception ex) {
+                        //TODO detect already accepted/rejected invitation -> KoyaErrorCodes.INVITATION_ALREADY_COMPLETED
+                        //startTask.getState().equals(WorkflowTaskState.COMPLETED 
+                        //condition is always true even if not already accepted ...
+                        return ex;
+                    }
+                    return null;
+                }
+            }, invitation.getInviteeUserName());
+
+            if (eInvite != null) {
+                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_ACCEPT_ERROR, eInvite);
+            }
+
+            // then modify user properties and password
+            Exception eModify = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
+                @Override
+                public Exception doWork() throws Exception {
+                    try {
+
+                        userService.modifyUser(userInvited);
+                        userService.changePassword(oldPassword, newPassword);
+                    } catch (Exception ex) {
+                        return ex;
+                    }
+                    return null;
+                }
+            }, invitation.getInviteeUserName());
+
+            if (eModify != null) {
+                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
+            }
+
+            //Post an activity for dossiers shared to this user.
+            final String companyId = (String) startTask.getProperties().get(WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME);
+            Exception ePostActivity = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
+                @Override
+                public Exception doWork() throws Exception {
+                    try {
+
+                        List<SecuredItem> securedItems = subSpaceAclService.getReadableSecuredItem(userInvited, new ArrayList<QName>() {
+                            {
+                                add(KoyaModel.TYPE_DOSSIER);
+                            }
+                        });
+                        for (SecuredItem item : securedItems) {
+                            if (siteService.getSite(item.getNodeRefasObject()).getShortName().equals(companyId)) {
+                                activityService.postActivity(NotificationType.KOYA_SHARED, companyId, "koya", getActivityData(userInvited, item.getNodeRefasObject()), invitation.getInviteeUserName());
+                            }
+                        }
+                    } catch (Exception ex) {
+                        return ex;
+                    }
+                    return null;
+                }
+            }, invitation.getInviteeUserName());
+
+            if (ePostActivity != null) {
+                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_POST_ACTIVITY_ERROR, ePostActivity);
+            }
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");
         res.getWriter().write("");
     }
+
+    /**
+     * Helper method to get the activity data for a user
+     *
+     * @param userName user name
+     * @param role role
+     * @return
+     */
+    private String getActivityData(User user, NodeRef nodeRef) throws KoyaServiceException {
+        String memberFN = user.getFirstName();
+        String memberLN = user.getName();
+        String userMail = user.getEmail();
+
+        JSONObject activityData = new JSONObject();
+        activityData.put("memberUserName", userMail);
+        activityData.put("memberFirstName", memberFN);
+        activityData.put("memberLastName", memberLN);
+        activityData.put("title", (memberFN + " " + memberLN + " ("
+                + userMail + ")").trim());
+        activityData.put("nodeRef", nodeRef.toString());
+        return activityData.toString();
+    }
+
 }

@@ -50,7 +50,7 @@ public final class User extends SecuredItem implements AlfrescoNode {
     private String ticketAlfresco;
     @JsonIgnore
     private Preferences preferences;
-
+    
     @JsonIgnore
     private RestTemplate restTemplate;
 
