@@ -3,10 +3,7 @@ package fr.itldev.koya.behaviour;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
-<<<<<<< HEAD
-=======
 import fr.itldev.koya.model.NotificationType;
->>>>>>> Post activity for share and unshare of dossiers
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.policies.SharePolicies;
 import java.util.List;
