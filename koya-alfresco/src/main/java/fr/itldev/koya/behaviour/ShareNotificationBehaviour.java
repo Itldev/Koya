@@ -71,18 +71,14 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
 
                     if (invitations.isEmpty()) {
                         //Posting the according activity
-                        activityService.postActivity(NotificationType.KOYA_SHARED, siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
-
-                        /**
-                         * TODO send koya specific sharing alert
-                         */
+                        activityService.postActivity(NotificationType.KOYA_SHARED, 
+                                siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
                     }
                 }
             } catch (KoyaServiceException ex) {
                 logger.error(ex.getMessage(), ex);
             }
 
-            logger.error("TODO send subspace sharing alert by email");
         } else {
             //Nothing to do : invitation sent 
         }
