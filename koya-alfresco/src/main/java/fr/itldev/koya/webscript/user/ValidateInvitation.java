@@ -185,7 +185,8 @@ public class ValidateInvitation extends AbstractWebScript {
                 }
             }, invitation.getInviteeUserName());
 
-            if (eModify != null) {
+            if (eModify != null) {                
+                eModify.printStackTrace();
                 throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
             }
 
