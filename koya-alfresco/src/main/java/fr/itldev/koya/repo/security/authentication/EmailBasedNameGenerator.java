@@ -16,21 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
  */
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.itldev.koya.repo.security.authentication;
 
 import org.alfresco.repo.security.authentication.UserNameGenerator;
 import org.apache.commons.lang.RandomStringUtils;
 
-/**
- *
- * @author nico
- */
+
 public class EmailBasedNameGenerator implements UserNameGenerator {
 
     @Override

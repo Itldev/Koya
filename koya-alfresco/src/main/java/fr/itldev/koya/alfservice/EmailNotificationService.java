@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.evaluator.IsSubTypeEvaluator;
 import org.alfresco.repo.action.executer.MailActionExecuter;
@@ -55,6 +56,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -62,6 +64,9 @@ import org.apache.commons.logging.LogFactory;
 public class EmailNotificationService {
 
     protected static Log logger = LogFactory.getLog(FeedNotifier.class);
+    
+    private final static String INSTANT_NOTIFICATION_SUBJECT = "koya.instant-notification.subject";
+    
     protected ActionService actionService;
     protected RuleService ruleService;
     protected RepositoryLocation feedEmailTemplateLocation;
@@ -72,6 +77,9 @@ public class EmailNotificationService {
     protected TransactionService transactionService;
     protected SubSpaceAclService subSpaceAclService;
     protected UserService userService;
+    protected KoyaNodeService koyaNodeService;
+
+    protected String i18nPropertiesPath;
 
     private static final String RULE_NAME_EMAIL = "email_notification_rule";
     private static final String MSG_EMAIL_SUBJECT = "activities.feed.notifier.email.subject";
@@ -123,6 +131,14 @@ public class EmailNotificationService {
         this.transactionService = transactionService;
     }
 
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
+    }
+
+    public void setI18nPropertiesPath(String i18nPropertiesPath) {
+        this.i18nPropertiesPath = i18nPropertiesPath;
+    }
+
     //</editor-fold>
     public boolean isUserNotified(String username) throws KoyaServiceException {
         //TODO : use an aspect on user to save the value
@@ -168,7 +184,7 @@ public class EmailNotificationService {
          * Limited to Dossiers
          */
         List<SecuredItem> readableDossiers = subSpaceAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
-
+     
         for (SecuredItem item : readableDossiers) {
             logger.debug("addRemoveUser SecuredItem: " + item.getName());
 
@@ -251,7 +267,21 @@ public class EmailNotificationService {
         Map<String, Serializable> ruleParameters = new HashMap<>(1);
 
         ruleParameters.put(MailActionExecuter.PARAM_TO_MANY, new ArrayList(Arrays.asList(username)));
-        ruleParameters.put(MailActionExecuter.PARAM_SUBJECT, "Nouvel élément ajouté");
+
+        Properties i18n = koyaNodeService.readPropertiesFileContent(i18nPropertiesPath);
+        if (i18n == null) {
+            logger.error("Invalid koya Mail properties path : " + i18nPropertiesPath);
+            return;
+        }
+       
+        /**
+         * TODO get mail subject on mail sending not on rule creation
+         * 
+         * if mail subject change between rule creation (at first users added)
+         * and mail alert, le subject will be the old one.
+         * 
+         */
+        ruleParameters.put(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(INSTANT_NOTIFICATION_SUBJECT));
         ruleParameters.put(MailActionExecuter.PARAM_TEMPLATE, getEmailTemplateRef());
 
         action.setParameterValues(ruleParameters);
@@ -275,11 +305,13 @@ public class EmailNotificationService {
 
             try {
                 if (!feedEmailTemplateLocation.getQueryLanguage().equals(SearchService.LANGUAGE_XPATH)) {
-                    logger.error("Cannot find the activities email template - repository location query language is not 'xpath': " + feedEmailTemplateLocation.getQueryLanguage());
+                    logger.error("Cannot find the activities email template - repository "
+                            + "location query language is not 'xpath': " + feedEmailTemplateLocation.getQueryLanguage());
                     return null;
                 }
 
-                List<NodeRef> nodeRefs = searchService.selectNodes(nodeService.getRootNode(store), xpath, null, namespaceService, false);
+                List<NodeRef> nodeRefs = searchService.selectNodes(
+                        nodeService.getRootNode(store), xpath, null, namespaceService, false);
                 if (nodeRefs.size() != 1) {
                     logger.error("Cannot find the activities email template: " + xpath);
                     return null;
