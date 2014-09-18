@@ -41,6 +41,7 @@ import java.util.zip.Deflater;
 import javax.servlet.http.HttpServletResponse;
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.action.executer.ImporterActionExecuter;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
@@ -276,9 +277,9 @@ public class KoyaContentService {
 
         try {
             Map<String, Serializable> paramsImport = new HashMap<>();
-            paramsImport.put("encoding", "UTF-8");
-            paramsImport.put("destination", nodeService.getPrimaryParent(zipFile).getParentRef());
-            Action importZip = actionService.createAction("import", paramsImport);
+            paramsImport.put(ImporterActionExecuter.PARAM_ENCODING, "UTF-8");
+            paramsImport.put(ImporterActionExecuter.PARAM_DESTINATION_FOLDER, nodeService.getPrimaryParent(zipFile).getParentRef());
+            Action importZip = actionService.createAction(ImporterActionExecuter.NAME, paramsImport);
             /**
              * Process must be executed synchronously in order to delete
              * original zip
