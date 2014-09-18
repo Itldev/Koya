@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -240,6 +241,16 @@ public class KoyaContentService {
         return tmpZipFile;
     }
 
+    
+     public static final List<String> ZIP_MIMETYPES = Collections.unmodifiableList(new ArrayList() {
+        {
+            add(MimetypeMap.MIMETYPE_ZIP);
+            add("application/x-zip-compressed");
+            add("application/x-zip");
+        }
+    });
+    
+    
     /**
      * Extract selected zipfile and delete it if succeed.
      *
@@ -256,7 +267,7 @@ public class KoyaContentService {
          */
         try {
             ContentReader reader = contentService.getReader(zipFile, ContentModel.PROP_CONTENT);
-            if (!MimetypeMap.MIMETYPE_ZIP.equals(reader.getMimetype())) {
+            if (!ZIP_MIMETYPES.contains(reader.getMimetype())) {
                 throw new KoyaServiceException(KoyaErrorCodes.CONTENT_IS_NOT_ZIP);
             }
         } catch (InvalidNodeRefException ex) {
