@@ -56,7 +56,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -64,9 +63,9 @@ import org.apache.log4j.Logger;
 public class EmailNotificationService {
 
     protected static Log logger = LogFactory.getLog(FeedNotifier.class);
-    
+
     private final static String INSTANT_NOTIFICATION_SUBJECT = "koya.instant-notification.subject";
-    
+
     protected ActionService actionService;
     protected RuleService ruleService;
     protected RepositoryLocation feedEmailTemplateLocation;
@@ -140,22 +139,30 @@ public class EmailNotificationService {
     }
 
     //</editor-fold>
+    /**
+     * Checks if user belongs to any notification rule on the repository. If
+     * true he's a notified user.
+     *
+     *
+     * @param username
+     * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
     public boolean isUserNotified(String username) throws KoyaServiceException {
-        //TODO : use an aspect on user to save the value
-        return !getEmailNotificationRule(username).isEmpty();
-    }
-
-    public List<Rule> getEmailNotificationRule(String username) throws KoyaServiceException {
-        List<Rule> res = new ArrayList<>();
+        //TODO : use a EHcache   
+        //@Cacheable(cacheName = "userNotifyCache", cacheNull = false, keyGenerator = @KeyGenerator(name = "StringCacheKeyGenerator")
 
         User u = userService.getUserByUsername(username);
 
         /**
-         * Get list of all Read availables secured items for users.
+         * Get list of secured Items a user has a Koya Role
          *
-         * Limited to
+         * this excludes admin users that have a read permission on each node by
+         * default.
+         *
          */
-        List<SecuredItem> readableDossiers = subSpaceAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
+        List<SecuredItem> readableDossiers
+                = subSpaceAclService.getUsersSecuredItemWithKoyaPermissions(u, TYPEFILTER_DOSSIER, null);
 
         for (SecuredItem item : readableDossiers) {
             logger.debug("getEmailNotificationRule SecuredItem: " + item.getName());
@@ -166,12 +173,11 @@ public class EmailNotificationService {
             for (Rule r : rules) {
                 if (RULE_NAME_EMAIL.equals(r.getTitle())
                         && ((ArrayList<String>) ((CompositeAction) r.getAction()).getAction(0).getParameterValue(MailActionExecuter.PARAM_TO_MANY)).contains(username)) {
-                    res.add(r);
+                    return true;
                 }
             }
         }
-
-        return res;
+        return false;
     }
 
     public void addRemoveUser(String username, boolean add) throws KoyaServiceException {
@@ -179,12 +185,15 @@ public class EmailNotificationService {
         User u = userService.getUserByUsername(username);
 
         /**
-         * Get list of all Read availables secured items for users.
+         * Get list of secured Items a user has a Koya Role
          *
-         * Limited to Dossiers
+         * this excludes admin users that have a read permission on each node by
+         * default.
+         *
          */
-        List<SecuredItem> readableDossiers = subSpaceAclService.getReadableSecuredItem(u, TYPEFILTER_DOSSIER);
-     
+        List<SecuredItem> readableDossiers
+                = subSpaceAclService.getUsersSecuredItemWithKoyaPermissions(u, TYPEFILTER_DOSSIER, null);
+
         for (SecuredItem item : readableDossiers) {
             logger.debug("addRemoveUser SecuredItem: " + item.getName());
 
@@ -273,13 +282,13 @@ public class EmailNotificationService {
             logger.error("Invalid koya Mail properties path : " + i18nPropertiesPath);
             return;
         }
-       
+
         /**
          * TODO get mail subject on mail sending not on rule creation
-         * 
+         *
          * if mail subject change between rule creation (at first users added)
          * and mail alert, le subject will be the old one.
-         * 
+         *
          */
         ruleParameters.put(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(INSTANT_NOTIFICATION_SUBJECT));
         ruleParameters.put(MailActionExecuter.PARAM_TEMPLATE, getEmailTemplateRef());

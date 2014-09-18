@@ -103,19 +103,4 @@ public class KoyaScript extends BaseProcessorExtension {
         }
         return sharedElements;
     }
-
-    /**
-     * List all readable secured items in application for user in param.
-     *
-     * @param n
-     * @return
-     * @throws KoyaServiceException
-     */
-    public List<ScriptNode> listReadableSecuredItems(ScriptNode n) throws KoyaServiceException {
-        List<ScriptNode> readableSecuredItems = new ArrayList<>();
-        for (SecuredItem s : subSpaceAclService.getReadableSecuredItem(userService.buildUser(n.getNodeRef()), null)) {
-            readableSecuredItems.add(new ScriptNode(s.getNodeRefasObject(), serviceRegistry));
-        }
-        return readableSecuredItems;
-    }
 }

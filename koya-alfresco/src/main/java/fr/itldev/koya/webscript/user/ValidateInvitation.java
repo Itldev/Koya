@@ -185,23 +185,28 @@ public class ValidateInvitation extends AbstractWebScript {
                 }
             }, invitation.getInviteeUserName());
 
-            if (eModify != null) {                
+            if (eModify != null) {
                 eModify.printStackTrace();
                 throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
             }
 
-            //Post an activity for dossiers shared to this user.
+            //Post an activity for dossiers shared to this user 
+            /*
+            
+             TODO make it asynchronous process to avoid lock invitation process
+            
+             */
             final String companyId = (String) startTask.getProperties().get(WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME);
             Exception ePostActivity = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
                 @Override
                 public Exception doWork() throws Exception {
                     try {
 
-                        List<SecuredItem> securedItems = subSpaceAclService.getReadableSecuredItem(userInvited, new ArrayList<QName>() {
+                        List<SecuredItem> securedItems = subSpaceAclService.getUsersSecuredItemWithKoyaPermissions(userInvited, new ArrayList<QName>() {
                             {
                                 add(KoyaModel.TYPE_DOSSIER);
                             }
-                        });
+                        }, null);
                         for (SecuredItem item : securedItems) {
                             if (siteService.getSite(item.getNodeRefasObject()).getShortName().equals(companyId)) {
                                 activityService.postActivity(NotificationType.KOYA_SHARED, companyId, "koya", getActivityData(userInvited, item.getNodeRefasObject()), invitation.getInviteeUserName());
