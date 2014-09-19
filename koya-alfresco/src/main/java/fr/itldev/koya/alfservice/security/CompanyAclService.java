@@ -30,16 +30,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.alfresco.repo.invitation.InvitationSearchCriteriaImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteDoesNotExistException;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.invitation.Invitation;
+import org.alfresco.service.cmr.invitation.InvitationSearchCriteria;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.util.collections.CollectionUtils;
+import org.alfresco.util.collections.Filter;
+import org.alfresco.util.collections.Function;
 import org.apache.log4j.Logger;
 import org.springframework.util.Assert;
 
@@ -53,6 +59,7 @@ public class CompanyAclService {
     protected AuthorityService authorityService;
     protected AuthenticationService authenticationService;
     protected ActionService actionService;
+    protected PermissionService permissionService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setAuthorityService(AuthorityService authorityService) {
@@ -78,8 +85,12 @@ public class CompanyAclService {
     public void setInvitationService(InvitationService invitationService) {
         this.invitationService = invitationService;
     }
-    //</editor-fold>
 
+    public void setPermissionService(PermissionService permissionService) {
+        this.permissionService = permissionService;
+    }
+
+    //</editor-fold>
     //TODO refine by userTypes : Collaborators Roles, Client Roles
     public List<UserRole> getAvailableRoles(Company c) throws KoyaServiceException {
         try {
@@ -147,35 +158,58 @@ public class CompanyAclService {
      * @param permissionsFilter
      * @return
      */
-    public List<User> listMembersPendingInvitation(String companyName, List<SitePermission> permissionsFilter) {
-        List<User> usersOfCompanyPendingInvitation = new ArrayList<>();
-        if (permissionsFilter == null || permissionsFilter.isEmpty()) {
-            permissionsFilter = SitePermission.getAll();
+    public List<User> listMembersPendingInvitation(final String companyName, final List<SitePermission> permissionsFilter) {
+        List<Invitation> pendinginvitations = getPendingInvite(companyName, null, null);
+        final List<String> permissions = CollectionUtils.transform(permissionsFilter, new Function<SitePermission, String>() {
+
+            @Override
+            public String apply(SitePermission sp) {
+                return sp.toString();
+            }
+        });
+
+        if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
+            pendinginvitations = CollectionUtils.filter(pendinginvitations, new Filter<Invitation>() {
+
+                @Override
+                public Boolean apply(Invitation i) {
+                    return permissions.contains(i.getRoleName());
+                }
+            });
         }
 
-        for (SitePermission sp : permissionsFilter) {
-            Map<String, String> members = siteService.listMembers(companyName, null,
-                    sp.toString(), 0);
-            for (String userName : members.keySet()) {
-                if (!authorityService.isAdminAuthority(userName)
-                        && !invitationService.listPendingInvitationsForInvitee(userName).isEmpty()) {
-                    usersOfCompanyPendingInvitation.add(userService.getUserByUsername(userName));
-                }
-            }
-        }
+        List<User> usersOfCompanyPendingInvitation = CollectionUtils.transform(pendinginvitations, new Function<Invitation, User>() {
 
-        for (Invitation i : invitationService.listPendingInvitationsForResource(
-                Invitation.ResourceType.WEB_SITE, companyName)) {
-            User u = userService.getUserByUsername(i.getInviteeUserName());
-            for (SitePermission sp : permissionsFilter) {
-                if (sp.equals(i.getRoleName())
-                        && !usersOfCompanyPendingInvitation.contains(u)) {
-                    usersOfCompanyPendingInvitation.add(u);
-                }
+            @Override
+            public User apply(Invitation invitation) {
+                return userService.getUserByUsername(invitation.getInviteeUserName());
             }
-        }
+        });
 
         return usersOfCompanyPendingInvitation;
+    }
+
+    public List<Invitation> getPendingInvite(String companyId, String inviterId, String inviteeId) {
+        final InvitationSearchCriteriaImpl criteria = new InvitationSearchCriteriaImpl();
+        criteria.setInvitationType(InvitationSearchCriteria.InvitationType.NOMINATED);
+        criteria.setResourceType(Invitation.ResourceType.WEB_SITE);
+
+        if (inviterId != null) {
+            criteria.setInviter(inviterId);
+        }
+        if (inviteeId != null) {
+            criteria.setInvitee(inviteeId);
+        }
+        if (companyId != null) {
+            criteria.setResourceName(companyId);
+        }
+
+        return AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<List<Invitation>>() {
+            @Override
+            public List<Invitation> doWork() throws Exception {
+                return invitationService.searchInvitation(criteria);
+            }
+        });
     }
 
     /**
@@ -195,7 +229,7 @@ public class CompanyAclService {
     }
 
     public Boolean hasPendingInvitation(Company c, User u) throws KoyaServiceException {
-        return listMembersPendingInvitation(c.getName(), null).contains(u);
+        return !getPendingInvite(c.getName(), null, u.getUserName()).isEmpty();
     }
 
     public SitePermission getSitePermission(Company c, String userMail) {
@@ -269,14 +303,14 @@ public class CompanyAclService {
              *
              *
              */
-            return AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Invitation>() {
+            return AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Invitation>() {
                 @Override
                 public Invitation doWork() throws Exception {
                     return invitationService.inviteNominated(null, userMail, userMail,
                             Invitation.ResourceType.WEB_SITE, c.getName(),
                             permission.toString(), serverPath, acceptUrl, rejectUrl);
                 }
-            }, "admin");
+            });
 
         } else {
             SitePermission sitePermission = getSitePermission(c, u);

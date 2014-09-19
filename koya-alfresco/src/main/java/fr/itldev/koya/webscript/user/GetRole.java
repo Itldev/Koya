@@ -25,6 +25,7 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserRole;
+import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
@@ -68,9 +69,9 @@ public class GetRole extends AbstractWebScript {
 
             User u = userService.getUserByUsername(userName);
             Company c = koyaNodeService.companyBuilder(companyName);
-
+            SitePermission permission = companyAclService.getSitePermission(c, u);
             response = KoyaWebscript.getObjectAsJson(
-                    new UserRole(companyAclService.getSitePermission(c, u).toString()));
+                    new UserRole(permission!=null?companyAclService.getSitePermission(c, u).toString():null));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
@@ -79,3 +80,4 @@ public class GetRole extends AbstractWebScript {
     }
 
 }
+ 
