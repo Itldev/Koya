@@ -81,4 +81,9 @@ public interface KoyaErrorCodes {
     public static final Integer SECU_USER_MUSTBE_CONSUMER_TO_APPLY_PERMISSION = 803;
     public static final Integer SECU_USER_MUSTBE_COMPANY_MEMBER_TO_CHANGE_COMPANYROLE = 804;
 
+    //900 -> Koya mail
+    public static final Integer KOYAMAIL_INVALID_SUBJECT_PROPERTIES_PATH = 900;
+    public static final Integer KOYAMAIL_CANNOT_FIND_TEMPLATE = 901;
+    public static final Integer KOYAMAIL_UNSUPPORTED_TEMPLATE_LOCATION_TYPE = 902;
+
 }

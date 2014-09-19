@@ -1,6 +1,7 @@
 package org.alfresco.repo.invitation.site;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.exception.KoyaServiceException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,8 +54,7 @@ public class KoyaInviteSender extends InviteSender {
     private Logger logger = Logger.getLogger(this.getClass());
 
     // koya sepecic injections
-    private String i18nPropertiesPath;
-    private KoyaNodeService koyaNodeService;
+    private KoyaMailService koyaMailService;
     //
 
     private static final List<String> expectedProperties = Arrays.asList(wfVarInviteeUserName,//
@@ -83,7 +83,7 @@ public class KoyaInviteSender extends InviteSender {
     private final NamespaceService namespaceService;
 
     public KoyaInviteSender(ServiceRegistry services, Repository repository, MessageService messageService,
-            KoyaNodeService koyaNodeService, String i18nPropertiesPath) {
+            KoyaMailService koyaMailService) {
 
         super(services, repository, messageService);
         this.actionService = services.getActionService();
@@ -101,12 +101,12 @@ public class KoyaInviteSender extends InviteSender {
         /**
          * Koya specific injections load
          */
-        this.koyaNodeService = koyaNodeService;
-        this.i18nPropertiesPath = i18nPropertiesPath;
+        this.koyaMailService = koyaMailService;
     }
 
     @Override
     public void sendMail(Map<String, String> properties) {
+
         checkProperties(properties);
 
         ParameterCheck.mandatory("Properties", properties);
@@ -117,30 +117,28 @@ public class KoyaInviteSender extends InviteSender {
         mail.setParameterValue(MailActionExecuter.PARAM_FROM, getEmail(inviter));
         mail.setParameterValue(MailActionExecuter.PARAM_TO, getEmail(invitee));
 
-        /**
-         * KOYA : specific email subject
-         *
-         * TODO create service that return standard exception Code if any error
-         *
-         *
-         */
-        Properties i18n = koyaNodeService.readPropertiesFileContent(i18nPropertiesPath);
-        if (i18n == null) {
-            logger.error("Invalid koya Mail properties path : " + i18nPropertiesPath);
-            return;
+        try {
+            /**
+             * KOYA : specific email subject
+             *
+             */
+            Properties i18n = koyaMailService.getI18nSubjectProperties();
+
+            mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(EMAIL_SUBJECT).replace("{0}", getSiteName(properties)));
+            /**
+             *
+             */
+            mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT_PARAMS, new Object[]{
+                ModelUtil.getProductName(repoAdminService), getSiteName(properties)});
+            mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, getEmailTemplateNodeRef());
+            mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,
+                    (Serializable) buildMailTextModel(properties, inviter, invitee));
+            mail.setParameterValue(MailActionExecuter.PARAM_IGNORE_SEND_FAILURE, true);
+            actionService.executeAction(mail, getWorkflowPackage(properties));
+        } catch (KoyaServiceException ex) {
+            throw new RuntimeException(ex);
         }
 
-        mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(EMAIL_SUBJECT).replace("{0}", getSiteName(properties)));
-        /**
-         *
-         */
-        mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT_PARAMS, new Object[]{
-            ModelUtil.getProductName(repoAdminService), getSiteName(properties)});
-        mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, getEmailTemplateNodeRef());
-        mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,
-                (Serializable) buildMailTextModel(properties, inviter, invitee));
-        mail.setParameterValue(MailActionExecuter.PARAM_IGNORE_SEND_FAILURE, true);
-        actionService.executeAction(mail, getWorkflowPackage(properties));
     }
 
     /**

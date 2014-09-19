@@ -137,11 +137,8 @@
     <bean id="InviteHelper" class="org.alfresco.repo.invitation.KoyaInviteHelper">
         <property name="serviceRegistry" ref="ServiceRegistry"/>
         <property name="repositoryHelper" ref="repositoryHelper"/>
-        <property name="messageService" ref="messageService"/>
-        <property name="i18nPropertiesPath">
-            <value>${koya.i18n.mail}</value>
-        </property>
-        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="messageService" ref="messageService"/>        
+        <property name="koyaMailService" ref="koyaMailService"/>
     </bean>
 
 
@@ -152,23 +149,20 @@
         <property name="actionService" ref="actionService"/> 
         <property name="ruleService" ref="ruleService"/> 
         <property name="userService" ref="userService"/> 
-        <property name="feedEmailTemplateLocation" ref="emailNotificationTemplateLocation"/>
-        <property name="fileFolderService" ref="FileFolderService"/>
-        <property name="searchService" ref="SearchService"/>
-        <property name="namespaceService" ref="NamespaceService"/>
-        <property name="nodeService" ref="NodeService"/>
+        <property name="feedEmailTemplateLocation">
+            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
+                <property name="path">
+                    <value>${koya.template.instant-notification}</value>
+                </property>                 
+                <property name="queryLanguage" value="xpath"/>
+            </bean>
+        </property>
         <property name="transactionService" ref="transactionService"/>
         <property name="subSpaceAclService" ref="subSpaceAclService"/>
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="i18nPropertiesPath">
-            <value>${koya.i18n.mail}</value>
-        </property>
+         <property name="koyaMailService" ref="koyaMailService"/>
     </bean>
     
-    <bean id="emailNotificationTemplateLocation" class="org.alfresco.repo.dictionary.RepositoryLocation">
-        <property name="path" value="/app:company_home/app:dictionary/app:email_templates/app:notify_email_templates/cm:notify_user_email.html.ftl"/>
-        <property name="queryLanguage" value="xpath"/>
-    </bean>
+    
     
     <!--Service used for debugging-->
     <bean id="debuggerService" class="fr.itldev.koya.alfservice.DebuggerService">
@@ -178,5 +172,36 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="companyAclService" ref="companyAclService"/>
     </bean>
+    
+    
+    <bean name="koyaMailService" class="fr.itldev.koya.alfservice.KoyaMailService">
+        <property name="namespaceService" ref="NamespaceService"/>
+        <property name="fileFolderService" ref="FileFolderService"/>
+        <property name="searchService" ref="SearchService"/>
+        <property name="nodeService" ref="NodeService"/>
+        <property name="actionService" ref="actionService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/> 
+        <!-- param properties-->
+        
+        <property name="i18nMailSubjectPropertiesLocation">
+            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
+                <property name="path">
+                    <value>${koya.i18n.mail}</value>
+                </property>                    
+                <property name="queryLanguage" value="xpath"/>
+            </bean>
+        </property>      
+        
+        
+        <property name="shareNotificationTemplateLocation">
+            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
+                <property name="path">
+                    <value>${koya.template.share-notification}</value>
+                </property>                    
+                <property name="queryLanguage" value="xpath"/>
+            </bean>
+        </property>      
+    </bean>
+
    
 </beans>

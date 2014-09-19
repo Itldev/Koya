@@ -1,5 +1,6 @@
 package org.alfresco.repo.invitation;
 
+import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,15 +78,10 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
      *
      * Koya specific property
      */
-    private KoyaNodeService koyaNodeService;
-    private String i18nPropertiesPath;
+    private KoyaMailService koyaMailService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
-
-    public void setI18nPropertiesPath(String i18nPropertiesPath) {
-        this.i18nPropertiesPath = i18nPropertiesPath;
+    public void setKoyaMailService(KoyaMailService koyaMailService) {
+        this.koyaMailService = koyaMailService;
     }
 
     @Override
@@ -100,7 +96,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         this.workflowService = serviceRegistry.getWorkflowService();
         this.nodeService = serviceRegistry.getNodeService();
         this.inviteSender = new KoyaInviteSender(serviceRegistry, repositoryHelper, messageService,
-                koyaNodeService, i18nPropertiesPath);
+                koyaMailService);
     }
 
     /**
@@ -126,22 +122,18 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
             }
         }, AuthenticationUtil.getSystemUserName());
     }
-    
+
     @Override
-     public void acceptNominatedInvitation(Map<String, Object> executionVariables)
-    {
+    public void acceptNominatedInvitation(Map<String, Object> executionVariables) {
         final String invitee = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarInviteeUserName);
         String siteShortName = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarResourceName);
         String inviter = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarInviterUserName);
         String role = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarRole);
-        
-        AuthenticationUtil.runAsSystem(new RunAsWork<Void>()
-        {
+
+        AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
             @Override
-            public Void doWork() throws Exception
-            {
-                if (authenticationService.isAuthenticationMutable(invitee))
-                {
+            public Void doWork() throws Exception {
+                if (authenticationService.isAuthenticationMutable(invitee)) {
                     authenticationService.setAuthenticationEnabled(invitee, true);
                 }
                 return null;
@@ -149,7 +141,6 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         });
         addSiteMembership(invitee, siteShortName, role, inviter, false);
     }
-    
 
     @Override
     public void sendNominatedInvitation(String inviteId, Map<String, Object> executionVariables) {

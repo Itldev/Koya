@@ -659,8 +659,11 @@ public class KoyaNodeService {
     /**
      * get the company this nodeRef belongs to
      *
+     * todo implement with node locator
+     *
      * @param nodeRef
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public Company getCompany(NodeRef nodeRef) throws KoyaServiceException {
         Map params = new HashMap(1);
@@ -680,6 +683,8 @@ public class KoyaNodeService {
      * return true if node given in argument has a Dossier in his ancestors.
      *
      * unsecured method
+     *
+     * todo implement with node locator
      *
      * @param nodeRef
      * @return
@@ -714,6 +719,7 @@ public class KoyaNodeService {
      *
      * @param n
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public Company getNodeCompany(NodeRef n) throws KoyaServiceException {
         if (n == null) {
@@ -723,22 +729,6 @@ public class KoyaNodeService {
         } else {
             return getNodeCompany(unsecuredNodeService.getPrimaryParent(n).getParentRef());
         }
-    }
-
-    /**
-     * Read file content. Null if any error occurs
-     *
-     * @param fileNr
-     * @return
-     */
-    public String readFileContent(NodeRef fileNr) {
-        try {
-            ContentReader contentReader = fileFolderService.getReader(fileNr);
-            return contentReader.getContentString();
-        } catch (ContentIOException ex) {
-            //silent exception catching : content remains null if occurs
-        }
-        return null;
     }
 
     public Properties readPropertiesFileContent(NodeRef fileNr) {
@@ -752,37 +742,5 @@ public class KoyaNodeService {
             }
         }
         return props;
-    }
-
-    public Properties readPropertiesFileContent(String path) {
-        return readPropertiesFileContent(
-                getNodeRefLucenePath(path));
-    }
-
-    public NodeRef getNodeRefLucenePath(String path) {
-
-        try {
-            ResultSet resultSet = searchService.query(
-                    new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"),
-                    SearchService.LANGUAGE_LUCENE, "PATH:\"" + path + "\"");
-
-            if (resultSet.length() == 1) {
-                return resultSet.getNodeRef(0);
-            } else {
-                logger.error("Invalid lucene path node : " + path);
-            }
-        } catch (Exception ex) {
-            logger.error("invalid lucene path given to getNodeRefLucenePath : path = " + path);
-            /**
-             * TODO throw KoyaServiceException that can be caugth by invitation process
-             * call in KoyaInviteSender 
-             * 
-             * bug not resolved now to make invitation process fail if problem occurs
-             */
-
-//            throw new KoyaServiceException(KoyaErrorCodes.INVALID_LUCENE_PATH,
-//                    "invalid lucene path given to getNodeRefLucenePath : path = " + path);
-        }
-        return null;
     }
 }

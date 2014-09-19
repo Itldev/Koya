@@ -36,21 +36,15 @@ import org.alfresco.repo.action.evaluator.IsSubTypeEvaluator;
 import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.repo.activities.feed.FeedNotifier;
 import org.alfresco.repo.dictionary.RepositoryLocation;
-import org.alfresco.repo.search.SearcherException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionCondition;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.action.CompositeAction;
-import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.rule.Rule;
 import org.alfresco.service.cmr.rule.RuleService;
 import org.alfresco.service.cmr.rule.RuleType;
-import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.namespace.QName;
@@ -69,19 +63,12 @@ public class EmailNotificationService {
     protected ActionService actionService;
     protected RuleService ruleService;
     protected RepositoryLocation feedEmailTemplateLocation;
-    private NamespaceService namespaceService;
-    protected FileFolderService fileFolderService;
-    protected SearchService searchService;
-    protected NodeService nodeService;
     protected TransactionService transactionService;
     protected SubSpaceAclService subSpaceAclService;
     protected UserService userService;
-    protected KoyaNodeService koyaNodeService;
-
-    protected String i18nPropertiesPath;
+    protected KoyaMailService koyaMailService;
 
     private static final String RULE_NAME_EMAIL = "email_notification_rule";
-    private static final String MSG_EMAIL_SUBJECT = "activities.feed.notifier.email.subject";
 
     private static final List<QName> TYPEFILTER_DOSSIER = Collections.unmodifiableList(new ArrayList<QName>() {
         {
@@ -110,32 +97,12 @@ public class EmailNotificationService {
         this.feedEmailTemplateLocation = feedEmailTemplateLocation;
     }
 
-    public void setNamespaceService(NamespaceService namespaceService) {
-        this.namespaceService = namespaceService;
-    }
-
-    public void setFileFolderService(FileFolderService fileFolderService) {
-        this.fileFolderService = fileFolderService;
-    }
-
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
-    }
-
-    public void setNodeService(NodeService nodeService) {
-        this.nodeService = nodeService;
-    }
-
     public void setTransactionService(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
-
-    public void setI18nPropertiesPath(String i18nPropertiesPath) {
-        this.i18nPropertiesPath = i18nPropertiesPath;
+    public void setKoyaMailService(KoyaMailService koyaMailService) {
+        this.koyaMailService = koyaMailService;
     }
 
     //</editor-fold>
@@ -253,7 +220,7 @@ public class EmailNotificationService {
         }
     }
 
-    private void createRule(final NodeRef nodeRef, String username) {
+    private void createRule(final NodeRef nodeRef, String username) throws KoyaServiceException {
         final Rule rule = new Rule();
         rule.setRuleType(RuleType.INBOUND);
         rule.setTitle(RULE_NAME_EMAIL);
@@ -277,11 +244,7 @@ public class EmailNotificationService {
 
         ruleParameters.put(MailActionExecuter.PARAM_TO_MANY, new ArrayList(Arrays.asList(username)));
 
-        Properties i18n = koyaNodeService.readPropertiesFileContent(i18nPropertiesPath);
-        if (i18n == null) {
-            logger.error("Invalid koya Mail properties path : " + i18nPropertiesPath);
-            return;
-        }
+        Properties i18n = koyaMailService.getI18nSubjectProperties();
 
         /**
          * TODO get mail subject on mail sending not on rule creation
@@ -291,7 +254,7 @@ public class EmailNotificationService {
          *
          */
         ruleParameters.put(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(INSTANT_NOTIFICATION_SUBJECT));
-        ruleParameters.put(MailActionExecuter.PARAM_TEMPLATE, getEmailTemplateRef());
+        ruleParameters.put(MailActionExecuter.PARAM_TEMPLATE, koyaMailService.getFileTemplateRef(feedEmailTemplateLocation));
 
         action.setParameterValues(ruleParameters);
 
@@ -305,38 +268,4 @@ public class EmailNotificationService {
         });
     }
 
-    protected String getEmailTemplateRef() {
-        String locationType = feedEmailTemplateLocation.getQueryLanguage();
-
-        if (locationType.equals(SearchService.LANGUAGE_XPATH)) {
-            StoreRef store = feedEmailTemplateLocation.getStoreRef();
-            String xpath = feedEmailTemplateLocation.getPath();
-
-            try {
-                if (!feedEmailTemplateLocation.getQueryLanguage().equals(SearchService.LANGUAGE_XPATH)) {
-                    logger.error("Cannot find the activities email template - repository "
-                            + "location query language is not 'xpath': " + feedEmailTemplateLocation.getQueryLanguage());
-                    return null;
-                }
-
-                List<NodeRef> nodeRefs = searchService.selectNodes(
-                        nodeService.getRootNode(store), xpath, null, namespaceService, false);
-                if (nodeRefs.size() != 1) {
-                    logger.error("Cannot find the activities email template: " + xpath);
-                    return null;
-                }
-
-                return fileFolderService.getLocalizedSibling(nodeRefs.get(0)).toString();
-            } catch (SearcherException e) {
-                logger.error("Cannot find the email template!", e);
-            }
-
-            return null;
-        } else if (locationType.equals(RepositoryLocation.LANGUAGE_CLASSPATH)) {
-            return feedEmailTemplateLocation.getPath();
-        } else {
-            logger.error("Unsupported location type: " + locationType);
-            return null;
-        }
-    }
 }
