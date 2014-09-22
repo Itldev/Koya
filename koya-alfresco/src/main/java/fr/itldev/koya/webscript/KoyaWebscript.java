@@ -56,6 +56,7 @@ public abstract class KoyaWebscript {
     public static final String WSCONST_USERFAVOURITE = "userFavourite";
     public static final String WSCONST_NEWNAME = "newName";
     public static final String WSCONST_ACTIVE = "active";
+    public static final String WSCONST_XPATH = "xPath";
 
     /**
      * Extracts JSON POST data.

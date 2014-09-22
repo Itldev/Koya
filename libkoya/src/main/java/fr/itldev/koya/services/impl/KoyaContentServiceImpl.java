@@ -59,7 +59,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
     private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
 
-    private static final String REST_POST_UPLOAD = "/s/api/upload";
+   
 
     private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
 
@@ -124,7 +124,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     private List<Content> listContent(User user, SecuredItem container, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
-        List<SecuredItem> lstSi = new ArrayList<>();
+        List<SecuredItem> lstSi = new ArrayList<>();//TODO collectionsUtil list transformation
 
         if (depth.length > 0) {
             lstSi = fromJSON(new TypeReference<List<SecuredItem>>() {
@@ -162,7 +162,8 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
-        AlfrescoUploadReturn upReturn = user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
+        AlfrescoUploadReturn upReturn = user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
 
         return (Document) getSecuredItem(user, upReturn.getNodeRef());
 

@@ -39,8 +39,10 @@ import java.util.Objects;
 import java.util.Properties;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.activities.ActivityType;
+import org.alfresco.repo.dictionary.RepositoryLocation;
 import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.repo.nodelocator.AncestorNodeLocator;
+import org.alfresco.repo.search.SearcherException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.favourites.FavouritesService;
@@ -61,6 +63,7 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 
@@ -86,6 +89,7 @@ public class KoyaNodeService {
     private SiteService siteService;
     private AncestorNodeLocator ancestorNodeLocator;
     protected SearchService searchService;
+    protected NamespaceService namespaceService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -134,6 +138,10 @@ public class KoyaNodeService {
 
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
+    }
+
+    public void setNamespaceService(NamespaceService namespaceService) {
+        this.namespaceService = namespaceService;
     }
 
     // </editor-fold>
@@ -742,5 +750,24 @@ public class KoyaNodeService {
             }
         }
         return props;
+    }
+
+    public NodeRef xPath2NodeRef(String xpath) throws KoyaServiceException {
+
+        RepositoryLocation templateLoc = new RepositoryLocation();//defaultQuery language = xpath
+        templateLoc.setPath(xpath);
+        StoreRef store = templateLoc.getStoreRef();
+
+        try {
+            List<NodeRef> nodeRefs = searchService.selectNodes(
+                    nodeService.getRootNode(store), xpath, null, namespaceService, false);
+            if (nodeRefs.size() != 1) {
+                throw new KoyaServiceException(KoyaErrorCodes.INVALID_XPATH_NODE,
+                        nodeRefs.size() + " nodes match search");
+            }
+            return nodeRefs.get(0);
+        } catch (SearcherException e) {
+            throw new KoyaServiceException(KoyaErrorCodes.CANNOT_FIND_XPATH_NODE, e);
+        }
     }
 }

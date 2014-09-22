@@ -42,6 +42,7 @@
         <property name="siteService" ref="SiteService"/>
         <property name="ancestorNodeLocator" ref="ancestorNodeLocator"/>
         <property name="searchService" ref="searchService"/>
+        <property name="namespaceService" ref="namespaceService"/>
     </bean>
     
     <!--Companies handling service-->
@@ -159,7 +160,7 @@
         </property>
         <property name="transactionService" ref="transactionService"/>
         <property name="subSpaceAclService" ref="subSpaceAclService"/>
-         <property name="koyaMailService" ref="koyaMailService"/>
+        <property name="koyaMailService" ref="koyaMailService"/>
     </bean>
     
     

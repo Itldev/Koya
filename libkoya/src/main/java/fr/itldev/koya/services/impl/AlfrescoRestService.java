@@ -3,25 +3,26 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -33,6 +34,12 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 public class AlfrescoRestService implements AlfrescoService {
@@ -43,6 +50,8 @@ public class AlfrescoRestService implements AlfrescoService {
     private static final String REST_POST_MAIL = "/s/fr/itldev/koya/global/mail";
     private static final String REST_GET_SECUREDITEM = "/s/fr/itldev/koya/global/getsecureditem/{nodeRef}";
     private static final String REST_GET_LIBVERSION = "/s/fr/itldev/koya/meta/libversion";
+    protected static final String REST_POST_UPLOAD = "/s/api/upload";
+    private static final String REST_GET_XPATH2NODEREF = "/s/fr/itldev/koya/global/xpath2noderef/{xPath}";
 
     private String alfrescoServerUrl;
 
@@ -127,10 +136,40 @@ public class AlfrescoRestService implements AlfrescoService {
                 getForObject(getAlfrescoServerUrl() + REST_GET_SECUREDITEM,
                         SecuredItem.class, nodeRef);
     }
+
+    /**
+     * Get NodeRef reference from xpath expression.
+     *
+     * @param user
+     * @param nodeRef
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public String xPathToNodeRef(User user, String nodeRef) throws AlfrescoServiceException {
+        return user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_XPATH2NODEREF,
+                        String.class, nodeRef);
+
+    }
+
+    @Override
+    public AlfrescoUploadReturn uploadToXpathNode(User user, Resource resource, String parentXPath) throws AlfrescoServiceException {
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+
+        parts.add("filedata", resource);
+        parts.add("destination", xPathToNodeRef(user, parentXPath));
+        parts.add("overwrite", "true");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
+        return user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
+
+    }
+
     /*
      * ================ Utils methods ==================
      */
-
     /**
      * Extracts noderef parts.
      *
