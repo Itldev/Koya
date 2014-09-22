@@ -18,7 +18,6 @@
  */
 package fr.itldev.koya.model.json;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,12 +33,15 @@ public class MailWrapper {
 
     private List<String> to = new ArrayList<>();
     private String from;
+    //withoutTemplate
     private String subject;
     private String content;
-    //template
-    private String templateNodeRef;
-    private String templatePath;
-    private Map<String, Serializable> templateParams = new HashMap<>();
+    //template body
+    private String templateXPath;
+    private Map<String, String> templateParams = new HashMap<>();
+    // template subject
+    private String templateKoyaSubjectKey;
+    private List<String> templateKoyaSubjectParams = new ArrayList<>();
 
     public List<String> getTo() {
         return to;
@@ -73,28 +75,36 @@ public class MailWrapper {
         this.content = content;
     }
 
-    public String getTemplateNodeRef() {
-        return templateNodeRef;
+    public String getTemplateXPath() {
+        return templateXPath;
     }
 
-    public void setTemplateNodeRef(String templateNodeRef) {
-        this.templateNodeRef = templateNodeRef;
+    public void setTemplateXPath(String templateXPath) {
+        this.templateXPath = templateXPath;
     }
 
-    public String getTemplatePath() {
-        return templatePath;
-    }
-
-    public void setTemplatePath(String templatePath) {
-        this.templatePath = templatePath;
-    }
-
-    public Map<String, Serializable> getTemplateParams() {
+    public Map<String, String> getTemplateParams() {
         return templateParams;
     }
 
-    public void setTemplateParams(Map<String, Serializable> templateParams) {
+    public void setTemplateParams(Map<String, String> templateParams) {
         this.templateParams = templateParams;
+    }
+
+    public String getTemplateKoyaSubjectKey() {
+        return templateKoyaSubjectKey;
+    }
+
+    public void setTemplateKoyaSubjectKey(String templateKoyaSubjectKey) {
+        this.templateKoyaSubjectKey = templateKoyaSubjectKey;
+    }
+
+    public List<String> getTemplateKoyaSubjectParams() {
+        return templateKoyaSubjectParams;
+    }
+
+    public void setTemplateKoyaSubjectParams(List<String> templateKoyaSubjectParams) {
+        this.templateKoyaSubjectParams = templateKoyaSubjectParams;
     }
 
     @Override

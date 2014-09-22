@@ -18,19 +18,10 @@
  */
 package fr.itldev.koya.webscript.global;
 
+import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.json.MailWrapper;
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import org.alfresco.repo.action.executer.MailActionExecuter;
-import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -46,89 +37,21 @@ public class SendMail extends AbstractWebScript {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    protected ActionService actionService;
-    protected AuthenticationService authenticationService;
-    protected SearchService searchService;
+    protected KoyaMailService koyaMailService;
 
-    public void setActionService(ActionService actionService) {
-        this.actionService = actionService;
-    }
-
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
-
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
+    public void setKoyaMailService(KoyaMailService koyaMailService) {
+        this.koyaMailService = koyaMailService;
     }
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-
         try {
-
             ObjectMapper mapper = new ObjectMapper();
-            MailWrapper mw = mapper.readValue(req.getContent().getReader(), MailWrapper.class);
-            logger.debug(mw.toString());
-
-            //TODO get authentication info (guest or not --> snder or not )
-            try {
-                /**
-                 * Create 1 action per recipient as they must be registered user
-                 * https://forums.alfresco.com/forum/developer-discussions/repository-services/mailactionexecuterparamtomany-parameter-not-working
-                 *
-                 * TODO find multi user mail sending way
-                 */
-
-                for (String recipient : mw.getTo()) {
-
-                    /**
-                     * Params Setting
-                     */
-                    Map<String, Serializable> paramsMail = new HashMap<>();
-                    // String currentUserName = authenticationService.getCurrentUserName();
-                    paramsMail.put(MailActionExecuter.PARAM_TO, recipient);
-                    if (mw.getFrom() != null) {
-                        paramsMail.put(MailActionExecuter.PARAM_FROM, mw.getFrom());
-                    }
-                    paramsMail.put(MailActionExecuter.PARAM_SUBJECT, mw.getSubject());
-                    paramsMail.put(MailActionExecuter.PARAM_TEXT, mw.getContent());
-
-                    if (mw.getTemplatePath() != null) {
-                        ResultSet resultSet = searchService.query(
-                                new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"),
-                                SearchService.LANGUAGE_LUCENE, "PATH:\"" + mw.getTemplatePath() + "\"");
-                        if (resultSet.length() == 0) {
-                            logger.error("Template " + mw.getTemplatePath() + " not found.");
-                            return;
-                        } else {
-                            NodeRef template = resultSet.getNodeRef(0);
-                            paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, template);
-
-                            Map<String, Serializable> templateModel = new HashMap<>();
-                            templateModel.put("args", (Serializable) mw.getTemplateParams());
-                            paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
-                        }
-                        //paramsMail.put(MailActionExecuter.PARAM_SUBJECT_PARAMS, "");
-                    }
-                    /**
-                     * Action execution
-                     */
-                    actionService.executeAction(actionService.createAction(
-                            MailActionExecuter.NAME, paramsMail), null);
-                }
-
-            } catch (Exception ex) {
-                logger.error(ex.toString());
-                throw new KoyaServiceException(0);
-            }
-
+            koyaMailService.sendMail(mapper.readValue(req.getContent().getReader(), MailWrapper.class));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-
         res.setContentType("application/json");
-
         res.getWriter().write("");
     }
 

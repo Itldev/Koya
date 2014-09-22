@@ -3,8 +3,10 @@ package fr.itldev.koya.alfservice;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -98,6 +101,63 @@ public class KoyaMailService {
         templateModel.put("args", (Serializable) templateParams);
         paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
 
+        actionService.executeAction(actionService.createAction(
+                MailActionExecuter.NAME, paramsMail), null);
+
+    }
+
+    /**
+     *
+     * @param wrapper
+     * @throws KoyaServiceException
+     */
+    public void sendMail(MailWrapper wrapper) throws KoyaServiceException {
+
+        /**
+         * Params Setting
+         */
+        Map<String, Serializable> paramsMail = new HashMap<>();
+        paramsMail.put(MailActionExecuter.PARAM_TO_MANY, new ArrayList(wrapper.getTo()));
+
+        if (wrapper.getFrom() != null) {
+            paramsMail.put(MailActionExecuter.PARAM_FROM, wrapper.getFrom());
+        }
+
+        /**
+         * Get subject and body Templates
+         */
+        if (wrapper.getTemplateXPath() != null) {
+            RepositoryLocation templateLoc = new RepositoryLocation();//defaultQuery language = xpath
+            templateLoc.setPath(wrapper.getTemplateXPath());
+
+            paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, getFileTemplateRef(templateLoc));
+            Map<String, Serializable> templateModel = new HashMap<>();
+
+            templateModel.put("args", (Serializable) wrapper.getTemplateParams());
+            paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
+        } else {
+            paramsMail.put(MailActionExecuter.PARAM_TEXT, wrapper.getContent());
+        }
+
+        if (wrapper.getTemplateKoyaSubjectKey() != null) {
+
+            String subject = (String) getI18nSubjectProperties().get(wrapper.getTemplateKoyaSubjectKey());
+
+            /**
+             * TODO replace MailActionExecuter.PARAM_SUBJECT_PARAMS parameter
+             */
+            for (int i = 0; i < wrapper.getTemplateKoyaSubjectParams().size(); i++) {
+                subject = subject.replace("{" + i + "}", wrapper.getTemplateKoyaSubjectParams().get(i));
+            }
+            paramsMail.put(MailActionExecuter.PARAM_SUBJECT, subject);
+
+        } else {
+            paramsMail.put(MailActionExecuter.PARAM_SUBJECT, wrapper.getSubject());
+        }
+
+        /**
+         * Action execution
+         */
         actionService.executeAction(actionService.createAction(
                 MailActionExecuter.NAME, paramsMail), null);
 
