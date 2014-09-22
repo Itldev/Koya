@@ -86,6 +86,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
+        super.afterPropertiesSet();
         this.actionService = serviceRegistry.getActionService();
         this.authenticationService = serviceRegistry.getAuthenticationService();
         this.invitationService = serviceRegistry.getInvitationService();
@@ -168,6 +169,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
      */
     @Override
     public void setMessageService(MessageService messageService) {
+        super.setMessageService(messageService);
         this.messageService = messageService;
     }
 
@@ -176,6 +178,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
      */
     @Override
     public void setRepositoryHelper(Repository repositoryHelper) {
+        super.setRepositoryHelper(repositoryHelper);
         this.repositoryHelper = repositoryHelper;
     }
 
@@ -184,6 +187,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
      */
     @Override
     public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+        super.setServiceRegistry(serviceRegistry);
         this.serviceRegistry = serviceRegistry;
     }
 }

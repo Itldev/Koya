@@ -1,6 +1,7 @@
 package fr.itldev.koya.behaviour;
 
 import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.NotificationType;
@@ -29,7 +30,7 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
     private SiteService siteService;
     private UserService userService;
     private PolicyComponent policyComponent;
-    private InvitationService invitationService;
+    private CompanyAclService companyAclService;
 
     public void setActivityService(ActivityService activityService) {
         this.activityService = activityService;
@@ -47,10 +48,11 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
         this.policyComponent = policyComponent;
     }
 
-    public void setInvitationService(InvitationService invitationService) {
-        this.invitationService = invitationService;
+    public void setCompanyAclService(CompanyAclService companyAclService) {
+        this.companyAclService = companyAclService;
     }
 
+    
     public void init() {
         this.policyComponent.bindClassBehaviour(SharePolicies.AfterSharePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
                 new JavaBehaviour(this, "afterShareItem", Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
@@ -67,7 +69,7 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
                 if (user.isEnabled() != null && user.isEnabled()) {
                     String siteShortName = siteService.getSiteShortName(nodeRef);
 
-                    List<Invitation> invitations = getPendingInvite(siteShortName, null, user.getUserName());
+                    List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName, null, user.getUserName());
 
                     if (invitations.isEmpty()) {
                         //Posting the according activity
@@ -92,7 +94,7 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
             if (user.isEnabled() != null && user.isEnabled()) {
                 String siteShortName = siteService.getSiteShortName(nodeRef);
 
-                List<Invitation> invitations = getPendingInvite(siteShortName, null, user.getUserName());
+                List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName, null, user.getUserName());
 
                 if (invitations.isEmpty()) {
                     //Posting the according activity
@@ -127,26 +129,4 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
         return activityData.toString();
     }
 
-    /**
-     * Helper method to get the pending invite
-     *
-     */
-    private List<Invitation> getPendingInvite(String companyId, String inviterId, String inviteeId) {
-        InvitationSearchCriteriaImpl criteria = new InvitationSearchCriteriaImpl();
-        criteria.setInvitationType(InvitationSearchCriteria.InvitationType.NOMINATED);
-        criteria.setResourceType(Invitation.ResourceType.WEB_SITE);
-
-        if (inviterId != null) {
-            criteria.setInviter(inviterId);
-        }
-        if (inviteeId != null) {
-            criteria.setInvitee(inviteeId);
-        }
-        if (companyId != null) {
-            criteria.setResourceName(companyId);
-        }
-
-        return invitationService.searchInvitation(criteria);
-
-    }
 }

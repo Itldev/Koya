@@ -105,7 +105,7 @@
         <property name="siteService" ref="siteService"/>
         <property name="activityService" ref="activityService"/>
         <property name="userService" ref="userService"/>
-        <property name="invitationService" ref="invitationService" />
+        <property name="companyAclService" ref="companyAclService" />
     </bean>
     
     

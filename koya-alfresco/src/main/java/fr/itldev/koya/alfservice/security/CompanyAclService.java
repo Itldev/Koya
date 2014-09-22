@@ -28,8 +28,10 @@ import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.alfresco.repo.invitation.InvitationSearchCriteriaImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteDoesNotExistException;
@@ -128,27 +130,32 @@ public class CompanyAclService {
      * @return
      */
     public List<User> listMembersValidated(String companyName, List<SitePermission> permissionsFilter) {
+        final List<String> permissions = CollectionUtils.toListOfStrings(permissionsFilter);
 
-        List<User> usersOfCompanyValidated = new ArrayList<>();
-        if (permissionsFilter == null || permissionsFilter.isEmpty()) {
-            permissionsFilter = SitePermission.getAll();
-        }
+        Map<String, String> members = siteService.listMembers(companyName, null, null, 0);
+        //Admin is not considered as a company active member
+        members.remove(AuthenticationUtil.getAdminUserName());
+        List<Map.Entry<String, String>> companyMembers = new ArrayList(members.entrySet());
 
-        for (SitePermission sp : permissionsFilter) {
+        if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
+            companyMembers = CollectionUtils.filter(companyMembers, new Filter<Map.Entry<String, String>>() {
 
-            Map<String, String> members = siteService.listMembers(companyName, null,
-                    sp.toString(), 0);
-            for (String userName : members.keySet()) {
-                if (!authorityService.isAdminAuthority(userName)
-                        && invitationService.listPendingInvitationsForInvitee(userName).isEmpty()) {
-                    usersOfCompanyValidated.add(userService.getUserByUsername(userName));
+                @Override
+                public Boolean apply(Map.Entry<String, String> member) {
+                    return permissions.contains(member.getValue());
                 }
-            }
-
+            });
         }
+
+        List<User> usersOfCompanyValidated = CollectionUtils.transform(companyMembers, new Function<Map.Entry<String, String>, User>() {
+
+            @Override
+            public User apply(Map.Entry<String, String> entry) {
+                return userService.getUserByUsername(entry.getKey());
+            }
+        });
 
         return usersOfCompanyValidated;
-
     }
 
     /**
@@ -160,13 +167,7 @@ public class CompanyAclService {
      */
     public List<User> listMembersPendingInvitation(final String companyName, final List<SitePermission> permissionsFilter) {
         List<Invitation> pendinginvitations = getPendingInvite(companyName, null, null);
-        final List<String> permissions = CollectionUtils.transform(permissionsFilter, new Function<SitePermission, String>() {
-
-            @Override
-            public String apply(SitePermission sp) {
-                return sp.toString();
-            }
-        });
+        final List<String> permissions = CollectionUtils.toListOfStrings(permissionsFilter);
 
         if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
             pendinginvitations = CollectionUtils.filter(pendinginvitations, new Filter<Invitation>() {
@@ -253,13 +254,12 @@ public class CompanyAclService {
         if (roleOfSite != null) {
             return SitePermission.valueOf(roleOfSite);
         }
-        //if not found, try with pending invitation users        
-        for (Invitation i : invitationService.listPendingInvitationsForResource(
-                Invitation.ResourceType.WEB_SITE, c.getName())) {
-            if (i.getInviteeUserName().equals(u.getUserName())) {
-                return SitePermission.valueOf(i.getRoleName());
-            }
+        //if not found, try with pending invitation users
+        Iterator<Invitation> it = getPendingInvite(c.getName(), null, u.getUserName()).iterator();
+        if (it.hasNext()) {
+            return SitePermission.valueOf(it.next().getRoleName());
         }
+
         //if no reults return null;
         return null;
     }
@@ -365,20 +365,46 @@ public class CompanyAclService {
      * @throws KoyaServiceException
      */
     public void removeFromMembers(Company c, User u) throws KoyaServiceException {
-        siteService.removeMembership(c.getName(), u.getUserName());
+        List<Invitation> invitations = getPendingInvite(c.getName(), null, u.getUserName());
+        if (invitations.isEmpty()) {
+            siteService.removeMembership(c.getName(), u.getUserName());
 
-        //Launch backend action that cleans all users specific permissions in company
-        //Only delete specific permissions on dossiers 
-        try {
-            Map<String, Serializable> paramsClean = new HashMap<>();
-            paramsClean.put("userName", u.getUserName());
-            Action cleanUserAuth = actionService.createAction("cleanPermissions", paramsClean);
-            cleanUserAuth.setExecuteAsynchronously(true);
-            actionService.executeAction(cleanUserAuth, siteService.getSite(c.getName()).getNodeRef());
-        } catch (InvalidNodeRefException ex) {
-            throw new KoyaServiceException(0, "");//TODO
+            //Launch backend action that cleans all users specific permissions in company
+            //Only delete specific permissions on dossiers 
+            try {
+                Map<String, Serializable> paramsClean = new HashMap<>();
+                paramsClean.put("userName", u.getUserName());
+                Action cleanUserAuth = actionService.createAction("cleanPermissions", paramsClean);
+                cleanUserAuth.setExecuteAsynchronously(true);
+                actionService.executeAction(cleanUserAuth, siteService.getSite(c.getName()).getNodeRef());
+            } catch (InvalidNodeRefException ex) {
+                throw new KoyaServiceException(0, "");//TODO
+            }
+        } else {
+            List<Exception> exceptions = new ArrayList<>();
+            for (final Invitation i : invitations) {
+                Exception eCancel = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Exception>() {
+
+                    @Override
+                    public Exception doWork() throws Exception {
+                        try {
+                            invitationService.cancel(i.getInviteId());
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                            return e;
+                        }
+                        return null;
+                    }
+                });
+                if (eCancel != null) {
+                    exceptions.add(eCancel);
+                }
+
+            }
+            if (!exceptions.isEmpty()) {
+                throw new KoyaServiceException(0, "");//TODO
+            }
         }
-
     }
 
 }
