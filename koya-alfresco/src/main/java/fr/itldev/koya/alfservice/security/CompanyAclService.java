@@ -131,10 +131,8 @@ public class CompanyAclService {
      */
     public List<User> listMembersValidated(String companyName, List<SitePermission> permissionsFilter) {
         final List<String> permissions = CollectionUtils.toListOfStrings(permissionsFilter);
-
         Map<String, String> members = siteService.listMembers(companyName, null, null, 0);
-        //Admin is not considered as a company active member
-        members.remove(AuthenticationUtil.getAdminUserName());
+
         List<Map.Entry<String, String>> companyMembers = new ArrayList(members.entrySet());
 
         if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
@@ -142,7 +140,7 @@ public class CompanyAclService {
 
                 @Override
                 public Boolean apply(Map.Entry<String, String> member) {
-                    return permissions.contains(member.getValue());
+                    return permissions.contains(member.getValue()) && !authorityService.isAdminAuthority(member.getKey());
                 }
             });
         }
