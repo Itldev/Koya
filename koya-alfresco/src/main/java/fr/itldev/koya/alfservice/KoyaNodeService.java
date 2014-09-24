@@ -603,6 +603,11 @@ public class KoyaNodeService {
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public SecuredItem getParent(NodeRef currentNode) throws KoyaServiceException {
+
+        if (isKoyaCompany(currentNode)) {
+            return null;//can't get company  parent 
+        }
+
         NodeRef parentNr = unsecuredNodeService.getPrimaryParent(currentNode).getParentRef();
         if (isKoyaCompany(parentNr)
                 || (unsecuredNodeService.getProperty(parentNr, ContentModel.PROP_NAME).equals(DOCLIB_NAME)
@@ -631,33 +636,19 @@ public class KoyaNodeService {
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public List<SecuredItem> getParentsList(NodeRef n, Integer nbAncestor, Class... typeFilter) throws KoyaServiceException {
+    public List<SecuredItem> getParentsList(NodeRef n, Integer nbAncestor) throws KoyaServiceException {
         List<SecuredItem> parents = new ArrayList<>();
         SecuredItem parent = getParent(n);
 
         if (parent == null) {
-            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODE_HIERACHY);
-        } else if (parent.getClass().isAssignableFrom(Company.class)) {
             /**
              * End condition
              */
-            if (typeFilter.length == 0
-                    || (typeFilter.length == 1 && typeFilter[0].isAssignableFrom(parent.getClass()))) {
-                parents.add(parent);
-            }
-
-            return parents;
+            return new ArrayList<>();
         } else {
-            if (typeFilter.length == 0
-                    || (typeFilter.length == 1 && typeFilter[0].isAssignableFrom(parent.getClass()))) {
-                parents.add(parent);
-            }
-
-            if (Objects.equals(nbAncestor, NB_ANCESTOR_INFINTE)) {
-                parents.addAll(getParentsList(parent.getNodeRefasObject(), NB_ANCESTOR_INFINTE));
-            } else if (nbAncestor > 1) {
-                nbAncestor--;
-                parents.addAll(getParentsList(parent.getNodeRefasObject(), nbAncestor));
+            parents.add(parent);
+            if (nbAncestor > 1 || nbAncestor <= NB_ANCESTOR_INFINTE) {
+                parents.addAll(getParentsList(parent.getNodeRefasObject(), --nbAncestor));
             }
         }
 

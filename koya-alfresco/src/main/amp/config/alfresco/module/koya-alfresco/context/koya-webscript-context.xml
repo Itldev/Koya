@@ -325,7 +325,7 @@
     </bean>
     
     <!--get Parent-->
-    <bean id="webscript.fr.itldev.koya.global.getparent.post" 
+    <bean id="webscript.fr.itldev.koya.global.parents.get" 
           class="fr.itldev.koya.webscript.global.GetParent"
           parent="webscript">                
         <property name="koyaNodeService" ref="koyaNodeService" />     

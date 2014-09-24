@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
@@ -31,8 +30,8 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
 
     protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}";
     protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{newName}/{nodeRef}";
-    private static final String REST_POST_GETPARENT = "/s/fr/itldev/koya/global/getparent/{nbAncestor}";
-    private static final String REST_POST_GETPARENT_INFINITE = "/s/fr/itldev/koya/global/getparent";
+    private static final String REST_GET_PARENTS = "/s/fr/itldev/koya/global/parents/{nodeRef}?nbAncestor={nbAncestor}";
+    private static final String REST_GET_PARENTS_INFINITE = "/s/fr/itldev/koya/global/parents/{nodeRef}";
 
     private String alfrescoServerUrl;
 
@@ -97,10 +96,17 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
     public SecuredItem getParent(User user, SecuredItem securedItem)
             throws AlfrescoServiceException {
 
-        return fromJSON(new TypeReference<List<SecuredItem>>() {
-        }, user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_GETPARENT_INFINITE,
-                securedItem, String.class)).get(0);
+        List<SecuredItem> parents = fromJSON(new TypeReference<List<SecuredItem>>() {
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_PARENTS,
+                String.class, securedItem.getNodeRef(), 1));
+       
+        if (parents.isEmpty()) {
+            return null;
+        } else {
+            return parents.get(0);
+        }
+
     }
 
     /**
@@ -115,10 +121,11 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
     @Override
     public List<SecuredItem> getParents(User user, SecuredItem securedItem)
             throws AlfrescoServiceException {
+
         return fromJSON(new TypeReference<List<SecuredItem>>() {
-        }, user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_GETPARENT_INFINITE,
-                securedItem, String.class));
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_PARENTS_INFINITE,
+                String.class, securedItem.getNodeRef()));
     }
 
 }
