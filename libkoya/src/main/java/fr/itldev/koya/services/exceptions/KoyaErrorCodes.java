@@ -87,5 +87,6 @@ public interface KoyaErrorCodes {
     public static final Integer KOYAMAIL_INVALID_SUBJECT_PROPERTIES_PATH = 900;
     public static final Integer KOYAMAIL_CANNOT_FIND_TEMPLATE = 901;
     public static final Integer KOYAMAIL_UNSUPPORTED_TEMPLATE_LOCATION_TYPE = 902;
+    public static final Integer KOYAMAIL_SUBJECT_KEY_NOT_EXISTS_IN_PROPERTIES = 903;
 
 }

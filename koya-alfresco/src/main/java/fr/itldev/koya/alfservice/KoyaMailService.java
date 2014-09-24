@@ -79,13 +79,11 @@ public class KoyaMailService {
     public void sendShareNotifMail(User sender, String destMail, NodeRef sharedNodeRef) throws KoyaServiceException {
         Map<String, Serializable> paramsMail = new HashMap<>();
 
-        Properties i18n = getI18nSubjectProperties();
-
         paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
         /**
          * Get subject from properties file in repository
          */
-        paramsMail.put(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(SHARE_NOTIFICATION_SUBJECT));
+        paramsMail.put(MailActionExecuter.PARAM_SUBJECT, getI18nSubject(SHARE_NOTIFICATION_SUBJECT));
         paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, getFileTemplateRef(shareNotificationTemplateLocation));
 
         //TODO i18n templates
@@ -141,7 +139,7 @@ public class KoyaMailService {
 
         if (wrapper.getTemplateKoyaSubjectKey() != null) {
 
-            String subject = (String) getI18nSubjectProperties().get(wrapper.getTemplateKoyaSubjectKey());
+            String subject = (String) getI18nSubject(wrapper.getTemplateKoyaSubjectKey());
 
             /**
              * TODO replace MailActionExecuter.PARAM_SUBJECT_PARAMS parameter
@@ -163,7 +161,7 @@ public class KoyaMailService {
 
     }
 
-    public Properties getI18nSubjectProperties() throws KoyaServiceException {
+    public String getI18nSubject(String propKey) throws KoyaServiceException {
         Properties i18n = koyaNodeService.readPropertiesFileContent(
                 getFileTemplateRef(i18nMailSubjectPropertiesLocation));
         if (i18n == null) {
@@ -171,7 +169,14 @@ public class KoyaMailService {
                     "Invalid koya Mail subject properties path : "
                     + i18nMailSubjectPropertiesLocation.getPath());
         }
-        return i18n;
+
+        String value = i18n.getProperty(propKey);
+
+        if (value != null && !value.isEmpty()) {
+            return value;
+        } else {
+            throw new KoyaServiceException(KoyaErrorCodes.KOYAMAIL_SUBJECT_KEY_NOT_EXISTS_IN_PROPERTIES, " missing key = " + propKey);
+        }
     }
 
     /**

@@ -244,7 +244,6 @@ public class EmailNotificationService {
 
         ruleParameters.put(MailActionExecuter.PARAM_TO_MANY, new ArrayList(Arrays.asList(username)));
 
-        Properties i18n = koyaMailService.getI18nSubjectProperties();
 
         /**
          * TODO get mail subject on mail sending not on rule creation
@@ -253,7 +252,7 @@ public class EmailNotificationService {
          * and mail alert, le subject will be the old one.
          *
          */
-        ruleParameters.put(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(INSTANT_NOTIFICATION_SUBJECT));
+        ruleParameters.put(MailActionExecuter.PARAM_SUBJECT, koyaMailService.getI18nSubject(INSTANT_NOTIFICATION_SUBJECT));
         ruleParameters.put(MailActionExecuter.PARAM_TEMPLATE, koyaMailService.getFileTemplateRef(feedEmailTemplateLocation));
 
         action.setParameterValues(ruleParameters);

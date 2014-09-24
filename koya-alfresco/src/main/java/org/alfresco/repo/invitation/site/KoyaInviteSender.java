@@ -122,9 +122,8 @@ public class KoyaInviteSender extends InviteSender {
              * KOYA : specific email subject
              *
              */
-            Properties i18n = koyaMailService.getI18nSubjectProperties();
 
-            mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT, i18n.getProperty(EMAIL_SUBJECT).replace("{0}", getSiteName(properties)));
+            mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT, koyaMailService.getI18nSubject(EMAIL_SUBJECT).replace("{0}", getSiteName(properties)));
             /**
              *
              */
