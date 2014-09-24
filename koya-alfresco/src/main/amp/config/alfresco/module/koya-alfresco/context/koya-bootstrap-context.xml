@@ -41,11 +41,42 @@
         <property name="bootstrapViews">
             <list>
                 <props>
-                    <prop key="path"> /${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}</prop>
+                    <prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}</prop>
                     <prop key="location">alfresco/module/${project.artifactId}/bootstrap/koya-mail-templates.xml</prop>
                 </props>        
             </list>
         </property>
 
     </bean>
+    
+    <!--add versionable aspect to defined node-->
+    <bean id="patch.koyaMakeNodesVersionable" class="fr.itldev.koya.patch.MakeNodesVersionable"
+          parent="basePatch">
+        <property name="id">
+            <value>patch.koyaMakeNodesVersionable</value>
+        </property>       
+        <property name="description">
+            <value>Make specified nodes versionable</value>
+        </property>    
+        <property name="fixesFromSchema">
+            <value>0</value>
+        </property>
+        <property name="fixesToSchema">
+            <value>${version.schema}</value>
+        </property>
+        <property name="targetSchema">
+            <value>10000</value>
+        </property>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="versionService" ref="versionService"/>
+        <property name="xPathNodes">
+            <list>
+                <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/cm:invite/cm:invite-email_fr.html.ftl</value>                
+                <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/app:notify_email_templates/cm:notify_user_email_fr.html.ftl</value>                
+            </list>
+        </property>
+                      
+    </bean>
+    
+    
 </beans>

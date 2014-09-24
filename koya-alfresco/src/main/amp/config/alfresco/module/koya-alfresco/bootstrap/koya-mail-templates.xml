@@ -12,10 +12,12 @@
             <cm:content view:childName="cm:share-notification.html.ftl">
                 <view:aspects>
                     <cm:titled />
+                    <cm:versionable />
                     <cm:author />
                     <app:inlineeditable />
                 </view:aspects>
                 <view:properties>
+                    <cm:versionLabel>1.0</cm:versionLabel>
                     <app:editInline>true</app:editInline>
                     <cm:description></cm:description>
                     <cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/share-notification.html.ftl|mimetype=text/plain|size=1455|encoding=UTF-8</cm:content>
@@ -25,13 +27,15 @@
                 </view:properties>
                 <view:associations></view:associations>
             </cm:content>        
-             <cm:content view:childName="cm:koyamail.properties">
+            <cm:content view:childName="cm:koyamail.properties">
                 <view:aspects>
                     <cm:titled />
                     <cm:author />
                     <app:inlineeditable />
+                    <cm:versionable />
                 </view:aspects>
                 <view:properties>
+                    <cm:versionLabel>1.0</cm:versionLabel>
                     <app:editInline>true</app:editInline>
                     <cm:description></cm:description>
                     <cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/koyamail.properties|mimetype=text/plain|size=1455|encoding=UTF-8</cm:content>
