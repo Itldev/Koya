@@ -173,7 +173,7 @@ public class SubSpaceAclService {
      */
     public void initSubSpaceWithDefaultPermissions(SubSpace subSpaceItem) throws KoyaServiceException {
         
-        Company c = koyaNodeService.getNodeCompany(subSpaceItem.getNodeRefasObject());
+        Company c = koyaNodeService.getCompany(subSpaceItem.getNodeRefasObject());
         // Clear the node inherited permissions
         permissionService.setInheritParentPermissions(subSpaceItem.getNodeRefasObject(), false);
         /*

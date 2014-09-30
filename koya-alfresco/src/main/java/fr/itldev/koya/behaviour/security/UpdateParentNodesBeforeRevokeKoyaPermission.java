@@ -93,7 +93,7 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
     @Override
     public void beforeRevokeKoyaPermission(SubSpace subSpace, String authority, KoyaPermission permission) {
         
-        logger.error("Chained permissions deletion user=" + authority + ": ref =  " + subSpace.getName() + "(" + subSpace.getClass().getSimpleName() + ")");
+        logger.debug("Chained permissions deletion user=" + authority + ": ref =  " + subSpace.getName() + "(" + subSpace.getClass().getSimpleName() + ")");
         
         try {
             Company c = koyaNodeService.getCompany(subSpace.getNodeRefasObject());

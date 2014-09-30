@@ -50,7 +50,7 @@ public class SubSpaceConsumersAclService extends SubSpaceAclService {
                 + userMail + " on " + subSpace.getName() + "(" + subSpace.getClass().getSimpleName() + ")");
 
         //Get company the shared Node belongs To
-        Company company = koyaNodeService.getNodeCompany(subSpace.getNodeRefasObject());
+        Company company = koyaNodeService.getCompany(subSpace.getNodeRefasObject());
         SitePermission userPermissionInCompany = companyAclService.getSitePermission(company, userMail);
         
         Invitation invitation = null;

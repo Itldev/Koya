@@ -725,6 +725,11 @@ public class KoyaNodeService {
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public Company getCompany(NodeRef nodeRef) throws KoyaServiceException {
+
+        if (nodeRef == null) {
+            return null;
+        }
+
         Map params = new HashMap(1);
         params.put(AncestorNodeLocator.TYPE_KEY, KoyaModel.TYPES_SHORT_PREFIX.get(KoyaModel.TYPE_COMPANY));
 
@@ -758,33 +763,6 @@ public class KoyaNodeService {
             }
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    /**
-     *
-     *
-     */
-    /**
-     * Returns company whose node belongs to. Null is node is not a comapny
-     * child
-     *
-     * unsecured method
-     *
-     *
-     * TODO modify with nodeLocator implementation
-     *
-     * @param n
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public Company getNodeCompany(NodeRef n) throws KoyaServiceException {
-        if (n == null) {
-            return null;
-        } else if (unsecuredNodeService.getType(n).equals(KoyaModel.TYPE_COMPANY)) {
-            return companyBuilder(n);
-        } else {
-            return getNodeCompany(unsecuredNodeService.getPrimaryParent(n).getParentRef());
         }
     }
 
