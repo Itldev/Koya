@@ -32,7 +32,7 @@ import org.springframework.core.io.Resource;
 
 public class DossierServiceImpl extends AlfrescoRestService implements DossierService {
 
-    private static final String REST_POST_ADDDOSSIER = "/s/fr/itldev/koya/dossier/add/{parentNodeRef}";
+    private static final String REST_GET_CREATEDOSSIER = "/s/fr/itldev/koya/dossier/create/{parentNodeRef}?title={title}";
     private static final String REST_POST_LISTCHILD = "/s/fr/itldev/koya/dossier/list?filter={filter}";
     private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
 
@@ -50,9 +50,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     }
 
     @Override
-    public Dossier create(User user, Dossier dossier, Space parentSpace) throws AlfrescoServiceException {
-        return user.getRestTemplate().postForObject(getAlfrescoServerUrl()
-                + REST_POST_ADDDOSSIER, dossier, Dossier.class, parentSpace.getNodeRef());
+    public Dossier create(User user, Space parentSpace, String title) throws AlfrescoServiceException {
+        return user.getRestTemplate().getForObject(getAlfrescoServerUrl()
+                + REST_GET_CREATEDOSSIER, Dossier.class, parentSpace.getNodeRef(), title);
     }
 
     /**
@@ -61,7 +61,6 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      * TODO make this process atomic
      *
      * @param user
-     * @param dossier
      * @param parentSpace
      * @param zipFile
      *
@@ -70,9 +69,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      * @throws AlfrescoServiceException
      */
     @Override
-    public Dossier create(User user, Dossier dossier, Space parentSpace, Resource zipFile) throws AlfrescoServiceException {
-        Dossier d = create(user, dossier, parentSpace);
-        Document zipDoc = KoyaContentService.upload(user, zipFile, d);
+    public Dossier create(User user, Space parentSpace, String title, Resource zipFile) throws AlfrescoServiceException {
+        Dossier d = create(user, parentSpace, title);
+        Document zipDoc = KoyaContentService.upload(user, d.getNodeRefasObject(), zipFile);
         KoyaContentService.importZipedContent(user, zipDoc);
         return d;
     }

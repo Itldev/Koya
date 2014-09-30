@@ -20,11 +20,10 @@
 -->
 
 <webscript>
-     <shortname>Move Content</shortname>
-    <description>move content to new defined parent</description>
+    <shortname>Create Directory</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/content/move/{parentNodeRef}</url>
-    <authentication>user</authentication>    
+    <url>/fr/itldev/koya/content/createdir/{parentNodeRef}?title={title}</url>
+    <authentication>user</authentication>
     <format default="json"/>
 </webscript>
 

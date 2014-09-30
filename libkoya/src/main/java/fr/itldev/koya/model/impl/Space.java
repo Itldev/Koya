@@ -46,7 +46,7 @@ public final class Space extends SecuredItem implements Container, SubSpace {
     }
 
     // </editor-fold>
-    public Space() {
+    private Space() {
     }
 
     public Space(String name) {
@@ -61,6 +61,10 @@ public final class Space extends SecuredItem implements Container, SubSpace {
     @Override
     public String getType() {
         return "space";
+    }
+
+    public static Space newInstance() {
+        return new Space();
     }
 
 }

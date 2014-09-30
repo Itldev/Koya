@@ -20,10 +20,9 @@
 -->
 
 <webscript>
-    <shortname>Add Dossier</shortname>
-    <description>Add Dossier in space</description>
+    <shortname>Create new Dossier</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/dossier/add/{parentNodeRef}</url>
+    <url>/fr/itldev/koya/dossier/create/{parentNodeRef}?title={title}</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>

@@ -20,10 +20,9 @@
 -->
 
 <webscript>
-    <shortname>Copy Content</shortname>
-    <description>copy content to defined parent</description>
+    <shortname>List Content</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/content/copy/{parentNodeRef}</url>
+    <url>/fr/itldev/koya/content/list/{nodeRef}?onlyFolders={onlyFolders}&amp;maxdepth={maxdepth}";</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

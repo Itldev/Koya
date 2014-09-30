@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.SalesOffer;
@@ -81,7 +80,7 @@ public class CompanyServiceImplTest extends TestCase {
         assertTrue(offresCom.size() > 0);
         SalesOffer sel = offresCom.get(0);
 
-        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel), "default");
+        Company created = companyService.create(admin, "company_" + new Random().nextInt(1000), sel.getName(), "default");
         assertNotNull(created);
     }
 
@@ -92,7 +91,7 @@ public class CompanyServiceImplTest extends TestCase {
         SalesOffer sel = offresCom.get(0);
 
         Random r = new Random();
-        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel), "default");
+        Company created = companyService.create(admin, "company_" + new Random().nextInt(1000), sel.getName(), "default");
 
         List<Company> lst = companyService.list(admin);
         assertTrue(lst.size() > 0);
@@ -113,8 +112,7 @@ public class CompanyServiceImplTest extends TestCase {
         assertTrue(offresCom.size() > 0);
         SalesOffer sel = offresCom.get(0);
 
-        Company created = companyService.create(admin, 
-                new Company("company_" + new Random().nextInt(1000), sel), "default");
+        Company created = companyService.create(admin, "company_" + new Random().nextInt(1000), sel.getName(), "default");
 
         System.out.println("comp = " + created);
 
@@ -129,7 +127,7 @@ public class CompanyServiceImplTest extends TestCase {
             List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
             assertTrue(offresCom.size() > 0);
             SalesOffer sel = offresCom.get(0);
-            Company notExists = new Company("company_" + new Random().nextInt(1000), sel);
+            Company notExists = companyService.create(admin, "company_" + new Random().nextInt(1000), sel.getName(), "default");
 
             Preferences p = companyService.getPreferences(admin, notExists);
             fail("should throw exception because company doesnt exists");
@@ -145,7 +143,7 @@ public class CompanyServiceImplTest extends TestCase {
         assertTrue(offresCom.size() > 0);
         SalesOffer sel = offresCom.get(0);
 
-        Company created = companyService.create(admin, new Company("company_" + new Random().nextInt(1000), sel), "default");
+        Company created = companyService.create(admin, "company_" + new Random().nextInt(1000), sel.getName(), "default");
         Preferences p = companyService.getPreferences(admin, created);
         String testKey = "fr.itldev.test";
 

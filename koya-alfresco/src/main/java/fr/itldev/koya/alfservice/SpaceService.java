@@ -70,15 +70,15 @@ public class SpaceService {
     /**
      * Space creation in a valid Container : Space or Company
      *
-     * @param name
+     * @param title
      * @param target
      * @param prop
      * @return
      * @throws KoyaServiceException
      */
-    public Space create(String name, NodeRef target, Map<String, String> prop) throws KoyaServiceException {
+    public Space create(String title, NodeRef target, Map<String, String> prop) throws KoyaServiceException {
         //Space must have a name
-        if (name == null || name.isEmpty()) {
+        if (title == null || title.isEmpty()) {
             throw new KoyaServiceException(KoyaErrorCodes.SPACE_EMPTY_NAME);
         }
 
@@ -94,10 +94,12 @@ public class SpaceService {
             throw new KoyaServiceException(KoyaErrorCodes.SPACE_INVALID_PARENT);
         }
 
-        //TODO check name unicity
+        String name = koyaNodeService.getUniqueValidFileNameFromTitle(title);
+
         //build node properties
         final Map<QName, Serializable> properties = new HashMap<>();
         properties.put(ContentModel.PROP_NAME, name);
+        properties.put(ContentModel.PROP_TITLE, title);
 
         ChildAssociationRef car = nodeService.createNode(nrParent,
                 ContentModel.ASSOC_CONTAINS,
@@ -145,28 +147,6 @@ public class SpaceService {
             }
         }
         return spaces;
-    }
-
-    /**
-     * move a space
-     *
-     * @param toMove
-     * @param dest
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public Space move(NodeRef toMove, NodeRef dest) throws KoyaServiceException {
-
-        String name = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
-
-        if (nodeService.getType(dest).equals(KoyaModel.TYPE_COMPANY)) {
-            dest = getDocLibNodeRef(dest);
-        }
-        logger.trace("move " + name + " to " + (String) nodeService.getProperty(dest, ContentModel.PROP_NAME));
-
-        nodeService.moveNode(toMove, dest, ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name));
-        return koyaNodeService.nodeSpaceBuilder(toMove);
-        //TODO call global move method
     }
 
     /**

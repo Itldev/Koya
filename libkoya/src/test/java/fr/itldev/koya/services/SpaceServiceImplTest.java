@@ -58,7 +58,8 @@ public class SpaceServiceImplTest extends TestCase {
     @Before
     public void createCompany() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
+        companyTests = companyService.create(admin, "company" + new Random().nextInt(1000),
+                companyService.listSalesOffer(admin).get(0).getName(), "default");
     }
 
     @After

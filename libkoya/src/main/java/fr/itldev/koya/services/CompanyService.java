@@ -29,17 +29,17 @@ import org.springframework.web.client.RestClientException;
 
 public interface CompanyService extends AlfrescoService {
 
-    /**
-     * Company creation
-     *
-     * @param admin
-     * @param c
-     * @param template
-     * @return
-     * @throws RestClientException
-     * @throws AlfrescoServiceException
-     */
-    Company create(User admin, Company c, String template) throws RestClientException, AlfrescoServiceException;
+   /**
+    * Company creation
+    * @param admin
+    * @param title
+    * @param salesOfferName
+    * @param template
+    * @return
+    * @throws RestClientException
+    * @throws AlfrescoServiceException 
+    */
+    Company create(User admin, String title, String salesOfferName, String template) throws RestClientException, AlfrescoServiceException;
 
     /**
      *

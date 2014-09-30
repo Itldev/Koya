@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.interfaces.Content;
@@ -81,35 +80,41 @@ public class GenericServiceImplTest extends TestCase {
     @Before
     public void createDossier() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
+        companyTests = companyService.create(admin,
+                "company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0).getName(), "default");
         spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
-        dossierTests = dossierService.create(admin, new Dossier("doss1"), spaceTests);
+        dossierTests = dossierService.create(admin, spaceTests, "doss1");
     }
 
     @After
-    public void deleteCompany() throws RestClientException, AlfrescoServiceException {
-        companyService.delete(admin, companyTests);
+    public void deleteCompany() throws RestClientException {
+        try {
+            companyService.delete(admin, companyTests);
+        } catch (AlfrescoServiceException aex) {
+            System.err.println("error deleting company '" + companyTests.getTitle() + "' : " + aex.getKoyaErrorCode() + " - " + aex.getMessage());
+        }
     }
 
     @Test
     public void testgetParent() throws AlfrescoServiceException {
-        Content dir = koyaContentService.create(admin, new Directory("dir"), dossierTests);
+        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRefasObject(), "dir");
+        System.err.println(dir);
         assertTrue(securedItemService.getParent(admin, (SecuredItem) dir).getName().equals("doss1"));
     }
 
     @Test
     public void testgetParents1() throws AlfrescoServiceException {
-        Content dir = koyaContentService.create(admin, new Directory("dir2"), dossierTests);
+        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRefasObject(), "dir2");
         assertEquals(securedItemService.getParents(admin, (SecuredItem) dir).size(), 3);
     }
 
     @Test
     public void testgetParents2() throws AlfrescoServiceException {
-        Content dir = koyaContentService.create(admin, new Directory("dir"), dossierTests);
-        Content subDir = koyaContentService.create(admin, new Directory("subdir"), (Directory) dir);
+        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRefasObject(), "dir");
+        Directory subDir = koyaContentService.createDir(admin, dir.getNodeRefasObject(), "subdir");
 
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
-        Document doc = koyaContentService.upload(admin, toUpload, (Directory) subDir);
+        Document doc = koyaContentService.upload(admin, subDir.getNodeRefasObject(), toUpload);
 
         assertEquals(securedItemService.getParents(admin, doc).size(), 5);
     }

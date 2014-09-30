@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.content;
+package fr.itldev.koya.webscript.dossier;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
@@ -31,26 +31,30 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
- * Copy Content Webscript.
+ * Add Dossier Webscript
  *
  */
-public class CopyContent extends AbstractWebScript {
+public class CreateDossier extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
+    /*services*/
+    private DossierService dossierService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
+    public void setDossierService(DossierService dossierService) {
+        this.dossierService = dossierService;
     }
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 
-        NodeRef dest = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_DESTNODEREF));
-        NodeRef nodeRef = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_NODEREF));
+        String title = (String) urlParamsMap.get(KoyaWebscript.WSCONST_TITLE);
+
+        NodeRef parent = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_PARENTNODEREF));
+
         String response;
+
         try {
-            response = KoyaWebscript.getObjectAsJson(koyaNodeService.copy(nodeRef, dest));
+            response = KoyaWebscript.getObjectAsJson(dossierService.create(title, parent, null));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

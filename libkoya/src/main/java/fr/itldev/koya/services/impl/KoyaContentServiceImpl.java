@@ -3,27 +3,24 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.interfaces.Container;
 import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AlfrescoUploadReturn;
@@ -40,6 +37,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.codehaus.jackson.type.TypeReference;
 import org.json.simple.JSONObject;
 import org.springframework.core.io.Resource;
@@ -51,114 +51,31 @@ import org.springframework.util.MultiValueMap;
 
 public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService {
 
-    private static final String REST_POST_ADDCONTENT = "/s/fr/itldev/koya/content/add/{parentNodeRef}";
-    private static final String REST_POST_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list/{onlyFolders}?maxdepth={maxdepth}";
-    private static final String REST_POST_LISTCONTENT = "/s/fr/itldev/koya/content/list/{onlyFolders}";
-    private static final String REST_POST_MOVECONTENT = "/s/fr/itldev/koya/content/move/{parentNodeRef}";
-    private static final String REST_POST_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{parentNodeRef}";
+    private static final String REST_GET_CREATEDIR = "/s/fr/itldev/koya/content/createdir/{parentNodeRef}?title={title}";
+    private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}";
+    private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}";
+    private static final String REST_GET_LISTCONTENT = "/s/fr/itldev/koya/content/list/{nodeRef}?onlyFolders={onlyFolders}";
+    private static final String REST_GET_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}";
+
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
     private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
-
-   
-
     private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
 
     @Override
-    public Content create(User user, Content toCreate, Directory parent) throws AlfrescoServiceException {
-        return createImpl(user, toCreate, parent);
-    }
-
-    @Override
-    public Content create(User user, Content toCreate, Dossier parent) throws AlfrescoServiceException {
-        return createImpl(user, toCreate, parent);
-    }
-
-    @Override
-    public Document upload(User user, Resource r, Directory repertoire) throws AlfrescoServiceException {
-        return uploadPrivate(user, r, repertoire);
-    }
-
-    @Override
-    public Document upload(User user, Resource r, Dossier dossier) throws AlfrescoServiceException {
-        return uploadPrivate(user, r, dossier);
-    }
-
-    @Override
-    public Content move(User user, Content toMove, Directory desination) throws AlfrescoServiceException {
-        return moveImpl(user, toMove, desination);
-    }
-
-    @Override
-    public Content move(User user, Content toMove, Dossier desination) throws AlfrescoServiceException {
-        return moveImpl(user, toMove, desination);
-    }
-
-    @Override
-    public Content copy(User user, Content toCopy, Directory desination) throws AlfrescoServiceException {
-        return copyImpl(user, toCopy, desination);
-    }
-
-    @Override
-    public Content copy(User user, Content toCopy, Dossier desination) throws AlfrescoServiceException {
-        return copyImpl(user, toCopy, desination);
-    }
-
-    @Override
-    public List<Content> list(User user, Dossier dossier, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
-        return listContent(user, dossier, onlyFolders, depth);
-    }
-
-    @Override
-    public List<Content> list(User user, Directory dir, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
-        return listContent(user, dir, onlyFolders, depth);
-    }
-
-    private Content createImpl(User user, Content content, Container parent) throws AlfrescoServiceException {
-
-        if (parent.getNodeRef() == null) {
+    public Directory createDir(User user, NodeRef parent, String title) throws AlfrescoServiceException {
+        if (parent == null) {
             throw new AlfrescoServiceException("parent noderef must be set", 0);
         }
-        return (Content) user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_ADDCONTENT, content,
-                SecuredItem.class, parent.getNodeRef());
+        return (Directory) user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_CREATEDIR,
+                Directory.class, parent.toString(), title);
     }
 
-    private List<Content> listContent(User user, SecuredItem container, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
-        List<SecuredItem> lstSi = new ArrayList<>();//TODO collectionsUtil list transformation
-
-        if (depth.length > 0) {
-            lstSi = fromJSON(new TypeReference<List<SecuredItem>>() {
-            }, user.getRestTemplate().postForObject(
-                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT_DEPTH_OPTION,
-                    container, String.class, onlyFolders, depth[0]));
-        } else {
-            lstSi = fromJSON(new TypeReference<List<SecuredItem>>() {
-            }, user.getRestTemplate().postForObject(
-                    getAlfrescoServerUrl() + REST_POST_LISTCONTENT, container, String.class, onlyFolders));
-        }
-
-        /**
-         * Convert in content list
-         */
-        List<Content> retLst = new ArrayList<>();
-        for (SecuredItem si : lstSi) {
-            retLst.add((Content) si);
-        }
-        return retLst;
-    }
-
-    /**
-     *
-     * @param user
-     * @param in
-     * @param parent
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    private Document uploadPrivate(User user, Resource resource, Container parent) throws AlfrescoServiceException {
+    @Override
+    public Document upload(User user, NodeRef parent, Resource r) throws AlfrescoServiceException {
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-        parts.add("filedata", resource);
-        parts.add("destination", parent.getNodeRef());
+        parts.add("filedata", r);
+        parts.add("destination", parent.toString());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
@@ -169,14 +86,49 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
     }
 
-    private Content moveImpl(User user, Content contenu, Container parent) throws AlfrescoServiceException {
-        return (Content) user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_MOVECONTENT, contenu, SecuredItem.class, parent.getNodeRef());
+    @Override
+    public Content move(User user, NodeRef contentToMove, NodeRef destination) throws AlfrescoServiceException {
+        return (Content) user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_MOVECONTENT, SecuredItem.class, contentToMove, destination);
     }
 
-    private Content copyImpl(User user, Content contenu, Container parent) throws AlfrescoServiceException {
-        return (Content) user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_COPYCONTENT, contenu, SecuredItem.class, parent.getNodeRef());
+    @Override
+    public Content copy(User user, NodeRef contentToCopy, NodeRef destination) throws AlfrescoServiceException {
+        return (Content) user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_COPYCONTENT, SecuredItem.class, contentToCopy, destination);
+    }
+
+    private static final Transformer TRANSFORM_TO_INTEGER = new Transformer() {
+        @Override
+        public Object transform(Object input) {
+            return (Content) input;
+        }
+    };
+
+    @Override
+    public List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
+        List contents = new ArrayList();
+
+        
+        /**
+         * TODO use only one url pattern with setted options
+         */
+        
+        if (depth.length > 0) {
+            contents = fromJSON(new TypeReference<List<SecuredItem>>() {
+            }, user.getRestTemplate().getForObject(
+                    getAlfrescoServerUrl() + REST_GET_LISTCONTENT_DEPTH_OPTION,
+                    String.class, containerToList, onlyFolders, depth[0]));
+        } else {
+            contents = fromJSON(new TypeReference<List<SecuredItem>>() {
+            }, user.getRestTemplate().getForObject(
+                    getAlfrescoServerUrl() + REST_GET_LISTCONTENT,
+                    String.class, containerToList, onlyFolders));
+        }
+        //tranform SecuredItems to contents
+        CollectionUtils.transform(contents, TRANSFORM_TO_INTEGER);
+
+        return contents;
     }
 
     @Override

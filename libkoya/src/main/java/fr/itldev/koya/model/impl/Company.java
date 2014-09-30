@@ -35,7 +35,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  */
 public final class Company extends SecuredItem implements Container {
 
-    private String title;//displayed title
+    // private String title;//displayed title
     private String currentSaleOfferNodeRef;
     @JsonIgnore
     private SalesOffer currentSaleOffer;
@@ -45,14 +45,6 @@ public final class Company extends SecuredItem implements Container {
     private List<Space> children = new ArrayList<>();
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getCurrentSaleOfferNodeRef() {
         return currentSaleOfferNodeRef;
     }
@@ -89,28 +81,20 @@ public final class Company extends SecuredItem implements Container {
     }
 
     // </editor-fold>
-    public Company() {
-    }
-
-    public Company(String titre, SalesOffer offre) {
-        this.title = titre;
-        this.currentSaleOffer = offre;
-    }
-
-    public Company(SiteInfo siteInfo) {
-        this.setName(siteInfo.getShortName());
-        this.setTitle(siteInfo.getTitle());
-        this.setNodeRefasObject(siteInfo.getNodeRef());
-        //TODO path, parentNoderef
+    private Company() {
     }
 
     @Override
     public String toString() {
-        return "Company {" + "name=" + getName() + ", title=" + title + ", nodeRef=" + getNodeRef() + '}';
+        return "Company {" + "name=" + getName() + ", title=" + getTitle() + ", nodeRef=" + getNodeRef() + '}';
     }
 
     @Override
     public String getType() {
         return "company";
+    }
+
+    public static Company newInstance() {
+        return new Company();
     }
 }

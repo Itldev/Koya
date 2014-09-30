@@ -31,24 +31,24 @@ public interface DossierService extends AlfrescoService {
      * Creates a new Dossier
      *
      * @param user
-     * @param dossier
+     * @param title
      * @param parentSpace
      * @return
      * @throws AlfrescoServiceException
      */
-    Dossier create(User user, Dossier dossier, Space parentSpace) throws AlfrescoServiceException;
+    Dossier create(User user, Space parentSpace, String title) throws AlfrescoServiceException;
 
     /**
      * Creates a new Dossier with content in a zip file
      *
      * @param user
-     * @param dossier
      * @param parentSpace
+     * @param title
      * @param zipFile
      * @return
      * @throws AlfrescoServiceException
      */
-    Dossier create(User user, Dossier dossier, Space parentSpace, Resource zipFile) throws AlfrescoServiceException;
+    Dossier create(User user, Space parentSpace,String title, Resource zipFile) throws AlfrescoServiceException;
 
     /**
      *

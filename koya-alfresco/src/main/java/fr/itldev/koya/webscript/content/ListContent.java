@@ -47,10 +47,9 @@ public class ListContent extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
         Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 
-        NodeRef parent = new NodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
+        NodeRef parent = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_NODEREF));
         Integer depth;
 
         if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {

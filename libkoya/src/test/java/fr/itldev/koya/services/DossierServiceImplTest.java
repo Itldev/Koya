@@ -67,7 +67,9 @@ public class DossierServiceImplTest extends TestCase {
     @Before
     public void init() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
+        companyTests = companyService.create(admin,
+                "company" + new Random().nextInt(1000),
+                companyService.listSalesOffer(admin).get(0).getName(), "default");
         spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
 
         //create to 2 test users if they don't exists (ie while nb users < 3)
@@ -105,7 +107,7 @@ public class DossierServiceImplTest extends TestCase {
 
     @Test
     public void testCreateDossier() throws AlfrescoServiceException {
-        Dossier created = dossierService.create(admin, new Dossier("doss1"), spaceTests);
+        Dossier created = dossierService.create(admin, spaceTests, "doss1");
         assertNotNull("error creating 'child dossier'", created);
 
         dossierService.list(admin, spaceTests);
@@ -114,16 +116,16 @@ public class DossierServiceImplTest extends TestCase {
 
     @Test
     public void testListDossiers() throws AlfrescoServiceException {
-        dossierService.create(admin, new Dossier("doss1"), spaceTests);
-        dossierService.create(admin, new Dossier("doss2"), spaceTests);
-        dossierService.create(admin, new Dossier("doss3"), spaceTests);
-        dossierService.create(admin, new Dossier("doss4"), spaceTests);
+        dossierService.create(admin, spaceTests, "doss1");
+        dossierService.create(admin, spaceTests, "doss2");
+        dossierService.create(admin, spaceTests, "doss3");
+        dossierService.create(admin, spaceTests, "doss4");
         assertEquals(4, dossierService.list(admin, spaceTests).size());
     }
 
     @Test
     public void testListResponsibles() throws AlfrescoServiceException {
-        Dossier d = dossierService.create(admin, new Dossier("dossLstResp"), spaceTests);
+        Dossier d = dossierService.create(admin, spaceTests, "dossLstResp");
         List<User> resp = dossierService.listResponsibles(admin, d);
         assertEquals(resp.size(), 1);
         assertEquals(resp.get(0), admin);
@@ -133,7 +135,7 @@ public class DossierServiceImplTest extends TestCase {
     @Test
     public void testAddDelResponsibles() throws AlfrescoServiceException {
 
-        Dossier d = dossierService.create(admin, new Dossier("dossAddDelResp"), spaceTests);
+        Dossier d = dossierService.create(admin, spaceTests, "dossAddDelResp");
         List<User> resp = dossierService.listResponsibles(admin, d);
         assertEquals(resp.size(), 1);//creator automaticly set as responsible
 
@@ -148,7 +150,7 @@ public class DossierServiceImplTest extends TestCase {
         assertEquals(2, dossierService.listResponsibles(admin, d).size());
 
         //del a responsible --> now only 1
-        dossierService.delMemberOrResponsible(admin, d, admin);
+        dossierService.delMemberOrResponsible(admin, d, admin);//-> NPE ???
         assertEquals(1, dossierService.listResponsibles(admin, d).size());
         assertEquals(u1, dossierService.listResponsibles(admin, d).get(0));
         //remove non responsive shouldn't have impact

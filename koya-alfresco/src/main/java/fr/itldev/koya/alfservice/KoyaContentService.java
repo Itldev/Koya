@@ -19,9 +19,9 @@
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -46,13 +46,12 @@ import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
-import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
-import org.alfresco.service.cmr.model.FileNotFoundException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
+import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -110,53 +109,33 @@ public class KoyaContentService {
     }
 
     // </editor-fold>
-    public Directory createDir(String name, NodeRef parent) throws KoyaServiceException {
+    public Directory createDir(String title, NodeRef parent) throws KoyaServiceException {
 
         if (!(nodeService.getType(parent).equals(KoyaModel.TYPE_DOSSIER)
                 || nodeService.getType(parent).equals(ContentModel.TYPE_FOLDER))) {
             throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_INVALID_PARENT_TYPE);
         }
 
-        FileInfo fInfo;
+        String name = koyaNodeService.getUniqueValidFileNameFromTitle(title);
+
+        //build node properties
+        final Map<QName, Serializable> properties = new HashMap<>();
+        properties.put(ContentModel.PROP_NAME, name);
+        properties.put(ContentModel.PROP_TITLE, title);
+
         try {
-            fInfo = fileFolderService.create(parent, name, ContentModel.TYPE_FOLDER);
-        } catch (FileExistsException fex) {
+            ChildAssociationRef car = nodeService.createNode(parent,
+                    ContentModel.ASSOC_CONTAINS,
+                    QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
+                    ContentModel.TYPE_FOLDER,
+                    properties);
+            koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
+
+            return koyaNodeService.nodeDirBuilder(car.getChildRef());
+        } catch (DuplicateChildNodeNameException dcne) {
             throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
         }
 
-        return koyaNodeService.nodeDirBuilder(fInfo.getNodeRef());
-    }
-
-    public Content move(NodeRef toMove, NodeRef dest) throws KoyaServiceException {
-
-        String newName = (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME);
-
-        FileInfo fInfo;
-        try {
-            fInfo = fileFolderService.move(toMove, dest, newName);
-        } catch (FileExistsException fex) {
-            throw new KoyaServiceException(KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
-        } catch (FileNotFoundException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
-        }
-
-        return koyaNodeService.nodeContentBuilder(fInfo.getNodeRef());
-    }
-
-    public Content copy(NodeRef toCopy, NodeRef dest) throws KoyaServiceException {
-
-        String newName = (String) nodeService.getProperty(toCopy, ContentModel.PROP_NAME);
-
-        FileInfo fInfo;
-        try {
-            fInfo = fileFolderService.copy(toCopy, dest, newName);
-        } catch (FileExistsException fex) {
-            throw new KoyaServiceException(KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
-        } catch (FileNotFoundException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
-        }
-
-        return koyaNodeService.nodeContentBuilder(fInfo.getNodeRef());
     }
 
     /**
@@ -242,16 +221,14 @@ public class KoyaContentService {
         return tmpZipFile;
     }
 
-    
-     public static final List<String> ZIP_MIMETYPES = Collections.unmodifiableList(new ArrayList() {
+    public static final List<String> ZIP_MIMETYPES = Collections.unmodifiableList(new ArrayList() {
         {
             add(MimetypeMap.MIMETYPE_ZIP);
             add("application/x-zip-compressed");
             add("application/x-zip");
         }
     });
-    
-    
+
     /**
      * Extract selected zipfile and delete it if succeed.
      *
@@ -319,6 +296,9 @@ public class KoyaContentService {
             node = linkDestinationNode;
         }
 
+        /**
+         * TODO test name/title export result.
+         */
         String nodeName = (String) nodeService.getProperty(node, ContentModel.PROP_NAME);
 //        nodeName = noaccent ? unAccent(nodeName) : nodeName;
 

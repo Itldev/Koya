@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.activities.ActivityType;
@@ -46,8 +45,10 @@ import org.alfresco.repo.search.SearcherException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.favourites.FavouritesService;
+import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.model.FileNotFoundException;
 import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentData;
@@ -58,13 +59,13 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.ISO9075;
 import org.apache.log4j.Logger;
 
 /**
@@ -148,6 +149,10 @@ public class KoyaNodeService {
     /**
      * ===== Activity Handling methods ==========.
      *
+     */
+    /**
+     *
+     * TODO is it useful ????
      */
     /**
      *
@@ -367,7 +372,12 @@ public class KoyaNodeService {
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public Company companyBuilder(SiteInfo s) throws KoyaServiceException {
-        Company c = new Company(s);
+        Company c = Company.newInstance();
+
+        c.setName(s.getShortName());
+        c.setTitle(s.getTitle());
+        c.setNodeRefasObject(s.getNodeRef());
+
         c.setUserFavourite(isFavourite(c.getNodeRefasObject()));
 
         return c;
@@ -408,13 +418,14 @@ public class KoyaNodeService {
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public Space nodeSpaceBuilder(final NodeRef spaceNodeRef) throws KoyaServiceException {
-        Space e = new Space();
+        Space e = Space.newInstance();
 
         /**
          * General attributes
          */
         e.setNodeRef(spaceNodeRef.toString());
         e.setName((String) unsecuredNodeService.getProperty(spaceNodeRef, ContentModel.PROP_NAME));
+        e.setTitle((String) unsecuredNodeService.getProperty(spaceNodeRef, ContentModel.PROP_TITLE));
 
         /**
          * User context attributes
@@ -430,7 +441,7 @@ public class KoyaNodeService {
      * @return
      */
     public Dossier nodeDossierBuilder(final NodeRef dossierNodeRef) {
-        Dossier d = new Dossier();
+        Dossier d = Dossier.newInstance();
 
         /**
          * General attributes
@@ -438,6 +449,7 @@ public class KoyaNodeService {
         d.setNodeRef(dossierNodeRef.toString());
         d.setName((String) unsecuredNodeService.getProperty(dossierNodeRef, ContentModel.PROP_NAME));
         d.setLastModifiedDate((Date) unsecuredNodeService.getProperty(dossierNodeRef, ContentModel.PROP_MODIFIED));
+        d.setTitle((String) unsecuredNodeService.getProperty(dossierNodeRef, ContentModel.PROP_TITLE));
 
         /**
          * User context attributes
@@ -470,10 +482,10 @@ public class KoyaNodeService {
      * @return
      */
     public Directory nodeDirBuilder(NodeRef dirNodeRef) {
-        Directory r = new Directory();
+        Directory r = Directory.newInstance();
         r.setNodeRef(dirNodeRef.toString());
         r.setName((String) unsecuredNodeService.getProperty(dirNodeRef, ContentModel.PROP_NAME));
-
+        r.setTitle((String) unsecuredNodeService.getProperty(dirNodeRef, ContentModel.PROP_TITLE));
         r.setUserFavourite(isFavourite(dirNodeRef));
 
         return r;
@@ -490,9 +502,10 @@ public class KoyaNodeService {
      * @return
      */
     public Document nodeDocumentBuilder(final NodeRef docNodeRef) {
-        Document d = new Document();
+        Document d = Document.newInsance();
         d.setNodeRef(docNodeRef.toString());
         d.setName((String) unsecuredNodeService.getProperty(docNodeRef, ContentModel.PROP_NAME));
+        d.setTitle((String) unsecuredNodeService.getProperty(docNodeRef, ContentModel.PROP_TITLE));
         d.setUserFavourite(isFavourite(docNodeRef));
         d.setByteSize(AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Long>() {
             @Override
@@ -560,15 +573,19 @@ public class KoyaNodeService {
     /**
      *
      * @param n
-     * @param newName
+     * @param newTitle
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public SecuredItem rename(NodeRef n, String newName) throws KoyaServiceException {
+    public SecuredItem rename(NodeRef n, String newTitle) throws KoyaServiceException {
         //todo check new name validity
 
         try {
-            nodeService.setProperty(n, ContentModel.PROP_NAME, newName);
+            String name = getUniqueValidFileNameFromTitle(newTitle);
+
+            nodeService.setProperty(n, ContentModel.PROP_NAME, name);
+            nodeService.setProperty(n, ContentModel.PROP_TITLE, newTitle);
+
         } catch (DuplicateChildNodeNameException dex) {
             throw new KoyaServiceException(KoyaErrorCodes.DUPLICATE_CHILD_RENAME, dex);
         }
@@ -591,6 +608,50 @@ public class KoyaNodeService {
         if (nodeRefType.equals(ContentModel.TYPE_CONTENT)) {
             activityService.postActivity(ActivityType.FILE_DELETED, siteId, "koya", n, title, nodeRefType, parentNodeRef);
         }
+    }
+
+    /**
+     * @param toMove
+     * @param dest
+     * @return
+     * @throws KoyaServiceException
+     */
+    public SecuredItem move(NodeRef toMove, NodeRef dest) throws KoyaServiceException {
+        FileInfo fInfo;
+        try {
+            fInfo = fileFolderService.move(toMove, dest,
+                    (String) nodeService.getProperty(toMove, ContentModel.PROP_NAME));
+        } catch (FileExistsException fex) {
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
+        } catch (FileNotFoundException ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
+        }
+        //TODO update KoyaNodes cache
+        return nodeRef2SecuredItem(fInfo.getNodeRef());
+    }
+
+    /**
+     *
+     * @param toCopy
+     * @param dest
+     * @return
+     * @throws KoyaServiceException
+     */
+    public SecuredItem copy(NodeRef toCopy, NodeRef dest) throws KoyaServiceException {
+        FileInfo fInfo;
+        try {
+            fInfo = fileFolderService.copy(toCopy, dest,
+                    (String) nodeService.getProperty(toCopy, ContentModel.PROP_NAME));
+        } catch (FileExistsException fex) {
+            /**
+             * change errors
+             */
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
+        } catch (FileNotFoundException ex) {
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
+        }
+        //TODO update KoyaNodes cache
+        return nodeRef2SecuredItem(fInfo.getNodeRef());
     }
 
     /**
@@ -658,7 +719,6 @@ public class KoyaNodeService {
     /**
      * get the company this nodeRef belongs to
      *
-     * todo implement with node locator
      *
      * @param nodeRef
      * @return
@@ -680,10 +740,8 @@ public class KoyaNodeService {
 
     /**
      * return true if node given in argument has a Dossier in his ancestors.
-     *
      * unsecured method
      *
-     * todo implement with node locator
      *
      * @param nodeRef
      * @return
@@ -760,5 +818,15 @@ public class KoyaNodeService {
         } catch (SearcherException e) {
             throw new KoyaServiceException(KoyaErrorCodes.CANNOT_FIND_XPATH_NODE, e);
         }
+    }
+
+    /**
+     * Name encoding method from title String.
+     *
+     * @param title
+     * @return
+     */
+    public String getUniqueValidFileNameFromTitle(String title) {
+        return ISO9075.encode(title);
     }
 }

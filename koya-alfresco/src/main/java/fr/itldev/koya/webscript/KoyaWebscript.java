@@ -19,6 +19,7 @@
 package fr.itldev.koya.webscript;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -36,7 +37,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public abstract class KoyaWebscript {
 
     public static final String WSCONST_NODEREF = "nodeRef";
+    public static final String WSCONST_DESTNODEREF = "destNodeRef";
     public static final String WSCONST_NAME = "name";
+    public static final String WSCONST_TITLE = "title";
     public static final String WSCONST_SHORTNAME = "shortname";
     public static final String WSCONST_TEMPLATENAME = "templatename";
     public static final String WSCONST_NBANCESTOR = "nbAncestor";
@@ -89,7 +92,20 @@ public abstract class KoyaWebscript {
         Map<String, String> params = new HashMap<>();
         params.putAll(req.getServiceMatch().getTemplateVars());
         for (String k : req.getParameterNames()) {
-            params.put(k, req.getParameter(k));
+            String param;
+            try {
+                /**
+                 * Decode double encoded url parameter : ex string with accent
+                 * characters
+                 * 
+                 * TODO charset  permissive implementation 
+                 */
+                param = new String(req.getParameter(k).getBytes("iso-8859-1"), "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                param = req.getParameter(k);
+            }
+
+            params.put(k, param);
         }
         return params;
     }

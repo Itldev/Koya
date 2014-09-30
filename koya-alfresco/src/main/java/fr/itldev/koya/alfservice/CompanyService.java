@@ -35,8 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.alfresco.model.ContentModel;
-import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.AssociationRef;
@@ -46,7 +44,6 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
-import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.site.SiteVisibility;
@@ -117,7 +114,7 @@ public class CompanyService {
 
         String shortName = getShortNameFromTitle(title);
         SiteInfo sInfo = siteService.createSite(SITE_PRESET, shortName, title, DESC + " - " + shortName, SiteVisibility.PRIVATE);
-        Company created = new Company(sInfo);
+        Company created = koyaNodeService.companyBuilder(sInfo);
         koyaNodeService.setActiveStatus(sInfo.getNodeRef(), Boolean.TRUE);
 
         //Creating koya-config directory
@@ -381,19 +378,7 @@ public class CompanyService {
      */
     private String getShortNameFromTitle(String title) {
 
-        String shortTitle = title.replaceAll("[àáâãäå]", "a")
-                .replaceAll("æ", "ae")
-                .replaceAll("ç", "c")
-                .replaceAll("[èéêë]", "e")
-                .replaceAll("[ìíîï]", "i")
-                .replaceAll("ñ", "n")
-                .replaceAll("[òóôõö]", "o")
-                .replaceAll("œ", "oe")
-                .replaceAll("[ùúûü]", "u")
-                .replaceAll("[ýÿ]", "y")
-                .replaceAll("&", "and")
-                .replaceAll("[^0-9a-zA-Z\\-\\s]", "")
-                .replaceAll("\\s+", "-").toLowerCase();
+        String shortTitle = koyaNodeService.getUniqueValidFileNameFromTitle(title);
 
         /**
          * shortTitle is unique even if title alredy exists.

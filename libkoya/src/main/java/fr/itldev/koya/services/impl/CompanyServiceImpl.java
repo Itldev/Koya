@@ -49,17 +49,19 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
      * Company creation
      *
      * @param admin
-     * @param c
+     * @param title
+     * @param salesOfferName
+     * @param template
      * @return
      * @throws RestClientException
      * @throws AlfrescoServiceException
      */
     @Override
-    public Company create(User admin, Company c, String template) throws RestClientException, AlfrescoServiceException {
+    public Company create(User admin, String title, String salesOfferName, String template) throws RestClientException, AlfrescoServiceException {
 
         //TODO verifications (name + offrecom)
         return admin.getRestTemplate().getForObject(getAlfrescoServerUrl()
-                + REST_POST_ADDCOMPANY, Company.class, c.getTitle(), c.getCurrentSaleOffer().getName(), template);
+                + REST_POST_ADDCOMPANY, Company.class, title, salesOfferName, template);
     }
 
     @Override

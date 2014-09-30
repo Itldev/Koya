@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.impl.Dossier;
@@ -74,14 +73,20 @@ public class FavouriteServiceImplTest extends TestCase {
     @Before
     public void createSpace() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, new Company("company" + new Random().nextInt(1000), companyService.listSalesOffer(admin).get(0)), "default");
+        companyTests = companyService.create(admin,
+                "company" + new Random().nextInt(1000),
+                companyService.listSalesOffer(admin).get(0).getName(), "default");
         spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
-        dossierTests = dossierService.create(admin, new Dossier("doss1"), spaceTests);
+        dossierTests = dossierService.create(admin, spaceTests, "doss1");
     }
 
     @After
     public void deleteCompany() throws RestClientException, AlfrescoServiceException {
-        companyService.delete(admin, companyTests);
+        try {
+            companyService.delete(admin, companyTests);
+        } catch (AlfrescoServiceException aex) {
+            System.err.println("error deleting company '" + companyTests.getTitle() + "' : " + aex.getKoyaErrorCode() + " - " + aex.getMessage());
+        }
     }
 
     @Test
@@ -100,11 +105,11 @@ public class FavouriteServiceImplTest extends TestCase {
     @Test
     public void addDelFavouriteDocTest() throws AlfrescoServiceException {
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
-        Document doc = koyaContentService.upload(admin, toUpload, dossierTests);
+        Document doc = koyaContentService.upload(admin, dossierTests.getNodeRefasObject(), toUpload);
         favouriteService.setFavouriteValue(admin, doc, Boolean.TRUE);
-        assertTrue(koyaContentService.list(admin, dossierTests, false).get(0).getUserFavourite());
+        assertTrue(koyaContentService.list(admin, dossierTests.getNodeRefasObject(), false).get(0).getUserFavourite());
         favouriteService.setFavouriteValue(admin, doc, Boolean.FALSE);
-        assertFalse(koyaContentService.list(admin, dossierTests, false).get(0).getUserFavourite());
+        assertFalse(koyaContentService.list(admin, dossierTests.getNodeRefasObject(), false).get(0).getUserFavourite());
     }
 
     @Test
@@ -119,7 +124,7 @@ public class FavouriteServiceImplTest extends TestCase {
         assertEquals(2, favouriteService.getFavourites(admin).size());
 
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
-        Document doc = koyaContentService.upload(admin, toUpload, dossierTests);
+        Document doc = koyaContentService.upload(admin, dossierTests.getNodeRefasObject(), toUpload);
         favouriteService.setFavouriteValue(admin, doc, Boolean.TRUE);
         assertEquals(3, favouriteService.getFavourites(admin).size());
 

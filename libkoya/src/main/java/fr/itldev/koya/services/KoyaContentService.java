@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services;
 
 import fr.itldev.koya.model.SecuredItem;
@@ -28,29 +27,20 @@ import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.InputStream;
 import java.util.List;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.core.io.Resource;
 
 public interface KoyaContentService extends AlfrescoService {
 
-    Content create(User user, Content toCreate, Directory parent) throws AlfrescoServiceException;
+    Directory createDir(User user, NodeRef parent, String title) throws AlfrescoServiceException;
 
-    Content create(User user, Content toCreate, Dossier parent) throws AlfrescoServiceException;
+    Document upload(User user, NodeRef parent, Resource r) throws AlfrescoServiceException;
 
-    Document upload(User user, Resource r, Directory repertoire) throws AlfrescoServiceException;
+    Content move(User user, NodeRef contentToMove, NodeRef destination) throws AlfrescoServiceException;
 
-    Document upload(User user, Resource r, Dossier dossier) throws AlfrescoServiceException;
+    Content copy(User user, NodeRef contentToCopy, NodeRef destination) throws AlfrescoServiceException;
 
-    Content move(User user, Content toMove, Directory desination) throws AlfrescoServiceException;
-
-    Content move(User user, Content toMove, Dossier desination) throws AlfrescoServiceException;
-
-    Content copy(User user, Content toCopy, Directory desination) throws AlfrescoServiceException;
-
-    Content copy(User user, Content toCopy, Dossier desination) throws AlfrescoServiceException;
-
-    List<Content> list(User user, Dossier dossier, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException;
-
-    List<Content> list(User user, Directory dir, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException;
+    List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException;
 
     Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException;
 

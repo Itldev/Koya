@@ -49,12 +49,12 @@ import org.codehaus.jackson.map.ObjectMapper;
     @Type(value = Template.class, name = "template"),
     @Type(value = User.class, name = "user")})
 public abstract class SecuredItem implements AlfrescoNode {
-    
+
     //fields that should be escpaed before serialization
     // public final static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
     private String nodeRef;
     private String name;
-
+    private String title;
 
     private Boolean userFavourite;
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
@@ -79,6 +79,17 @@ public abstract class SecuredItem implements AlfrescoNode {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTitle() {
+        if (title == null || title.isEmpty()) {
+            return name;
+        }
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Override

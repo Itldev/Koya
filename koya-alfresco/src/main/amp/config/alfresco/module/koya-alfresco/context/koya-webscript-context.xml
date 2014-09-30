@@ -147,7 +147,7 @@
     <bean id="webscript.fr.itldev.koya.space.move.post" 
           class="fr.itldev.koya.webscript.space.MoveSpace"
           parent="webscript">                
-        <property name="spaceService" ref="spaceService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
     </bean>
     
     
@@ -158,8 +158,8 @@
     -->
     
     <!--create Dossier-->
-    <bean id="webscript.fr.itldev.koya.dossier.add.post" 
-          class="fr.itldev.koya.webscript.dossier.AddDossier"
+    <bean id="webscript.fr.itldev.koya.dossier.create.get" 
+          class="fr.itldev.koya.webscript.dossier.CreateDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
     </bean>
@@ -225,30 +225,30 @@
     -->
  
     <!--content creation-->
-    <bean id="webscript.fr.itldev.koya.content.add.post" 
-          class="fr.itldev.koya.webscript.content.AddContent"
+    <bean id="webscript.fr.itldev.koya.content.createdir.get" 
+          class="fr.itldev.koya.webscript.content.CreateDir"
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />
     </bean>
     <!--content listing-->
-    <bean id="webscript.fr.itldev.koya.content.list.post" 
+    <bean id="webscript.fr.itldev.koya.content.list.get" 
           class="fr.itldev.koya.webscript.content.ListContent"
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />  
     </bean>
     
     <!--content move-->
-    <bean id="webscript.fr.itldev.koya.content.move.post" 
+    <bean id="webscript.fr.itldev.koya.content.move.get" 
           class="fr.itldev.koya.webscript.content.MoveContent"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />   
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     <!--content copy-->
-    <bean id="webscript.fr.itldev.koya.content.copy.post" 
+    <bean id="webscript.fr.itldev.koya.content.copy.get" 
           class="fr.itldev.koya.webscript.content.CopyContent"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />   
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
    
     

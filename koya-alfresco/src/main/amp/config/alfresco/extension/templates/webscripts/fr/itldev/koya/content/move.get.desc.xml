@@ -20,10 +20,9 @@
 -->
 
 <webscript>
-    <shortname>List Content</shortname>
-    <description>List available content</description>
+     <shortname>Move Content</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/content/list/{onlyFolders}?maxdepth={maxdepth}</url>
+    <url>/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

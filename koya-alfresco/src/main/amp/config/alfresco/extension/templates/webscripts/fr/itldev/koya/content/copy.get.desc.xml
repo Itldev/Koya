@@ -20,11 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Add Content</shortname>
-    <description>Add Content</description>
+    <shortname>Copy Content</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/content/add/{parentNodeRef}</url>
-    <authentication>user</authentication>
+    <url>/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}</url>
+    <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
 

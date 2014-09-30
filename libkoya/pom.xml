@@ -45,6 +45,12 @@
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-repository</artifactId>
         </dependency>
+        
+         <dependency>
+            <groupId>${alfresco.groupId}</groupId>
+            <artifactId>alfresco-data-model</artifactId>
+            <version>4.2.e</version>
+        </dependency>  
               
         <!-- =======tests =====================-->
         <dependency>

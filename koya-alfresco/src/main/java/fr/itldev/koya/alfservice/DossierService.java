@@ -66,16 +66,16 @@ public class DossierService {
     // </editor-fold>
     /**
      *
-     * @param name
+     * @param title
      * @param parent
      * @param prop
      * @return
      * @throws KoyaServiceException
      */
-    public Dossier create(String name, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
+    public Dossier create(String title, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
 
-        //Dossier must have a name
-        if (name == null || name.isEmpty()) {
+        //Dossier must have a title
+        if (title == null || title.isEmpty()) {
             throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_EMPTY_NAME);
         }
 
@@ -83,16 +83,17 @@ public class DossierService {
         if (!nodeService.getType(parent).equals(KoyaModel.TYPE_SPACE)) {
             throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_NOT_IN_SPACE);
         }
-        //checks if dossier's name already exists
-        for (ChildAssociationRef car : nodeService.getChildAssocs(parent)) {
-            if (nodeService.getProperty(car.getChildRef(), ContentModel.PROP_NAME).equals(name)) {
-                throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_NAME_EXISTS);
-            }
+
+        String name = koyaNodeService.getUniqueValidFileNameFromTitle(title);
+
+        if (nodeService.getChildByName(parent, ContentModel.ASSOC_CONTAINS, name) != null) {
+            throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_NAME_EXISTS);
         }
 
         //build node properties
         final Map<QName, Serializable> properties = new HashMap<>();
         properties.put(ContentModel.PROP_NAME, name);
+        properties.put(ContentModel.PROP_TITLE, title);
 
         ChildAssociationRef car = nodeService.createNode(parent, ContentModel.ASSOC_CONTAINS,
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
