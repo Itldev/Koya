@@ -115,7 +115,6 @@ public class CompanyService {
         String shortName = getShortNameFromTitle(title);
         SiteInfo sInfo = siteService.createSite(SITE_PRESET, shortName, title, DESC + " - " + shortName, SiteVisibility.PRIVATE);
         Company created = koyaNodeService.companyBuilder(sInfo);
-        koyaNodeService.setActiveStatus(sInfo.getNodeRef(), Boolean.TRUE);
 
         //Creating koya-config directory
         NodeRef koyaConfig = getKoyaConfigNodeRef(sInfo.getNodeRef(), true);
@@ -134,7 +133,6 @@ public class CompanyService {
      */
     public List<Company> list() throws KoyaServiceException {
         //TODO limit user's available sites only
-        //TODO active sites only
         List<Company> socs = new ArrayList<>();
 
         for (SiteInfo s : siteService.listSites(authenticationService.getCurrentUserName())) {

@@ -30,7 +30,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public final class Dossier extends SecuredItem implements Container, SubSpace {
 
-    private Boolean active = Boolean.TRUE;
 
     @JsonProperty("childdir")
     private List<Directory> childDir = new ArrayList<>();

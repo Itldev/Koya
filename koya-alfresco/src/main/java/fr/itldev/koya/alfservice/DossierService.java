@@ -99,7 +99,6 @@ public class DossierService {
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
                 KoyaModel.TYPE_DOSSIER,
                 properties);
-        koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
 
         return koyaNodeService.nodeDossierBuilder(car.getChildRef());
     }

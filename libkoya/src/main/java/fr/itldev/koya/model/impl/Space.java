@@ -28,7 +28,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public final class Space extends SecuredItem implements Container, SubSpace {
 
-    private Boolean active = Boolean.TRUE;
     /*---------------------*/
     @JsonIgnore
     private SecuredItem parent;
@@ -55,7 +54,7 @@ public final class Space extends SecuredItem implements Container, SubSpace {
 
     @Override
     public String toString() {
-        return "Space [ name = " + getName() + ", noderef=" + getNodeRef() + " , active =" + active + "]";
+        return "Space [ name = " + getName() + ", noderef=" + getNodeRef() +  "]";
     }
 
     @Override

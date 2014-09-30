@@ -147,46 +147,6 @@ public class KoyaNodeService {
 
     // </editor-fold>
     /**
-     * ===== Activity Handling methods ==========.
-     *
-     */
-    /**
-     *
-     * TODO is it useful ????
-     */
-    /**
-     *
-     * @param n
-     * @param activeValue
-     */
-    public void setActiveStatus(NodeRef n, Boolean activeValue) {
-
-        //TODO limit actions to activable nodes (check model)
-        if (nodeService.hasAspect(n, KoyaModel.ASPECT_ACTIVABLE)) {
-            //if node exists with activable aspect, update value.
-            nodeService.setProperty(n, KoyaModel.PROP_ISACTIVE, activeValue);
-        } else {
-            //add aspect with value
-            Map<QName, Serializable> props = new HashMap<>();
-            props.put(KoyaModel.PROP_ISACTIVE, activeValue);
-            nodeService.addAspect(n, KoyaModel.ASPECT_ACTIVABLE, props);
-        }
-    }
-
-    /**
-     *
-     * Active Node has aspect KoyaModel.QNAME_KOYA_ACTIVABLE AND active property
-     * is true.
-     *
-     * @param n
-     * @return
-     */
-    public Boolean isActive(NodeRef n) {
-        return unsecuredNodeService.hasAspect(n, KoyaModel.ASPECT_ACTIVABLE)
-                && (Boolean) unsecuredNodeService.getProperty(n, KoyaModel.PROP_ISACTIVE);
-    }
-
-    /**
      * ====== Favourites Handling methods ======.
      *
      * TODO add a ehcache cache

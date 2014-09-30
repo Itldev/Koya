@@ -274,12 +274,6 @@
     ==================================================================
     -->
     
-    <!--Change Activity Status-->
-    <bean id="webscript.fr.itldev.koya.global.toggleactive.post" 
-          class="fr.itldev.koya.webscript.global.ToggleActive"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />        
-    </bean>
     
     
     <!--Change Favourite Status-->

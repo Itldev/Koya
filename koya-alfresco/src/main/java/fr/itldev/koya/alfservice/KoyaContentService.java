@@ -129,7 +129,6 @@ public class KoyaContentService {
                     QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
                     ContentModel.TYPE_FOLDER,
                     properties);
-            koyaNodeService.setActiveStatus(car.getChildRef(), Boolean.TRUE);
 
             return koyaNodeService.nodeDirBuilder(car.getChildRef());
         } catch (DuplicateChildNodeNameException dcne) {
