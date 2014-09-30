@@ -63,8 +63,12 @@ public class SpaceServiceImplTest extends TestCase {
     }
 
     @After
-    public void deleteSociete() throws RestClientException, AlfrescoServiceException {
-        companyService.delete(admin, companyTests);
+    public void deleteCompany() throws RestClientException, AlfrescoServiceException {
+        try {
+            companyService.delete(admin, companyTests);
+        } catch (AlfrescoServiceException aex) {
+            System.err.println("error deleting company '" + companyTests.getTitle() + "' : " + aex.getKoyaErrorCode() + " - " + aex.getMessage());
+        }
     }
 
     @Test

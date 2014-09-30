@@ -79,9 +79,14 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
      * Koya specific property
      */
     private KoyaMailService koyaMailService;
+    private KoyaNodeService koyaNodeService;
 
     public void setKoyaMailService(KoyaMailService koyaMailService) {
         this.koyaMailService = koyaMailService;
+    }
+
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
     }
 
     @Override
@@ -97,7 +102,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         this.workflowService = serviceRegistry.getWorkflowService();
         this.nodeService = serviceRegistry.getNodeService();
         this.inviteSender = new KoyaInviteSender(serviceRegistry, repositoryHelper, messageService,
-                koyaMailService);
+                koyaMailService, koyaNodeService);
     }
 
     /**

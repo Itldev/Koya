@@ -26,6 +26,7 @@ import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.interfaces.SubSpace;
 import fr.itldev.koya.model.json.SharingWrapper;
 import java.io.IOException;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -68,7 +69,7 @@ public class ShareItems extends AbstractWebScript {
             //extract shared elements
             for (String n : sw.getSharedNodeRefs()) {
 
-                SecuredItem si = koyaNodeService.nodeRef2SecuredItem(n);
+                SecuredItem si = koyaNodeService.nodeRef2SecuredItem(koyaNodeService.getNodeRef(n));
 
                 if (SubSpace.class.isAssignableFrom(si.getClass())) {
                     SubSpace subSpace = (SubSpace) si;

@@ -53,9 +53,9 @@ public class ListMember extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        NodeRef nodeRef = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
         String response;
         try {
+            NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(
                     SubSpaceCollaboratorsAclService.listUsers(
                             koyaNodeService.nodeRef2SecuredItem(nodeRef), KoyaPermissionCollaborator.MEMBER));

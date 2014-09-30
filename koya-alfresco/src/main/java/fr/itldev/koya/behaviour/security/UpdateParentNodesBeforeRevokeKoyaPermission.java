@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  */
 public class UpdateParentNodesBeforeRevokeKoyaPermission implements
         KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy {
-    
+
     private final Logger logger = Logger.getLogger(this.getClass());
     private Behaviour beforeRevokeKoyaPermission;
     private PolicyComponent policyComponent;
@@ -44,23 +44,23 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
     public void setPolicyComponent(PolicyComponent policyComponent) {
         this.policyComponent = policyComponent;
     }
-    
+
     public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
         this.subSpaceAclService = subSpaceAclService;
     }
-    
+
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
-    
+
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-    
+
     public void setPermissionService(PermissionService permissionService) {
         this.permissionService = permissionService;
     }
-    
+
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
@@ -76,7 +76,7 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
         this.policyComponent.bindClassBehaviour(
                 KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy.QNAME, KoyaModel.TYPE_SPACE,
                 this.beforeRevokeKoyaPermission);
-        
+
     }
 
     /**
@@ -92,15 +92,15 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
      */
     @Override
     public void beforeRevokeKoyaPermission(SubSpace subSpace, String authority, KoyaPermission permission) {
-        
+
         logger.debug("Chained permissions deletion user=" + authority + ": ref =  " + subSpace.getName() + "(" + subSpace.getClass().getSimpleName() + ")");
-        
+
         try {
-            Company c = koyaNodeService.getCompany(subSpace.getNodeRefasObject());
+            Company c = koyaNodeService.getFirstParentOfType(subSpace.getNodeRefasObject(),Company.class);
             if (!SitePermission.CONSUMER.equals(siteService.getMembersRole(c.getName(), authority))) {
                 return;
             }
-            
+
             final NodeRef parentNode = nodeService.getPrimaryParent(subSpace.getNodeRefasObject()).getParentRef();
             boolean userCanReadParentNode = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork< Boolean>() {
                 @Override
@@ -109,18 +109,18 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
                             parentNode, PermissionService.READ).equals(AccessStatus.ALLOWED);
                 }
             }, authority);
-            
-            logger.error("parent is subspace  ? = " + koyaNodeService.isKoyaSubspace(parentNode));
+
+            logger.error("parent is subspace  ? = " + SubSpace.class.isAssignableFrom(koyaNodeService.nodeRef2SecuredItem(parentNode).getClass()));
             logger.error("can read parent ? = " + userCanReadParentNode);
-            
-            if (koyaNodeService.isKoyaSubspace(parentNode)
+
+            if (SubSpace.class.isAssignableFrom(koyaNodeService.nodeRef2SecuredItem(parentNode).getClass())
                     && userCanReadParentNode) {
-                
+
                 final SubSpace parent = (SubSpace) koyaNodeService.nodeRef2SecuredItem(parentNode);
 
                 //loop through current node parent childs
                 for (final ChildAssociationRef car : nodeService.getChildAssocs(parent.getNodeRefasObject())) {
-                    
+
                     boolean userCanReadChild = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork< Boolean>() {
                         @Override
                         public Boolean doWork() throws Exception {
@@ -129,25 +129,25 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
                                     .equals(AccessStatus.ALLOWED);
                         }
                     }, authority);
-                    
+
                     if (userCanReadChild) {
                         logger.error("one readable child .... return ");
                         //At least one child is readable -> do nothing
                         return;
                     }
                 }
-                
+
                 logger.error("revoke parent perm (" + parent.getName() + ")");
                 //no readable child -> revoke CONSUMER_CLIENT permissions on parent
                 subSpaceAclService.revokeSubSpacePermission(parent, authority, KoyaPermissionConsumer.CLIENT);
             } else {
-                logger.error("Remove company '" + c.getName() + "' access for user '" + authority+"' ?");
+                logger.error("Remove company '" + c.getName() + "' access for user '" + authority + "' ?");
 //                siteService.removeMembership(c.getName(), authority);
             }
-            
+
         } catch (KoyaServiceException ex) {
             logger.error("Error update befor revoke permissions" + ex.toString());
         }
     }
-    
+
 }

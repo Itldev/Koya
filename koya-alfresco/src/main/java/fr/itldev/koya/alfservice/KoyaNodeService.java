@@ -43,7 +43,6 @@ import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.repo.nodelocator.AncestorNodeLocator;
 import org.alfresco.repo.search.SearcherException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.favourites.FavouritesService;
 import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -82,7 +81,6 @@ public class KoyaNodeService {
     private NodeService unsecuredNodeService;
     private FavouritesService favouritesService;
     private PreferenceService preferenceService;
-    private DictionaryService dictionaryService;
     private CompanyService companyService;
     private FileFolderService fileFolderService;
     private AuthenticationService authenticationService;
@@ -107,10 +105,6 @@ public class KoyaNodeService {
 
     public void setPreferenceService(PreferenceService preferenceService) {
         this.preferenceService = preferenceService;
-    }
-
-    public void setDictionaryService(DictionaryService dictionaryService) {
-        this.dictionaryService = dictionaryService;
     }
 
     public void setCompanyService(CompanyService companyService) {
@@ -167,7 +161,7 @@ public class KoyaNodeService {
         if (foldersFavourites != null && !foldersFavourites.isEmpty()) {
             for (String favStr : foldersFavourites.split(",")) {
                 try {
-                    NodeRef n = new NodeRef(favStr);
+                    NodeRef n = getNodeRef(favStr);
                     //Build object according to type                
                     QName typeFav = nodeService.getType(n);
 
@@ -188,7 +182,7 @@ public class KoyaNodeService {
         if (docsFavourites != null && !docsFavourites.isEmpty()) {
             for (String favStr : docsFavourites.split(",")) {
                 try {
-                    NodeRef n = new NodeRef(favStr);
+                    NodeRef n = getNodeRef(favStr);
                     favourites.add(nodeDocumentBuilder(n));
                 } catch (InvalidNodeRefException e) {
                 }
@@ -277,21 +271,18 @@ public class KoyaNodeService {
      *
      */
     /**
-     *
-     * Get typed SecuredItem from Noderef String.
+     * NodeRef builder : should be used instead of NodeRef instanciation.
      *
      * @param strNodeRef
      * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
+     * @throws KoyaServiceException
      */
-    public SecuredItem nodeRef2SecuredItem(String strNodeRef) throws KoyaServiceException {
-        NodeRef nr = null;
+    public NodeRef getNodeRef(String strNodeRef) throws KoyaServiceException {
         try {
-            nr = new NodeRef(strNodeRef);
+            return new NodeRef(strNodeRef);
         } catch (InvalidNodeRefException ex) {
             throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF);
         }
-        return nodeRef2SecuredItem(nr);
     }
 
     /**
@@ -312,9 +303,9 @@ public class KoyaNodeService {
                 si = nodeSpaceBuilder(nodeRef);
             } else if (type.equals(KoyaModel.TYPE_DOSSIER)) {
                 si = nodeDossierBuilder(nodeRef);
-            } else if (type.equals(ContentModel.TYPE_FOLDER) && nodeIsChildOfDossier(nodeRef)) {
+            } else if (type.equals(ContentModel.TYPE_FOLDER) && (getFirstParentOfType(nodeRef, Dossier.class) != null)) {
                 si = nodeDirBuilder(nodeRef);
-            } else if (type.equals(ContentModel.TYPE_CONTENT) && nodeIsChildOfDossier(nodeRef)) {
+            } else if (type.equals(ContentModel.TYPE_CONTENT) && (getFirstParentOfType(nodeRef, Dossier.class) != null)) {
                 si = nodeDocumentBuilder(nodeRef);
             } else {
                 throw new KoyaServiceException(KoyaErrorCodes.INVALID_SECUREDITEM_NODEREF);
@@ -426,7 +417,7 @@ public class KoyaNodeService {
      * @return
      */
     public Content nodeContentBuilder(NodeRef nodeRef) {
-        if (nodeIsFolder(nodeRef)) {
+        if (isKoyaType(nodeRef, Directory.class)) {
             return nodeDirBuilder(nodeRef);
         } else {
             return nodeDocumentBuilder(nodeRef);
@@ -478,51 +469,6 @@ public class KoyaNodeService {
         d.setMimeType(contentData.getMimetype());
 
         return d;
-    }
-
-    /**
-     *
-     * ===== Type checking methods ======
-     *
-     */
-    /**
-     * Return true if node is type ContentModel.TYPE_FOLDER or subtype.
-     *
-     * unsecured method
-     *
-     *
-     * @param nodeRef
-     * @return
-     */
-    public Boolean nodeIsFolder(NodeRef nodeRef) {
-        QName qNameType = unsecuredNodeService.getType(nodeRef);
-        return qNameType.equals(ContentModel.TYPE_FOLDER)
-                || (dictionaryService.isSubClass(qNameType, ContentModel.TYPE_FOLDER));
-    }
-
-    /**
-     * Koya company is a site with activable aspect.
-     *
-     * unsecured method
-     *
-     *
-     * @param n
-     * @return
-     */
-    public Boolean isKoyaCompany(NodeRef n) {
-        return unsecuredNodeService.getType(n).equals(KoyaModel.TYPE_COMPANY)
-                && unsecuredNodeService.hasAspect(n, KoyaModel.ASPECT_ACTIVABLE);
-    }
-
-    /**
-     * Is type koya:dossier or koya:space
-     *
-     * @param n
-     * @return
-     */
-    public Boolean isKoyaSubspace(NodeRef n) {
-        return unsecuredNodeService.getType(n).equals(KoyaModel.TYPE_SPACE)
-                || unsecuredNodeService.getType(n).equals(KoyaModel.TYPE_DOSSIER);
     }
 
     /**
@@ -615,6 +561,49 @@ public class KoyaNodeService {
     }
 
     /**
+     *
+     * ===== Type checking methods ======
+     *
+     */
+    /**
+     *
+     * @param n
+     * @param type
+     * @return
+     */
+    public Boolean isKoyaType(NodeRef n, Class<? extends SecuredItem> type) {
+        try {
+            return type.isAssignableFrom(nodeRef2SecuredItem(n).getClass());
+        } catch (KoyaServiceException kex) {
+            return false;
+        }
+    }
+
+    public <T extends SecuredItem> T getFirstParentOfType(NodeRef n, Class<? extends SecuredItem> type) throws KoyaServiceException {
+        if (n == null) {
+            return null;
+        }
+        QName qName = KoyaModel.CLASS_TO_QNAME.get(type);
+
+        if (qName == null) {
+            /**
+             * TODO throw KoyaError
+             */
+            logger.error("Unsupported type class (" + type.getSimpleName() + ") for Qname conversion");
+        }
+
+        Map params = new HashMap(1);
+        params.put(AncestorNodeLocator.TYPE_KEY, KoyaModel.TYPES_SHORT_PREFIX.get(qName));
+
+        NodeRef nTyped = ancestorNodeLocator.getNode(n, params);
+
+        if (nTyped != null) {
+            return (T) nodeRef2SecuredItem(nTyped);
+        }
+        return null;
+    }
+
+    /**
      * Returns node parent if exists.
      *
      * unsecured method
@@ -625,21 +614,21 @@ public class KoyaNodeService {
      */
     public SecuredItem getParent(NodeRef currentNode) throws KoyaServiceException {
 
-        if (isKoyaCompany(currentNode)) {
+        if (isKoyaType(currentNode, Company.class)) {
             return null;//can't get company  parent 
         }
 
         NodeRef parentNr = unsecuredNodeService.getPrimaryParent(currentNode).getParentRef();
-        if (isKoyaCompany(parentNr)
+        if (isKoyaType(parentNr, Company.class)
                 || (unsecuredNodeService.getProperty(parentNr, ContentModel.PROP_NAME).equals(DOCLIB_NAME)
-                && isKoyaCompany(unsecuredNodeService.getPrimaryParent(parentNr).getParentRef()))) {
+                && isKoyaType(unsecuredNodeService.getPrimaryParent(parentNr).getParentRef(), Company.class))) {
             //If parent is a company or doclib node (which primary parent is a company)
             return companyBuilder(parentNr);
         } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.TYPE_SPACE)) {
             return nodeSpaceBuilder(parentNr);
         } else if (unsecuredNodeService.getType(parentNr).equals(KoyaModel.TYPE_DOSSIER)) {
             return nodeDossierBuilder(parentNr);
-        } else if (nodeIsChildOfDossier(parentNr)) {
+        } else if (getFirstParentOfType(parentNr, Dossier.class) != null) {
             return (SecuredItem) nodeContentBuilder(parentNr);
         } else {
             throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODE_HIERACHY);
@@ -676,56 +665,11 @@ public class KoyaNodeService {
         return parents;
     }
 
-    /**
-     * get the company this nodeRef belongs to
-     *
-     *
-     * @param nodeRef
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
+    /*
+    
+    
+    
      */
-    public Company getCompany(NodeRef nodeRef) throws KoyaServiceException {
-
-        if (nodeRef == null) {
-            return null;
-        }
-
-        Map params = new HashMap(1);
-        params.put(AncestorNodeLocator.TYPE_KEY, KoyaModel.TYPES_SHORT_PREFIX.get(KoyaModel.TYPE_COMPANY));
-
-        NodeRef companyNR = ancestorNodeLocator.getNode(nodeRef, params);
-
-        if (companyNR != null) {
-            return companyBuilder(companyNR);
-        } else {
-            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF, "nodeRef not whithin a Company");
-        }
-
-    }
-
-    /**
-     * return true if node given in argument has a Dossier in his ancestors.
-     * unsecured method
-     *
-     *
-     * @param nodeRef
-     * @return
-     */
-    private Boolean nodeIsChildOfDossier(NodeRef nodeRef) {
-
-        try {
-            NodeRef parent = unsecuredNodeService.getPrimaryParent(nodeRef).getParentRef();
-
-            if (unsecuredNodeService.getType(parent).equals(KoyaModel.TYPE_DOSSIER)) {
-                return true;
-            } else {
-                return nodeIsChildOfDossier(parent);
-            }
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public Properties readPropertiesFileContent(NodeRef fileNr) {
         Properties props = new Properties();
         if (fileNr != null) {

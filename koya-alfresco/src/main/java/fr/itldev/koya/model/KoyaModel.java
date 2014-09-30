@@ -18,6 +18,9 @@
  */
 package fr.itldev.koya.model;
 
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,5 +87,14 @@ public class KoyaModel {
             put(TYPE_DOSSIER, "koya:dossier");
         }
     });
+
+    public static final Map<Class<? extends SecuredItem>, QName> CLASS_TO_QNAME
+            = Collections.unmodifiableMap(new HashMap< Class<? extends SecuredItem>, QName>() {
+                {
+                    put(Company.class, TYPE_COMPANY);
+                    put(Space.class, TYPE_SPACE);
+                    put(Dossier.class, TYPE_DOSSIER);
+                }
+            });
 
 }

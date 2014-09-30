@@ -49,7 +49,7 @@ public class SubSpaceCollaboratorsAclService extends SubSpaceAclService {
                 + userMail + " on " + subSpace.getName() + "(" + subSpace.getClass().getSimpleName() + ")");
 
         //Get company the shared Node belongs To
-        Company company = koyaNodeService.getCompany(subSpace.getNodeRefasObject());
+        Company company = koyaNodeService.getFirstParentOfType(subSpace.getNodeRefasObject(),Company.class);
         SitePermission userPermissionInCompany = companyAclService.getSitePermission(company, userMail);
                
         if (userPermissionInCompany == null) {

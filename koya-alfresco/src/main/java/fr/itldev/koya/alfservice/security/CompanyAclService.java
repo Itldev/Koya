@@ -52,9 +52,9 @@ import org.apache.log4j.Logger;
 import org.springframework.util.Assert;
 
 public class CompanyAclService {
-
+    
     private Logger logger = Logger.getLogger(this.getClass());
-
+    
     protected SiteService siteService;
     protected UserService userService;
     protected InvitationService invitationService;
@@ -67,27 +67,27 @@ public class CompanyAclService {
     public void setAuthorityService(AuthorityService authorityService) {
         this.authorityService = authorityService;
     }
-
+    
     public void setAuthenticationService(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
-
+    
     public void setActionService(ActionService actionService) {
         this.actionService = actionService;
     }
-
+    
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
-
+    
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
-
+    
     public void setInvitationService(InvitationService invitationService) {
         this.invitationService = invitationService;
     }
-
+    
     public void setPermissionService(PermissionService permissionService) {
         this.permissionService = permissionService;
     }
@@ -132,27 +132,27 @@ public class CompanyAclService {
     public List<User> listMembersValidated(String companyName, List<SitePermission> permissionsFilter) {
         final List<String> permissions = CollectionUtils.toListOfStrings(permissionsFilter);
         Map<String, String> members = siteService.listMembers(companyName, null, null, 0);
-
+        
         List<Map.Entry<String, String>> companyMembers = new ArrayList(members.entrySet());
-
+        
         if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
             companyMembers = CollectionUtils.filter(companyMembers, new Filter<Map.Entry<String, String>>() {
-
+                
                 @Override
                 public Boolean apply(Map.Entry<String, String> member) {
                     return permissions.contains(member.getValue()) && !authorityService.isAdminAuthority(member.getKey());
                 }
             });
         }
-
+        
         List<User> usersOfCompanyValidated = CollectionUtils.transform(companyMembers, new Function<Map.Entry<String, String>, User>() {
-
+            
             @Override
             public User apply(Map.Entry<String, String> entry) {
                 return userService.getUserByUsername(entry.getKey());
             }
         });
-
+        
         return usersOfCompanyValidated;
     }
 
@@ -166,33 +166,33 @@ public class CompanyAclService {
     public List<User> listMembersPendingInvitation(final String companyName, final List<SitePermission> permissionsFilter) {
         List<Invitation> pendinginvitations = getPendingInvite(companyName, null, null);
         final List<String> permissions = CollectionUtils.toListOfStrings(permissionsFilter);
-
+        
         if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
             pendinginvitations = CollectionUtils.filter(pendinginvitations, new Filter<Invitation>() {
-
+                
                 @Override
                 public Boolean apply(Invitation i) {
                     return permissions.contains(i.getRoleName());
                 }
             });
         }
-
+        
         List<User> usersOfCompanyPendingInvitation = CollectionUtils.transform(pendinginvitations, new Function<Invitation, User>() {
-
+            
             @Override
             public User apply(Invitation invitation) {
                 return userService.getUserByUsername(invitation.getInviteeUserName());
             }
         });
-
+        
         return usersOfCompanyPendingInvitation;
     }
-
+    
     public List<Invitation> getPendingInvite(String companyId, String inviterId, String inviteeId) {
         final InvitationSearchCriteriaImpl criteria = new InvitationSearchCriteriaImpl();
         criteria.setInvitationType(InvitationSearchCriteria.InvitationType.NOMINATED);
         criteria.setResourceType(Invitation.ResourceType.WEB_SITE);
-
+        
         if (inviterId != null) {
             criteria.setInviter(inviterId);
         }
@@ -202,7 +202,7 @@ public class CompanyAclService {
         if (companyId != null) {
             criteria.setResourceName(companyId);
         }
-
+        
         return AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<List<Invitation>>() {
             @Override
             public List<Invitation> doWork() throws Exception {
@@ -226,11 +226,11 @@ public class CompanyAclService {
             throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
         }
     }
-
+    
     public Boolean hasPendingInvitation(Company c, User u) throws KoyaServiceException {
         return !getPendingInvite(c.getName(), null, u.getUserName()).isEmpty();
     }
-
+    
     public SitePermission getSitePermission(Company c, String userMail) {
         User u = userService.getUserByEmailFailOver(userMail);
         if (u != null) {
@@ -247,7 +247,7 @@ public class CompanyAclService {
      * @return
      */
     public SitePermission getSitePermission(Company c, User u) {
-        //try with validated members 
+        //try with validated members            
         String roleOfSite = siteService.getMembersRole(c.getName(), u.getUserName());
         if (roleOfSite != null) {
             return SitePermission.valueOf(roleOfSite);
@@ -279,11 +279,11 @@ public class CompanyAclService {
      */
     public Invitation inviteMember(final Company c, final String userMail, final SitePermission permission,
             final String serverPath, final String acceptUrl, final String rejectUrl) throws KoyaServiceException {
-
+        
         Assert.notNull(serverPath, "serverPath is null");
         Assert.notNull(acceptUrl, "acceptUrl is null");
         Assert.notNull(rejectUrl, "rejectUrl is null");
-
+        
         User u = userService.getUserByEmailFailOver(userMail);
         if (u == null) {
 
@@ -309,10 +309,10 @@ public class CompanyAclService {
                             permission.toString(), serverPath, acceptUrl, rejectUrl);
                 }
             });
-
+            
         } else {
             SitePermission sitePermission = getSitePermission(c, u);
-
+            
             if (sitePermission == null) {
                 //no setted permission -> do it
                 siteService.setMembership(c.getName(), u.getUserName(), permission.toString());
@@ -320,7 +320,7 @@ public class CompanyAclService {
                 //already site member ...
             }
         }
-
+        
         return null;
     }
 
@@ -339,20 +339,20 @@ public class CompanyAclService {
 
         //checks if user is already a company member
         SitePermission roleSite = getSitePermission(c, u);
-
+        
         if (roleSite == null) {
             throw new KoyaServiceException(KoyaErrorCodes.SECU_USER_MUSTBE_COMPANY_MEMBER_TO_CHANGE_COMPANYROLE);
         }
         /**
          * TODO check if pending invitation exists
          */
-
+        
         try {
             siteService.setMembership(c.getName(), u.getUserName(), role.toString());
         } catch (SiteDoesNotExistException ex) {
             throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
         }
-
+        
     }
 
     /**
@@ -382,7 +382,7 @@ public class CompanyAclService {
             List<Exception> exceptions = new ArrayList<>();
             for (final Invitation i : invitations) {
                 Exception eCancel = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Exception>() {
-
+                    
                     @Override
                     public Exception doWork() throws Exception {
                         try {
@@ -397,12 +397,12 @@ public class CompanyAclService {
                 if (eCancel != null) {
                     exceptions.add(eCancel);
                 }
-
+                
             }
             if (!exceptions.isEmpty()) {
                 throw new KoyaServiceException(0, "");//TODO
             }
         }
     }
-
+    
 }

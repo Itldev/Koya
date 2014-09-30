@@ -1,6 +1,7 @@
 package org.alfresco.repo.invitation.site;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -81,9 +82,10 @@ public class KoyaInviteSender extends InviteSender {
 //    private final SysAdminParams sysAdminParams;
     private final RepoAdminService repoAdminService;
     private final NamespaceService namespaceService;
+    private final KoyaNodeService koyaNodeService;
 
     public KoyaInviteSender(ServiceRegistry services, Repository repository, MessageService messageService,
-            KoyaMailService koyaMailService) {
+            KoyaMailService koyaMailService, KoyaNodeService koyaNodeService) {
 
         super(services, repository, messageService);
         this.actionService = services.getActionService();
@@ -102,6 +104,7 @@ public class KoyaInviteSender extends InviteSender {
          * Koya specific injections load
          */
         this.koyaMailService = koyaMailService;
+        this.koyaNodeService = koyaNodeService;
     }
 
     @Override
@@ -187,9 +190,9 @@ public class KoyaInviteSender extends InviteSender {
         return model;
     }
 
-    private NodeRef getWorkflowPackage(Map<String, String> properties) {
+    private NodeRef getWorkflowPackage(Map<String, String> properties) throws KoyaServiceException {
         String packageRef = properties.get(WF_PACKAGE);
-        return new NodeRef(packageRef);
+        return koyaNodeService.getNodeRef(packageRef);
     }
 
     private String getSiteName(Map<String, String> properties) {

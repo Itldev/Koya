@@ -81,6 +81,7 @@ public abstract class SecuredItem implements AlfrescoNode {
         this.name = name;
     }
 
+    @Override
     public String getTitle() {
         if (title == null || title.isEmpty()) {
             return name;

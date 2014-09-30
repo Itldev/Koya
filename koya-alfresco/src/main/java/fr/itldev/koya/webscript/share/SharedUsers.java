@@ -20,14 +20,10 @@ package fr.itldev.koya.webscript.share;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SubSpaceAclService;
-import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -52,14 +48,13 @@ public class SharedUsers extends AbstractWebScript {
         this.koyaNodeService = koyaNodeService;
     }
 
-
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        NodeRef n = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
 
         String response;
         try {
+            NodeRef n = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(
                     subSpaceAclService.listUsers(koyaNodeService.nodeRef2SecuredItem(n), KoyaPermissionConsumer.getAll()));
         } catch (KoyaServiceException ex) {

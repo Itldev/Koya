@@ -124,6 +124,7 @@
           class="fr.itldev.koya.webscript.space.AddSpace"
           parent="webscript">                
         <property name="spaceService" ref="spaceService" /> 
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     <!-- apply space template -->
@@ -162,12 +163,14 @@
           class="fr.itldev.koya.webscript.dossier.CreateDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     <!--list Dossiers-->
     <bean id="webscript.fr.itldev.koya.dossier.list.post" 
           class="fr.itldev.koya.webscript.dossier.ListDossier"
           parent="webscript">                
         <property name="dossierService" ref="dossierService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     
@@ -229,12 +232,14 @@
           class="fr.itldev.koya.webscript.content.CreateDir"
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />        
     </bean>
     <!--content listing-->
     <bean id="webscript.fr.itldev.koya.content.list.get" 
           class="fr.itldev.koya.webscript.content.ListContent"
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />  
+        <property name="koyaNodeService" ref="koyaNodeService" />        
     </bean>
     
     <!--content move-->
@@ -265,6 +270,7 @@
           class="fr.itldev.koya.webscript.content.ImportZip"
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     
@@ -338,7 +344,8 @@
     <bean id="webscript.fr.itldev.koya.global.secu.permissions.get" 
           class="fr.itldev.koya.webscript.global.secu.GetPermissions"
           parent="webscript">                
-        <property name="subSpaceAclService" ref="subSpaceAclService" />      
+        <property name="subSpaceAclService" ref="subSpaceAclService" />  
+        <property name="koyaNodeService" ref="koyaNodeService" />       
     </bean>
     
     

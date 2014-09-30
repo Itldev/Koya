@@ -54,10 +54,10 @@ public class IsSharedConsumer extends AbstractWebScript {
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        NodeRef n = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
 
         String response;
         try {
+            NodeRef n = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(
                     !subSpaceAclService.listUsers(koyaNodeService.nodeRef2SecuredItem(n), KoyaPermissionConsumer.getAll())
                     .isEmpty());

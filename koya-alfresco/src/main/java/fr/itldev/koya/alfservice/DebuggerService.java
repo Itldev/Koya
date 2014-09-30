@@ -97,7 +97,7 @@ public class DebuggerService {
             identation = indent[0];
         }
 
-        logWithIndent("=== " + root.getName() + " (" + root.getClass().getSimpleName() + ")" + " = " + root.getNodeRef(), identation);
+        logWithIndent("=== " + root.getTitle() + " (" + root.getClass().getSimpleName() + ")" + " = " + root.getNodeRef(), identation);
 
         //for each available types, list autorities
         for (AccessPermission perm : permissionService.getAllSetPermissions(root.getNodeRefasObject())) {

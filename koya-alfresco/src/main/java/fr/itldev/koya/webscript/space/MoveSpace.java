@@ -44,11 +44,11 @@ public class MoveSpace extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        NodeRef node = new NodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
-        NodeRef parent = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_PARENTNODEREF));
 
         String response;
         try {
+            NodeRef node = koyaNodeService.getNodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
+            NodeRef parent = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_PARENTNODEREF));
             response = KoyaWebscript.getObjectAsJson(koyaNodeService.move(node, parent));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

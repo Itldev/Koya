@@ -34,7 +34,6 @@
         <property name="unsecuredNodeService" ref="nodeService"/>
         <property name="favouritesService" ref="favouritesService"/>
         <property name="preferenceService" ref="preferenceService"/>
-        <property name="dictionaryService" ref="DictionaryService"/>
         <property name="companyService" ref="companyService"/>
         <property name="fileFolderService" ref="FileFolderService" />
         <property name="authenticationService" ref="AuthenticationService" />
@@ -140,6 +139,7 @@
         <property name="repositoryHelper" ref="repositoryHelper"/>
         <property name="messageService" ref="messageService"/>        
         <property name="koyaMailService" ref="koyaMailService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
     </bean>
 
 

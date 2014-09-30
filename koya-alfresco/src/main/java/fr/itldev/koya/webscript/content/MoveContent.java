@@ -45,10 +45,11 @@ public class MoveContent extends AbstractWebScript {
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
-        NodeRef dest = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_DESTNODEREF));
-        NodeRef nodeRef = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_NODEREF));
+
         String response;
         try {
+            NodeRef dest = koyaNodeService.getNodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_DESTNODEREF));
+            NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(koyaNodeService.move(nodeRef, dest));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

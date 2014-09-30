@@ -69,10 +69,11 @@ public class AddResponsible extends AbstractWebScript {
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        NodeRef nodeRef = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
+
         String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
 
         try {
+            NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
 
             SubSpaceCollaboratorsAclService.shareSecuredItem(
                     (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),

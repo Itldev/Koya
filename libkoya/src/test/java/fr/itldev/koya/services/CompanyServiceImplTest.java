@@ -122,21 +122,6 @@ public class CompanyServiceImplTest extends TestCase {
     }
 
     @Test
-    public void testGetPrefNotExistCompany() {
-        try {
-            List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
-            assertTrue(offresCom.size() > 0);
-            SalesOffer sel = offresCom.get(0);
-            Company notExists = companyService.create(admin, "company_" + new Random().nextInt(1000), sel.getName(), "default");
-
-            Preferences p = companyService.getPreferences(admin, notExists);
-            fail("should throw exception because company doesnt exists");
-        } catch (AlfrescoServiceException aex) {
-            assertEquals(aex.getKoyaErrorCode(), KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
-        }
-    }
-
-    @Test
     public void testSetPrefs() throws IOException, AlfrescoServiceException {
 
         List<SalesOffer> offresCom = companyService.listSalesOffer(admin);

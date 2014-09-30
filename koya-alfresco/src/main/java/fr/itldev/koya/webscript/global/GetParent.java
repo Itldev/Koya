@@ -51,7 +51,7 @@ public class GetParent extends AbstractWebScript {
 
         NodeRef node = null;
         try {
-            node = new NodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
+            node = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
         } catch (Exception ex) {
             throw new WebScriptException("KoyaError cannot build noderef: " + ex.toString());
 

@@ -19,6 +19,7 @@
 package fr.itldev.koya.webscript.dossier;
 
 import fr.itldev.koya.alfservice.DossierService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
@@ -38,6 +39,11 @@ public class CreateDossier extends AbstractWebScript {
 
     /*services*/
     private DossierService dossierService;
+    private KoyaNodeService koyaNodeService;
+
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
+    }
 
     public void setDossierService(DossierService dossierService) {
         this.dossierService = dossierService;
@@ -49,11 +55,10 @@ public class CreateDossier extends AbstractWebScript {
 
         String title = (String) urlParamsMap.get(KoyaWebscript.WSCONST_TITLE);
 
-        NodeRef parent = new NodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_PARENTNODEREF));
-
         String response;
 
         try {
+            NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_PARENTNODEREF));
             response = KoyaWebscript.getObjectAsJson(dossierService.create(title, parent, null));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

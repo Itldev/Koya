@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.webscript.global.secu;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
@@ -36,17 +37,23 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 public class GetPermissions extends AbstractWebScript {
 
     private SubSpaceAclService subSpaceAclService;
+    private KoyaNodeService koyaNodeService;
 
     public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
         this.subSpaceAclService = subSpaceAclService;
     }
 
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
+    }
+
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        NodeRef nodeRef = new NodeRef(urlParams.get(KoyaWebscript.WSCONST_NODEREF));
+
         String response;
         try {
+            NodeRef nodeRef = koyaNodeService.getNodeRef(urlParams.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(subSpaceAclService.getPermissions(nodeRef));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

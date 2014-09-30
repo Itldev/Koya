@@ -136,7 +136,7 @@ public class CompanyService {
         List<Company> socs = new ArrayList<>();
 
         for (SiteInfo s : siteService.listSites(authenticationService.getCurrentUserName())) {
-            if (koyaNodeService.isKoyaCompany(s.getNodeRef())) {
+            if (koyaNodeService.isKoyaType(s.getNodeRef(), Company.class)) {
                 socs.add(koyaNodeService.companyBuilder(s));
             }
         }
@@ -199,7 +199,9 @@ public class CompanyService {
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public String getPreference(String companyName, String preferenceKey) throws KoyaServiceException {
+
         Company c = koyaNodeService.companyBuilder(companyName);
+
         Properties compProperties;
         try {
             //TODO use lucene path to retrieve node reference.

@@ -167,7 +167,7 @@ public class KoyaContentService {
         }
 
         for (final FileInfo fi : childList) {
-            if (koyaNodeService.nodeIsFolder(fi.getNodeRef())) {
+            if (koyaNodeService.isKoyaType(fi.getNodeRef(), Directory.class)) {
                 Directory dir = koyaNodeService.nodeDirBuilder(fi.getNodeRef());
                 dir.setChildren(list(fi.getNodeRef(), depth - 1, folderOnly));
                 contents.add(dir);
@@ -179,7 +179,7 @@ public class KoyaContentService {
 
     }
 
-    public File zip(List<String> nodeRefs) {
+    public File zip(List<String> nodeRefs) throws KoyaServiceException {
         File tmpZipFile = null;
         try {
             tmpZipFile = TempFileProvider.createTempFile("tmpDL", ".zip");
@@ -200,7 +200,7 @@ public class KoyaContentService {
 
             try {
                 for (String nodeRef : nodeRefs) {
-                    addToZip(new NodeRef(nodeRef), zipStream, "");
+                    addToZip(koyaNodeService.getNodeRef(nodeRef), zipStream, "");
                 }
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
