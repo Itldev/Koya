@@ -30,6 +30,7 @@ import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.query.PagingRequest;
@@ -43,6 +44,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
+import org.alfresco.service.cmr.workflow.WorkflowTaskState;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
@@ -139,6 +141,25 @@ public class ValidateInvitation extends AbstractWebScript {
                 throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_ID);
             }
 
+            /**
+             * Test invitation validity code inspired by InvitationServiceImpl
+             */
+            List<WorkflowTask> tasks = workflowService.getTasksForWorkflowPath(startTask.getPath().getId());
+            if (tasks.size() != 1) {
+                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
+            }
+
+            WorkflowTask task = tasks.get(0);
+            if (!taskTypeMatches(task,
+                    WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING,
+                    WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING)) {
+                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
+            }
+
+            
+            /**
+             * Test invite ticket validity
+             */
             if (!invitation.getTicket().equals(inviteTicket)) {
                 throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_TICKET);
             }
@@ -157,9 +178,6 @@ public class ValidateInvitation extends AbstractWebScript {
                     try {
                         invitationService.accept(invitationId, inviteTicket);
                     } catch (Exception ex) {
-                        //TODO detect already accepted/rejected invitation -> KoyaErrorCodes.INVITATION_ALREADY_COMPLETED
-                        //startTask.getState().equals(WorkflowTaskState.COMPLETED 
-                        //condition is always true even if not already accepted ...
                         return ex;
                     }
                     return null;
@@ -249,6 +267,11 @@ public class ValidateInvitation extends AbstractWebScript {
                 + userMail + ")").trim());
         activityData.put("nodeRef", nodeRef.toString());
         return activityData.toString();
+    }
+
+    private boolean taskTypeMatches(WorkflowTask task, QName... types) {
+        QName taskDefName = task.getDefinition().getMetadata().getName();
+        return Arrays.asList(types).contains(taskDefName);
     }
 
 }
