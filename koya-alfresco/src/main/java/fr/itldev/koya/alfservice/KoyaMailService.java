@@ -117,9 +117,11 @@ public class KoyaMailService {
         Map<String, Serializable> paramsMail = new HashMap<>();
         paramsMail.put(MailActionExecuter.PARAM_TO_MANY, new ArrayList(wrapper.getTo()));
 
-        if (wrapper.getFrom() != null) {
-            paramsMail.put(MailActionExecuter.PARAM_FROM, wrapper.getFrom());
-        }
+        /**
+         * DO NOT set MailActionExecuter.PARAM_FROM with wrapper.getFrom() if
+         * not not null --> mail always sent with default mail adress. not
+         * forged address
+         */
 
         /**
          * Get subject and body Templates
