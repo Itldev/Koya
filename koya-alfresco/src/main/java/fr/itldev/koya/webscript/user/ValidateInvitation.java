@@ -156,7 +156,6 @@ public class ValidateInvitation extends AbstractWebScript {
                 throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
             }
 
-            
             /**
              * Test invite ticket validity
              */
@@ -238,7 +237,14 @@ public class ValidateInvitation extends AbstractWebScript {
             }, invitation.getInviteeUserName());
 
             if (ePostActivity != null) {
-                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_POST_ACTIVITY_ERROR, ePostActivity);
+                /**
+                 * TODO handle this exception : throw new
+                 * KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_POST_ACTIVITY_ERROR,
+                 * ePostActivity);
+                 *
+                 */
+                logger.error("Validate Invitation Post Activity error (non blocking) : " + ePostActivity.toString());
+                ePostActivity.printStackTrace();
             }
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
