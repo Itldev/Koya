@@ -29,7 +29,7 @@ public interface UserService {
 
     User login(String authKey, String md5password) throws RestClientException, AlfrescoServiceException;
 
-    Boolean logout(User user);
+    Boolean logout(User user)throws AlfrescoServiceException;
 
     void createUser(User userAdmin, User toCreate);
 

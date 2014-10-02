@@ -25,6 +25,7 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -130,9 +131,12 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     }
 
     @Override
-    public Boolean logout(User user) {
-
-        getTemplate().delete(REST_DEL_LOGOUT, user.getTicketAlfresco());
+    public Boolean logout(User user) throws AlfrescoServiceException {
+        try {
+            user.getRestTemplate().delete(getAlfrescoServerUrl() + REST_DEL_LOGOUT, user.getTicketAlfresco());
+        } catch (RestClientException rce) {
+            throw new AlfrescoServiceException(rce.getMessage(), KoyaErrorCodes.CANNOT_LOGOUT_USER);
+        }
 
         //TODO treat returns
         return null;
