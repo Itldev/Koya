@@ -48,7 +48,7 @@ import org.codehaus.jackson.map.ObjectMapper;
     @Type(value = SalesOffer.class, name = "salesoffer"),
     @Type(value = Template.class, name = "template"),
     @Type(value = User.class, name = "user")})
-public abstract class SecuredItem implements AlfrescoNode {
+public abstract class SecuredItem implements AlfrescoNode, Comparable<SecuredItem> {
 
     //fields that should be escpaed before serialization
     // public final static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
@@ -163,4 +163,9 @@ public abstract class SecuredItem implements AlfrescoNode {
     public void setType(String contentType) {
     }
 
+    @Override
+    public int compareTo(SecuredItem t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
 }
