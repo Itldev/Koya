@@ -274,6 +274,14 @@
     </bean>
     
     
+    <bean id="webscript.fr.itldev.koya.content.upload.post" 
+          class="fr.itldev.koya.webscript.content.Upload"
+          parent="webscript">                
+        <property name="koyaContentService" ref="koyaContentService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />         
+    </bean>
+    
+    
     <!--
     ==================================================================
     ========================== Global ============================

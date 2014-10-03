@@ -51,6 +51,7 @@ import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
+import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -177,6 +178,57 @@ public class KoyaContentService {
         }
         return contents;
 
+    }
+
+    public Map<String, String> createContentNode(NodeRef parent, String fileName,
+            org.springframework.extensions.surf.util.Content content) throws KoyaServiceException {
+
+        String name = fileName
+                .replaceAll("\"", "")
+                .replaceAll("\\*", "")
+                .replaceAll(">", "")
+                .replaceAll("<", "")
+                .replaceAll("\\?", "")
+                .replaceAll("\\/", "")
+                .replaceAll(":", "")
+                .replaceAll("\\|", "");
+        Boolean rename = !fileName.equals(name);
+
+        /**
+         * CREATE NODE
+         */
+        NodeRef createdNode;
+        try {
+            final Map<QName, Serializable> properties = new HashMap<>();
+            properties.put(ContentModel.PROP_NAME, name);
+            properties.put(ContentModel.PROP_TITLE, fileName);
+            ChildAssociationRef car = nodeService.createNode(parent,
+                    ContentModel.ASSOC_CONTAINS,
+                    QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
+                    ContentModel.TYPE_CONTENT,
+                    properties);
+            createdNode = car.getChildRef();
+        } catch (DuplicateChildNodeNameException dcne) {
+            throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
+        }
+
+        /**
+         * ADD CONTENT TO CREATED NODE
+         *
+         */
+        ContentWriter writer = this.contentService.getWriter(createdNode, ContentModel.PROP_CONTENT, true);
+        writer.setMimetype(content.getMimetype());
+        writer.setEncoding(content.getEncoding());
+        writer.putContent(content.getInputStream());
+
+        Map<String, String> retMap = new HashMap<>();
+
+        retMap.put("filename", name);
+        retMap.put("originalFilename", fileName);
+        retMap.put("rename", rename.toString());
+        retMap.put("size", Long.toString(writer.getSize()));
+
+        return retMap;
     }
 
     public File zip(List<String> nodeRefs) throws KoyaServiceException {
