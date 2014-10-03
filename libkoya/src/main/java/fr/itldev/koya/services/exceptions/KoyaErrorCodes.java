@@ -58,6 +58,8 @@ public interface KoyaErrorCodes {
     public static final Integer CONTENT_IS_NOT_ZIP = 405;
     public static final Integer ZIP_EXTRACTION_PROCESS_ERROR = 406;
     public static final Integer FILE_DELETE_ERROR = 407;
+        public static final Integer FILE_UPLOAD_NAME_EXISTS = 408;
+
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;

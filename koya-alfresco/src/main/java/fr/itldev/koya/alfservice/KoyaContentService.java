@@ -209,7 +209,7 @@ public class KoyaContentService {
                     properties);
             createdNode = car.getChildRef();
         } catch (DuplicateChildNodeNameException dcne) {
-            throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
+            throw new KoyaServiceException(KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS, fileName);
         }
 
         /**
