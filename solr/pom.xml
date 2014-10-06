@@ -9,7 +9,8 @@
     <parent>
         <groupId>fr.itldev</groupId>
         <artifactId>koya</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>${koya.version}</version>
+        <relativePath>..</relativePath>    
     </parent>
 
     <properties>
@@ -24,7 +25,9 @@
                 <executions>
                     <execution>
                         <id>copy-alfresco-community-lib</id>
-                        <goals><goal>unpack</goal></goals>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
                         <phase>generate-resources</phase>
                         <configuration>
                             <outputDirectory>${alfresco.solr.dir}</outputDirectory>
@@ -67,7 +70,9 @@
                     <execution>
                         <id>overlay-web-xml</id>
                         <phase>process-resources</phase>
-                        <goals><goal>copy-resources</goal></goals>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
                         <configuration>
                             <outputDirectory>${alfresco.solr.war.overlay}/WEB-INF</outputDirectory>
                             <overwrite>true</overwrite>
@@ -137,7 +142,9 @@
                     <execution>
                         <id>copy-lib</id>
                         <phase>package</phase>
-                        <goals><goal>copy-resources</goal></goals>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
                         <configuration>
                             <outputDirectory>${alfresco.solr.dir}</outputDirectory>
                             <resources>
