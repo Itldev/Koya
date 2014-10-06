@@ -9,8 +9,7 @@
     <parent>
         <groupId>fr.itldev</groupId>
         <artifactId>koya</artifactId>
-        <version>${koya.version}</version>
-        <relativePath>..</relativePath>    
+        <version>0.5-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -22,7 +21,7 @@
         <dependency>
             <groupId>fr.itldev</groupId>
             <artifactId>libkoya</artifactId>
-            <version>${koya.version}</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
     
