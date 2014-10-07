@@ -395,16 +395,7 @@
         <property name="userService" ref="userService" /> 
     </bean>
     
-    <bean id="webscript.fr.itldev.koya.user.validateinvitation.post" 
-          class="fr.itldev.koya.webscript.user.ValidateInvitation"
-          parent="webscript">
-        <property name="userService" ref="userService" /> 
-        <property name="invitationService" ref="invitationService" /> 
-        <property name="workflowService" ref="WorkflowService" /> 
-        <property name="subSpaceAclService" ref="subSpaceAclService" /> 
-        <property name="activityService" ref="activityService" />
-        <property name="siteService" ref="siteService" />
-    </bean>
+    
     
     <!-- get user role for a company -->
     <bean id="webscript.fr.itldev.koya.user.role.get" 
@@ -426,12 +417,7 @@
     
     
     
-    <bean id="webscript.fr.itldev.koya.user.invite.post" 
-          class="fr.itldev.koya.webscript.user.Invite"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" /> 
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
-    </bean>
+   
     
     <bean id="webscript.fr.itldev.koya.user.revoke.get" 
           class="fr.itldev.koya.webscript.user.Revoke"
@@ -448,14 +434,57 @@
         <property name="userService" ref="userService" /> 
     </bean>
 
-
-
-    <bean id="webscript.fr.itldev.koya.user.invitation.haspendinginvitation.get"
-          class="fr.itldev.koya.webscript.user.invitation.HasPendingInvitation"
+    
+    
+    
+    <!--
+    ==================================================================
+    ========================== Invitation ==============================
+    ==================================================================
+    -->
+    
+    
+    <bean id="webscript.fr.itldev.koya.invitation.invitation.get"
+          class="fr.itldev.koya.webscript.invitation.GetInvitation"
+          parent="webscript">                
+        <property name="companyAclService" ref="companyAclService" />
+        <property name="koyaNodeService" ref="koyaNodeService" /> 
+        <property name="userService" ref="userService" /> 
+    </bean>
+    
+    
+    <bean id="webscript.fr.itldev.koya.invitation.sendmail.post"
+          class="fr.itldev.koya.webscript.invitation.SendInviteMail"
+          parent="webscript">                    
+        <property name="workflowService" ref="WorkflowService"/>
+        <property name="serviceRegistry" ref="ServiceRegistry"/>
+        <property name="repositoryHelper" ref="repositoryHelper"/>
+        <property name="messageService" ref="messageService"/>        
+        <property name="koyaMailService" ref="koyaMailService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/> 
+        <property name="companyAclService" ref="companyAclService"/> 
+        <property name="authenticationService" ref="AuthenticationService"/> 
+        <property name="userService" ref="userService"/>         
+    </bean>
+    
+    
+    <bean id="webscript.fr.itldev.koya.invitation.invite.post" 
+          class="fr.itldev.koya.webscript.invitation.Invite"
           parent="webscript">                
         <property name="companyAclService" ref="companyAclService" /> 
         <property name="koyaNodeService" ref="koyaNodeService" /> 
+    </bean>
+    
+    
+    <bean id="webscript.fr.itldev.koya.invitation.validate.post" 
+          class="fr.itldev.koya.webscript.invitation.ValidateInvitation"
+          parent="webscript">
         <property name="userService" ref="userService" /> 
+        <property name="invitationService" ref="invitationService" /> 
+        <property name="workflowService" ref="WorkflowService" /> 
+        <property name="subSpaceAclService" ref="subSpaceAclService" /> 
+        <property name="activityService" ref="activityService" />
+        <property name="siteService" ref="siteService" />
     </bean>
 
 

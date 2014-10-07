@@ -23,7 +23,7 @@
     <shortname>Invite a user to a company with rolename</shortname>
     <description>Invite a user to a company with rolename</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/user/invite</url>
+    <url>/fr/itldev/koya/invitation/invite</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

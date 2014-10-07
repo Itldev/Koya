@@ -25,20 +25,22 @@ import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
+import java.util.Map;
 import org.springframework.web.client.RestClientException;
 
 public interface CompanyService extends AlfrescoService {
 
-   /**
-    * Company creation
-    * @param admin
-    * @param title
-    * @param salesOfferName
-    * @param template
-    * @return
-    * @throws RestClientException
-    * @throws AlfrescoServiceException 
-    */
+    /**
+     * Company creation
+     *
+     * @param admin
+     * @param title
+     * @param salesOfferName
+     * @param template
+     * @return
+     * @throws RestClientException
+     * @throws AlfrescoServiceException
+     */
     Company create(User admin, String title, String salesOfferName, String template) throws RestClientException, AlfrescoServiceException;
 
     /**
@@ -70,8 +72,6 @@ public interface CompanyService extends AlfrescoService {
      */
     List<User> listMembers(User userLogged, Company company, List<String> rolesFilter) throws RestClientException, AlfrescoServiceException;
 
-    
-    
     /**
      * List Sales Offers
      *

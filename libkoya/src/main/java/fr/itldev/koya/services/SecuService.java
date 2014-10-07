@@ -62,21 +62,6 @@ public interface SecuService {
     void setUserRole(User userLogged, Company c, String userNameSetRole, String roleName) throws AlfrescoServiceException;
 
     /**
-     * Invite user identified by email on company with rolename granted.
-     *
-     * @param userLogged
-     * @param c
-     * @param userEmail
-     * @param roleName
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
-     * @throws AlfrescoServiceException
-     */
-    void inviteUser(User userLogged, Company c, String userEmail, String roleName,
-            String serverPath, String acceptUrl, String rejectUrl) throws AlfrescoServiceException;
-
-    /**
      *
      * @param userLogged
      * @param userToGetConnections

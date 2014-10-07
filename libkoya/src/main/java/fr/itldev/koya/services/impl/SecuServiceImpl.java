@@ -24,20 +24,17 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.model.impl.UserRole;
-import fr.itldev.koya.model.json.InviteWrapper;
 import fr.itldev.koya.services.SecuService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.util.List;
 import org.codehaus.jackson.type.TypeReference;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class SecuServiceImpl extends AlfrescoRestService implements SecuService {
 
     private static final String REST_GET_AVAILABLEROLES = "/s/fr/itldev/koya/company/roles/{companyName}";
     private static final String REST_GET_USERROLE = "/s/fr/itldev/koya/user/role/{companyName}/{userName}";
     private static final String REST_GET_SETUSERROLE = "/s/fr/itldev/koya/user/setrole/{companyName}/{userName}/{roleName}";
-    private static final String REST_GET_INVITEUSER = "/s/fr/itldev/koya/user/invite";
     private static final String REST_GET_LISTUSERCONNECTIONS = "/s/fr/itldev/koya/user/listconnect/{userName}?"
             + "companiesFilter={companiesFilter}&maxResults={maxResults}";
     private static final String REST_GET_REVOKEUSERACCESS = "/s/fr/itldev/koya/user/revoke/{companyName}/{userName}";
@@ -67,34 +64,6 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
                 userNameSetRole, roleName);
     }
 
-    /**
-     * Invite user identified by email on company with rolename granted.
-     *
-     * @param userLogged
-     * @param c
-     * @param userEmail
-     * @param roleName
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
-     * @throws AlfrescoServiceException
-     */
-    @Override
-    public void inviteUser(User userLogged, Company c, String userEmail, String roleName,
-            String serverPath, String acceptUrl, String rejectUrl) throws AlfrescoServiceException {
-
-        InviteWrapper iw = new InviteWrapper();
-        iw.setCompanyName(c.getName());
-        iw.setEmail(userEmail);
-        iw.setRoleName(roleName);
-        iw.setAcceptUrl(acceptUrl);
-        iw.setServerPath(serverPath);
-        iw.setRejectUrl(rejectUrl);
-
-        userLogged.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_GET_INVITEUSER, iw,
-                String.class);
-    }
 
     /**
      *

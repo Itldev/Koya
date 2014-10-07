@@ -20,9 +20,9 @@
 -->
 
 <webscript>
-    <shortname>Checks if user has pending invitation</shortname>   
+    <shortname>Get user's invitation on company if exists</shortname>   
     <family>Itldev</family>
-    <url>/fr/itldev/koya/user/invitation/haspending/{userName}/{companyName}</url>   
+    <url>/fr/itldev/koya/invitation/invitation/{userName}/{companyName}</url>   
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

@@ -58,8 +58,7 @@ public interface KoyaErrorCodes {
     public static final Integer CONTENT_IS_NOT_ZIP = 405;
     public static final Integer ZIP_EXTRACTION_PROCESS_ERROR = 406;
     public static final Integer FILE_DELETE_ERROR = 407;
-        public static final Integer FILE_UPLOAD_NAME_EXISTS = 408;
-
+    public static final Integer FILE_UPLOAD_NAME_EXISTS = 408;
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;
@@ -68,7 +67,7 @@ public interface KoyaErrorCodes {
     public static final Integer LOGIN_ALREADY_EXISTS = 503;
     public static final Integer CANT_MODIFY_USER_PASSWORD = 504;
     public static final Integer CANNOT_LOGOUT_USER = 505;
-    
+
     //550 -> invitation process errors
     public static final Integer INVALID_INVITATION_TICKET = 550;
     public static final Integer INVALID_INVITATION_ID = 551;
@@ -76,6 +75,7 @@ public interface KoyaErrorCodes {
     public static final Integer INVITATION_PROCESS_ACCEPT_ERROR = 553;
     public static final Integer INVITATION_ALREADY_COMPLETED = 554;
     public static final Integer INVITATION_PROCESS_POST_ACTIVITY_ERROR = 555;
+    public static final Integer INVITATION_PROCESS_NOT_ALLOWED_RESEND_MAIL = 556;
 
     //600 -> Sales Offer
     public static final Integer SALES_OFFER_LACK_MANDATORY_PROPERTY = 600;

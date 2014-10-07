@@ -112,16 +112,7 @@ public interface UserService {
 
     List<Notification> getNotifications(User userLog);
 
-    /**
-     * Validate invitation giving user modifications;
-     *
-     * @param user
-     * @param inviteId
-     * @param inviteTicket
-     * @throws AlfrescoServiceException
-     */
-    void validateInvitation(User user, String inviteId, String inviteTicket) throws AlfrescoServiceException;
-
+   
     /**
      * Get user Object from email.
      *
@@ -161,15 +152,5 @@ public interface UserService {
      */
     Boolean getEmailNotification(User user) throws AlfrescoServiceException;
 
-    /**
-     * Checks if user has connect once (or more) to company : ie has validated
-     * invotation link.
-     *
-     * @param userLogger
-     * @param c
-     * @param userChecked
-     * @return
-     */
-    Boolean hasPendingInvitation(User userLogger, Company c, User userChecked)throws AlfrescoServiceException;
 
 }

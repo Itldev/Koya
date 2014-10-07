@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.user;
+package fr.itldev.koya.webscript.invitation;
 
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SubSpaceAclService;

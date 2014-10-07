@@ -20,13 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Validate Invitation</shortname>
-    <description>Validate Invitation
-        no authentication but invitation ticket</description>        
+    <shortname>Send invitation mail by existing inviteId</shortname>   
     <family>Itldev</family>
-    <url>/fr/itldev/koya/user/validateinvitation/{inviteId}/{inviteTicket}/{password}</url>
-    <authentication>none</authentication>    
-    <transaction>required</transaction>
+    <url>/fr/itldev/koya/invitation/sendmail</url>   
+    <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
 

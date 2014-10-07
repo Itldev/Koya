@@ -57,6 +57,9 @@ public class DossierServiceImplTest extends TestCase {
     private DossierService dossierService;
 
     @Autowired
+    private InvitationService invitationService;
+
+    @Autowired
     private SecuService secuService;
 
     private Company companyTests;
@@ -82,7 +85,7 @@ public class DossierServiceImplTest extends TestCase {
                 String mail = "userdossiertest" + randomPart + "@test.com";
                 String userName = "userdossiertest" + randomPart + "_test_com";
 
-                secuService.inviteUser(admin, companyTests, mail,
+                invitationService.inviteUser(admin, companyTests, mail,
                         "SiteManager", "", "", "");
                 secuService.setUserRole(admin, companyTests, userName, "SiteManager");
                 users = userService.find(admin, null, 10, companyTests, null);

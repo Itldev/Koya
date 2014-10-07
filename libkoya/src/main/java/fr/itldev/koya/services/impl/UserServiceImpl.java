@@ -70,15 +70,11 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find?"
             + "query={query}&maxResults={maxresults}&companyName={companyName}&roleFilter={roleFilter}";
     private static final String REST_GET_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword/{oldpwd}/{newpwd}";
-    private static final String REST_GET_HASPENDINGINVITATION = "/s/fr/itldev/koya/user/invitation/haspending/{userName}/{companyName}";
 
     //===== Preferences
     private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
     private static final String REST_POST_PREFERENCES = "/s/api/people/{userid}/preferences";
     private static final String REST_DELETE_PREFERENCES = "/s/api/people/{userid}/preferences?pf={preferencefilter?}";
-
-    //====== invitation workfow  
-    private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/user/validateinvitation/{inviteId}/{inviteTicket}/{password}";
 
     //====== Notifications
     private static final String REST_GET_EMAILNOTIFICATION = "/s/fr/itldev/koya/user/emailnotification/{userName}";
@@ -292,21 +288,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         //cf alfresco activity service
     }
 
-    /**
-     * Validate invitation giving user modifications;
-     *
-     * @param user
-     * @param inviteId
-     * @param inviteTicket
-     * @throws AlfrescoServiceException
-     */
-    @Override
-    public void validateInvitation(User user, String inviteId, String inviteTicket) throws AlfrescoServiceException {
-        getTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, user, String.class, inviteId, inviteTicket, user.getPassword());
-
-    }
-
+    
     /**
      * Get user Object from email.
      *
@@ -399,20 +381,6 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
                         + REST_GET_EMAILNOTIFICATION, Boolean.class, user.getUserName());
     }
 
-    /**
-     * Checks if user has connect once (or more) to company : ie has validated
-     * invotation link.
-     *
-     * @param userLogger
-     * @param c
-     * @param userChecked
-     * @return
-     */
-    @Override
-    public Boolean hasPendingInvitation(User userLogger, Company c, User userChecked) throws AlfrescoServiceException {
-        return userLogger.getRestTemplate().
-                getForObject(getAlfrescoServerUrl()
-                        + REST_GET_HASPENDINGINVITATION, Boolean.class, userChecked.getUserName(), c.getName());
-    }
+  
 
 }
