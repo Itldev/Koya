@@ -380,6 +380,19 @@ public class CompanyService {
 
         String shortTitle = koyaNodeService.getUniqueValidFileNameFromTitle(title);
 
+        shortTitle = shortTitle.replaceAll("[àáâãäå]", "a")
+                .replaceAll("æ", "ae")
+                .replaceAll("ç", "c")
+                .replaceAll("[èéêë]", "e")
+                .replaceAll("[ìíîï]", "i")
+                .replaceAll("ñ", "n")
+                .replaceAll("[òóôõö]", "o")
+                .replaceAll("œ", "oe")
+                .replaceAll("[ùúûü]", "u")
+                .replaceAll("[ýÿ]", "y")
+                .replaceAll("&", "and")
+                .replaceAll("\\s+", "-").toLowerCase();
+
         /**
          * shortTitle is unique even if title alredy exists.
          */
