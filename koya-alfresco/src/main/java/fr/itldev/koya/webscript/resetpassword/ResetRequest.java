@@ -42,7 +42,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
- * Reset PAswword Request Webscript
+ * Reset Password Request Webscript
  *
  */
 public class ResetRequest extends AbstractWebScript {
@@ -77,6 +77,8 @@ public class ResetRequest extends AbstractWebScript {
             /**
              * TODO check if user has existing workflow : in this case resend
              * mail.
+             * 
+             * specific workflow
              */
             /**
              * Workflow properties :

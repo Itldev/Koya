@@ -111,6 +111,7 @@
     <bean id="ResetPasswordDelegate" parent="baseKoyaResetPasswordDelegate"
           class="fr.itldev.koya.resetpassword.activiti.ResetPasswordDelegate" >
         <property name="userService" ref="userService"/>
+        <property name="authenticationService" ref="AuthenticationService"/>        
     </bean>
 
       

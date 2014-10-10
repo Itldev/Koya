@@ -585,7 +585,7 @@
     
     
     <bean id="webscript.fr.itldev.koya.resetpassword.validation.post" 
-          class="fr.itldev.koya.webscript.resetpassword.SetNew"
+          class="fr.itldev.koya.webscript.resetpassword.ResetValidation"
           parent="webscript">       
         <property name="workflowService" ref="WorkflowService" />   
     </bean>

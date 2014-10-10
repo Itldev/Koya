@@ -42,7 +42,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  * Set new password Webscript.
  *
  */
-public class SetNew extends AbstractWebScript {
+public class ResetValidation extends AbstractWebScript {
 
     private WorkflowService workflowService;
 
@@ -79,15 +79,9 @@ public class SetNew extends AbstractWebScript {
             }
             if (tasks.size() == 1) {
                 WorkflowTask task = tasks.get(0);
-
-//                logger.error("task type =" + task.getDefinition().getMetadata().getName());
-//                logger.error("task path =" + task.getDefinition().getMetadata().getName());
                 Map<QName, Serializable> workflowProps = new HashMap<>();
                 workflowProps.put(ResetPasswordModel.PROP_RESET_NEWPASSWORD, newPassword);
 
-                /**
-                 * TODO effectively give newPässword to exec delegate
-                 */
                 workflowService.updateTask(task.getId(), workflowProps, null, null);
 
                 workflowService.endTask(task.getId(), null);
