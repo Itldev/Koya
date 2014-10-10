@@ -201,6 +201,15 @@
                 </property>                    
                 <property name="queryLanguage" value="xpath"/>
             </bean>
+        </property>     
+        
+        <property name="resetPasswordTemplateLocation">
+            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
+                <property name="path">
+                    <value>${koya.template.reset-password}</value>
+                </property>                    
+                <property name="queryLanguage" value="xpath"/>
+            </bean>
         </property>      
     </bean>
 

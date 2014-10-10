@@ -79,4 +79,39 @@
     </bean>
     
     
+    <bean id="koya-workflowBootstrap" parent="workflowDeployer">
+        <property name="workflowDefinitions">
+            <list>
+                     
+                <props>
+                    <prop key="engineId">activiti</prop>
+                    <prop key="location">alfresco/module/${project.artifactId}/workflow/resetPassword.bpmn</prop>
+                    <prop key="mimetype">text/xml</prop>
+                    <prop key="redeploy">true</prop>
+                </props>
+            </list>
+        </property>
+        <property name="models">
+            <list>
+                <value>alfresco/module/${project.artifactId}/workflow/resetPassword-model.xml</value>            
+            </list>
+        </property>
+    </bean>
+    
+    
+    <bean id="baseKoyaResetPasswordDelegate" parent="baseJavaDelegate"
+          class="org.alfresco.repo.invitation.activiti.AbstractInvitationDelegate" abstract="true"/>
+    
+    <bean id="SendResetTicketDelegate" parent="baseKoyaResetPasswordDelegate"
+          class="fr.itldev.koya.resetpassword.activiti.SendResetTicketDelegate" >
+        <property name="koyaMailService" ref="koyaMailService"/> 
+        <property name="userService" ref="userService"/>
+    </bean>
+    
+    <bean id="ResetPasswordDelegate" parent="baseKoyaResetPasswordDelegate"
+          class="fr.itldev.koya.resetpassword.activiti.ResetPasswordDelegate" >
+        <property name="userService" ref="userService"/>
+    </bean>
+
+      
 </beans>

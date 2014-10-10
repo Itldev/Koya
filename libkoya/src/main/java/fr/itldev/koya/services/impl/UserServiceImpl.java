@@ -80,6 +80,10 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_GET_EMAILNOTIFICATION = "/s/fr/itldev/koya/user/emailnotification/{userName}";
     private static final String REST_GET_EMAILNOTIFICATION_ENABLE = "/s/fr/itldev/koya/user/emailnotification/{userName}/{enable}";
 
+    //====== reset password BPM
+    private static final String REST_POST_RESET_PASSWORD_REQUEST = "/s/fr/itldev/koya/resetpassword/request";
+    private static final String REST_POST_RESET_PASSWORD_VALIDATION = "/s/fr/itldev/koya/resetpassword/validation";
+
     private BeanFactory beanFactory;
 
     @Override
@@ -288,7 +292,6 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         //cf alfresco activity service
     }
 
-    
     /**
      * Get user Object from email.
      *
@@ -381,6 +384,43 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
                         + REST_GET_EMAILNOTIFICATION, Boolean.class, user.getUserName());
     }
 
-  
+    /**
+     * Send Reset password request to alfresco server.
+     *
+     *
+     * @param userEmail
+     * @param resetUrl
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public void sendResetPasswordRequest(String userEmail, String resetUrl) throws AlfrescoServiceException {
+        Map<String, String> params = new HashMap<>();
+        params.put("userEmail", userEmail);
+        params.put("resetUrl", resetUrl);
+
+        getTemplate().postForObject(getAlfrescoServerUrl()
+                + REST_POST_RESET_PASSWORD_REQUEST, params, String.class);
+    }
+
+    /**
+     * Validate password modification in reset password process.
+     *
+     * Authenticated by resetId + resetTicket.
+     *
+     * @param resetId
+     * @param resetTicket
+     * @param newPassword
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public void validateNewPasswordfromResetProcess(String resetId, String resetTicket, String newPassword) throws AlfrescoServiceException {
+
+        Map<String, String> params = new HashMap<>();
+        params.put("resetId", resetId);
+        params.put("resetTicket", resetTicket);
+        params.put("newPassword", newPassword);
+        getTemplate().postForObject(getAlfrescoServerUrl()
+                + REST_POST_RESET_PASSWORD_VALIDATION, params, String.class);
+    }
 
 }

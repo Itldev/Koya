@@ -568,5 +568,26 @@
           parent="webscript">
         <property name="emailNotificationService" ref="emailNotificationService" />   
     </bean>
+    
+    
+    <!--
+    ==================================================================
+    ========================== Reset Password Workflow ===============
+    ==================================================================
+    -->
+    
+    <bean id="webscript.fr.itldev.koya.resetpassword.request.post" 
+          class="fr.itldev.koya.webscript.resetpassword.ResetRequest"
+          parent="webscript">
+        <property name="userService" ref="userService" />   
+        <property name="workflowService" ref="WorkflowService" />   
+    </bean>
+    
+    
+    <bean id="webscript.fr.itldev.koya.resetpassword.validation.post" 
+          class="fr.itldev.koya.webscript.resetpassword.SetNew"
+          parent="webscript">       
+        <property name="workflowService" ref="WorkflowService" />   
+    </bean>
 
 </beans>

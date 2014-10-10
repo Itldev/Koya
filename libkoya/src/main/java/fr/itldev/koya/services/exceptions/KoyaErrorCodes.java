@@ -77,6 +77,10 @@ public interface KoyaErrorCodes {
     public static final Integer INVITATION_PROCESS_POST_ACTIVITY_ERROR = 555;
     public static final Integer INVITATION_PROCESS_NOT_ALLOWED_RESEND_MAIL = 556;
 
+    //570 -> Reset Password process errors
+    public static final Integer INVALID_RESETPASSWORD_TICKET = 570;
+    public static final Integer INVALID_RESETPASSWORD_ID = 571;
+
     //600 -> Sales Offer
     public static final Integer SALES_OFFER_LACK_MANDATORY_PROPERTY = 600;
 

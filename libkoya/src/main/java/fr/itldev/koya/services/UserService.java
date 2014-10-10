@@ -29,7 +29,7 @@ public interface UserService {
 
     User login(String authKey, String md5password) throws RestClientException, AlfrescoServiceException;
 
-    Boolean logout(User user)throws AlfrescoServiceException;
+    Boolean logout(User user) throws AlfrescoServiceException;
 
     void createUser(User userAdmin, User toCreate);
 
@@ -112,7 +112,6 @@ public interface UserService {
 
     List<Notification> getNotifications(User userLog);
 
-   
     /**
      * Get user Object from email.
      *
@@ -152,5 +151,26 @@ public interface UserService {
      */
     Boolean getEmailNotification(User user) throws AlfrescoServiceException;
 
+    /**
+     * Send Reset password request to alfresco server.
+     *
+     *
+     * @param userEmail
+     * @param resetUrl
+     * @throws AlfrescoServiceException
+     */
+    void sendResetPasswordRequest(String userEmail, String resetUrl) throws AlfrescoServiceException;
+
+    /**
+     * Validate password modification in reset password process.
+     *
+     * Authenticated by resetId + resetTicket.
+     *
+     * @param resetId
+     * @param resetTicket
+     * @param newPassword
+     * @throws AlfrescoServiceException
+     */
+    void validateNewPasswordfromResetProcess(String resetId, String resetTicket, String newPassword) throws AlfrescoServiceException;
 
 }

@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 public class KoyaMailService {
 
     private final static String SHARE_NOTIFICATION_SUBJECT = "koya.share-notification.subject";
+    private final static String RESET_PASSWORD_SUBJECT = "koya.reset-password.subject";
 
     protected NamespaceService namespaceService;
     protected FileFolderService fileFolderService;
@@ -43,6 +44,7 @@ public class KoyaMailService {
 
     //Share Notification Template
     protected RepositoryLocation shareNotificationTemplateLocation;
+    protected RepositoryLocation resetPasswordTemplateLocation;
 
     public void setNamespaceService(NamespaceService namespaceService) {
         this.namespaceService = namespaceService;
@@ -76,6 +78,10 @@ public class KoyaMailService {
         this.shareNotificationTemplateLocation = shareNotificationTemplateLocation;
     }
 
+    public void setResetPasswordTemplateLocation(RepositoryLocation resetPasswordTemplateLocation) {
+        this.resetPasswordTemplateLocation = resetPasswordTemplateLocation;
+    }
+
     public void sendShareNotifMail(User sender, String destMail, NodeRef sharedNodeRef) throws KoyaServiceException {
         Map<String, Serializable> paramsMail = new HashMap<>();
 
@@ -104,6 +110,28 @@ public class KoyaMailService {
 
     }
 
+    public void sendResetRequestMail(String destMail, String resetRequestUrl) throws KoyaServiceException {
+        Map<String, Serializable> paramsMail = new HashMap<>();
+
+        paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
+        /**
+         * Get subject from properties file in repository
+         */
+        paramsMail.put(MailActionExecuter.PARAM_SUBJECT, getI18nSubject(RESET_PASSWORD_SUBJECT));
+        paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, getFileTemplateRef(resetPasswordTemplateLocation));
+
+        //TODO i18n templates
+        Map<String, Serializable> templateModel = new HashMap<>();
+        Map<String, Serializable> templateParams = new HashMap<>();
+        templateParams.put("resetRequestUrl", resetRequestUrl);
+
+        templateModel.put("args", (Serializable) templateParams);
+        paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
+
+        actionService.executeAction(actionService.createAction(
+                MailActionExecuter.NAME, paramsMail), null);
+    }
+
     /**
      *
      * @param wrapper
@@ -122,7 +150,6 @@ public class KoyaMailService {
          * not not null --> mail always sent with default mail adress. not
          * forged address
          */
-
         /**
          * Get subject and body Templates
          */
