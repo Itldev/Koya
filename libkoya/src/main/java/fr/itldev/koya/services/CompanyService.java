@@ -25,7 +25,6 @@ import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.List;
-import java.util.Map;
 import org.springframework.web.client.RestClientException;
 
 public interface CompanyService extends AlfrescoService {
