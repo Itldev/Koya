@@ -20,15 +20,11 @@
 -->
 
 <webscript>
-    <shortname>List Content</shortname>
+    <shortname>List Dossiers</shortname>
+    <description>List available Dossiers in Space</description>
     <family>Itldev</family>
-    <description>
-        2 modes : 
-        * paginated : paginated direct child (depth = 1)
-        * recursive : non paginated recursive child 
-    </description>
-    <url>/fr/itldev/koya/content/list/{mode}/{nodeRef}?onlyFolders={onlyFolders}&amp;maxdepth={maxdepth}&amp;skipCount={skipCount}&amp;maxItems={maxItems}";</url>
-    <authentication>user</authentication>    
+    <url>/fr/itldev/koya/dossier/list/{parentNodeRef}?skipCount={skipCount}&amp;maxItems={maxItems}&amp;filter={filter}</url>
+    <authentication>user</authentication>
     <format default="json"/>
 </webscript>
 

@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services.impl;
 
+import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
@@ -26,14 +27,18 @@ import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
+import java.util.HashSet;
 import java.util.List;
+import org.alfresco.service.namespace.QName;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.core.io.Resource;
 
 public class DossierServiceImpl extends AlfrescoRestService implements DossierService {
 
     private static final String REST_GET_CREATEDOSSIER = "/s/fr/itldev/koya/dossier/create/{parentNodeRef}?title={title}";
-    private static final String REST_POST_LISTCHILD = "/s/fr/itldev/koya/dossier/list?filter={filter}";
+
+    private static final String REST_GET_LISTCHILD = "/s/fr/itldev/koya/dossier/list/{parentNodeRef}?skipCount={skipCount}&maxItems={maxItems}&filter={filter}";
+
     private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
 
     private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/dossier/member/list/{nodeRef}";
@@ -96,16 +101,33 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<Dossier> list(User user, Space space, String... filter) throws AlfrescoServiceException {
+    public List<Dossier> list(User user, Space space, int skipCount, int maxItems, String... filter) throws AlfrescoServiceException {
         String filterStr = "";
         if (filter.length == 1) {
             filterStr = filter[0];
         }
 
         return fromJSON(new TypeReference<List<Dossier>>() {
-        }, user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_LISTCHILD, space, String.class, filterStr));
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_LISTCHILD, String.class, space.getNodeRef(), skipCount, maxItems, filterStr));
 
+    }
+
+    /**
+     * Count all Space Dossiers
+     *
+     * @param user
+     * @param space
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public Integer countChildren(User user, Space space) throws AlfrescoServiceException {
+        return countChildren(user, space, new HashSet<QName>() {
+            {
+                add(KoyaModel.TYPE_DOSSIER);
+            }
+        });
     }
 
     /**

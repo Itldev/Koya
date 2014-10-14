@@ -114,7 +114,7 @@ public class DossierServiceImplTest extends TestCase {
         Dossier created = dossierService.create(admin, spaceTests, "doss1");
         assertNotNull("error creating 'child dossier'", created);
 
-        dossierService.list(admin, spaceTests);
+        dossierService.list(admin, spaceTests,0,10);
         //  dossierService.supprimer(admin, cree);
     }
 
@@ -124,7 +124,7 @@ public class DossierServiceImplTest extends TestCase {
         dossierService.create(admin, spaceTests, "doss2");
         dossierService.create(admin, spaceTests, "doss3");
         dossierService.create(admin, spaceTests, "doss4");
-        assertEquals(4, dossierService.list(admin, spaceTests).size());
+        assertEquals(4, dossierService.list(admin, spaceTests,0,10).size());
     }
 
     @Test

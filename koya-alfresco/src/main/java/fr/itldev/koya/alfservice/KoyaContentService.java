@@ -152,7 +152,7 @@ public class KoyaContentService {
      * @param folderOnly
      * @return
      */
-    public List<Content> list(NodeRef parent, Integer depth, Boolean... folderOnly) {
+    public List<Content> list(NodeRef parent, Integer depth, Boolean folderOnly) {
 
         List<Content> contents = new ArrayList<>();
 
@@ -161,7 +161,7 @@ public class KoyaContentService {
         }
 
         List<FileInfo> childList;
-        if (folderOnly.length > 0 && folderOnly[0]) {
+        if (folderOnly) {
             childList = fileFolderService.listFolders(parent);
         } else {
             childList = fileFolderService.list(parent);
@@ -231,6 +231,17 @@ public class KoyaContentService {
         return retMap;
     }
 
+    /**
+     *
+     * TODO execute in an action.
+     *
+     */
+    /**
+     *
+     * @param nodeRefs
+     * @return
+     * @throws KoyaServiceException
+     */
     public File zip(List<String> nodeRefs) throws KoyaServiceException {
         File tmpZipFile = null;
         try {

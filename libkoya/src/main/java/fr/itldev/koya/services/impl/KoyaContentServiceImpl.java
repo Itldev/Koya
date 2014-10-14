@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services.impl;
 
+import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Document;
@@ -35,9 +36,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.codehaus.jackson.type.TypeReference;
@@ -54,8 +59,10 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     private static final String REST_GET_CREATEDIR = "/s/fr/itldev/koya/content/createdir/{parentNodeRef}?title={title}";
     private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}";
     private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}";
-    private static final String REST_GET_LISTCONTENT = "/s/fr/itldev/koya/content/list/{nodeRef}?onlyFolders={onlyFolders}";
-    private static final String REST_GET_LISTCONTENT_DEPTH_OPTION = "/s/fr/itldev/koya/content/list/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}";
+
+    //
+    private static final String REST_GET_LISTCONTENT = "/s/fr/itldev/koya/content/list/recursive/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}";
+    private static final String REST_GET_LISTCONTENT_PAGINATED = "/s/fr/itldev/koya/content/list/paginated/{nodeRef}?skipCount={skipCount}&maxItems={maxItems}&onlyFolders={onlyFolders}";
 
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
     private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
@@ -98,7 +105,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
                 getAlfrescoServerUrl() + REST_GET_COPYCONTENT, SecuredItem.class, contentToCopy, destination);
     }
 
-    private static final Transformer TRANSFORM_TO_INTEGER = new Transformer() {
+    private static final Transformer TRANSFORM_TO_CONTENTS = new Transformer() {
         @Override
         public Object transform(Object input) {
             return (Content) input;
@@ -106,29 +113,54 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     };
 
     @Override
-    public List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException {
-        List contents = new ArrayList();
+    public List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer depth) throws AlfrescoServiceException {
 
-        
-        /**
-         * TODO use only one url pattern with setted options
-         */
-        
-        if (depth.length > 0) {
-            contents = fromJSON(new TypeReference<List<SecuredItem>>() {
-            }, user.getRestTemplate().getForObject(
-                    getAlfrescoServerUrl() + REST_GET_LISTCONTENT_DEPTH_OPTION,
-                    String.class, containerToList, onlyFolders, depth[0]));
-        } else {
-            contents = fromJSON(new TypeReference<List<SecuredItem>>() {
-            }, user.getRestTemplate().getForObject(
-                    getAlfrescoServerUrl() + REST_GET_LISTCONTENT,
-                    String.class, containerToList, onlyFolders));
-        }
+        List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_LISTCONTENT,
+                String.class, containerToList, onlyFolders, depth));
+
         //tranform SecuredItems to contents
-        CollectionUtils.transform(contents, TRANSFORM_TO_INTEGER);
+        CollectionUtils.transform(contents, TRANSFORM_TO_CONTENTS);
 
         return contents;
+    }
+
+    /**
+     *
+     * @param user
+     * @param containerToList
+     * @param skipCount
+     * @param maxItems
+     * @param onlyFolders
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public List<Content> listPaginatedDirectChild(User user, NodeRef containerToList,
+            Integer skipCount, Integer maxItems, Boolean onlyFolders) throws AlfrescoServiceException {
+
+        List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_LISTCONTENT_PAGINATED,
+                String.class, containerToList, skipCount, maxItems, onlyFolders));
+
+        //tranform SecuredItems to contents
+        CollectionUtils.transform(contents, TRANSFORM_TO_CONTENTS);
+        return contents;
+
+    }
+
+    @Override
+    public Integer countChildren(User user, SecuredItem parent, Boolean onlyFolders) throws AlfrescoServiceException {
+
+        Set<QName> typeFilter = new HashSet<>();
+
+        if (onlyFolders) {
+            typeFilter.add(ContentModel.TYPE_FOLDER);
+        }
+
+        return countChildren(user, parent, typeFilter);
     }
 
     @Override
@@ -175,4 +207,5 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
                 .getForObject(getAlfrescoServerUrl() + REST_GET_IMPORTZIP,
                         String.class, zipFile.getNodeRef());
     }
+
 }

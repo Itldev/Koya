@@ -23,18 +23,18 @@ import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
-import org.alfresco.service.cmr.model.FileFolderService;
-import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 
 /**
@@ -48,7 +48,6 @@ public class DossierService {
 
     private NodeService nodeService;
     private KoyaNodeService koyaNodeService;
-    private FileFolderService fileFolderService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -57,10 +56,6 @@ public class DossierService {
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
-    }
-
-    public void setFileFolderService(FileFolderService fileFolderService) {
-        this.fileFolderService = fileFolderService;
     }
 
     // </editor-fold>
@@ -105,20 +100,35 @@ public class DossierService {
 
     /**
      *
+     * Used in subSpaceConsumersAclService to list user shares
+     *
      * @param parent
      * @return
      * @throws KoyaServiceException
      */
     public List<Dossier> list(NodeRef parent) throws KoyaServiceException {
-        List<Dossier> dossiers = new ArrayList<>();
 
-        for (final FileInfo fi : fileFolderService.listFolders(parent)) {
-            if (fi.getType().equals(KoyaModel.TYPE_DOSSIER)) {
-                Dossier dossier = koyaNodeService.nodeDossierBuilder(fi.getNodeRef());
-                dossiers.add(dossier);
-            }
+        if (!nodeService.getType(parent).equals(KoyaModel.TYPE_SPACE)) {
+            throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_INVALID_PARENT_NODE);
         }
-        return dossiers;
+
+        List nodes = nodeService.getChildAssocs(parent, new HashSet<QName>() {
+            {
+                add(KoyaModel.TYPE_DOSSIER);
+            }
+        });
+
+        /**
+         * transform List<ChildAssociationRef> to List<Dossier>
+         */
+        CollectionUtils.transform(nodes, new Transformer() {
+            @Override
+            public Object transform(Object input) {
+                return koyaNodeService.nodeDossierBuilder(((ChildAssociationRef) input).getChildRef());
+            }
+        });
+
+        return nodes;
     }
 
 }

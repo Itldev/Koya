@@ -21,8 +21,8 @@ package fr.itldev.koya.services;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.interfaces.Container;
 import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.InputStream;
@@ -40,7 +40,12 @@ public interface KoyaContentService extends AlfrescoService {
 
     Content copy(User user, NodeRef contentToCopy, NodeRef destination) throws AlfrescoServiceException;
 
-    List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer... depth) throws AlfrescoServiceException;
+    List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer depth) throws AlfrescoServiceException;
+
+    List<Content> listPaginatedDirectChild(User user, NodeRef containerToList,
+            Integer skipCount, Integer maxItems, Boolean onlyFolders) throws AlfrescoServiceException;
+
+    Integer countChildren(User user, SecuredItem parent, Boolean onlyFolders) throws AlfrescoServiceException;
 
     Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException;
 

@@ -18,13 +18,15 @@
  */
 package fr.itldev.koya.webscript.dossier;
 
-import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -37,26 +39,38 @@ public class ListDossier extends AbstractWebScript {
 
 
     /*services*/
-    private DossierService dossierService;
     private KoyaNodeService koyaNodeService;
-
-    public void setDossierService(DossierService dossierService) {
-        this.dossierService = dossierService;
-    }
+    private NodeService nodeService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
 
+    public void setNodeService(NodeService nodeService) {
+        this.nodeService = nodeService;
+    }
+
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
         String response;
 
         try {
-            NodeRef parent = koyaNodeService.getNodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
-            response = KoyaWebscript.getObjectAsJson(dossierService.list(parent));
+            NodeRef parent = koyaNodeService.getNodeRef(urlParams.get(KoyaWebscript.WSCONST_PARENTNODEREF));
+
+            /**
+             * Prevents bad parents type
+             */
+            if (!nodeService.getType(parent).equals(KoyaModel.TYPE_SPACE)) {
+                throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_INVALID_PARENT_NODE);
+            }
+
+            int maxItems = Integer.valueOf(urlParams.get("maxItems"));
+            int skipCount = Integer.valueOf(urlParams.get("skipCount"));
+
+            response = KoyaWebscript.getObjectAsJson(
+                    koyaNodeService.listChildrenPaginated(parent, skipCount, maxItems, Boolean.TRUE));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

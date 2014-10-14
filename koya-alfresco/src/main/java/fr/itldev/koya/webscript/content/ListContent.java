@@ -21,10 +21,18 @@ package fr.itldev.koya.webscript.content;
 import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -32,7 +40,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  *
- * Dossier Listing Webscript
+ * Content Listing Webscript
  *
  *
  *
@@ -43,6 +51,7 @@ public class ListContent extends AbstractWebScript {
 
     private KoyaContentService koyaContentService;
     private KoyaNodeService koyaNodeService;
+    private NodeService nodeService;
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
@@ -52,22 +61,63 @@ public class ListContent extends AbstractWebScript {
         this.koyaContentService = koyaContentService;
     }
 
+    public void setNodeService(NodeService nodeService) {
+        this.nodeService = nodeService;
+    }
+
+    private static final String MODE_RECURSIVE = "recursive";
+    private static final String MODE_PAGINATED = "paginated";
+    private static final List<String> AllowedModes = new ArrayList() {
+        {
+            add(MODE_RECURSIVE);
+            add(MODE_PAGINATED);
+        }
+    };
+
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+
         Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
-        String response;
+        String response = "";
         try {
             NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_NODEREF));
-            Integer depth;
 
-            if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
-                depth = new Integer((String) urlParamsMap.get(KoyaWebscript.WSCONST_MAXDEPTH));
-            } else {
-                depth = DEFAULT_MAX_DEPTH;
+            /**
+             * Prevents bad parent type
+             */
+            QName parentType = nodeService.getType(parent);
+            if (!(parentType.equals(KoyaModel.TYPE_DOSSIER)
+                    || parentType.equals(ContentModel.TYPE_FOLDER))) {
+                throw new KoyaServiceException(KoyaErrorCodes.CONTENT_INVALID_PARENT_NODE);
+            }
+
+            String mode = urlParamsMap.get("mode");
+            /**
+             * Check mode
+             */
+            if (!AllowedModes.contains(mode)) {
+                throw new KoyaServiceException(KoyaErrorCodes.CONTENT_UNKNOWN_WEBSCRIPT_LISTING_MODE);
             }
             Boolean onlyFolders = ((String) urlParamsMap.get(KoyaWebscript.WSCONST_ONLYFOLDERS)).equals("true");
 
-            response = KoyaWebscript.getObjectAsJson(koyaContentService.list(parent, depth, onlyFolders));
+            /**
+             *
+             */
+            if (mode.equals(MODE_RECURSIVE)) {
+                Integer depth;
+                if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
+                    depth = new Integer((String) urlParamsMap.get(KoyaWebscript.WSCONST_MAXDEPTH));
+                } else {
+                    depth = DEFAULT_MAX_DEPTH;
+                }
+                response = KoyaWebscript.getObjectAsJson(koyaContentService.list(parent, depth, onlyFolders));
+
+            } else if (mode.equals(MODE_PAGINATED)) {
+                int maxItems = Integer.valueOf(urlParamsMap.get("maxItems"));
+                int skipCount = Integer.valueOf(urlParamsMap.get("skipCount"));
+                response = KoyaWebscript.getObjectAsJson(koyaNodeService.listChildrenPaginated(parent, skipCount, maxItems, onlyFolders));
+            }
+
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

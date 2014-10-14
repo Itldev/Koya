@@ -36,7 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.alfresco.model.ContentModel;
+import org.alfresco.query.PagingRequest;
+import org.alfresco.query.PagingResults;
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.dictionary.RepositoryLocation;
 import org.alfresco.service.cmr.activities.ActivityService;
@@ -65,6 +68,9 @@ import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
+import org.alfresco.util.Pair;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 
 /**
@@ -372,6 +378,9 @@ public class KoyaNodeService {
         Space e = Space.newInstance();
 
         /**
+         * TODO type checking !!
+         */
+        /**
          * General attributes
          */
         e.setNodeRef(spaceNodeRef.toString());
@@ -392,6 +401,10 @@ public class KoyaNodeService {
      * @return
      */
     public Dossier nodeDossierBuilder(final NodeRef dossierNodeRef) {
+        /**
+         * TODO type checking
+         */
+        
         Dossier d = Dossier.newInstance();
 
         /**
@@ -665,11 +678,64 @@ public class KoyaNodeService {
         return parents;
     }
 
-    /*
-    
-    
-    
+    /**
+     * count direct children of given type
+     *
+     *
+     * @param parent
+     * @param qNameFilter
+     * @return
+     * @throws KoyaServiceException
      */
+    public Integer countChildren(NodeRef parent, Set<QName> qNameFilter) throws KoyaServiceException {
+
+        if (qNameFilter != null && !qNameFilter.isEmpty()) {
+            return nodeService.getChildAssocs(parent, qNameFilter).size();
+        } else {
+            return nodeService.getChildAssocs(parent).size();
+        }
+    }
+
+    /**
+     *
+     * @param parent
+     * @param skipCount
+     * @param maxItems
+     * @param onlyFolders
+     * @return
+     * @throws KoyaServiceException
+     */
+    public List<SecuredItem> listChildrenPaginated(NodeRef parent, int skipCount,
+            int maxItems, boolean onlyFolders) throws KoyaServiceException {
+
+        List<Pair<QName, Boolean>> sortProps = new ArrayList() {
+            {
+                add(new Pair<>(ContentModel.PROP_TITLE, true));
+            }
+        };
+
+        PagingResults<FileInfo> results = fileFolderService.list(parent, !onlyFolders, true, null,
+                sortProps,
+                new PagingRequest(skipCount, maxItems));
+
+        List children = results.getPage();
+
+        /**
+         * Transform List<FileInfo> as List<SecuredItem>
+         */
+        CollectionUtils.transform(children, new Transformer() {
+            @Override
+            public Object transform(Object input) {
+                try {
+                    return nodeRef2SecuredItem(((FileInfo) input).getNodeRef());
+                } catch (KoyaServiceException ex) {
+                    return null;
+                }
+            }
+        });
+        return children;
+    }
+
     public Properties readPropertiesFileContent(NodeRef fileNr) {
         Properties props = new Properties();
         if (fileNr != null) {

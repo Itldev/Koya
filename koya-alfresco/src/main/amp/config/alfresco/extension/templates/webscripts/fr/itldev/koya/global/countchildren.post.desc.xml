@@ -20,10 +20,13 @@
 -->
 
 <webscript>
-    <shortname>List Dossiers</shortname>
-    <description>Liste available Dossiers in Space</description>
+    <shortname>Count Direct Children of given parent node</shortname>
+    <description>
+        Count Direct Children of given parent node.
+        Optional QName array can be given ti filter results.
+    </description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/dossier/list</url>
+    <url>/fr/itldev/koya/global/countchildren/{parentNodeRef}</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>

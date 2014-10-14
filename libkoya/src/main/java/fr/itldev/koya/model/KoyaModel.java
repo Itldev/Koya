@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.model;
 
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
@@ -96,5 +97,6 @@ public class KoyaModel {
                     put(Dossier.class, TYPE_DOSSIER);
                 }
             });
+    
 
 }

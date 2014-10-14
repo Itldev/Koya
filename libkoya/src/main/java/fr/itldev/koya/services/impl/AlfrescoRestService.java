@@ -19,7 +19,6 @@
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AlfrescoUploadReturn;
@@ -29,8 +28,10 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import fr.itldev.koya.services.impl.util.KoyaUtil;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -52,6 +53,8 @@ public class AlfrescoRestService implements AlfrescoService {
     private static final String REST_GET_LIBVERSION = "/s/fr/itldev/koya/meta/libversion";
     protected static final String REST_POST_UPLOAD = "/s/api/upload";
     private static final String REST_GET_XPATH2NODEREF = "/s/fr/itldev/koya/global/xpath2noderef/{xPath}";
+
+    private static final String REST_POST_COUNTCHILDREN = "/s/fr/itldev/koya/global/countchildren/{parentNodeRef}";
 
     private String alfrescoServerUrl;
 
@@ -166,6 +169,13 @@ public class AlfrescoRestService implements AlfrescoService {
         return user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
 
     }
+
+    @Override
+    public Integer countChildren(User user, SecuredItem parent, Set<QName> qNameFilter) throws AlfrescoServiceException {
+        return user.getRestTemplate().postForObject(getAlfrescoServerUrl()
+                + REST_POST_COUNTCHILDREN, qNameFilter, Integer.class, parent.getNodeRef());
+    }
+
 
     /*
      * ================ Utils methods ==================

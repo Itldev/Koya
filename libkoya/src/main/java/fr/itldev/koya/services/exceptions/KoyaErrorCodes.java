@@ -48,6 +48,7 @@ public interface KoyaErrorCodes {
     public static final Integer DOSSIER_EMPTY_NAME = 300;
     public static final Integer DOSSIER_NOT_IN_SPACE = 301;
     public static final Integer DOSSIER_NAME_EXISTS = 302;
+    public static final Integer DOSSIER_INVALID_PARENT_NODE = 303;//
 
     //400 -> Content errors
     public static final Integer CONTENT_CREATION_INVALID_TYPE = 400;
@@ -59,6 +60,8 @@ public interface KoyaErrorCodes {
     public static final Integer ZIP_EXTRACTION_PROCESS_ERROR = 406;
     public static final Integer FILE_DELETE_ERROR = 407;
     public static final Integer FILE_UPLOAD_NAME_EXISTS = 408;
+    public static final Integer CONTENT_INVALID_PARENT_NODE = 410;
+    public static final Integer CONTENT_UNKNOWN_WEBSCRIPT_LISTING_MODE = 411;
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;

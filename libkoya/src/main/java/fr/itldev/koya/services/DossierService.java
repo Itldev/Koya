@@ -64,11 +64,24 @@ public interface DossierService extends AlfrescoService {
      *
      * @param user
      * @param space
+     * @param skipCount
+     * @param maxItems
      * @param filter
      * @return
      * @throws AlfrescoServiceException
      */
-    List<Dossier> list(User user, Space space, String... filter) throws AlfrescoServiceException;
+    List<Dossier> list(User user, Space space, int skipCount, int maxItems, String... filter) throws AlfrescoServiceException;
+    
+    
+     /**
+     * Count all Space Dossiers
+     *
+     * @param user     
+     * @param space     
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    Integer countChildren(User user, Space space) throws AlfrescoServiceException;
 
     /**
      * List all users in charge of specified Dossier.

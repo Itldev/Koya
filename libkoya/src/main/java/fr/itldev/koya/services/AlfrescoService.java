@@ -24,6 +24,8 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.Set;
+import org.alfresco.service.namespace.QName;
 import org.springframework.core.io.Resource;
 
 public interface AlfrescoService {
@@ -62,25 +64,36 @@ public interface AlfrescoService {
      */
     SecuredItem getSecuredItem(User user, String nodeRef) throws AlfrescoServiceException;
 
-    
     /**
      * Get NodeRef reference from xpath expression.
+     *
      * @param user
      * @param nodeRef
      * @return
-     * @throws AlfrescoServiceException 
+     * @throws AlfrescoServiceException
      */
     String xPathToNodeRef(User user, String nodeRef) throws AlfrescoServiceException;
-    
-    
+
     /**
      * Upload a file to parentXpath.
+     *
      * @param user
      * @param resource
      * @param parentXPath
      * @return
-     * @throws AlfrescoServiceException 
+     * @throws AlfrescoServiceException
      */
     AlfrescoUploadReturn uploadToXpathNode(User user, Resource resource, String parentXPath) throws AlfrescoServiceException;
+
+    /**
+     * Count all Children of type
+     *
+     * @param user
+     * @param parent
+     * @param qNameFilter
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    Integer countChildren(User user, SecuredItem parent, Set<QName> qNameFilter) throws AlfrescoServiceException;
 
 }
