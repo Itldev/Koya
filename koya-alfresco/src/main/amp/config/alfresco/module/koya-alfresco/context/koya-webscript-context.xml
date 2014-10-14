@@ -283,29 +283,31 @@
         <property name="koyaNodeService" ref="koyaNodeService" />         
     </bean>
     
+    <!--
+    ==================================================================
+    ========================== Favourites ============================
+    ==================================================================
+    -->
+    
+    <!-- Get Users Favourites -->
+    <bean id="webscript.fr.itldev.koya.favourites.list.get" 
+          class="fr.itldev.koya.webscript.favourites.List"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" />      
+    </bean>
+    
+    <!--Change or get Favourite Status-->
+    <bean id="webscript.fr.itldev.koya.favourites.status.get" 
+          class="fr.itldev.koya.webscript.favourites.Status"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" />   
+    </bean>
     
     <!--
     ==================================================================
     ========================== Global ============================
     ==================================================================
     -->
-    
-    
-    
-    <!--Change Favourite Status-->
-    <bean id="webscript.fr.itldev.koya.global.togglefavourite.post" 
-          class="fr.itldev.koya.webscript.global.ToggleFavourite"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-    
-    
-    <!-- Get Users Favourites -->
-    <bean id="webscript.fr.itldev.koya.global.getfavourites.get" 
-          class="fr.itldev.koya.webscript.global.GetFavourites"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />      
-    </bean>
     
     <!--Get used disk size-->
     <bean id="webscript.fr.itldev.koya.global.disksize.get" 

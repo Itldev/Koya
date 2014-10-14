@@ -97,9 +97,9 @@ public class FavouriteServiceImplTest extends TestCase {
     @Test
     public void addDelFavouriteDossierTest() throws AlfrescoServiceException {
         favouriteService.setFavouriteValue(admin, dossierTests, Boolean.TRUE);
-        assertTrue(dossierService.list(admin, spaceTests, 0, 10).get(0).getUserFavourite());
+        assertTrue(favouriteService.isFavourite(admin, dossierTests));
         favouriteService.setFavouriteValue(admin, dossierTests, Boolean.FALSE);
-        assertFalse(dossierService.list(admin, spaceTests, 0, 10).get(0).getUserFavourite());
+        assertFalse(favouriteService.isFavourite(admin, dossierTests));
     }
 
     @Test
@@ -107,9 +107,9 @@ public class FavouriteServiceImplTest extends TestCase {
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
         Document doc = koyaContentService.upload(admin, dossierTests.getNodeRefasObject(), toUpload);
         favouriteService.setFavouriteValue(admin, doc, Boolean.TRUE);
-        assertTrue(koyaContentService.list(admin, dossierTests.getNodeRefasObject(), false, 1).get(0).getUserFavourite());
+        assertTrue(favouriteService.isFavourite(admin, doc));
         favouriteService.setFavouriteValue(admin, doc, Boolean.FALSE);
-        assertFalse(koyaContentService.list(admin, dossierTests.getNodeRefasObject(), false, 1).get(0).getUserFavourite());
+        assertFalse(favouriteService.isFavourite(admin, doc));
     }
 
     @Test

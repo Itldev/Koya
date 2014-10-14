@@ -20,10 +20,9 @@
 -->
 
 <webscript>
-    <shortname>Get User Favourites Items</shortname>
-    <description>Get User Favourites Items</description>
+    <shortname>Get Authenticated User Favourites Items</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/global/getfavourites</url>
+    <url>/fr/itldev/koya/favourites/list</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

@@ -32,8 +32,6 @@ public interface AlfrescoNode {
 
     String getTitle();
 
-    Boolean getUserFavourite();
-
     NodeRef getNodeRefasObject();
 
 }

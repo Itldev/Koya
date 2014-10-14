@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.global;
+package fr.itldev.koya.webscript.favourites;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -30,13 +30,11 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
- * Set/unset Favourite status on node
- *
- *
+ * Set/unset User Favourite status on node or simply get if no status given.
  *
  *
  */
-public class ToggleFavourite extends AbstractWebScript {
+public class Status extends AbstractWebScript {
 
     private KoyaNodeService koyaNodeService;
 
@@ -46,19 +44,22 @@ public class ToggleFavourite extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
-
+        Map<String, String> urlMap = KoyaWebscript.getUrlParamsMap(req);
+        String response = "";
         try {
-            Boolean userFavourite = (Boolean) jsonPostMap.get(KoyaWebscript.WSCONST_USERFAVOURITE);
-            NodeRef conteneur = koyaNodeService.getNodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
-            koyaNodeService.setFavouriteStatus(conteneur, userFavourite);
+            NodeRef node = koyaNodeService.getNodeRef(urlMap.get(KoyaWebscript.WSCONST_NODEREF));
 
+            if (urlMap.containsKey("status")) {
+                koyaNodeService.setFavouriteStatus(node, urlMap.get("status").equals("true"));
+            }
+            //return current favourite status.
+            response = KoyaWebscript.getObjectAsJson(koyaNodeService.isFavourite(node));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
 
         res.setContentType("application/json");
-        res.getWriter().write("");
+        res.getWriter().write(response);
     }
 
 }

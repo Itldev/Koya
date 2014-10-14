@@ -56,9 +56,7 @@ public abstract class SecuredItem implements AlfrescoNode, Comparable<SecuredIte
     private String name;
     private String title;
 
-    private Boolean userFavourite;
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-
     @Override
     public String getNodeRef() {
         return nodeRef;
@@ -91,15 +89,6 @@ public abstract class SecuredItem implements AlfrescoNode, Comparable<SecuredIte
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    @Override
-    public Boolean getUserFavourite() {
-        return userFavourite;
-    }
-
-    public void setUserFavourite(Boolean userFavourite) {
-        this.userFavourite = userFavourite;
     }
 
     // </editor-fold>
@@ -167,5 +156,5 @@ public abstract class SecuredItem implements AlfrescoNode, Comparable<SecuredIte
     public int compareTo(SecuredItem t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }

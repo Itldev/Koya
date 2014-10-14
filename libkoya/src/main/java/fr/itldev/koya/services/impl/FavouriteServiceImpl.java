@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
@@ -31,8 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class FavouriteServiceImpl extends AlfrescoRestService implements FavouriteService {
 
-    private static final String REST_POST_TOGGLEFAVOURITE = "/s/fr/itldev/koya/global/togglefavourite";
-    private static final String REST_GET_GETFAVOURITES = "/s/fr/itldev/koya/global/getfavourites";
+    private static final String REST_GET_LISTFAVOURITES = "/s/fr/itldev/koya/favourites/list";
+    private static final String REST_GET_STATUS_FAVOURITE = "/s/fr/itldev/koya/favourites/status/{nodeRef}";
+    private static final String REST_GET_STATUS_FAVOURITE_CHANGE = "/s/fr/itldev/koya/favourites/status/{nodeRef}?status={status}";
 
     @Autowired
     UserService userService;
@@ -41,17 +41,22 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements Favouri
     public List<SecuredItem> getFavourites(User user) throws AlfrescoServiceException {
         return fromJSON(new TypeReference<List<SecuredItem>>() {
         }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_GETFAVOURITES, String.class));
+                getAlfrescoServerUrl() + REST_GET_LISTFAVOURITES, String.class));
     }
 
     @Override
-    public void setFavouriteValue(User user, SecuredItem item, Boolean favouriteValue) throws AlfrescoServiceException {
-        item.setUserFavourite(favouriteValue);
-        user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_TOGGLEFAVOURITE, item, String.class);
+    public Boolean setFavouriteValue(User user, SecuredItem item, Boolean favouriteValue) throws AlfrescoServiceException {
+        Boolean status = user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_STATUS_FAVOURITE_CHANGE, Boolean.class, item.getNodeRef(), favouriteValue);
         //Automaticly reload user's preferences
         userService.loadPreferences(user);
+        return status;
+    }
 
+    @Override
+    public Boolean isFavourite(User user, SecuredItem item) throws AlfrescoServiceException {
+        return user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_STATUS_FAVOURITE, Boolean.class, item.getNodeRef());
     }
 
 }

@@ -335,8 +335,6 @@ public class KoyaNodeService {
         c.setTitle(s.getTitle());
         c.setNodeRefasObject(s.getNodeRef());
 
-        c.setUserFavourite(isFavourite(c.getNodeRefasObject()));
-
         return c;
     }
 
@@ -387,11 +385,6 @@ public class KoyaNodeService {
         e.setName((String) unsecuredNodeService.getProperty(spaceNodeRef, ContentModel.PROP_NAME));
         e.setTitle((String) unsecuredNodeService.getProperty(spaceNodeRef, ContentModel.PROP_TITLE));
 
-        /**
-         * User context attributes
-         */
-        e.setUserFavourite(isFavourite(spaceNodeRef));
-
         return e;
     }
 
@@ -404,7 +397,7 @@ public class KoyaNodeService {
         /**
          * TODO type checking
          */
-        
+
         Dossier d = Dossier.newInstance();
 
         /**
@@ -414,11 +407,6 @@ public class KoyaNodeService {
         d.setName((String) unsecuredNodeService.getProperty(dossierNodeRef, ContentModel.PROP_NAME));
         d.setLastModifiedDate((Date) unsecuredNodeService.getProperty(dossierNodeRef, ContentModel.PROP_MODIFIED));
         d.setTitle((String) unsecuredNodeService.getProperty(dossierNodeRef, ContentModel.PROP_TITLE));
-
-        /**
-         * User context attributes
-         */
-        d.setUserFavourite(isFavourite(dossierNodeRef));
 
         return d;
     }
@@ -450,7 +438,6 @@ public class KoyaNodeService {
         r.setNodeRef(dirNodeRef.toString());
         r.setName((String) unsecuredNodeService.getProperty(dirNodeRef, ContentModel.PROP_NAME));
         r.setTitle((String) unsecuredNodeService.getProperty(dirNodeRef, ContentModel.PROP_TITLE));
-        r.setUserFavourite(isFavourite(dirNodeRef));
 
         return r;
     }
@@ -470,7 +457,6 @@ public class KoyaNodeService {
         d.setNodeRef(docNodeRef.toString());
         d.setName((String) unsecuredNodeService.getProperty(docNodeRef, ContentModel.PROP_NAME));
         d.setTitle((String) unsecuredNodeService.getProperty(docNodeRef, ContentModel.PROP_TITLE));
-        d.setUserFavourite(isFavourite(docNodeRef));
         d.setByteSize(AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Long>() {
             @Override
             public Long doWork() throws Exception {
