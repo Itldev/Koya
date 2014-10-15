@@ -42,6 +42,7 @@ import org.alfresco.query.PagingRequest;
 import org.alfresco.query.PagingResults;
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.dictionary.RepositoryLocation;
+import org.alfresco.repo.node.getchildren.GetChildrenCannedQuery;
 import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.repo.nodelocator.AncestorNodeLocator;
 import org.alfresco.repo.search.SearcherException;
@@ -696,6 +697,7 @@ public class KoyaNodeService {
 
         List<Pair<QName, Boolean>> sortProps = new ArrayList() {
             {
+                add(new Pair<>(GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER, false));
                 add(new Pair<>(ContentModel.PROP_TITLE, true));
             }
         };
