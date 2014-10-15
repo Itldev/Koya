@@ -18,11 +18,17 @@
  */
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.services.impl.AlfrescoRestService;
+import static groovy.xml.dom.DOMCategory.parent;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import org.alfresco.model.ContentModel;
+import static org.alfresco.service.cmr.favourites.FavouritesService.SortFields.title;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.CopyService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -30,9 +36,17 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.MutableAuthenticationService;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.namespace.NamespaceService;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.util.GUID;
 import org.alfresco.util.ISO9075;
+import org.alfresco.util.PropertyMap;
+import static org.mozilla.javascript.Token.name;
 
 /**
  *
@@ -41,12 +55,16 @@ public class ModelService extends AlfrescoRestService {
 
     private static final String SPACE_TEMPLATE_PATH = "/app:company_home/app:dictionary/app:koya_space_templates";
     private static final String REST_GET_DOC_LIB_LIST = "/slingshot/doclib/containers/";
+    private static final String IMPORT_FOLDER_NAME = "import";
 
     // Dependencies
     private NodeService nodeService;
     private CopyService copyService;
     private SearchService searchService;
     private SiteService siteService;
+    protected PermissionService permissionService;
+    protected PersonService personService;
+    protected MutableAuthenticationService authenticationService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -63,6 +81,18 @@ public class ModelService extends AlfrescoRestService {
 
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
+    }
+
+    public void setPermissionService(PermissionService permissionService) {
+        this.permissionService = permissionService;
+    }
+
+    public void setPersonService(PersonService personService) {
+        this.personService = personService;
+    }
+
+    public void setAuthenticationService(MutableAuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
     }
 
     // </editor-fold>
@@ -126,10 +156,66 @@ public class ModelService extends AlfrescoRestService {
     }
 
     /**
-     * Templates existance check method
+     * Creates company default import user (<companyName>_import) and import
+     * folder giving user permissions.
+     *
+     * @param siteShortName
+     * @return
      */
-    public void checkOrInitKoyaModels() {
+    public NodeRef companyInitImports(String siteShortName) {
+        SiteInfo siteInfo = siteService.getSite(siteShortName);
 
+        /**
+         * Create importer user
+         */
+        String userName = siteShortName + "_" + IMPORT_FOLDER_NAME;
+
+        PropertyMap propsUser = new PropertyMap();
+        propsUser.put(ContentModel.PROP_USERNAME, userName);
+        propsUser.put(ContentModel.PROP_FIRSTNAME, userName);
+        propsUser.put(ContentModel.PROP_LASTNAME, userName);
+        propsUser.put(ContentModel.PROP_EMAIL, userName + "@alfresco.com");
+
+        //initialize importer user with generated password : admin has to modify it
+        authenticationService.createAuthentication(userName, GUID.generate().toCharArray());
+        personService.createPerson(propsUser);
+
+        /**
+         * give conbtributor role to this user
+         */
+        siteService.setMembership(siteShortName, userName, SitePermission.CONTRIBUTOR.toString());
+
+        /**
+         * create import directory with correct permissions
+         */
+        //build node properties
+        final Map<QName, Serializable> properties = new HashMap<>();
+        properties.put(ContentModel.PROP_NAME, IMPORT_FOLDER_NAME);
+        properties.put(ContentModel.PROP_TITLE, IMPORT_FOLDER_NAME);
+
+        ChildAssociationRef car = nodeService.createNode(siteInfo.getNodeRef(), ContentModel.ASSOC_CONTAINS,
+                QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, IMPORT_FOLDER_NAME),
+                ContentModel.TYPE_FOLDER,
+                properties);
+
+        // Clear the node inherited permissions
+        permissionService.setInheritParentPermissions(car.getChildRef(), false);
+        /*
+         Setting default permissions on node       
+         */
+        //Sitemanager keeps manager permissions
+        permissionService.setPermission(car.getChildRef(),
+                siteService.getSiteRoleGroup(siteShortName, SitePermission.MANAGER.toString()),
+                SitePermission.MANAGER.toString(), true);
+
+        //give importer manager permissions
+        permissionService.setPermission(car.getChildRef(), userName,
+                SitePermission.MANAGER.toString(), true);
+
+        /**
+         * TODO set import rule on this node
+         */
+        return car.getChildRef();
     }
 
 }

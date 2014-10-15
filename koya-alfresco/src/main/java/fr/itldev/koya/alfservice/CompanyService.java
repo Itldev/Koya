@@ -120,6 +120,8 @@ public class CompanyService {
         NodeRef koyaConfig = getKoyaConfigNodeRef(sInfo.getNodeRef(), true);
 
         modelService.companyInitTemplate(shortName, template);
+        
+        modelService.companyInitImports(shortName);
 
         //TODO copy config files to the koy-config directory
         return created;

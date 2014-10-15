@@ -106,6 +106,9 @@
         <property name="copyService" ref="CopyService"/>
         <property name="searchService" ref="SearchService"/>
         <property name="siteService" ref="SiteService"/>
+        <property name="permissionService" ref="PermissionService"/>
+        <property name="personService" ref="PersonService"/>
+        <property name="authenticationService" ref="AuthenticationService"/>
     </bean>
     
     
