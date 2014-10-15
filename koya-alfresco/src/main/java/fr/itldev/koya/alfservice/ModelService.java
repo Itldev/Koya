@@ -186,7 +186,7 @@ public class ModelService extends AlfrescoRestService {
         siteService.setMembership(siteShortName, userName, SitePermission.CONTRIBUTOR.toString());
 
         /**
-         * create import directory with correct permissions
+         * create import directory with default permissions
          */
         //build node properties
         final Map<QName, Serializable> properties = new HashMap<>();
@@ -197,20 +197,6 @@ public class ModelService extends AlfrescoRestService {
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, IMPORT_FOLDER_NAME),
                 ContentModel.TYPE_FOLDER,
                 properties);
-
-        // Clear the node inherited permissions
-        permissionService.setInheritParentPermissions(car.getChildRef(), false);
-        /*
-         Setting default permissions on node       
-         */
-        //Sitemanager keeps manager permissions
-        permissionService.setPermission(car.getChildRef(),
-                siteService.getSiteRoleGroup(siteShortName, SitePermission.MANAGER.toString()),
-                SitePermission.MANAGER.toString(), true);
-
-        //give importer manager permissions
-        permissionService.setPermission(car.getChildRef(), userName,
-                SitePermission.MANAGER.toString(), true);
 
         /**
          * TODO set import rule on this node
