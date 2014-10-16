@@ -1,8 +1,11 @@
 package fr.itldev.koya.model.permissions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.alfresco.repo.site.SiteModel;
+import org.alfresco.util.collections.CollectionUtils;
 
 /**
  *
@@ -19,6 +22,14 @@ public class SitePermission extends AlfrescoPermission {
         super(permissionName);
     }
 
+    private static final Map<String, SitePermission> sitePermissionCache = new HashMap<String, SitePermission>() {
+        {
+            for (SitePermission sp : getAll()) {
+                put(sp.permissionName, sp);
+            }
+        }
+    };
+
     public static List<SitePermission> getAll() {
 
         List<SitePermission> all = new ArrayList<>();
@@ -31,20 +42,10 @@ public class SitePermission extends AlfrescoPermission {
     }
 
     public static List<String> getAllAsString() {
-        List<String> perms = new ArrayList<>();
-        for (SitePermission p : getAll()) {
-            perms.add(p.permissionName);
-        }
-        return perms;
+        return CollectionUtils.toListOfStrings(getAll());
     }
 
     public static SitePermission valueOf(String permissionName) {
-        for (SitePermission p : getAll()) {
-            if (p.equals(permissionName)) {
-                return p;
-            }
-        }
-        return null;
+        return sitePermissionCache.get(permissionName);
     }
-
 }
