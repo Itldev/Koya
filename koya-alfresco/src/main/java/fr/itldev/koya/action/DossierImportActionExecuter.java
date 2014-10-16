@@ -1,0 +1,448 @@
+package fr.itldev.koya.action;
+
+import fr.itldev.koya.alfservice.DossierService;
+import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.importXml.model.ContentXml;
+import fr.itldev.koya.alfservice.importXml.model.ContentsXmlWrapper;
+import fr.itldev.koya.alfservice.importXml.model.DossierXml;
+import fr.itldev.koya.alfservice.importXml.model.DossiersXmlWrapper;
+import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.interfaces.SubSpace;
+import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
+import fr.itldev.koya.model.permissions.SitePermission;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipException;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import org.alfresco.error.AlfrescoRuntimeException;
+import org.alfresco.model.ContentModel;
+import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ParameterDefinition;
+import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.ContentService;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.util.TempFileProvider;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
+
+    private Log logger = LogFactory.getLog(DossierImportActionExecuter.class);
+
+    public static final String NAME = "koyaDossierImport";
+
+    private SiteService siteService;
+    private NodeService nodeService;
+    private ContentService contentService;
+    private DossierService dossierService;
+    private UserService userService;
+    private SubSpaceCollaboratorsAclService subSpaceCollaboratorsAclService;
+    private KoyaNodeService koyaNodeService;
+    private KoyaContentService koyaContentService;
+
+    public SiteService getSiteService() {
+        return siteService;
+    }
+
+    public void setSiteService(SiteService siteService) {
+        this.siteService = siteService;
+    }
+
+    public NodeService getNodeService() {
+        return nodeService;
+    }
+
+    public void setNodeService(NodeService nodeService) {
+        this.nodeService = nodeService;
+    }
+
+    public ContentService getContentService() {
+        return contentService;
+    }
+
+    public void setContentService(ContentService contentService) {
+        this.contentService = contentService;
+    }
+
+    public DossierService getDossierService() {
+        return dossierService;
+    }
+
+    public void setDossierService(DossierService dossierService) {
+        this.dossierService = dossierService;
+    }
+
+    public UserService getUserService() {
+        return userService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public SubSpaceCollaboratorsAclService getSubSpaceCollaboratorsAclService() {
+        return subSpaceCollaboratorsAclService;
+    }
+
+    public void setSubSpaceCollaboratorsAclService(SubSpaceCollaboratorsAclService subSpaceCollaboratorsAclService) {
+        this.subSpaceCollaboratorsAclService = subSpaceCollaboratorsAclService;
+    }
+
+    public KoyaNodeService getKoyaNodeService() {
+        return koyaNodeService;
+    }
+
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
+    }
+
+    public KoyaContentService getKoyaContentService() {
+        return koyaContentService;
+    }
+
+    public void setKoyaContentService(KoyaContentService koyaContentService) {
+        this.koyaContentService = koyaContentService;
+    }
+
+    private static final int BUFFER_SIZE = 16384;
+
+    private static final String TEMP_FILE_PREFIX = "koya";
+    private static final String TEMP_FILE_SUFFIX_ZIP = ".zip";
+    private static final String FILE_DOSSIERS_XML = "dossiers_import.xml";
+
+    private static final String FILE_CONTENT_ZIP = "Documents.zip";
+    private static final String FILE_CONTENT_XML = "documents_import.xml";
+    private static final String FOLDER_CONTENTS = "contents";
+
+    private static final List<SitePermission> societePermissions = new ArrayList<SitePermission>() {
+        {
+            add(SitePermission.MANAGER);
+            add(SitePermission.COLLABORATOR);
+        }
+    };
+
+    @Override
+    protected void executeImpl(Action action, NodeRef actionedUponNodeRef) {
+        if (this.nodeService.exists(actionedUponNodeRef) == true) {
+            SiteInfo siteInfo = siteService.getSite(actionedUponNodeRef);
+            NodeRef documentLibrary = siteService.getContainer(siteInfo.getShortName(), SiteService.DOCUMENT_LIBRARY);
+            Map<String, Dossier> mapCacheDossier = new HashMap<String, Dossier>();
+            try {
+                logger.debug("Retrieving company");
+                Company company = koyaNodeService.companyBuilder(siteInfo);
+                logger.debug("Company " + company.getTitle() + " Found");
+
+                // The node being passed in should be an Alfresco content package
+                ContentReader reader = this.contentService.getReader(actionedUponNodeRef, ContentModel.PROP_CONTENT);
+                if (reader != null) {
+                    // perform an dossiers import of a standard ZIP file
+                    ZipFile zipFile = null;
+                    File tempFile = null;
+                    try {
+                        // unfortunately a ZIP file can not be read directly from an input stream so we have to create
+                        // a temporary file first
+                        tempFile = TempFileProvider.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX_ZIP);
+                        reader.getContent(tempFile);
+                        // NOTE: This encoding allows us to workaround bug:
+                        //       http://bugs.sun.com/bugdatabase/view_bug.do;:WuuT?bug_id=4820807
+                        // We also try to use the extra encoding information if present
+                        // ALF-2016
+                        zipFile = new ZipFile(tempFile, "UTF-8", true);
+
+                        // build a temp dir name based on the ID of the noderef we are importing
+                        // also use the long life temp folder as large ZIP files can take a while
+                        File alfTempDir = TempFileProvider.getLongLifeTempDir("import");
+                        File tempDir = new File(alfTempDir.getPath() + File.separatorChar + actionedUponNodeRef.getId());
+                        try {
+                            // TODO: improve this code to directly pipe the zip stream output into the repo objects - 
+                            //       to remove the need to expand to the filesystem first?
+                            extractFile(zipFile, tempDir.getPath());
+
+                            //Reading the new dossiers to create
+                            File fileDossiersXml = new File(tempDir, FILE_DOSSIERS_XML);
+                            if (fileDossiersXml.exists()) {
+                                //Create new dossiers
+                                List<DossierXml> dossierXmls = null;
+                                try {
+                                    logger.debug("Unmarshalling " + fileDossiersXml.getName());
+                                    JAXBContext context = JAXBContext.newInstance(DossiersXmlWrapper.class, DossierXml.class);
+                                    DossiersXmlWrapper dossiersXmlWrapper = (DossiersXmlWrapper) context.createUnmarshaller().unmarshal(fileDossiersXml);
+                                    if (dossiersXmlWrapper != null) {
+                                        dossierXmls = dossiersXmlWrapper.getDossiers();
+                                    }
+
+                                } catch (JAXBException ex) {
+                                    throw new AlfrescoRuntimeException("Error unmarshalling dossiers metadata.", ex);
+                                }
+
+                                if (dossierXmls != null) {
+                                    logger.debug(dossierXmls.size() + " dossiers found");
+                                    for (final DossierXml dossierXml : dossierXmls) {
+
+                                        if (dossierXml.getReference() != null) {
+                                            String space = dossierXml.getSpace();
+                                            if (space == null || space.isEmpty()) {
+                                                space = "defaultSpace";
+                                            }
+
+                                            NodeRef spaceNodeRef = nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, space);
+                                            logger.debug("Creating dossier " + dossierXml.getReference() + " - " + dossierXml.getName() + " into " + spaceNodeRef);
+
+                                            Dossier d = null;
+                                            try {
+                                                d = dossierService.create(dossierXml.getReference() + " - " + dossierXml.getName(), spaceNodeRef, new HashMap<QName, String>() {
+                                                    {
+                                                        put(KoyaModel.PROP_REFERENCE, dossierXml.getReference());
+                                                    }
+                                                });
+
+                                                mapCacheDossier.put(dossierXml.getReference(), d);
+
+                                            } catch (KoyaServiceException ex) {
+                                                if (KoyaErrorCodes.DOSSIER_NAME_EXISTS.equals(ex.getErrorCode())) {
+                                                    logger.error("Dossiers " + dossierXml.getReference() + " already exists.");
+                                                } else {
+                                                    logger.error("Cannot create dossier " + dossierXml.getReference(), ex);
+                                                }
+                                                continue;
+                                            }
+
+                                            for (String respMail : dossierXml.getResponsibles()) {
+                                                User respUser = userService.getUserByEmailFailOver(respMail);
+                                                if (respUser != null) {
+                                                    logger.debug("Adding " + respMail + " as responsible");
+                                                    try {
+                                                        addKoyaPermissionCollaborator(company, d, respUser, KoyaPermissionCollaborator.RESPONSIBLE);
+                                                    } catch (KoyaServiceException ex) {
+                                                        logger.error("Error adding " + respMail + " AS reponsible to dossier " + dossierXml.getReference(), ex);
+                                                    }
+                                                }
+                                                dossierXml.getMembers().remove(respMail);
+                                            }
+                                            for (String memberMail : dossierXml.getMembers()) {
+                                                User memberUser = userService.getUserByEmailFailOver(memberMail);
+                                                if (memberUser != null) {
+                                                    logger.debug("Adding " + memberMail + " as collaborator");
+                                                    try {
+                                                        addKoyaPermissionCollaborator(company, d, memberUser, KoyaPermissionCollaborator.MEMBER);
+                                                    } catch (KoyaServiceException ex) {
+                                                        logger.error("Error adding " + memberMail + " AS collaborator to dossier " + dossierXml.getReference(), ex);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            //Importing new content into the dossiers
+                            File fileContentZip = new File(tempDir, FILE_CONTENT_ZIP);
+                            if (fileContentZip.exists()) {
+                                //Extract content zip file
+                                File contentsDir = new File(tempDir, FOLDER_CONTENTS);
+                                contentsDir.mkdir();
+
+                                extractFile(new ZipFile(fileContentZip, "UTF-8", true), contentsDir.getPath());
+
+                                //Reading contents files descriptor
+                                File fileContentXml = new File(contentsDir.getPath(), FILE_CONTENT_XML);
+                                if (!fileContentXml.exists()) {
+                                    throw new AlfrescoRuntimeException("No files content metadata file found.");
+                                }
+                                //Create new content
+                                List<ContentXml> contentXmls = null;
+                                try {
+                                    logger.debug("Unmarshalling " + fileContentXml.getName());
+                                    JAXBContext context = JAXBContext.newInstance(ContentsXmlWrapper.class, ContentXml.class);
+                                    ContentsXmlWrapper contentsXmlWrapper = (ContentsXmlWrapper) context.createUnmarshaller().unmarshal(fileContentXml);
+                                    if (contentsXmlWrapper != null) {
+                                        contentXmls = contentsXmlWrapper.getContentXmls();
+                                    }
+
+                                } catch (JAXBException ex) {
+                                    throw new AlfrescoRuntimeException("Error unmarshalling dossiers metadata.", ex);
+                                }
+
+                                if (contentXmls != null) {
+                                    logger.debug(contentXmls.size() + " contents found");
+
+                                    for (ContentXml contentXml : contentXmls) {
+                                        try {
+                                            Dossier dossier = dossierService.getDossier(company, contentXml.getDossierReference());
+                                            String path = contentXml.getPath();
+
+                                            NodeRef dirNodeRef;
+                                            if (path == null || path.isEmpty()) {
+                                                dirNodeRef = dossier.getNodeRefasObject();
+                                            } else {
+                                                dirNodeRef = koyaContentService.makeFolders(dossier.getNodeRefasObject(), Arrays.asList(path.split(File.separator))).getNodeRefasObject();
+                                            }
+
+                                            try {
+                                                logger.debug("Adding " + contentXml.getFilename() + " to " + path + " as " + contentXml.getName());
+                                                koyaContentService.createContentNode(dirNodeRef, contentXml.getName(), contentXml.getFilename(),
+                                                        null, null,
+                                                        new FileInputStream(new File(contentsDir, contentXml.getFilename())));
+                                            } catch (FileNotFoundException ex) {
+                                                logger.error(ex.getMessage(), ex);
+                                            } catch (KoyaServiceException ex) {
+                                                //TODO Do something about duplicate - update/rename
+                                                if (KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS.equals(ex.getErrorCode())) {
+                                                    //TODO Do something about duplicate - update/rename/ignore
+                                                    logger.error("File " + contentXml.getFilename() + " - " + contentXml.getName() + "already exist");
+                                                } else {
+                                                    logger.error(ex.getMessage(), ex);
+                                                }
+                                            }
+                                        } catch (KoyaServiceException ex) {
+                                            //TODO Dossier not found or multiple dossiers found
+                                            logger.error(ex.getMessage(), ex);
+                                        }
+                                    }
+                                }
+                            }
+
+                        } finally {
+                            deleteDir(tempDir);
+                        }
+                    } catch (IOException ioErr) {
+                        throw new AlfrescoRuntimeException("Failed to import ZIP file.", ioErr);
+                    } finally {
+                        // now the import is done, delete the temporary file
+                        if (tempFile != null) {
+                            tempFile.delete();
+                        }
+                        if (zipFile != null) {
+                            try {
+                                zipFile.close();
+                            } catch (IOException e) {
+                                throw new AlfrescoRuntimeException("Failed to close zip package.", e);
+                            }
+                        }
+                    }
+                }
+            } catch (KoyaServiceException ex) {
+                throw new AlfrescoRuntimeException("Company not found.", ex);
+            }
+
+        }
+    }
+
+    private void addKoyaPermissionCollaborator(Company c, Dossier d, User u, KoyaPermissionCollaborator permissionCollaborator) throws KoyaServiceException {
+        if (societePermissions.contains(SitePermission.valueOf(siteService.getMembersRole(c.getName(), u.getUserName())))) {
+            subSpaceCollaboratorsAclService.shareSecuredItem(
+                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(d.getNodeRefasObject()),
+                    userService.getUserByUsername(u.getUserName()).getEmail(), KoyaPermissionCollaborator.RESPONSIBLE, "", "", "");
+        }
+    }
+
+    @Override
+    protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
+    }
+
+    /**
+     * Extract the file and folder structure of a ZIP file into the specified
+     * directory
+     *
+     * @param archive The ZIP archive to extract
+     * @param extractDir The directory to extract into
+     */
+    private void extractFile(ZipFile archive, String extractDir) {
+        logger.debug("Extracting " + archive);
+        String fileName;
+        String destFileName;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        extractDir = extractDir + File.separator;
+        try {
+            for (Enumeration e = archive.getEntries(); e.hasMoreElements();) {
+                ZipArchiveEntry entry = (ZipArchiveEntry) e.nextElement();
+                if (!entry.isDirectory()) {
+                    fileName = entry.getName();
+                    fileName = fileName.replace('/', File.separatorChar);
+                    destFileName = extractDir + fileName;
+                    File destFile = new File(destFileName);
+                    String parent = destFile.getParent();
+                    if (parent != null) {
+                        File parentFile = new File(parent);
+                        if (!parentFile.exists()) {
+                            parentFile.mkdirs();
+                        }
+                    }
+                    InputStream in = new BufferedInputStream(archive.getInputStream(entry), BUFFER_SIZE);
+                    OutputStream out = new BufferedOutputStream(new FileOutputStream(destFileName), BUFFER_SIZE);
+                    int count;
+                    while ((count = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, count);
+                    }
+                    in.close();
+                    out.close();
+                } else {
+                    File newdir = new File(extractDir + entry.getName());
+                    newdir.mkdirs();
+                }
+            }
+        } catch (ZipException e) {
+            throw new AlfrescoRuntimeException("Failed to process ZIP file.", e);
+        } catch (FileNotFoundException e) {
+            throw new AlfrescoRuntimeException("Failed to process ZIP file.", e);
+        } catch (IOException e) {
+            throw new AlfrescoRuntimeException("Failed to process ZIP file.", e);
+        }
+    }
+
+    /**
+     * Recursively delete a dir of files and directories
+     *
+     * @param dir directory to delete
+     */
+    private void deleteDir(File dir) {
+        if (dir != null) {
+            File elenco = new File(dir.getPath());
+
+            // listFiles can return null if the path is invalid i.e. already been deleted,
+            // therefore check for null before using in loop
+            File[] files = elenco.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        file.delete();
+                    } else {
+                        deleteDir(file);
+                    }
+                }
+            }
+
+            // delete provided directory
+            dir.delete();
+        }
+    }
+}

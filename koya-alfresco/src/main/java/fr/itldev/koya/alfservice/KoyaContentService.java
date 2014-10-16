@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
@@ -43,10 +44,14 @@ import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ImporterActionExecuter;
 import org.alfresco.repo.content.MimetypeMap;
+import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.model.FileFolderServiceType;
+import org.alfresco.service.cmr.model.FileFolderUtil;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
@@ -59,6 +64,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.log4j.Logger;
@@ -139,6 +145,75 @@ public class KoyaContentService {
     }
 
     /**
+     * Checks for the presence of, and creates as necessary, the folder
+     * structure in the provided path.
+     * <p>
+     * An empty path list is not allowed as it would be impossible to
+     * necessarily return file info for the parent node - it might not be a
+     * folder node.
+     *
+     * @param parentNodeRef the node under which the path will be created
+     * @param pathElements the folder name path to create - may not be empty
+     *
+     * @return Returns the info of the last folder in the path.
+     */
+    public Directory makeFolders(NodeRef parentNodeRef, List<String> pathElements) throws KoyaServiceException {
+        if (!(nodeService.getType(parentNodeRef).equals(KoyaModel.TYPE_DOSSIER)
+                || nodeService.getType(parentNodeRef).equals(ContentModel.TYPE_FOLDER))) {
+            throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_INVALID_PARENT_TYPE);
+        }
+
+        if (pathElements != null && pathElements.size() == 0) {
+            throw new IllegalArgumentException("Path element list is empty");
+        }
+        NodeRef currentParentRef = parentNodeRef;
+        // just loop and create if necessary
+        for (final String pathElement : pathElements) {
+            //ignoring empty path part
+            if (pathElement != null && !pathElement.isEmpty()) {
+            // does it exist?
+                // Navigation should not check permissions
+                NodeRef nodeRef = AuthenticationUtil.runAsSystem(new SearchAsSystem(fileFolderService, parentNodeRef, koyaNodeService.getUniqueValidFileNameFromTitle(pathElement)));
+
+                if (nodeRef == null) {
+                    try {
+                    // not present - make it
+                        // If this uses the public service it will check create
+                        // permissions
+                        Directory directory = createDir(pathElement, currentParentRef);
+                        currentParentRef = currentParentRef = directory.getNodeRefasObject();
+                    } finally {
+
+                    }
+                } else {
+                    // it exists
+                    currentParentRef = nodeRef;
+                }
+            }
+        }
+
+        return koyaNodeService.nodeDirBuilder(currentParentRef);
+    }
+
+    private static class SearchAsSystem implements AuthenticationUtil.RunAsWork<NodeRef> {
+
+        FileFolderService service;
+        NodeRef node;
+        String name;
+
+        SearchAsSystem(FileFolderService service, NodeRef node, String name) {
+            this.service = service;
+            this.node = node;
+            this.name = name;
+        }
+
+        public NodeRef doWork() throws Exception {
+            return service.searchSimple(node, name);
+        }
+
+    }
+
+    /**
      * List Content recursive from parent noderef.
      *
      * depth limit
@@ -183,16 +258,17 @@ public class KoyaContentService {
     public Map<String, String> createContentNode(NodeRef parent, String fileName,
             org.springframework.extensions.surf.util.Content content) throws KoyaServiceException {
 
-        String name = fileName
-                .replaceAll("\"", "")
-                .replaceAll("\\*", "")
-                .replaceAll(">", "")
-                .replaceAll("<", "")
-                .replaceAll("\\?", "")
-                .replaceAll("\\/", "")
-                .replaceAll(":", "")
-                .replaceAll("\\|", "");
-        Boolean rename = !fileName.equals(name);
+        return createContentNode(parent, fileName, null, content.getMimetype(), content.getEncoding(), content.getInputStream());
+    }
+
+    public Map<String, String> createContentNode(NodeRef parent, String fileName, String name,
+            String mimetype, String encoding, InputStream contentInputStream) throws KoyaServiceException {
+        Boolean rename = false;
+        if (name == null) {
+            name = koyaNodeService.getUniqueValidFileNameFromTitle(fileName);
+
+            rename = !fileName.equals(name);
+        }
 
         /**
          * CREATE NODE
@@ -217,9 +293,9 @@ public class KoyaContentService {
          *
          */
         ContentWriter writer = this.contentService.getWriter(createdNode, ContentModel.PROP_CONTENT, true);
-        writer.setMimetype(content.getMimetype());
-        writer.setEncoding(content.getEncoding());
-        writer.putContent(content.getInputStream());
+        writer.setMimetype(mimetype);
+        writer.setEncoding(encoding);
+        writer.putContent(contentInputStream);
 
         Map<String, String> retMap = new HashMap<>();
 

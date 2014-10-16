@@ -763,6 +763,14 @@ public class KoyaNodeService {
      * @return
      */
     public String getUniqueValidFileNameFromTitle(String title) {
+
+        title = title.replaceAll("([\\\"\\\\*\\\\\\>\\<\\?\\/\\:\\|]+)", "");
+        String oldTitle;
+        do {
+            oldTitle = title;
+            title = title.replaceAll("([\\.]+$)|([ ]+$)", "");
+        } while (!oldTitle.equals(title));
+
         return ISO9075.encode(title);
     }
 }

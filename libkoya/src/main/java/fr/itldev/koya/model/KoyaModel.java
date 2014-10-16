@@ -72,6 +72,8 @@ public class KoyaModel {
     public static final QName PROP_DESCRIPTION = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "description");
 
     public static final QName PROP_LEGALINFOS = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "legalInformations");
+    
+    public static final QName PROP_REFERENCE =  QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "reference");
 
     //================= Type associations ===========================================
     public static final QName ASSOC_CONTACT_USER = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");

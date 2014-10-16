@@ -26,8 +26,17 @@
     <bean id="cleanPermissions" class="fr.itldev.koya.action.CleanUserPermissionsActionExecuter" parent="action-executer">
         <property name="nodeService" ref="NodeService"/>
         <property name="permissionService" ref="permissionService" />
-         <property name="searchService" ref="SearchService" />
+        <property name="searchService" ref="SearchService" />
     </bean>
 
-    
+    <bean id="koyaDossierImport" class ="fr.itldev.koya.action.DossierImportActionExecuter" parent="action-executer">
+        <property name="siteService" ref="siteService" />
+        <property name="nodeService" ref="nodeService" />
+        <property name="contentService" ref="contentService" />
+        <property name="dossierService" ref="dossierService" />
+        <property name="userService" ref="userService" />
+        <property name="subSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="koyaContentService" ref="koyaContentService" />
+    </bean>
 </beans>

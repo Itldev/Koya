@@ -18,6 +18,8 @@
  */
 package fr.itldev.koya.alfservice.security;
 
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -32,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.alfresco.repo.invitation.InvitationSearchCriteriaImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteDoesNotExistException;
@@ -44,10 +47,12 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.collections.CollectionUtils;
 import org.alfresco.util.collections.Filter;
 import org.alfresco.util.collections.Function;
+import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 import org.springframework.util.Assert;
 
@@ -62,6 +67,9 @@ public class CompanyAclService {
     protected AuthenticationService authenticationService;
     protected ActionService actionService;
     protected PermissionService permissionService;
+
+    protected CompanyService companyService;
+    protected KoyaNodeService koyaNodeService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setAuthorityService(AuthorityService authorityService) {
@@ -209,6 +217,30 @@ public class CompanyAclService {
                 return invitationService.searchInvitation(criteria);
             }
         });
+    }
+
+    /**
+     *
+     * @param username
+     * @return List of companies a user belong to
+     */
+    public List<Company> listCompany(String username) {
+        List<SiteInfo> l = siteService.listSites(username);
+
+        List<Company> res = CollectionUtils.transform(l, new Function<SiteInfo, Company>() {
+
+            @Override
+            public Company apply(SiteInfo siteInfo) {
+                try {
+                    return koyaNodeService.companyBuilder(siteInfo);
+                } catch (KoyaServiceException ex) {
+                    java.util.logging.Logger.getLogger(CompanyAclService.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return null;
+            }
+        });
+        
+        return res;
     }
 
     /**

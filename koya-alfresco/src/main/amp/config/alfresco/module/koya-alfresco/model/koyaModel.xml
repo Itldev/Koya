@@ -69,7 +69,12 @@
         
         <type name="koya:dossier">
             <title>dossier</title> 
-            <parent>koya:container</parent>           
+            <parent>koya:container</parent>   
+            <properties>
+                <property name="koya:reference">
+                    <type>d:text</type>
+                </property>
+            </properties>        
         </type> 
         
         

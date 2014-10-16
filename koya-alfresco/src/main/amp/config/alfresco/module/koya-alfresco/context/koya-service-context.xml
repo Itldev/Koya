@@ -67,6 +67,7 @@
     <bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
         <property name="nodeService" ref="NodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="searchService" ref="searchService"/>
     </bean>
 
     <!--Contents handling service-->
@@ -109,6 +110,8 @@
         <property name="permissionService" ref="PermissionService"/>
         <property name="personService" ref="PersonService"/>
         <property name="authenticationService" ref="AuthenticationService"/>
+        <property name="actionService" ref="actionService"/>
+        <property name="ruleService" ref="ruleService" />
     </bean>
     
     

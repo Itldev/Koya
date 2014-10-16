@@ -163,7 +163,7 @@ public class SpaceService {
      */
     private NodeRef getDocLibNodeRef(NodeRef companyNodeRef) throws KoyaServiceException {
         //TODO cache noderef / companies
-
+        //TODO use siteService.getContainer(siteService.getSite(companyNodeRef).getShortName(), SiteService.DOCUMENT_LIBRARY);
         for (ChildAssociationRef car : nodeService.getChildAssocs(companyNodeRef)) {
             if (nodeService.getProperty(car.getChildRef(), ContentModel.PROP_NAME).equals(KoyaNodeService.DOCLIB_NAME)) {
                 return car.getChildRef();

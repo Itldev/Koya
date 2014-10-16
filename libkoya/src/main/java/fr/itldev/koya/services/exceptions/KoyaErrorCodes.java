@@ -49,6 +49,8 @@ public interface KoyaErrorCodes {
     public static final Integer DOSSIER_NOT_IN_SPACE = 301;
     public static final Integer DOSSIER_NAME_EXISTS = 302;
     public static final Integer DOSSIER_INVALID_PARENT_NODE = 303;//
+    public static final Integer NO_SUCH_DOSSIER_REFERENCE = 304;
+    public static final Integer MANY_DOSSIERS_REFERENCE = 305;
 
     //400 -> Content errors
     public static final Integer CONTENT_CREATION_INVALID_TYPE = 400;

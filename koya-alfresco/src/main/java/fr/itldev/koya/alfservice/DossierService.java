@@ -20,9 +20,11 @@ package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +33,10 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.collections.CollectionUtils;
@@ -48,6 +54,7 @@ public class DossierService {
 
     private NodeService nodeService;
     private KoyaNodeService koyaNodeService;
+    protected SearchService searchService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -56,6 +63,10 @@ public class DossierService {
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
+    }
+
+    public void setSearchService(SearchService searchService) {
+        this.searchService = searchService;
     }
 
     // </editor-fold>
@@ -67,7 +78,7 @@ public class DossierService {
      * @return
      * @throws KoyaServiceException
      */
-    public Dossier create(String title, NodeRef parent, Map<String, String> prop) throws KoyaServiceException {
+    public Dossier create(String title, NodeRef parent, Map<QName, String> prop) throws KoyaServiceException {
 
         //Dossier must have a title
         if (title == null || title.isEmpty()) {
@@ -89,6 +100,9 @@ public class DossierService {
         final Map<QName, Serializable> properties = new HashMap<>();
         properties.put(ContentModel.PROP_NAME, name);
         properties.put(ContentModel.PROP_TITLE, title);
+        if (prop != null) {
+            properties.putAll(prop);
+        }
 
         ChildAssociationRef car = nodeService.createNode(parent, ContentModel.ASSOC_CONTAINS,
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
@@ -100,13 +114,12 @@ public class DossierService {
 
     /**
      *
-     * Used in subSpaceConsumersAclService to list user shares
-     *
      * @param parent
      * @return
      * @throws KoyaServiceException
      */
     public List<Dossier> list(NodeRef parent) throws KoyaServiceException {
+        List<Dossier> dossiers = new ArrayList<>();
 
         if (!nodeService.getType(parent).equals(KoyaModel.TYPE_SPACE)) {
             throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_INVALID_PARENT_NODE);
@@ -131,4 +144,32 @@ public class DossierService {
         return nodes;
     }
 
+    /**
+     * Get Dossier by reference
+     * 
+     * @param company
+     * @param reference
+     * @return 
+     * @throws fr.itldev.koya.exception.KoyaServiceException
+     */
+    public Dossier getDossier(final Company company, final String reference) throws KoyaServiceException {
+        String luceneRequest = "TYPE:\"koya:dossier\" AND @koya\\:reference:\"" + reference + "\" AND PATH:\" /app:company_home/st:sites/cm:" + company.getName() + "/cm:documentLibrary/*/*\"";
+
+        ResultSet rs = null;
+        try {
+            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
+            switch (rs.length()) {
+                case 0:
+                    throw new KoyaServiceException(KoyaErrorCodes.NO_SUCH_DOSSIER_REFERENCE, reference);
+                case 1:
+                    return koyaNodeService.nodeDossierBuilder(rs.iterator().next().getNodeRef());
+                default:
+                    throw new KoyaServiceException(KoyaErrorCodes.MANY_DOSSIERS_REFERENCE, reference);
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+        }
+    }
 }
