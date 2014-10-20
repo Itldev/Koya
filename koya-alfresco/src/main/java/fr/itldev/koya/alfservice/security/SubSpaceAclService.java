@@ -183,13 +183,19 @@ public class SubSpaceAclService {
         permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
                 siteService.getSiteRoleGroup(c.getName(), SitePermission.MANAGER.toString()),
                 SitePermission.MANAGER.toString(), true);
-
-        /*SiteCollaborator gets contributor permission on Space in order to create
-         Sub Spaces or Dossiers.
-         
-         SiteCollaborator gets consumer permission on Dossier in order to read content.
-            
         
+        
+         //SiteContributor keeps contributor permissions
+        permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
+                siteService.getSiteRoleGroup(c.getName(), SitePermission.CONTRIBUTOR.toString()),
+                SitePermission.CONTRIBUTOR.toString(), true);
+
+        
+        
+        
+        /*SiteCollaborator gets contributor permission on Space in order to create
+         Sub Spaces or Dossiers.         
+         SiteCollaborator gets consumer permission on Dossier in order to read content.          
          */
         if (Space.class.isAssignableFrom(subSpaceItem.getClass())) {
             permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
