@@ -38,5 +38,6 @@
         <property name="subSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService" />
         <property name="koyaNodeService" ref="koyaNodeService" />
         <property name="koyaContentService" ref="koyaContentService" />
+        <property name="authenticationService" ref="authenticationService" />
     </bean>
 </beans>

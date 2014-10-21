@@ -54,6 +54,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.util.ZipInputStreamZipEntrySource;
@@ -196,7 +197,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                         try {
                             // TODO: improve this code to directly pipe the zip stream output into the repo objects - 
                             //       to remove the need to expand to the filesystem first?
-                            logger.debug(getLogPrefix(companyName, username)+"Extracting " + zipFile);
+                            logger.debug(getLogPrefix(companyName, username) + "Extracting " + zipFile);
 
                             extractFile(zipFile, tempDir.getPath());
 
@@ -219,6 +220,9 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
                                 if (dossierXmls != null) {
                                     logger.debug(getLogPrefix(companyName, username) + dossierXmls.size() + " dossiers found");
+                                    int countDossiersCreated = 0;
+                                    int countDossiersDuplicate = 0;
+                                    int countDossiersError = 0;
                                     for (final DossierXml dossierXml : dossierXmls) {
 
                                         if (dossierXml.getReference() != null) {
@@ -239,17 +243,19 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                 });
 
                                                 mapCacheDossier.put(dossierXml.getReference(), d);
-
+                                                countDossiersCreated++;
                                             } catch (KoyaServiceException ex) {
                                                 if (KoyaErrorCodes.DOSSIER_NAME_EXISTS.equals(ex.getErrorCode())) {
                                                     logger.error(getLogPrefix(companyName, username) + "Dossiers " + dossierXml.getReference() + " already exists.");
+                                                    countDossiersDuplicate++;
                                                 } else {
                                                     logger.error(getLogPrefix(companyName, username) + "Cannot create dossier " + dossierXml.getReference(), ex);
+                                                    countDossiersError++;
                                                 }
                                                 continue;
                                             }
 
-                                            logger.debug(getLogPrefix(companyName, username) + "get dossier responsibles");
+                                            logger.trace(getLogPrefix(companyName, username) + "Get dossier responsibles");
                                             for (String respMail : dossierXml.getResponsibles()) {
                                                 User respUser = userService.getUserByEmailFailOver(respMail);
                                                 if (respUser != null) {
@@ -263,7 +269,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                 dossierXml.getMembers().remove(respMail);
                                             }
 
-                                            logger.debug(getLogPrefix(companyName, username) + "get dossier members");
+                                            logger.trace(getLogPrefix(companyName, username) + "get dossier members");
                                             for (String memberMail : dossierXml.getMembers()) {
                                                 User memberUser = userService.getUserByEmailFailOver(memberMail);
                                                 if (memberUser != null) {
@@ -276,7 +282,11 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                 }
                                             }
                                         }
+
                                     }
+                                    logger.debug(getLogPrefix(companyName, username) + countDossiersCreated + " dossiers created");
+                                    logger.debug(getLogPrefix(companyName, username) + countDossiersDuplicate + " dossiers allready existing");
+                                    logger.debug(getLogPrefix(companyName, username) + countDossiersError + " dossiers not created (error)");
                                 }
                             }
 
@@ -287,8 +297,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                 File contentsDir = new File(tempDir, FOLDER_CONTENTS);
                                 contentsDir.mkdir();
 
-                                
-                                logger.debug(getLogPrefix(companyName, username)+"Extracting " + fileContentZip.getName());
+                                logger.debug(getLogPrefix(companyName, username) + "Extracting " + fileContentZip.getName());
                                 extractFile(new ZipFile(fileContentZip, "UTF-8", true), contentsDir.getPath());
 
                                 //Reading contents files descriptor
@@ -313,9 +322,19 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                 if (contentXmls != null) {
                                     logger.debug(getLogPrefix(companyName, username) + contentXmls.size() + " contents found");
 
+                                    int countContentAdded = 0;
+                                    int countContentDuplicate = 0;
+                                    int countContentError = 0;
+                                    int countContentFileNotFound = 0;
+                                    int countContentDossierNotFound = 0;
+
                                     for (ContentXml contentXml : contentXmls) {
                                         try {
-                                            Dossier dossier = dossierService.getDossier(company, contentXml.getDossierReference());
+                                            Dossier dossier = mapCacheDossier.get(contentXml.getDossierReference());
+                                            if (dossier == null) {
+                                                dossier = dossierService.getDossier(company, contentXml.getDossierReference());
+                                                mapCacheDossier.put(contentXml.getDossierReference(), dossier);
+                                            }
                                             String path = contentXml.getPath();
 
                                             NodeRef dirNodeRef;
@@ -325,27 +344,41 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                 dirNodeRef = koyaContentService.makeFolders(dossier.getNodeRefasObject(), Arrays.asList(path.split(File.separator))).getNodeRefasObject();
                                             }
 
+                                            String filename = contentXml.getFilename();
+                                            int extIdx = filename.lastIndexOf(".");
+                                            String name = contentXml.getName() + (extIdx != -1 ? filename.substring(extIdx) : "");
+
                                             try {
-                                                logger.trace(getLogPrefix(companyName, username) + "Adding " + contentXml.getFilename() + " to " + path + " as " + contentXml.getName());
-                                                koyaContentService.createContentNode(dirNodeRef, contentXml.getName(), contentXml.getFilename(),
-                                                        null, null,
-                                                        new FileInputStream(new File(contentsDir, contentXml.getFilename())));
+                                                logger.trace(getLogPrefix(companyName, username) + "Adding " + filename + " to " + path + " as " + name);
+
+                                                koyaContentService.createContentNode(dirNodeRef, name, filename, null, null,
+                                                        new FileInputStream(new File(contentsDir, filename)));
+                                                countContentAdded++;
                                             } catch (FileNotFoundException ex) {
                                                 logger.error(ex.getMessage(), ex);
+                                                countContentFileNotFound++;
                                             } catch (KoyaServiceException ex) {
                                                 //TODO Do something about duplicate - update/rename
                                                 if (KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS.equals(ex.getErrorCode())) {
                                                     //TODO Do something about duplicate - update/rename/ignore
-                                                    logger.error(getLogPrefix(companyName, username) + "File " + contentXml.getFilename() + " - " + contentXml.getName() + "already exist");
+                                                    logger.error(getLogPrefix(companyName, username) + "File " + filename + " - " + name + " already exist");
+                                                    countContentDuplicate++;
                                                 } else {
                                                     logger.error(getLogPrefix(companyName, username) + ex.getMessage(), ex);
+                                                    countContentError++;
                                                 }
                                             }
                                         } catch (KoyaServiceException ex) {
                                             //TODO Dossier not found or multiple dossiers found
                                             logger.error(getLogPrefix(companyName, username) + ex.getMessage(), ex);
+                                            countContentDossierNotFound++;
                                         }
                                     }
+                                    logger.debug(getLogPrefix(companyName, username) + countContentAdded + " contents added");
+                                    logger.debug(getLogPrefix(companyName, username) + countContentDuplicate + " contents duplicates name");
+                                    logger.debug(getLogPrefix(companyName, username) + countContentFileNotFound + " file not found");
+                                    logger.debug(getLogPrefix(companyName, username) + countContentDossierNotFound + " dossiers found");
+                                    logger.debug(getLogPrefix(companyName, username) + countContentError + " contents not added (error)");
                                 }
                             }
 
@@ -465,6 +498,6 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     }
 
     private String getLogPrefix(String companyName, String username) {
-        return ((companyName != null) ? "[" + companyName + "]" : "") + "[" + username + "]";
+        return "[" + username + "]" + ((companyName != null) ? "[" + companyName + "]" : "");
     }
 }
