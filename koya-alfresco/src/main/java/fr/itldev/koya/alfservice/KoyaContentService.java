@@ -437,7 +437,8 @@ public class KoyaContentService {
         /**
          * TODO test name/title export result.
          */
-        String nodeName = (String) nodeService.getProperty(node, ContentModel.PROP_NAME);
+        String nodeName = (String) nodeService.getProperty(node, ContentModel.PROP_TITLE);
+        nodeName = nodeName.replaceAll("([\\\"\\\\*\\\\\\>\\<\\?\\/\\:\\|]+)", "_");
 //        nodeName = noaccent ? unAccent(nodeName) : nodeName;
 
         if (this.dictionaryService.isSubClass(nodeQnameType, ContentModel.TYPE_CONTENT)) {
