@@ -24,6 +24,7 @@ import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.services.impl.AlfrescoRestService;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
@@ -56,7 +57,7 @@ import org.alfresco.util.PropertyMap;
  *
  */
 public class ModelService extends AlfrescoRestService {
-    
+
     private static final String SPACE_TEMPLATE_PATH = "/app:company_home/app:dictionary/app:koya_space_templates";
     private static final String REST_GET_DOC_LIB_LIST = "/slingshot/doclib/containers/";
     private static final String IMPORT_FOLDER_NAME = "import";
@@ -76,35 +77,35 @@ public class ModelService extends AlfrescoRestService {
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-    
+
     public void setCopyService(CopyService copyService) {
         this.copyService = copyService;
     }
-    
+
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
     }
-    
+
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
-    
+
     public void setPermissionService(PermissionService permissionService) {
         this.permissionService = permissionService;
     }
-    
+
     public void setPersonService(PersonService personService) {
         this.personService = personService;
     }
-    
+
     public void setAuthenticationService(MutableAuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
-    
+
     public void setActionService(ActionService actionService) {
         this.actionService = actionService;
     }
-    
+
     public void setRuleService(RuleService ruleService) {
         this.ruleService = ruleService;
     }
@@ -121,23 +122,23 @@ public class ModelService extends AlfrescoRestService {
      */
     public NodeRef companyInitTemplate(String siteShortName, String templateName) throws KoyaServiceException {
         NodeRef docLib = null;
-        
+
         ResultSet rs = null;
         try {
             SiteInfo siteInfo = siteService.getSite(siteShortName);
-            
+
             if (siteInfo != null) {
                 NodeRef companyNodeRef = siteInfo.getNodeRef();
-                
+
                 docLib = nodeService.getChildByName(companyNodeRef, ContentModel.ASSOC_CONTAINS, "documentLibrary");
                 if (docLib == null) {
                     docLib = siteService.createContainer(siteShortName, SiteService.DOCUMENT_LIBRARY, ContentModel.TYPE_FOLDER, null);
                 }
-                
+
                 rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                         SearchService.LANGUAGE_XPATH,
                         SPACE_TEMPLATE_PATH + "/cm:" + ISO9075.encode((templateName == null) ? "default" : templateName));
-                
+
                 NodeRef template = null;
                 if (rs.length() == 1) {
                     template = rs.getNodeRef(0);
@@ -152,9 +153,9 @@ public class ModelService extends AlfrescoRestService {
                                 associationRef.getTypeQName(),
                                 associationRef.getQName(),
                                 true);
-                        
+
                     }
-                    
+
                 } else {
                     throw new KoyaServiceException(KoyaErrorCodes.SPACE_TEMPLATE_NOT_FOUND);
                 }
@@ -183,7 +184,7 @@ public class ModelService extends AlfrescoRestService {
          * Create importer user
          */
         String userName = siteShortName + "_" + IMPORT_FOLDER_NAME;
-        
+
         PropertyMap propsUser = new PropertyMap();
         propsUser.put(ContentModel.PROP_USERNAME, userName);
         propsUser.put(ContentModel.PROP_FIRSTNAME, userName);
@@ -206,31 +207,34 @@ public class ModelService extends AlfrescoRestService {
         final Map<QName, Serializable> properties = new HashMap<>();
         properties.put(ContentModel.PROP_NAME, IMPORT_FOLDER_NAME);
         properties.put(ContentModel.PROP_TITLE, IMPORT_FOLDER_NAME);
-        
+
         ChildAssociationRef car = nodeService.createNode(siteInfo.getNodeRef(), ContentModel.ASSOC_CONTAINS,
                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, IMPORT_FOLDER_NAME),
                 ContentModel.TYPE_FOLDER,
                 properties);
 
-        
         Rule importRule = new Rule();
-        importRule.setRuleType(RuleType.INBOUND);
+        importRule.setRuleTypes(new ArrayList<String>() {
+            {
+                add(RuleType.INBOUND);
+                add(RuleType.UPDATE);
+            }
+        });
         importRule.applyToChildren(false);
         importRule.setTitle("Import Koya Zip File");
-        
-        
+
         CompositeAction compositeAction = actionService.createCompositeAction();
         importRule.setAction(compositeAction);
         importRule.setExecuteAsynchronously(true);
-        
+
         Action action = actionService.createAction(DossierImportActionExecuter.NAME);
         action.setExecuteAsynchronously(true);
-        
+
         compositeAction.addAction(action);
-        
+
         ruleService.saveRule(car.getChildRef(), importRule);
-        
+
         return car.getChildRef();
     }
-    
+
 }
