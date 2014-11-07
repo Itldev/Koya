@@ -8,14 +8,11 @@ import fr.itldev.koya.model.NotificationType;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.policies.SharePolicies;
 import java.util.List;
-import org.alfresco.repo.invitation.InvitationSearchCriteriaImpl;
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.service.cmr.invitation.Invitation;
-import org.alfresco.service.cmr.invitation.InvitationSearchCriteria;
-import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
@@ -52,7 +49,6 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
         this.companyAclService = companyAclService;
     }
 
-    
     public void init() {
         this.policyComponent.bindClassBehaviour(SharePolicies.AfterSharePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
                 new JavaBehaviour(this, "afterShareItem", Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
@@ -62,7 +58,7 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
     }
 
     @Override
-    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter) {
+    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter, Boolean sharedByImporter) {
         if (invitation == null) {
             try {
                 User user = userService.getUser(userMail);
@@ -73,7 +69,7 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
 
                     if (invitations.isEmpty()) {
                         //Posting the according activity
-                        activityService.postActivity(NotificationType.KOYA_SHARED, 
+                        activityService.postActivity(NotificationType.KOYA_SHARED,
                                 siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
                     }
                 }

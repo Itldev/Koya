@@ -66,7 +66,8 @@ public class AddMember extends AbstractWebScript {
 
             SubSpaceCollaboratorsAclService.shareSecuredItem(
                     (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
-                    userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.MEMBER, "", "", "");
+                    userService.getUserByUsername(userName).getEmail(),
+                    KoyaPermissionCollaborator.MEMBER, "", "", "", false);
 
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

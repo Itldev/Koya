@@ -183,16 +183,12 @@ public class SubSpaceAclService {
         permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
                 siteService.getSiteRoleGroup(c.getName(), SitePermission.MANAGER.toString()),
                 SitePermission.MANAGER.toString(), true);
-        
-        
-         //SiteContributor keeps contributor permissions
+
+        //SiteContributor keeps contributor permissions
         permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
                 siteService.getSiteRoleGroup(c.getName(), SitePermission.CONTRIBUTOR.toString()),
                 SitePermission.CONTRIBUTOR.toString(), true);
 
-        
-        
-        
         /*SiteCollaborator gets contributor permission on Space in order to create
          Sub Spaces or Dossiers.         
          SiteCollaborator gets consumer permission on Dossier in order to read content.          
@@ -260,18 +256,19 @@ public class SubSpaceAclService {
      * @param serverPath
      * @param acceptUrl
      * @param rejectUrl
+     * @param sharedByImporter
      * @throws KoyaServiceException
      */
     public void shareSecuredItem(SubSpace subSpace, String userMail, KoyaPermission perm,
-            String serverPath, String acceptUrl, String rejectUrl) throws KoyaServiceException {
+            String serverPath, String acceptUrl, String rejectUrl, Boolean sharedByImporter) throws KoyaServiceException {
 
         User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
 
         beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter);
+                .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
         Invitation invitation = shareSecuredItemImpl(subSpace, userMail, perm, serverPath, acceptUrl, rejectUrl);
         afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter);
+                .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter);
 
     }
 

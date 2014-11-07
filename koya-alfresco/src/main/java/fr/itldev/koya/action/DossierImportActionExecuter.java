@@ -412,7 +412,8 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
         if (societePermissions.contains(SitePermission.valueOf(siteService.getMembersRole(c.getName(), u.getUserName())))) {
             subSpaceCollaboratorsAclService.shareSecuredItem(
                     (SubSpace) koyaNodeService.nodeRef2SecuredItem(d.getNodeRefasObject()),
-                    userService.getUserByUsername(u.getUserName()).getEmail(), KoyaPermissionCollaborator.RESPONSIBLE, "", "", "");
+                    userService.getUserByUsername(u.getUserName()).getEmail(),
+                    permissionCollaborator, "", "", "", true);
         }
     }
 

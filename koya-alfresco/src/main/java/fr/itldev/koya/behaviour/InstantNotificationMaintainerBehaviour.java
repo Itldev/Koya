@@ -66,7 +66,7 @@ public class InstantNotificationMaintainerBehaviour implements SharePolicies.Aft
     }
 
     @Override
-    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter) {
+    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter, Boolean sharedByImporter) {
         try {
             User u = userService.getUserByEmailFailOver(userMail);
 

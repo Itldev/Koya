@@ -41,8 +41,10 @@ public interface SharePolicies {
          * @param nodeRef the reference to the item about to be shared
          * @param userMail
          * @param inviter
+         * @param sharedByImporter
          */
-        public void beforeShareItem(NodeRef nodeRef, String userMail, User inviter);
+        public void beforeShareItem(NodeRef nodeRef, String userMail, User inviter,
+                Boolean sharedByImporter);
     }
 
     public interface AfterSharePolicy extends ClassPolicy {
@@ -58,8 +60,10 @@ public interface SharePolicies {
          * @param userMail
          * @param invitation
          * @param inviter
+         * @param sharedByImporter
          */
-        public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter);
+        public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation,
+                User inviter, Boolean sharedByImporter);
     }
 
     public interface BeforeUnsharePolicy extends ClassPolicy {

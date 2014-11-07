@@ -14,31 +14,36 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ShareMailNotificationBehaviour implements SharePolicies.AfterSharePolicy {
-    
+
     protected static Log logger = LogFactory.getLog(ShareMailNotificationBehaviour.class);
-    
+
     protected PolicyComponent policyComponent;
-    
+
     protected KoyaMailService koyaMailService;
-    
+
     public void setPolicyComponent(PolicyComponent policyComponent) {
         this.policyComponent = policyComponent;
     }
-    
+
     public void setKoyaMailService(KoyaMailService koyaMailService) {
         this.koyaMailService = koyaMailService;
     }
-    
+
     public void init() {
         this.policyComponent.bindClassBehaviour(SharePolicies.AfterSharePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
                 new JavaBehaviour(this, "afterShareItem", Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
-        
+
     }
-    
+
     @Override
-    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter) {
-        
-        if (invitation == null) {
+    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation,
+            User inviter, Boolean sharedByImporter) {
+
+        /**
+         * Ininbits mail sending if any invitation or 
+         * sharing automaticly set by importer
+         */
+        if (invitation == null && !sharedByImporter) {
             try {
                 koyaMailService.sendShareNotifMail(inviter, userMail, nodeRef);
             } catch (KoyaServiceException ex) {
@@ -47,7 +52,7 @@ public class ShareMailNotificationBehaviour implements SharePolicies.AfterShareP
         } else {
             //Nothing to do : invitation already sent 
         }
-        
+
     }
-    
+
 }
