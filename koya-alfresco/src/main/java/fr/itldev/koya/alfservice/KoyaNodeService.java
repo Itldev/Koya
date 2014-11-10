@@ -57,6 +57,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.CyclicChildRelationshipException;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -531,6 +532,8 @@ public class KoyaNodeService {
             throw new KoyaServiceException(KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
         } catch (FileNotFoundException ex) {
             throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
+        }catch(CyclicChildRelationshipException ccre){
+            throw new KoyaServiceException(KoyaErrorCodes.MOVE_CYCLIC_RELATIONSHIP_DETECTED);
         }
         //TODO update KoyaNodes cache
         return nodeRef2SecuredItem(fInfo.getNodeRef());
