@@ -24,6 +24,7 @@ import fr.itldev.koya.model.json.InviteWrapper;
 import fr.itldev.koya.services.InvitationService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.Map;
+import org.codehaus.jackson.type.TypeReference;
 
 public class InvitationServiceImpl extends AlfrescoRestService implements InvitationService {
 
@@ -71,8 +72,8 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
      */
     @Override
     public void validateInvitation(User user, String inviteId, String inviteTicket) throws AlfrescoServiceException {
-        getTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, user, String.class, inviteId, inviteTicket, user.getPassword());
+        getTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE,
+                user, String.class, inviteId, inviteTicket, user.getPassword());
 
     }
 
@@ -88,10 +89,10 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
     @Override
     public Map<String, String> getInvitation(User user, Company c, User userToGetInvitaion) throws AlfrescoServiceException {
 
-        return user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl() + REST_GET_INVITATION,
-                        Map.class, userToGetInvitaion.getUserName(), c.getName()
-                );
+        return fromJSON(new TypeReference<Map>() {
+        }, user.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_INVITATION,
+                String.class, userToGetInvitaion.getUserName(), c.getName()
+        ));
 
     }
 
@@ -104,7 +105,6 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
      */
     @Override
     public void reSendInviteMail(User user, String inviteId) throws AlfrescoServiceException {
-        user.getRestTemplate().
-                postForObject(getAlfrescoServerUrl() + REST_POST_INVITATION, inviteId, String.class);
+        user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_INVITATION, inviteId, String.class);
     }
 }

@@ -73,9 +73,10 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         if (parent == null) {
             throw new AlfrescoServiceException("parent noderef must be set", 0);
         }
-        return (Directory) user.getRestTemplate().getForObject(
+        return fromJSON(new TypeReference<Directory>() {
+        }, user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_CREATEDIR,
-                Directory.class, parent.toString(), title);
+                String.class, parent.toString(), title));
     }
 
     @Override
@@ -86,8 +87,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
-        AlfrescoUploadReturn upReturn = user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
+        AlfrescoUploadReturn upReturn = fromJSON(new TypeReference<AlfrescoUploadReturn>() {
+        }, user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_UPLOAD, request, String.class));
 
         return (Document) getSecuredItem(user, upReturn.getNodeRef());
 
@@ -95,14 +97,16 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
     @Override
     public Content move(User user, NodeRef contentToMove, NodeRef destination) throws AlfrescoServiceException {
-        return (Content) user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_MOVECONTENT, SecuredItem.class, contentToMove, destination);
+        return (Content) fromJSON(new TypeReference<SecuredItem>() {
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_MOVECONTENT, String.class, contentToMove, destination));
     }
 
     @Override
     public Content copy(User user, NodeRef contentToCopy, NodeRef destination) throws AlfrescoServiceException {
-        return (Content) user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_COPYCONTENT, SecuredItem.class, contentToCopy, destination);
+        return (Content) fromJSON(new TypeReference<SecuredItem>() {
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_COPYCONTENT, String.class, contentToCopy, destination));
     }
 
     private static final Transformer TRANSFORM_TO_CONTENTS = new Transformer() {
@@ -165,8 +169,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
     @Override
     public Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException {
-        DiskSizeWrapper ret = user.getRestTemplate().getForObject(getAlfrescoServerUrl()
-                + REST_GET_DISKSIZE, DiskSizeWrapper.class, securedItem.getNodeRef());
+        DiskSizeWrapper ret = fromJSON(new TypeReference<DiskSizeWrapper>() {
+        }, user.getRestTemplate().getForObject(getAlfrescoServerUrl()
+                + REST_GET_DISKSIZE, String.class, securedItem.getNodeRef()));
         return ret.getSize();
     }
 

@@ -56,8 +56,10 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 
     @Override
     public Dossier create(User user, Space parentSpace, String title) throws AlfrescoServiceException {
-        return user.getRestTemplate().getForObject(getAlfrescoServerUrl()
-                + REST_GET_CREATEDOSSIER, Dossier.class, parentSpace.getNodeRef(), title);
+        return fromJSON(new TypeReference<Dossier>() {
+        }, user.getRestTemplate().getForObject(getAlfrescoServerUrl()
+                + REST_GET_CREATEDOSSIER, String.class, parentSpace.getNodeRef(), title));
+
     }
 
     /**

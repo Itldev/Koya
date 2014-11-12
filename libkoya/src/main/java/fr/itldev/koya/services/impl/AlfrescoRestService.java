@@ -103,8 +103,9 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     @Override
     public MetaInfos getServerInfos(User user) throws AlfrescoServiceException {
-        return user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl() + REST_GET_SERVERINFOS, MetaInfos.class);
+        return fromJSON(new TypeReference<MetaInfos>() {
+        }, user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_SERVERINFOS, String.class));
     }
 
     /**
@@ -135,9 +136,10 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     @Override
     public SecuredItem getSecuredItem(User user, String nodeRef) throws AlfrescoServiceException {
-        return user.getRestTemplate().
+        return fromJSON(new TypeReference<SecuredItem>() {
+        }, user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_SECUREDITEM,
-                        SecuredItem.class, nodeRef);
+                        String.class, nodeRef));
     }
 
     /**
@@ -166,8 +168,9 @@ public class AlfrescoRestService implements AlfrescoService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
-        return user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, AlfrescoUploadReturn.class);
 
+        return fromJSON(new TypeReference<AlfrescoUploadReturn>() {
+        }, user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UPLOAD, request, String.class));
     }
 
     @Override

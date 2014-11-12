@@ -19,7 +19,9 @@
 package fr.itldev.koya.webscript;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -110,35 +112,9 @@ public abstract class KoyaWebscript {
         return params;
     }
 
-    /**
-     * TODO change this implementation because it's based on static definition
-     * of attributes : make it dynamic.
-     */
-    public final static String[] ESCAPED_FIELDS_NAMES = {"name", "title", "companyName", "companyAddress", "description", "legalInformations"};
-
-    /**
-     * escapes identified fields after json serialization
-     *
-     * @param jsonWrapper
-     * @return
-     */
-    private static String escapeWrapper(String jsonWrapper) {
-
-        for (String fieldName : ESCAPED_FIELDS_NAMES) {
-            //match on name attribute
-            Pattern p = Pattern.compile("\\\"" + fieldName + "\\\":\\\"([^\\\"]*)\\\"");
-            Matcher m = p.matcher(jsonWrapper);
-            while (m.find()) {
-                jsonWrapper = jsonWrapper.replace(m.group(1), StringEscapeUtils.escapeJava(m.group(1)));
-            }
-        }
-
-        return jsonWrapper;
-    }
-
     public static String getObjectAsJson(Object o) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return escapeWrapper(mapper.writeValueAsString(o));
+        return mapper.writeValueAsString(o);
     }
 
 }

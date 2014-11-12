@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.interfaces.Container;
@@ -26,6 +25,7 @@ import fr.itldev.koya.services.SearchService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClientException;
 
@@ -73,9 +73,10 @@ public class SearchServiceImpl extends AlfrescoRestService implements SearchServ
 
         List<SecuredItem> itemsFound = new ArrayList<>();
 
-        Map result = user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_SEARCH, Map.class, processSearchExpr(searchexpr),
-                DEFAULT_MAXITEMS, baseNodeRef, "");
+        Map result = fromJSON(new TypeReference<Map>() {
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_SEARCH, String.class, processSearchExpr(searchexpr),
+                DEFAULT_MAXITEMS, baseNodeRef, ""));
 
         for (Map itemMap : (List<Map>) result.get(SEARCHRESULTKEY_ITEMS)) {
 

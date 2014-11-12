@@ -107,13 +107,15 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     public User login(String authKey, String password) throws RestClientException, AlfrescoServiceException {
 
         //call rest ticket
-        AuthTicket ticket = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LOGIN, AuthTicket.class, authKey, password);
+        AuthTicket ticket = fromJSON(new TypeReference<AuthTicket>() {
+        }, getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LOGIN, String.class, authKey, password));
         //Get User Object
         Map emailPostWrapper = new HashMap();
         emailPostWrapper.put("authKey", authKey);
-        User user = getTemplate().postForObject(
+        User user = fromJSON(new TypeReference<User>() {
+        }, getTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper,
-                User.class, ticket);
+                String.class, ticket));
 
         //Authentication ticket integration
         user.setTicketAlfresco(ticket.toString());
@@ -180,8 +182,9 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
 
     @Override
     public void loadPreferences(User userLog, User userToGetPrefs) {
-        Preferences preferences = userLog.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_PREFERENCES, Preferences.class, userToGetPrefs.getUserName());
+        Preferences preferences = fromJSON(new TypeReference<Preferences>() {
+        }, userLog.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_PREFERENCES, String.class, userToGetPrefs.getUserName()));
         userToGetPrefs.setPreferences(preferences);
     }
 
@@ -304,9 +307,10 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     public User getUserFromEmail(User user, String email) throws AlfrescoServiceException {
         Map emailPostWrapper = new HashMap();
         emailPostWrapper.put("authKey", email);
-        return getTemplate().postForObject(
+        return fromJSON(new TypeReference<User>() {
+        }, getTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper,
-                User.class, user.getTicketAlfresco());
+                String.class, user.getTicketAlfresco()));
     }
 
     @Override
@@ -315,9 +319,10 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         emailPostWrapper.put("authKey", email);
         emailPostWrapper.put("failProof", true);
         try {
-            return getTemplate().postForObject(
+            return fromJSON(new TypeReference<User>() {
+            }, getTemplate().postForObject(
                     getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper,
-                    User.class, user.getTicketAlfresco());
+                    String.class, user.getTicketAlfresco()));
         } catch (RestClientException e) {
             return null;
         }

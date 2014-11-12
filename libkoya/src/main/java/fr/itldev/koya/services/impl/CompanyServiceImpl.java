@@ -60,8 +60,9 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     public Company create(User admin, String title, String salesOfferName, String template) throws RestClientException, AlfrescoServiceException {
 
         //TODO verifications (name + offrecom)
-        return admin.getRestTemplate().getForObject(getAlfrescoServerUrl()
-                + REST_POST_ADDCOMPANY, Company.class, title, salesOfferName, template);
+        return fromJSON(new TypeReference<Company>() {
+        }, admin.getRestTemplate().getForObject(getAlfrescoServerUrl()
+                + REST_POST_ADDCOMPANY, String.class, title, salesOfferName, template));
     }
 
     @Override
@@ -143,8 +144,9 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     @Override
     public Preferences getPreferences(User user, Company c) throws AlfrescoServiceException {
-        return user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, Preferences.class, c.getName());
+        return fromJSON(new TypeReference<Preferences>() {
+        }, user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, String.class, c.getName()));
     }
 
     /**
@@ -181,9 +183,10 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     @Override
     public CompanyProperties getProperties(User user, Company c) throws AlfrescoServiceException {
-        return user.getRestTemplate().
+        return fromJSON(new TypeReference<CompanyProperties>() {
+        }, user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_PROPERTIES,
-                        CompanyProperties.class, c.getName());
+                        String.class, c.getName()));
     }
 
     @Override

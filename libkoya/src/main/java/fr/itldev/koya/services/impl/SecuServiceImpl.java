@@ -50,9 +50,10 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
 
     @Override
     public UserRole getUserRole(User userLogged, Company c, User userToGetRole) throws AlfrescoServiceException {
-        return userLogged.getRestTemplate().getForObject(
+        return fromJSON(new TypeReference<UserRole>() {
+        }, userLogged.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_USERROLE,
-                UserRole.class, c.getName(), userToGetRole.getUserName());
+                String.class, c.getName(), userToGetRole.getUserName()));
     }
 
     @Override
@@ -63,7 +64,6 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
                 String.class, c.getName(),
                 userNameSetRole, roleName);
     }
-
 
     /**
      *
@@ -145,9 +145,10 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
         if (s == null) {
             return null;
         }
-        return user.getRestTemplate().
+        return fromJSON(new TypeReference<Permissions>() {
+        }, user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_PERMISSIONS,
-                        Permissions.class, s.getNodeRef());
+                        String.class, s.getNodeRef()));
 
     }
 

@@ -47,9 +47,10 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
      */
     @Override
     public Space create(User user, Space space, SecuredItem parent) throws AlfrescoServiceException {
-        return user.getRestTemplate().postForObject(
+        return fromJSON(new TypeReference<Space>() {
+        }, user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_ADDSPACE,
-                space, Space.class, parent.getNodeRef());
+                space, String.class, parent.getNodeRef()));
     }
 
     @Override
@@ -87,9 +88,10 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
     }
 
     private Space movePrivate(User user, Space toMove, String newParentNodeRef) throws AlfrescoServiceException {
-        return user.getRestTemplate().postForObject(
+        return fromJSON(new TypeReference<Space>() {
+        }, user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_MOVESPACE,
-                toMove, Space.class, newParentNodeRef);
+                toMove, String.class, newParentNodeRef));
     }
 
 }
