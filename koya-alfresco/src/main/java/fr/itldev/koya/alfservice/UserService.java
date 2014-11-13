@@ -241,7 +241,7 @@ public class UserService {
         u.setName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_LASTNAME));
         u.setEmail((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));
         u.setEmailFeedDisabled((Boolean) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL_FEED_DISABLED));
-        u.setEnabled(!(Boolean)nodeService.hasAspect(userNodeRef, ContentModel.ASPECT_PERSON_DISABLED));
+        u.setEnabled(!(Boolean) nodeService.hasAspect(userNodeRef, ContentModel.ASPECT_PERSON_DISABLED));
         u.setNodeRef(userNodeRef.toString());
 
         return u;
@@ -327,7 +327,7 @@ public class UserService {
     /**
      * Helper method to get the activity data for a user
      *
-     * @param userMail  user mail
+     * @param userMail user mail
      * @return
      */
     public String getActivityUserData(String userMail) throws KoyaServiceException {
@@ -345,5 +345,15 @@ public class UserService {
         activityData.put("title", (memberFN + " " + memberLN + " ("
                 + userMail + ")").trim());
         return activityData.toString();
+    }
+
+    /**
+     * Checks if user has disabled aspect
+     *
+     * @param u
+     * @return
+     */
+    public Boolean isDisabled(User u) {
+        return nodeService.getAspects(u.getNodeRefasObject()).contains(ContentModel.ASPECT_PERSON_DISABLED);
     }
 }

@@ -19,9 +19,11 @@
 package fr.itldev.koya.webscript.resetpassword;
 
 import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.resetpassword.activiti.ResetPasswordModel;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.io.Serializable;
@@ -72,12 +74,25 @@ public class ResetRequest extends AbstractWebScript {
 
         try {
 
+            /**
+             * Check if user has pending invitation.If true, do not start reset
+             * workflow .
+             */
+            User u = userService.getUser(userEmail);
+
+            if (userService.isDisabled(u)) {
+                /**
+                 * If person is disabled : do not start reset password procedure
+                 */
+                throw new KoyaServiceException(KoyaErrorCodes.NORESETPWD_ONDISABLED_USERS);
+            }
+
             WorkflowDefinition wfd = workflowService.getDefinitionByName(WORKFLOW_DEFINITION_NAME_RESET_PASSWORD);
 
             /**
              * TODO check if user has existing workflow : in this case resend
              * mail.
-             * 
+             *
              * specific workflow
              */
             /**
@@ -85,7 +100,6 @@ public class ResetRequest extends AbstractWebScript {
              */
             Map<QName, Serializable> workflowProps = new HashMap<>();
             workflowProps.put(WorkflowModel.PROP_WORKFLOW_DESCRIPTION, userEmail + " reset password request");
-            User u = userService.getUser(userEmail);
 
             workflowProps.put(WorkflowModel.ASSOC_ASSIGNEE, u.getNodeRefasObject());
             workflowProps.put(ResetPasswordModel.PROP_RESETURL, resetUrl);
@@ -98,7 +112,7 @@ public class ResetRequest extends AbstractWebScript {
 
             WorkflowTask startTask = workflowService.getStartTask(wfPath.getInstance().getId());
             workflowService.endTask(startTask.getId(), null);
-            
+
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 
