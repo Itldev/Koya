@@ -214,43 +214,41 @@ public class ValidateInvitation extends AbstractWebScript {
             
              */
             final String companyId = (String) startTask.getProperties().get(WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME);
-            Exception ePostActivity = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
-                @Override
-                public Exception doWork() throws Exception {
-                    try {
 
-                        List<SecuredItem> securedItems = subSpaceAclService.getUsersSecuredItemWithKoyaPermissions(userInvited, new ArrayList<QName>() {
-                            {
-                                add(KoyaModel.TYPE_DOSSIER);
-                            }
-                        }, null);
-                        for (SecuredItem item : securedItems) {
-                            if (siteService.getSite(item.getNodeRefasObject()).getShortName().equals(companyId)) {
-                                activityService.postActivity(NotificationType.KOYA_SHARED, companyId, "koya", getActivityData(userInvited, item.getNodeRefasObject()), invitation.getInviteeUserName());
-                            }
-                        }
-                    } catch (Exception ex) {
-                        return ex;
-                    }
-                    return null;
+            List<SecuredItem> securedItems = subSpaceAclService.getUsersSecuredItemWithKoyaPermissions(userInvited, new ArrayList<QName>() {
+                {
+                    add(KoyaModel.TYPE_DOSSIER);
                 }
-            }, invitation.getInviteeUserName());
+            }, null);
+            for (final SecuredItem item : securedItems) {
+                if (siteService.getSite(item.getNodeRefasObject()).getShortName().equals(companyId)) {
 
-            if (ePostActivity != null) {
-                /**
-                 * TODO handle this exception : throw new
-                 * KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_POST_ACTIVITY_ERROR,
-                 * ePostActivity);
-                 *
-                 */
-                logger.error("Validate Invitation Post Activity error (non blocking) : " + ePostActivity.toString());
-                ePostActivity.printStackTrace();
+                    AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Object>() {
+                        @Override
+                        public Object doWork() throws Exception {
+                            try {
+                                activityService.postActivity(NotificationType.KOYA_SHARED,
+                                        companyId, "koya",
+                                        getActivityData(userInvited, item.getNodeRefasObject()),
+                                        invitation.getInviteeUserName());
+                            } catch (Exception ex) {
+                                logger.error("Validate Invitation Post Activity error (non blocking) : " + ex.toString());
+                                ex.printStackTrace();
+                            }
+                            return null;
+                        }
+                    }, invitation.getInviteeUserName());
+
+                }
             }
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-        res.setContentType("application/json");
-        res.getWriter().write("");
+
+        res.setContentType(
+                "application/json");
+        res.getWriter()
+                .write("");
     }
 
     /**
