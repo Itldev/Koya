@@ -39,6 +39,12 @@ import fr.itldev.koya.policies.KoyaPermissionsPolicies;
 import fr.itldev.koya.policies.SharePolicies;
 import java.util.ArrayList;
 import java.util.List;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 import org.alfresco.repo.policy.ClassPolicyDelegate;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.invitation.Invitation;
@@ -56,6 +62,7 @@ import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 
 /**
@@ -80,6 +87,8 @@ public class SubSpaceAclService {
     protected SpaceService spaceService;
     protected DossierService dossierService;
     protected CompanyAclService companyAclService;
+    protected TransactionService transactionService;
+
 
     /*
      * Policy delegates
@@ -150,6 +159,10 @@ public class SubSpaceAclService {
         this.companyAclService = companyAclService;
     }
 
+    public void setTransactionService(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
+
     //</editor-fold>
     /**
      * Registers the share policies
@@ -213,7 +226,8 @@ public class SubSpaceAclService {
      * @param permission
      */
     public void grantSubSpacePermission(final SubSpace subSpace, final String authority, KoyaPermission permission) {
-        logger.debug("Grant permission '" + permission.toString() + "' to '" + authority + "' on '" + subSpace.getName() + "'");
+        logger.debug("Grant permission '" + permission.toString() + "' to '"
+                + authority + "' on '" + subSpace.getTitle() + "' (" + subSpace.getClass().getSimpleName() + ")");
 
         permissionService.setPermission(subSpace.getNodeRefasObject(), authority, permission.toString(), true);
 
@@ -259,17 +273,28 @@ public class SubSpaceAclService {
      * @param sharedByImporter
      * @throws KoyaServiceException
      */
-    public void shareSecuredItem(SubSpace subSpace, String userMail, KoyaPermission perm,
-            String serverPath, String acceptUrl, String rejectUrl, Boolean sharedByImporter) throws KoyaServiceException {
+    public void shareSecuredItem(final SubSpace subSpace, final String userMail, final KoyaPermission perm,
+            final String serverPath, final String acceptUrl, final String rejectUrl, final Boolean sharedByImporter) throws KoyaServiceException {
 
-        User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
+        UserTransaction ut = transactionService.getNonPropagatingUserTransaction();
 
-        beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
-        Invitation invitation = shareSecuredItemImpl(subSpace, userMail, perm, serverPath, acceptUrl, rejectUrl);
-        afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter);
+        try {
+            ut.begin();
 
+            User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
+            beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
+                    .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
+            Invitation invitation = shareSecuredItemImpl(subSpace, userMail, perm, serverPath, acceptUrl, rejectUrl);
+            afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
+                    .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter);
+            ut.commit();
+        } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException ex) {
+
+            try {
+                ut.rollback();
+            } catch (IllegalStateException | SecurityException | SystemException ex1) {
+            }
+        }
     }
 
     protected Invitation shareSecuredItemImpl(SubSpace subSpace, String userMail, KoyaPermission perm,

@@ -45,10 +45,7 @@ public class SubSpaceConsumersAclService extends SubSpaceAclService {
         if (!KoyaPermissionConsumer.getAll().contains(perm)) {
             throw new KoyaServiceException(KoyaErrorCodes.SECU_UNSETTABLE_PERMISSION);
         }
-
-        logger.debug("Grant Consumer permission  " + perm + " to user "
-                + userMail + " on " + subSpace.getName() + "(" + subSpace.getClass().getSimpleName() + ")");
-
+      
         //Get company the shared Node belongs To
         Company company = koyaNodeService.getFirstParentOfType(subSpace.getNodeRefasObject(),Company.class);
         SitePermission userPermissionInCompany = companyAclService.getSitePermission(company, userMail);
