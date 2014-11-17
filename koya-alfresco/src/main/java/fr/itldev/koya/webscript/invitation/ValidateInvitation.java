@@ -21,30 +21,23 @@ package fr.itldev.koya.webscript.invitation;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.NotificationType;
-import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.alfresco.query.PagingRequest;
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
-import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
-import org.alfresco.service.cmr.workflow.WorkflowTaskState;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
@@ -215,32 +208,32 @@ public class ValidateInvitation extends AbstractWebScript {
              */
             final String companyId = (String) startTask.getProperties().get(WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME);
 
-            List<SecuredItem> securedItems = subSpaceAclService.getUsersSecuredItemWithKoyaPermissions(userInvited, new ArrayList<QName>() {
-                {
-                    add(KoyaModel.TYPE_DOSSIER);
-                }
-            }, null);
-            for (final SecuredItem item : securedItems) {
-                if (siteService.getSite(item.getNodeRefasObject()).getShortName().equals(companyId)) {
-
-                    AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Object>() {
-                        @Override
-                        public Object doWork() throws Exception {
-                            try {
-                                activityService.postActivity(NotificationType.KOYA_SHARED,
-                                        companyId, "koya",
-                                        getActivityData(userInvited, item.getNodeRefasObject()),
-                                        invitation.getInviteeUserName());
-                            } catch (Exception ex) {
-                                logger.error("Validate Invitation Post Activity error (non blocking) : " + ex.toString());
-                                ex.printStackTrace();
-                            }
-                            return null;
-                        }
-                    }, invitation.getInviteeUserName());
-
-                }
-            }
+//            List<SecuredItem> securedItems = subSpaceAclService.getUsersSecuredItemWithKoyaPermissions(userInvited, new ArrayList<QName>() {
+//                {
+//                    add(KoyaModel.TYPE_DOSSIER);
+//                }
+//            }, null);
+//            for (final SecuredItem item : securedItems) {
+//                if (siteService.getSite(item.getNodeRefasObject()).getShortName().equals(companyId)) {
+//
+//                    AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Object>() {
+//                        @Override
+//                        public Object doWork() throws Exception {
+//                            try {
+//                                activityService.postActivity(NotificationType.KOYA_SHARED,
+//                                        companyId, "koya",
+//                                        getActivityData(userInvited, item.getNodeRefasObject()),
+//                                        invitation.getInviteeUserName());
+//                            } catch (Exception ex) {
+//                                logger.error("Validate Invitation Post Activity error (non blocking) : " + ex.toString());
+//                                ex.printStackTrace();
+//                            }
+//                            return null;
+//                        }
+//                    }, invitation.getInviteeUserName());
+//
+//                }
+//            }
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
