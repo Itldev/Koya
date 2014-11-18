@@ -24,7 +24,6 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +34,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -109,7 +107,7 @@ public class DossierService {
                 KoyaModel.TYPE_DOSSIER,
                 properties);
 
-        return koyaNodeService.nodeDossierBuilder(car.getChildRef());
+        return koyaNodeService.getSecuredItem(car.getChildRef(), Dossier.class);
     }
 
     /**
@@ -119,7 +117,6 @@ public class DossierService {
      * @throws KoyaServiceException
      */
     public List<Dossier> list(NodeRef parent) throws KoyaServiceException {
-        List<Dossier> dossiers = new ArrayList<>();
 
         if (!nodeService.getType(parent).equals(KoyaModel.TYPE_SPACE)) {
             throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_INVALID_PARENT_NODE);
@@ -137,7 +134,11 @@ public class DossierService {
         CollectionUtils.transform(nodes, new Transformer() {
             @Override
             public Object transform(Object input) {
-                return koyaNodeService.nodeDossierBuilder(((ChildAssociationRef) input).getChildRef());
+                try {
+                    return koyaNodeService.getSecuredItem(((ChildAssociationRef) input).getChildRef(), Dossier.class);
+                } catch (KoyaServiceException ex) {
+                    return null;
+                }
             }
         });
 
@@ -146,10 +147,10 @@ public class DossierService {
 
     /**
      * Get Dossier by reference
-     * 
+     *
      * @param company
      * @param reference
-     * @return 
+     * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public Dossier getDossier(final Company company, final String reference) throws KoyaServiceException {
@@ -162,7 +163,7 @@ public class DossierService {
                 case 0:
                     throw new KoyaServiceException(KoyaErrorCodes.NO_SUCH_DOSSIER_REFERENCE, reference);
                 case 1:
-                    return koyaNodeService.nodeDossierBuilder(rs.iterator().next().getNodeRef());
+                    return koyaNodeService.getSecuredItem(rs.iterator().next().getNodeRef(), Dossier.class);
                 default:
                     throw new KoyaServiceException(KoyaErrorCodes.MANY_DOSSIERS_REFERENCE, reference);
             }

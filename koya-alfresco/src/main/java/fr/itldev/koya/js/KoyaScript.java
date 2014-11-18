@@ -19,15 +19,15 @@
 package fr.itldev.koya.js;
 
 import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.model.permissions.KoyaPermission;
-import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
+import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import java.util.ArrayList;
 import java.util.List;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -78,7 +78,7 @@ public class KoyaScript extends BaseProcessorExtension {
      */
     public List<ScriptNode> listConsumersAccess(ScriptNode n) throws KoyaServiceException {
         List<ScriptNode> users = new ArrayList<>();
-        SecuredItem s = koyaNodeService.nodeRef2SecuredItem(n.getNodeRef());
+        SecuredItem s = koyaNodeService.getSecuredItem(n.getNodeRef());
         for (User u : subSpaceAclService.listUsers(s, KoyaPermissionConsumer.getAll())) {
             users.add(new ScriptNode(u.getNodeRefasObject(), serviceRegistry));
         }
@@ -90,6 +90,7 @@ public class KoyaScript extends BaseProcessorExtension {
      *
      * @param n
      * @return
+     * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public List<ScriptNode> listUserNodes(ScriptNode n) throws KoyaServiceException {
         List<ScriptNode> sharedElements = new ArrayList<>();

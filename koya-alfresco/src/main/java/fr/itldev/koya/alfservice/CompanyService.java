@@ -114,13 +114,13 @@ public class CompanyService {
 
         String shortName = getShortNameFromTitle(title);
         SiteInfo sInfo = siteService.createSite(SITE_PRESET, shortName, title, DESC + " - " + shortName, SiteVisibility.PRIVATE);
-        Company created = koyaNodeService.companyBuilder(sInfo);
+        Company created = koyaNodeService.getSecuredItem(sInfo.getNodeRef(), Company.class);
 
         //Creating koya-config directory
         NodeRef koyaConfig = getKoyaConfigNodeRef(sInfo.getNodeRef(), true);
 
         modelService.companyInitTemplate(shortName, template);
-        
+
         modelService.companyInitImports(shortName);
 
         //TODO copy config files to the koy-config directory
@@ -138,9 +138,7 @@ public class CompanyService {
         List<Company> socs = new ArrayList<>();
 
         for (SiteInfo s : siteService.listSites(authenticationService.getCurrentUserName())) {
-            if (koyaNodeService.isKoyaType(s.getNodeRef(), Company.class)) {
-                socs.add(koyaNodeService.companyBuilder(s));
-            }
+            socs.add(koyaNodeService.getSecuredItem(s.getNodeRef(), Company.class));
         }
         return socs;
     }
@@ -175,7 +173,7 @@ public class CompanyService {
      */
     public Preferences getPreferences(String companyName) throws KoyaServiceException {
         Preferences prefs = new Preferences();
-        Company c = koyaNodeService.companyBuilder(companyName);
+        Company c = koyaNodeService.getSecuredItem(siteService.getSite(companyName).getNodeRef(), Company.class);
 
         Properties compProperties;
         try {
@@ -202,7 +200,7 @@ public class CompanyService {
      */
     public String getPreference(String companyName, String preferenceKey) throws KoyaServiceException {
 
-        Company c = koyaNodeService.companyBuilder(companyName);
+        Company c = koyaNodeService.getSecuredItem(siteService.getSite(companyName).getNodeRef(), Company.class);
 
         Properties compProperties;
         try {
@@ -227,7 +225,7 @@ public class CompanyService {
      */
     public void commitPreferences(String companyName, Preferences prefsToCommit) throws KoyaServiceException {
 
-        Company c = koyaNodeService.companyBuilder(companyName);
+        Company c = koyaNodeService.getSecuredItem(siteService.getSite(companyName).getNodeRef(), Company.class);
         NodeRef prefFileNodeRef = getCompanyConfigFile(c, PREFS_FILE_NAME);
 
         if (prefFileNodeRef != null) {
@@ -260,7 +258,7 @@ public class CompanyService {
      */
     public CompanyProperties getProperties(String companyName) throws KoyaServiceException {
 
-        Company c = koyaNodeService.companyBuilder(companyName);
+        Company c = koyaNodeService.getSecuredItem(siteService.getSite(companyName).getNodeRef(), Company.class);
         CompanyProperties cp = new CompanyProperties(companyName);
 
         NodeRef companyPropertiesNodeRef = getCompanyConfigFile(c, COMPANYPROPERTIES_FILE_NAME);
@@ -366,7 +364,7 @@ public class CompanyService {
      * @throws KoyaServiceException
      */
     public void commitProperties(String companyName, CompanyProperties compProperties) throws KoyaServiceException {
-        Company c = koyaNodeService.companyBuilder(companyName);
+        Company c = koyaNodeService.getSecuredItem(siteService.getSite(companyName).getNodeRef(), Company.class);
         //TODO implement this method
     }
 

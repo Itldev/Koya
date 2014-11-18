@@ -58,7 +58,7 @@ public class ListMember extends AbstractWebScript {
             NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(
                     SubSpaceCollaboratorsAclService.listUsers(
-                            koyaNodeService.nodeRef2SecuredItem(nodeRef), KoyaPermissionCollaborator.MEMBER));
+                            koyaNodeService.getSecuredItem(nodeRef), KoyaPermissionCollaborator.MEMBER));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

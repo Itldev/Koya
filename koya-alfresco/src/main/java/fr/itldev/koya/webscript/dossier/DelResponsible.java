@@ -75,11 +75,11 @@ public class DelResponsible extends AbstractWebScript {
             String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
 
             SubSpaceCollaboratorsAclService.unShareSecuredItem(
-                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
+                    (SubSpace) koyaNodeService.getSecuredItem(nodeRef),
                     userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.MEMBER);
 
             SubSpaceCollaboratorsAclService.unShareSecuredItem(
-                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef),
+                    (SubSpace) koyaNodeService.getSecuredItem(nodeRef),
                     userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.RESPONSIBLE);
 
         } catch (KoyaServiceException ex) {

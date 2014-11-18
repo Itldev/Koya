@@ -50,7 +50,7 @@ public class ApplyDefaultAclOnCreate implements NodeServicePolicies.OnCreateNode
     @Override
     public void onCreateNode(ChildAssociationRef childAssocRef) {
         try {
-            SubSpace subSpace = (SubSpace) koyaNodeService.nodeRef2SecuredItem(childAssocRef.getChildRef());
+            SubSpace subSpace = (SubSpace) koyaNodeService.getSecuredItem(childAssocRef.getChildRef());
             subSpaceAclService.initSubSpaceWithDefaultPermissions(subSpace);
         } catch (KoyaServiceException ex) {
             logger.error(ex.toString());

@@ -79,7 +79,7 @@ public class UpdateParentNodesAfterGrantKoyaPermission implements
         NodeRef pNode = nodeService.getPrimaryParent(subSpace.getNodeRefasObject()).getParentRef();
         SecuredItem sNode;
         try {
-            sNode = koyaNodeService.nodeRef2SecuredItem(pNode);
+            sNode = koyaNodeService.getSecuredItem(pNode);
         } catch (KoyaServiceException kex) {
             //silently catch any koyaException on creating SecuredItem : do nothing
             return;

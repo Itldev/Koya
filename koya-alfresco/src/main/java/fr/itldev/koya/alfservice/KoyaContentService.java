@@ -21,6 +21,7 @@ package fr.itldev.koya.alfservice;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
@@ -35,7 +36,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
@@ -44,14 +44,11 @@ import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ImporterActionExecuter;
 import org.alfresco.repo.content.MimetypeMap;
-import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.model.FileFolderService;
-import org.alfresco.service.cmr.model.FileFolderServiceType;
-import org.alfresco.service.cmr.model.FileFolderUtil;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
@@ -64,7 +61,6 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.log4j.Logger;
@@ -137,7 +133,7 @@ public class KoyaContentService {
                     ContentModel.TYPE_FOLDER,
                     properties);
 
-            return koyaNodeService.nodeDirBuilder(car.getChildRef());
+            return koyaNodeService.getSecuredItem(car.getChildRef(), Directory.class);
         } catch (DuplicateChildNodeNameException dcne) {
             throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
         }
@@ -171,13 +167,13 @@ public class KoyaContentService {
         for (final String pathElement : pathElements) {
             //ignoring empty path part
             if (pathElement != null && !pathElement.isEmpty()) {
-            // does it exist?
+                // does it exist?
                 // Navigation should not check permissions
                 NodeRef nodeRef = AuthenticationUtil.runAsSystem(new SearchAsSystem(fileFolderService, parentNodeRef, koyaNodeService.getUniqueValidFileNameFromTitle(pathElement)));
 
                 if (nodeRef == null) {
                     try {
-                    // not present - make it
+                        // not present - make it
                         // If this uses the public service it will check create
                         // permissions
                         Directory directory = createDir(pathElement, currentParentRef);
@@ -192,7 +188,7 @@ public class KoyaContentService {
             }
         }
 
-        return koyaNodeService.nodeDirBuilder(currentParentRef);
+        return koyaNodeService.getSecuredItem(currentParentRef, Directory.class);
     }
 
     private static class SearchAsSystem implements AuthenticationUtil.RunAsWork<NodeRef> {
@@ -244,11 +240,19 @@ public class KoyaContentService {
 
         for (final FileInfo fi : childList) {
             if (koyaNodeService.isKoyaType(fi.getNodeRef(), Directory.class)) {
-                Directory dir = koyaNodeService.nodeDirBuilder(fi.getNodeRef());
-                dir.setChildren(list(fi.getNodeRef(), depth - 1, folderOnly));
-                contents.add(dir);
+                Directory dir = null;
+                try {
+                    dir = koyaNodeService.getSecuredItem(fi.getNodeRef(), Directory.class);
+                    dir.setChildren(list(fi.getNodeRef(), depth - 1, folderOnly));
+                    contents.add(dir);
+                } catch (KoyaServiceException ex) {
+                }
+
             } else {
-                contents.add(koyaNodeService.nodeDocumentBuilder(fi.getNodeRef()));
+                try {
+                    contents.add(koyaNodeService.getSecuredItem(fi.getNodeRef(), Document.class));
+                } catch (KoyaServiceException ex) {
+                }
             }
         }
         return contents;

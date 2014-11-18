@@ -107,7 +107,7 @@ public class SpaceService {
                 KoyaModel.TYPE_SPACE,
                 properties);
 
-        return koyaNodeService.nodeSpaceBuilder(car.getChildRef());
+        return koyaNodeService.getSecuredItem(car.getChildRef(), Space.class);
     }
 
     /**
@@ -140,7 +140,7 @@ public class SpaceService {
         for (final FileInfo fi : fileFolderService.listFolders(rootNodeRef)) {
 
             if (fi.getType().equals(KoyaModel.TYPE_SPACE)) {
-                Space space = koyaNodeService.nodeSpaceBuilder(fi.getNodeRef());
+                Space space = koyaNodeService.getSecuredItem(fi.getNodeRef(), Space.class);
                 space.setChildSpaces(listRecursive(fi.getNodeRef(), depth - 1));
                 spaces.add(space);
             }

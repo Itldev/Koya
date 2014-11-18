@@ -50,7 +50,7 @@ public class GetSecuredItem extends AbstractWebScript {
         try {
             NodeRef nodeRefStr = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(
-                    koyaNodeService.nodeRef2SecuredItem(nodeRefStr));
+                    koyaNodeService.getSecuredItem(nodeRefStr));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

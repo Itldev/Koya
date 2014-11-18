@@ -59,7 +59,7 @@ public class IsSharedConsumer extends AbstractWebScript {
         try {
             NodeRef n = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(
-                    !subSpaceAclService.listUsers(koyaNodeService.nodeRef2SecuredItem(n), KoyaPermissionConsumer.getAll())
+                    !subSpaceAclService.listUsers(koyaNodeService.getSecuredItem(n), KoyaPermissionConsumer.getAll())
                     .isEmpty());
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

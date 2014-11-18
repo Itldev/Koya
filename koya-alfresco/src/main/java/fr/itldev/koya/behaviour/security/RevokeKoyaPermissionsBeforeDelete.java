@@ -50,7 +50,7 @@ public class RevokeKoyaPermissionsBeforeDelete implements
     @Override
     public void beforeDeleteNode(NodeRef nodeRef) {
         try {
-            SubSpace s = (SubSpace) koyaNodeService.nodeRef2SecuredItem(nodeRef);
+            SubSpace s = (SubSpace) koyaNodeService.getSecuredItem(nodeRef);
             subSpaceAclService.cleanAllKoyaSubSpacePermissions(s);
         } catch (KoyaServiceException ex) {
             logger.error("before delete node error : " + ex.toString());

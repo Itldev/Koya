@@ -249,7 +249,8 @@ public class SubSpaceAclService {
      *
      */
     public void revokeSubSpacePermission(SubSpace subSpace, String authority, KoyaPermission permission) {
-        logger.debug("Revoke permission '" + permission.toString() + "' to '" + authority + "' on '" + subSpace.getName() + "'");
+        logger.debug("Revoke permission '" + permission.toString() + "' to '"
+                + authority + "' on '" + subSpace.getTitle() + "' (" + subSpace.getClass().getSimpleName() + ")");
         beforeRevokeKoyaPermissionDelegate.get(
                 nodeService.getType(subSpace.getNodeRefasObject()))
                 .beforeRevokeKoyaPermission(subSpace, authority, permission);
@@ -329,8 +330,7 @@ public class SubSpaceAclService {
      * @param subSpace
      */
     public void cleanAllKoyaSubSpacePermissions(SubSpace subSpace) {
-
-        logger.error("clean all perm on " + subSpace.getName());
+        logger.debug("Clean All permissions on '" + subSpace.getTitle() + "' (" + subSpace.getClass().getSimpleName() + ")");
 
         for (KoyaPermission p : KoyaPermission.getAll()) {
             for (AccessPermission ap : permissionService.getAllSetPermissions(subSpace.getNodeRefasObject())) {
@@ -551,7 +551,7 @@ public class SubSpaceAclService {
                     for (AccessPermission ap : permissionService.getAllSetPermissions(r.getNodeRef())) {
                         if (koyaPermisssionFilterString.contains(ap.getPermission())
                                 && ap.getAuthority().equals(u.getUserName())) {
-                            securedItemsWithKoyaPermissions.add(koyaNodeService.nodeRef2SecuredItem(r.getNodeRef()));
+                            securedItemsWithKoyaPermissions.add(koyaNodeService.getSecuredItem(r.getNodeRef()));
                             break;
                         }
                     }

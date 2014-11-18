@@ -110,13 +110,13 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
                 }
             }, authority);
 
-            logger.error("parent is subspace  ? = " + SubSpace.class.isAssignableFrom(koyaNodeService.nodeRef2SecuredItem(parentNode).getClass()));
+            logger.error("parent is subspace  ? = " + SubSpace.class.isAssignableFrom(koyaNodeService.getSecuredItem(parentNode).getClass()));
             logger.error("can read parent ? = " + userCanReadParentNode);
 
-            if (SubSpace.class.isAssignableFrom(koyaNodeService.nodeRef2SecuredItem(parentNode).getClass())
+            if (SubSpace.class.isAssignableFrom(koyaNodeService.getSecuredItem(parentNode).getClass())
                     && userCanReadParentNode) {
 
-                final SubSpace parent = (SubSpace) koyaNodeService.nodeRef2SecuredItem(parentNode);
+                final SubSpace parent = (SubSpace) koyaNodeService.getSecuredItem(parentNode);
 
                 //loop through current node parent childs
                 for (final ChildAssociationRef car : nodeService.getChildAssocs(parent.getNodeRefasObject())) {

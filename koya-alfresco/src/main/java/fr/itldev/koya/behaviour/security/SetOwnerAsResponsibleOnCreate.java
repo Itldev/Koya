@@ -78,7 +78,7 @@ public class SetOwnerAsResponsibleOnCreate implements NodeServicePolicies.OnCrea
 
             if (creator != null && !creator.equals(modelService.getCompanyImporterUsername(siteService.getSiteShortName(childAssocRef.getChildRef())))) {
                 SubSpaceCollaboratorsAclService.grantSubSpacePermission(
-                        (SubSpace) koyaNodeService.nodeRef2SecuredItem(childAssocRef.getChildRef()),
+                        (SubSpace) koyaNodeService.getSecuredItem(childAssocRef.getChildRef()),
                         creator, KoyaPermissionCollaborator.RESPONSIBLE);
             } else {
                 //TODO set default responsible

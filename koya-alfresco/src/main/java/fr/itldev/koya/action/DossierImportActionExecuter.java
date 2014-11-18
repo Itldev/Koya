@@ -169,7 +169,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             NodeRef documentLibrary = siteService.getContainer(siteInfo.getShortName(), SiteService.DOCUMENT_LIBRARY);
             Map<String, Dossier> mapCacheDossier = new HashMap<String, Dossier>();
             try {
-                Company company = koyaNodeService.companyBuilder(siteInfo);
+                Company company = koyaNodeService.getSecuredItem(siteInfo.getNodeRef(), Company.class);
                 String companyName = company.getName();
                 logger.debug(getLogPrefix(companyName, username) + "Import Xml Started");
 
@@ -410,8 +410,8 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
     private void addKoyaPermissionCollaborator(Company c, Dossier d, User u, KoyaPermissionCollaborator permissionCollaborator) throws KoyaServiceException {
         if (societePermissions.contains(SitePermission.valueOf(siteService.getMembersRole(c.getName(), u.getUserName())))) {
-            subSpaceCollaboratorsAclService.shareSecuredItem(
-                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(d.getNodeRefasObject()),
+            subSpaceCollaboratorsAclService.shareSecuredItem( 
+                    (SubSpace) koyaNodeService.getSecuredItem(d.getNodeRefasObject()),
                     userService.getUserByUsername(u.getUserName()).getEmail(),
                     permissionCollaborator, "", "", "", true);
         }

@@ -29,12 +29,11 @@
     -->
     
     <!--Global Koya nodes util services-->
-    <bean name="koyaNodeService" class="fr.itldev.koya.alfservice.KoyaNodeService">
+    <bean name="koyaNodeService" class="fr.itldev.koya.alfservice.KoyaNodeService" init-method="init">
         <property name="nodeService" ref="NodeService"/>
         <property name="unsecuredNodeService" ref="nodeService"/>
         <property name="favouritesService" ref="favouritesService"/>
         <property name="preferenceService" ref="preferenceService"/>
-        <property name="companyService" ref="companyService"/>
         <property name="fileFolderService" ref="FileFolderService" />
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="activityService" ref="activityService"/>

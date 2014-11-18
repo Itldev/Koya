@@ -68,7 +68,7 @@ public class ShareItems extends AbstractWebScript {
             //extract shared elements
             for (String n : sw.getSharedNodeRefs()) {
 
-                SecuredItem si = koyaNodeService.nodeRef2SecuredItem(koyaNodeService.getNodeRef(n));
+                SecuredItem si = koyaNodeService.getSecuredItem(koyaNodeService.getNodeRef(n));
 
                 if (SubSpace.class.isAssignableFrom(si.getClass())) {
                     SubSpace subSpace = (SubSpace) si;

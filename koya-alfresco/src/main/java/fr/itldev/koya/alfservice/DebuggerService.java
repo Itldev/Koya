@@ -59,7 +59,7 @@ public class DebuggerService {
         SiteService siteService = serviceRegistry.getSiteService();
         logger.debug(" ===== Company " + companyName + " Members =====");
 
-        Company c = koyaNodeService.companyBuilder(companyName);
+        Company c = koyaNodeService.getSecuredItem(siteService.getSite(companyName).getNodeRef(), Company.class);
 
         for (User uValid : companyAclService.listMembersValidated(companyName, null)) {
             logger.debug(uValid.getUserName() + " = " + companyAclService.getSitePermission(c, uValid));
@@ -109,7 +109,7 @@ public class DebuggerService {
          */
         for (ChildAssociationRef car : nodeService.getChildAssocs(root.getNodeRefasObject(), SUBSPACES_TYPES)) {
             dumpSubSpacesPermissions(
-                    (SubSpace) koyaNodeService.nodeRef2SecuredItem(car.getChildRef()), identation + "   ");
+                    (SubSpace) koyaNodeService.getSecuredItem(car.getChildRef()), identation + "   ");
         }
 
     }

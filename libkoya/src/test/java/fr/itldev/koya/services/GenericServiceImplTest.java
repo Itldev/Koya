@@ -18,7 +18,6 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;

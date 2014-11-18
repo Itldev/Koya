@@ -68,7 +68,7 @@ public class ListResponsible extends AbstractWebScript {
             NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
             response = KoyaWebscript.getObjectAsJson(
                     SubSpaceCollaboratorsAclService.listUsers(
-                            koyaNodeService.nodeRef2SecuredItem(nodeRef), permissions));
+                            koyaNodeService.getSecuredItem(nodeRef), permissions));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

@@ -95,7 +95,7 @@ public class KoyaMailService {
         Map<String, Serializable> templateModel = new HashMap<>();
         Map<String, Serializable> templateParams = new HashMap<>();
 
-        SecuredItem s = koyaNodeService.nodeRef2SecuredItem(sharedNodeRef);
+        SecuredItem s = koyaNodeService.getSecuredItem(sharedNodeRef);
         templateParams.put("sharedItemName", s.getTitle());
         templateParams.put("inviterName", sender.getName());
         templateParams.put("inviterFirstName", sender.getFirstName());
