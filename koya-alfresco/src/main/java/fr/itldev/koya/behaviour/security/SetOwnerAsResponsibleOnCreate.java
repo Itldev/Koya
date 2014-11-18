@@ -1,6 +1,7 @@
 package fr.itldev.koya.behaviour.security;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.ModelService;
 import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
@@ -15,6 +16,7 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteService;
 import org.apache.log4j.Logger;
 
 /**
@@ -28,9 +30,12 @@ public class SetOwnerAsResponsibleOnCreate implements NodeServicePolicies.OnCrea
     private PolicyComponent policyComponent;
     private KoyaNodeService koyaNodeService;
     private NodeService nodeService;
-
+    private SiteService siteService;
+    
     private SubSpaceCollaboratorsAclService SubSpaceCollaboratorsAclService;
-
+    private ModelService modelService;
+    
+    
     public void setPolicyComponent(PolicyComponent policyComponent) {
         this.policyComponent = policyComponent;
     }
@@ -43,8 +48,16 @@ public class SetOwnerAsResponsibleOnCreate implements NodeServicePolicies.OnCrea
         this.nodeService = nodeService;
     }
 
+    public void setSiteService(SiteService siteService) {
+        this.siteService = siteService;
+    }
+
     public void setSubSpaceCollaboratorsAclService(SubSpaceCollaboratorsAclService SubSpaceCollaboratorsAclService) {
         this.SubSpaceCollaboratorsAclService = SubSpaceCollaboratorsAclService;
+    }
+
+    public void setModelService(ModelService modelService) {
+        this.modelService = modelService;
     }
 
     public void init() {
@@ -63,7 +76,7 @@ public class SetOwnerAsResponsibleOnCreate implements NodeServicePolicies.OnCrea
         try {
             String creator = (String) nodeService.getProperty(childAssocRef.getChildRef(), ContentModel.PROP_CREATOR);
 
-            if (creator != null) {
+            if (creator != null && !creator.equals(modelService.getCompanyImporterUsername(siteService.getSiteShortName(childAssocRef.getChildRef())))) {
                 SubSpaceCollaboratorsAclService.grantSubSpacePermission(
                         (SubSpace) koyaNodeService.nodeRef2SecuredItem(childAssocRef.getChildRef()),
                         creator, KoyaPermissionCollaborator.RESPONSIBLE);

@@ -170,6 +170,10 @@ public class ModelService extends AlfrescoRestService {
         return docLib;
     }
 
+    public String getCompanyImporterUsername(String siteShortName) {
+        return siteShortName + "_" + IMPORT_FOLDER_NAME;
+    }
+    
     /**
      * Creates company default import user (<companyName>_import) and import
      * folder giving user permissions.
@@ -183,8 +187,8 @@ public class ModelService extends AlfrescoRestService {
         /**
          * Create importer user
          */
-        String userName = siteShortName + "_" + IMPORT_FOLDER_NAME;
-
+        String userName = getCompanyImporterUsername(siteShortName);
+        
         PropertyMap propsUser = new PropertyMap();
         propsUser.put(ContentModel.PROP_USERNAME, userName);
         propsUser.put(ContentModel.PROP_FIRSTNAME, userName);
