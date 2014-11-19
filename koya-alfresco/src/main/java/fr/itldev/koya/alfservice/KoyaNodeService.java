@@ -363,6 +363,15 @@ public class KoyaNodeService {
         String siteId = siteService.getSiteShortName(n);
         String title = (String) nodeService.getProperty(n, ContentModel.PROP_NAME);
 
+        /**
+         * Delete from favourites
+         *
+         * TODO asynchronous process
+         */
+        if (isFavourite(n)) {
+            setFavouriteStatus(n, Boolean.FALSE);
+        }
+
         nodeService.deleteNode(n);
         if (nodeRefType.equals(ContentModel.TYPE_CONTENT)) {
             activityService.postActivity(ActivityType.FILE_DELETED, siteId, "koya", n, title, nodeRefType, parentNodeRef);
