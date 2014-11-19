@@ -41,16 +41,8 @@ public class List extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-
-        String response;
-
-        try {
-            response = KoyaWebscript.getObjectAsJson(koyaNodeService.getFavourites());
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
         res.setContentType("application/json");
-        res.getWriter().write(response);
+        res.getWriter().write(KoyaWebscript.getObjectAsJson(koyaNodeService.getFavourites()));
     }
 
 }

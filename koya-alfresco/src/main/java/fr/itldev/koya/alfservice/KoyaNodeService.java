@@ -147,9 +147,9 @@ public class KoyaNodeService {
      */
     /**
      *
-     * @return @throws fr.itldev.koya.exception.KoyaServiceException
+     * @return
      */
-    public List<SecuredItem> getFavourites() throws KoyaServiceException {
+    public List<SecuredItem> getFavourites() {
 
         List<SecuredItem> favourites = new ArrayList<>();
 
@@ -163,7 +163,8 @@ public class KoyaNodeService {
                 try {
                     NodeRef n = getNodeRef(favStr);
                     favourites.add(getSecuredItem(n));
-                } catch (InvalidNodeRefException e) {
+                } catch (KoyaServiceException e) {
+                    logger.error("Ignored Favourite nodeRef (FOLDERS) " + favStr + " : " + e.getMessage());
                 }
             }
         }
@@ -174,7 +175,8 @@ public class KoyaNodeService {
                 try {
                     NodeRef n = getNodeRef(favStr);
                     favourites.add(getSecuredItem(n));
-                } catch (InvalidNodeRefException e) {
+                } catch (KoyaServiceException e) {
+                    logger.error("Ignored Favourite nodeRef (DOCS) " + favStr + " : " + e.getMessage());
                 }
             }
         }
@@ -186,7 +188,8 @@ public class KoyaNodeService {
                 String compName = k.substring(FAVOURITES_PREF_COMPANIES.length() + 1);
                 try {
                     favourites.add(companyBuilder(compName));
-                } catch (Exception e) {//In case of non existant company
+                } catch (KoyaServiceException e) {
+                    logger.error("Ignored Favourite nodeRef (COMPANY) " + k + " : " + e.getMessage());
                 }
 
             }
