@@ -21,9 +21,8 @@
 
 <webscript>
     <shortname>Rename secured item</shortname>
-    <description>Rename secured item</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/global/rename/{newName}/{nodeRef}</url>
+    <url>/fr/itldev/koya/global/rename/{nodeRef}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

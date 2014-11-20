@@ -323,7 +323,7 @@
     </bean>
     
     <!-- rename secured item -->
-    <bean id="webscript.fr.itldev.koya.global.rename.get" 
+    <bean id="webscript.fr.itldev.koya.global.rename.post" 
           class="fr.itldev.koya.webscript.global.Rename"
           parent="webscript">                
         <property name="koyaNodeService" ref="koyaNodeService" />          

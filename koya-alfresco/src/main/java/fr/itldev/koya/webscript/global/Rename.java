@@ -44,13 +44,15 @@ public class Rename extends AbstractWebScript {
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+        String nodeRef = urlParams.get(KoyaWebscript.WSCONST_NODEREF);
 
-        String newName = urlParams.get(KoyaWebscript.WSCONST_NEWNAME);
+        Map<String, Object> postParams = KoyaWebscript.getJsonMap(req);
+        String newName = (String) postParams.get(KoyaWebscript.WSCONST_NEWNAME);
 
         String response;
 
         try {
-            NodeRef renameItem = koyaNodeService.getNodeRef(urlParams.get(KoyaWebscript.WSCONST_NODEREF));
+            NodeRef renameItem = koyaNodeService.getNodeRef(nodeRef);
             response = KoyaWebscript.getObjectAsJson(koyaNodeService.rename(renameItem, newName));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

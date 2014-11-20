@@ -22,14 +22,16 @@ import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.SecuredItemService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.client.RestTemplate;
 
 public class SecuredItemServiceImpl extends AlfrescoRestService implements SecuredItemService {
 
     protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}";
-    protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{newName}/{nodeRef}";
+    protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{nodeRef}";
     private static final String REST_GET_PARENTS = "/s/fr/itldev/koya/global/parents/{nodeRef}?nbAncestor={nbAncestor}";
     private static final String REST_GET_PARENTS_INFINITE = "/s/fr/itldev/koya/global/parents/{nodeRef}";
 
@@ -78,9 +80,13 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
      */
     @Override
     public void rename(User user, SecuredItem securedItem, String newName) throws AlfrescoServiceException {
-        user.getRestTemplate().getForObject(
-                alfrescoServerUrl + REST_GET_RENAMEITEM,
-                String.class, newName,
+        Map<String, String> postParams = new HashMap();
+
+        postParams.put("newName", newName);
+
+        user.getRestTemplate().postForObject(
+                alfrescoServerUrl + REST_GET_RENAMEITEM, postParams,
+                String.class,
                 securedItem.getNodeRef());
     }
 
@@ -100,7 +106,7 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
         }, user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_PARENTS,
                 String.class, securedItem.getNodeRef(), 1));
-       
+
         if (parents.isEmpty()) {
             return null;
         } else {
