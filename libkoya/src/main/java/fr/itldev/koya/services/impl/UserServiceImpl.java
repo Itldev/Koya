@@ -319,18 +319,13 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
         emailPostWrapper.put("authKey", email);
         emailPostWrapper.put("failProof", true);
         try {
-            String result = getTemplate().postForObject(
+            return fromJSON(new TypeReference<User>() {
+            }, getTemplate().postForObject(
                     getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL, emailPostWrapper,
-                    String.class, user.getTicketAlfresco());
-
-            if (result != null) {
-                return fromJSON(new TypeReference<User>() {
-                }, result);
-            }
-        } catch (RestClientException | NullPointerException e) {
+                    String.class, user.getTicketAlfresco()));
+        } catch (RestClientException e) {
             return null;
         }
-        return null;
     }
 
     private class RestClient extends RestTemplate {

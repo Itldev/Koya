@@ -237,6 +237,10 @@ public class AlfrescoRestService implements AlfrescoService {
             final String jsonPacket) {
         T data = null;
 
+        if (jsonPacket == null) {
+            return null;
+        }
+
         try {
             data = new ObjectMapper().readValue(jsonPacket, type);
         } catch (Exception e) {
