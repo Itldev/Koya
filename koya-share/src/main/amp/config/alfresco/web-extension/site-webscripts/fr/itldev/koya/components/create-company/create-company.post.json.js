@@ -37,15 +37,15 @@ function main()
 
     // Call the repo to create the st:site folder structure
     var conn = remote.connect("alfresco");
-//   var repoResponse = conn.post("/api/sites", clientRequest, "application/json");
+    
     var repoResponse = conn.get("/fr/itldev/koya/company/add/" + stringUtils.urlEncode(clientJSON.title) + "/" + stringUtils.urlEncode(clientJSON.salesOffer) + "/" + encodeURIComponent(clientJSON.spaceTemplate));
 
 
-    if (repoResponse.status === 401)
+    if (repoResponse.status.code === 401)
     {
         status.setCode(repoResponse.status, "error.loggedOut");
     }
-    if (repoResponse.status === 500)
+    if (repoResponse.status.code === 500)
     {
         status.setCode(repoResponse.status, repoResponse.message);
     }
