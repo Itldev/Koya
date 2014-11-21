@@ -277,23 +277,17 @@ public class SubSpaceAclService {
     public void shareSecuredItem(final SubSpace subSpace, final String userMail, final KoyaPermission perm,
             final String serverPath, final String acceptUrl, final String rejectUrl, final Boolean sharedByImporter) throws KoyaServiceException {
 
-        long startTime = System.currentTimeMillis();
-
         UserTransaction ut = transactionService.getNonPropagatingUserTransaction();
 
         try {
             ut.begin();
 
             User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
-
-            logger.error("t1 = " + (System.currentTimeMillis() - startTime));
-
             beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
                     .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
             Invitation invitation = shareSecuredItemImpl(subSpace, userMail, perm, serverPath, acceptUrl, rejectUrl);
-            logger.error("t2 = " + (System.currentTimeMillis() - startTime));
-//            afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-//                    .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter);
+            afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
+                    .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter);
             ut.commit();
         } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException ex) {
 
@@ -302,8 +296,6 @@ public class SubSpaceAclService {
             } catch (IllegalStateException | SecurityException | SystemException ex1) {
             }
         }
-
-        logger.error("t-total = " + (System.currentTimeMillis() - startTime));
     }
 
     protected Invitation shareSecuredItemImpl(SubSpace subSpace, String userMail, KoyaPermission perm,
