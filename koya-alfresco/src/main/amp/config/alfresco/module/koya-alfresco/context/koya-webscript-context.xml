@@ -30,14 +30,14 @@
     ==================================================================
     -->
     <!--create company-->
-    <bean id="webscript.fr.itldev.koya.company.add.get" 
+    <bean id="webscript.fr.itldev.koya.company.addcompany.post" 
           class="fr.itldev.koya.webscript.company.AddCompany"
           parent="webscript">                
-        <property name="companyService" ref="companyService" />
-        
+        <property name="companyService" ref="companyService" />        
     </bean>
+    
     <!--list companies-->
-    <bean id="webscript.fr.itldev.koya.company.list.get" 
+    <bean id="webscript.fr.itldev.koya.company.list.get"
           class="fr.itldev.koya.webscript.company.ListCompany"
           parent="webscript">                
         <property name="companyService" ref="companyService" />        

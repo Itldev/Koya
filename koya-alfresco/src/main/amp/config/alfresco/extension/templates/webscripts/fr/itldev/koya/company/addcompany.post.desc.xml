@@ -20,10 +20,9 @@
 -->
 
 <webscript>
-    <shortname>Add Company</shortname>
-    <description>AAdd Company</description>
+    <shortname>Add Company</shortname>    
     <family>Itldev</family>
-    <url>/fr/itldev/koya/company/add/{name}/{salesoffer}/{template}</url>
+    <url>/fr/itldev/koya/company/add</url>
     <authentication>admin</authentication>    
     <format default="json"/>
 </webscript>

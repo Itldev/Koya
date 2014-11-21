@@ -25,13 +25,15 @@ import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.CompanyService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.client.RestClientException;
 
 public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService {
 
-    private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add/{name}/{salesoffer}/{template}";
+    private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add";
     private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
     private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/company/members/{companyName}";
     private static final String REST_GET_LISTMEMBERS_ROLEFILTER = "/s/fr/itldev/koya/company/members/{companyName}/{roleFilter}";
@@ -51,18 +53,24 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
      * @param admin
      * @param title
      * @param salesOfferName
-     * @param template
+     * @param spaceTemplate
      * @return
      * @throws RestClientException
      * @throws AlfrescoServiceException
      */
     @Override
-    public Company create(User admin, String title, String salesOfferName, String template) throws RestClientException, AlfrescoServiceException {
+    public Company create(User admin, String title, String salesOfferName, String spaceTemplate) throws RestClientException, AlfrescoServiceException {
+
+        Map<String, String> params = new HashMap<>();
+
+        params.put("title", title);
+        params.put("salesoffer", salesOfferName);
+        params.put("spacetemplate", spaceTemplate);
 
         //TODO verifications (name + offrecom)
         return fromJSON(new TypeReference<Company>() {
-        }, admin.getRestTemplate().getForObject(getAlfrescoServerUrl()
-                + REST_POST_ADDCOMPANY, String.class, title, salesOfferName, template));
+        }, admin.getRestTemplate().postForObject(getAlfrescoServerUrl()
+                + REST_POST_ADDCOMPANY, params, String.class));
     }
 
     @Override

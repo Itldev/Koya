@@ -35,12 +35,12 @@ public interface CompanyService extends AlfrescoService {
      * @param admin
      * @param title
      * @param salesOfferName
-     * @param template
+     * @param spaceTemplate
      * @return
      * @throws RestClientException
      * @throws AlfrescoServiceException
      */
-    Company create(User admin, String title, String salesOfferName, String template) throws RestClientException, AlfrescoServiceException;
+    Company create(User admin, String title, String salesOfferName, String spaceTemplate) throws RestClientException, AlfrescoServiceException;
 
     /**
      *

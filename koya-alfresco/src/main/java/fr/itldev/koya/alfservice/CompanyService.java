@@ -106,7 +106,7 @@ public class CompanyService {
     }
 
     // </editor-fold>
-    public Company create(String title, SalesOffer sO, String template) throws KoyaServiceException {
+    public Company create(String title, SalesOffer sO, String spaceTemplate) throws KoyaServiceException {
 
         if (title == null || title.isEmpty()) {
             throw new KoyaServiceException(KoyaErrorCodes.COMPANY_EMPTY_TITLE);
@@ -119,7 +119,7 @@ public class CompanyService {
         //Creating koya-config directory
         NodeRef koyaConfig = getKoyaConfigNodeRef(sInfo.getNodeRef(), true);
 
-        modelService.companyInitTemplate(shortName, template);
+        modelService.companyInitTemplate(shortName, spaceTemplate);
 
         modelService.companyInitImports(shortName);
 

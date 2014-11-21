@@ -3,20 +3,19 @@
  *
  * Copyright (C) Itl Developpement 2014
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+ * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-
 package fr.itldev.koya.webscript.company;
 
 import fr.itldev.koya.alfservice.CompanyService;
@@ -37,10 +36,6 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class AddCompany extends AbstractWebScript {
 
-    private static final String ARG_NAME = "name";
-    private static final String ARG_TEMPLATE = "template";
-    private static final String ARG_SALESOFFER = "salesoffer";
-
     private CompanyService companyService;
 
     public void setCompanyService(CompanyService companyService) {
@@ -49,15 +44,17 @@ public class AddCompany extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+        Map<String, Object> jsonParams = KoyaWebscript.getJsonMap(req);
 
-        String name = urlParams.get(ARG_NAME);
-        String template = urlParams.get(ARG_TEMPLATE);
+        String name = (String) jsonParams.get(KoyaWebscript.WSCONST_TITLE);
+        String spaceTemplate = (String) jsonParams.get(KoyaWebscript.WSCONST_SPACETEMPLATE);
+        String salesOffer = (String) jsonParams.get(KoyaWebscript.WSCONST_SALESOFFER);
+
         String response;
 
         try {
-            SalesOffer so = companyService.getSalesOffer(urlParams.get(ARG_SALESOFFER));
-            response = KoyaWebscript.getObjectAsJson(companyService.create(name, so, template));
+            SalesOffer so = companyService.getSalesOffer(salesOffer);
+            response = KoyaWebscript.getObjectAsJson(companyService.create(name, so, spaceTemplate));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

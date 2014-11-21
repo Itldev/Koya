@@ -36,9 +36,13 @@ function main()
     var clientJSON = eval('(' + clientRequest + ')');
 
     // Call the repo to create the st:site folder structure
-    var conn = remote.connect("alfresco");
-    
-    var repoResponse = conn.get("/fr/itldev/koya/company/add/" + stringUtils.urlEncode(clientJSON.title) + "/" + stringUtils.urlEncode(clientJSON.salesOffer) + "/" + encodeURIComponent(clientJSON.spaceTemplate));
+    var connector = remote.connect("alfresco");
+
+    var repoResponse = connector.post("/fr/itldev/koya/company/add",
+            "{\"title\":\"" + stringUtils.urlEncode(clientJSON.title) + "\"" +
+            ",\"template\":\"" + stringUtils.urlEncode(clientJSON.spaceTemplate) + "\"" +
+            ",\"salesoffer\":\"" + stringUtils.urlEncode(clientJSON.salesOffer) + "\"}"
+            , "application/json");
 
 
     if (repoResponse.status.code === 401)

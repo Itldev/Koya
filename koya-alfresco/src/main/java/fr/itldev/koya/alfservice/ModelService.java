@@ -114,13 +114,13 @@ public class ModelService extends AlfrescoRestService {
     /**
      *
      * @param siteShortName
-     * @param templateName
+     * @param spaceTemplate
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      *
      * @retun company doclib noderef
      */
-    public NodeRef companyInitTemplate(String siteShortName, String templateName) throws KoyaServiceException {
+    public NodeRef companyInitTemplate(String siteShortName, String spaceTemplate )throws KoyaServiceException {
         NodeRef docLib = null;
 
         ResultSet rs = null;
@@ -137,7 +137,7 @@ public class ModelService extends AlfrescoRestService {
 
                 rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                         SearchService.LANGUAGE_XPATH,
-                        SPACE_TEMPLATE_PATH + "/cm:" + ISO9075.encode((templateName == null) ? "default" : templateName));
+                        SPACE_TEMPLATE_PATH + "/cm:" + ISO9075.encode((spaceTemplate == null) ? "default" : spaceTemplate));
 
                 NodeRef template = null;
                 if (rs.length() == 1) {
