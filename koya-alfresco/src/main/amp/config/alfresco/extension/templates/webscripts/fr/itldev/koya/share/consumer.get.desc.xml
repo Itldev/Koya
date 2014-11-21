@@ -23,7 +23,8 @@
     <shortname>Checks if node has any consumer share</shortname>
     <family>Itldev</family>
     <url>/fr/itldev/koya/share/consumer/{nodeRef}</url>
-    <authentication>user</authentication>    
+    <authentication runas="admin" >none</authentication>    
+    <!-- TODO define anonymous user to exec this request -->
     <format default="json"/>
 </webscript>
 

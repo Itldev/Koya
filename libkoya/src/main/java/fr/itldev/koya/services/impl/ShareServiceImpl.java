@@ -116,13 +116,12 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
     /**
      * Checks if item has any share with consumer permission
      *
-     * @param userLogged
      * @param item
      * @return
      */
     @Override
-    public Boolean isSharedWithConsumerPermission(User userLogged, SubSpace item) {
-        return userLogged.getRestTemplate().getForObject(
+    public Boolean isSharedWithConsumerPermission(SubSpace item) {
+        return getTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ISSHAREDWITHCONSUMER,
                 Boolean.class, item.getNodeRef());
     }

@@ -77,9 +77,8 @@ public interface ShareService extends AlfrescoService {
     /**
      * Checks if item has any share with consumer permission
      *
-     * @param userLogged
      * @param item
      * @return
      */
-    Boolean isSharedWithConsumerPermission(User userLogged, SubSpace item);
+    Boolean isSharedWithConsumerPermission(SubSpace item);
 }
