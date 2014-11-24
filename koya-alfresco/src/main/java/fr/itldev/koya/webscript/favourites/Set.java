@@ -30,11 +30,11 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
- * Set/unset User Favourite status on node or simply get if no status given.
+ * Set/unset User Favourite status.
  *
  *
  */
-public class Status extends AbstractWebScript {
+public class Set extends AbstractWebScript {
 
     private KoyaNodeService koyaNodeService;
 
@@ -44,14 +44,11 @@ public class Status extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlMap = KoyaWebscript.getUrlParamsMap(req);
+        Map<String, Object> postMap = KoyaWebscript.getJsonMap(req);
         String response = "";
         try {
-            NodeRef node = koyaNodeService.getNodeRef(urlMap.get(KoyaWebscript.WSCONST_NODEREF));
-
-            if (urlMap.containsKey("status")) {
-                koyaNodeService.setFavouriteStatus(node, urlMap.get("status").equals("true"));
-            }
+            NodeRef node = koyaNodeService.getNodeRef((String) postMap.get(KoyaWebscript.WSCONST_NODEREF));
+            koyaNodeService.setFavouriteStatus(node, ((Boolean) postMap.get("status")));
             //return current favourite status.
             response = KoyaWebscript.getObjectAsJson(koyaNodeService.isFavourite(node));
         } catch (KoyaServiceException ex) {

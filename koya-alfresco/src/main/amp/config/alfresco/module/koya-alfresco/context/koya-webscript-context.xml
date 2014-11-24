@@ -297,8 +297,8 @@
     </bean>
     
     <!--Change or get Favourite Status-->
-    <bean id="webscript.fr.itldev.koya.favourites.status.get" 
-          class="fr.itldev.koya.webscript.favourites.Status"
+    <bean id="webscript.fr.itldev.koya.favourites.set.post" 
+          class="fr.itldev.koya.webscript.favourites.Set"
           parent="webscript">                
         <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>

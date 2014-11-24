@@ -24,15 +24,16 @@ import fr.itldev.koya.services.FavouriteService;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FavouriteServiceImpl extends AlfrescoRestService implements FavouriteService {
 
     private static final String REST_GET_LISTFAVOURITES = "/s/fr/itldev/koya/favourites/list";
-    private static final String REST_GET_STATUS_FAVOURITE = "/s/fr/itldev/koya/favourites/status/{nodeRef}";
-    private static final String REST_GET_STATUS_FAVOURITE_CHANGE = "/s/fr/itldev/koya/favourites/status/{nodeRef}?status={status}";
+    private static final String REST_POST_FAVOURITE_STATUS = "/s/fr/itldev/koya/favourites/set";
 
     @Autowired
     UserService userService;
@@ -46,8 +47,14 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements Favouri
 
     @Override
     public Boolean setFavouriteValue(User user, SecuredItem item, Boolean favouriteValue) throws AlfrescoServiceException {
-        Boolean status = user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_STATUS_FAVOURITE_CHANGE, Boolean.class, item.getNodeRef(), favouriteValue);
+
+        Map<String, Object> postParams = new HashMap<>();
+        postParams.put("nodeRef", item.getNodeRef());
+        postParams.put("status", favouriteValue);
+
+        Boolean status = fromJSON(new TypeReference<Boolean>() {
+        }, user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_FAVOURITE_STATUS, postParams, String.class));
         //Automaticly reload user's preferences
         userService.loadPreferences(user);
         return status;
@@ -55,8 +62,7 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements Favouri
 
     @Override
     public Boolean isFavourite(User user, SecuredItem item) throws AlfrescoServiceException {
-        return user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_STATUS_FAVOURITE, Boolean.class, item.getNodeRef());
+        return getFavourites(user).contains(item);
     }
 
 }

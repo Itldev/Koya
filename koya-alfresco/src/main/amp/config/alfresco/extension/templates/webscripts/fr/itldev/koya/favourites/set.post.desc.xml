@@ -20,10 +20,9 @@
 -->
 
 <webscript>
-    <shortname>Get Node Favourite Status or define new</shortname>
+    <shortname>Define Favourite status</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/favourites/status/{nodeRef}</url>
-    <url>/fr/itldev/koya/favourites/status/{nodeRef}?status={status}</url>
+    <url>/fr/itldev/koya/favourites/set</url>    
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
