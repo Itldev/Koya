@@ -46,7 +46,7 @@
             <artifactId>alfresco-repository</artifactId>
         </dependency>
         
-         <dependency>
+        <dependency>
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-data-model</artifactId>
             <version>4.2.e</version>
@@ -97,6 +97,15 @@
             <version>3.1.0.RELEASE</version>
             <type>jar</type>
         </dependency>
+        
+        
+        <!--cache guava-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>11.0.2</version>
+        </dependency>
+        
     </dependencies>
   
 </project>

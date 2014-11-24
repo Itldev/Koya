@@ -34,6 +34,7 @@
         <property name="locations">  
             <list>  
                 <value>classpath:koya.properties</value>  
+                <value>classpath:koya-caches.properties</value>  
             </list>  
         </property>  
     </bean>  
@@ -93,7 +94,15 @@
    
     <bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl" parent="abstractRestService"/>
         
-    <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService"/>
+    <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService">
+        <property name="companyPreferencesCacheConfig">
+            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+                <property name="enabled" value="${companyPreferencesCache.enabled}" />
+                <property name="maxSize" value="${companyPreferencesCache.maxSize}"/>
+                <property name="expireAfterWriteSeconds" value="${companyPreferencesCache.expireAfterWriteSeconds}"/>
+            </bean>
+        </property>       
+    </bean>
     
     <bean id="spaceService" class="fr.itldev.koya.services.impl.SpaceServiceImpl" parent="abstractRestService"/>
     
@@ -103,11 +112,35 @@
     
     <bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl" parent="abstractRestService"/>
     
-    <bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl" parent="abstractRestService"/>
+    <bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl" parent="abstractRestService">
+        <property name="userFavouritesCacheConfig">
+            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+                <property name="enabled" value="${userFavouritesCache.enabled}" />
+                <property name="maxSize" value="${userFavouritesCache.maxSize}"/>
+                <property name="expireAfterWriteSeconds" value="${userFavouritesCache.expireAfterWriteSeconds}"/>
+            </bean>
+        </property>   
+    </bean>
     
-    <bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl" parent="abstractRestService"/>
+    <bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl" parent="abstractRestService">
+        <property name="nodeSharedWithConsumerCacheConfig">
+            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+                <property name="enabled" value="${nodeSharedWithConsumerCache.enabled}" />
+                <property name="maxSize" value="${nodeSharedWithConsumerCache.maxSize}"/>
+                <property name="expireAfterWriteSeconds" value="${nodeSharedWithConsumerCache.expireAfterWriteSeconds}"/>
+            </bean>
+        </property>       
+    </bean>
     
-    <bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl" parent="abstractRestService"/>
+    <bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl" parent="abstractRestService">
+        <property name="permissionsCacheConfig">
+            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+                <property name="enabled" value="${permissionsCache.enabled}" />
+                <property name="maxSize" value="${permissionsCache.maxSize}"/>
+                <property name="expireAfterWriteSeconds" value="${permissionsCache.expireAfterWriteSeconds}"/>
+            </bean>
+        </property>  
+    </bean>
     
     <bean id="searchService" class="fr.itldev.koya.services.impl.SearchServiceImpl" parent="abstractRestService"/>
 

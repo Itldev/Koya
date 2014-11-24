@@ -18,6 +18,8 @@
  */
 package fr.itldev.koya.services.impl;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Preferences;
@@ -25,13 +27,16 @@ import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.CompanyService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.impl.util.CacheConfig;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.client.RestClientException;
 
-public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService {
+public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService, InitializingBean {
 
     private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add";
     private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
@@ -41,11 +46,34 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     private static final String REST_DEL_DELCOMPANY = "/s/api/sites/{shortname}";
     private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}";
     private static final String REST_GET_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
-    private static final String REST_GET_SINGLEPREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}?preferenceKey={preferenceKey}";
     private static final String REST_POST_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
 
     private static final String REST_GET_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
     private static final String REST_POST_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
+
+    private Cache<Company, Preferences> companyPreferencesCache;
+    private CacheConfig companyPreferencesCacheConfig;
+
+    public void setCompanyPreferencesCacheConfig(CacheConfig companyPreferencesCacheConfig) {
+        this.companyPreferencesCacheConfig = companyPreferencesCacheConfig;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+
+        if (companyPreferencesCacheConfig == null) {
+            companyPreferencesCacheConfig = CacheConfig.noCache();
+        }
+        companyPreferencesCacheConfig.debugLogConfig("companyPreferencesCache");
+
+        if (companyPreferencesCacheConfig.getEnabled()) {
+            companyPreferencesCache = CacheBuilder.newBuilder()
+                    .maximumSize(companyPreferencesCacheConfig.getMaxSize())
+                    .expireAfterWrite(companyPreferencesCacheConfig.getExpireAfterWriteSeconds(),
+                            TimeUnit.SECONDS)
+                    .build();
+        }
+    }
 
     /**
      * Company creation
@@ -152,9 +180,26 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     @Override
     public Preferences getPreferences(User user, Company c) throws AlfrescoServiceException {
-        return fromJSON(new TypeReference<Preferences>() {
+
+        if (c == null) {
+            return null;
+        }
+        Preferences p;
+
+        if (companyPreferencesCacheConfig.getEnabled()) {
+            p = companyPreferencesCache.getIfPresent(c);
+            if (p != null) {
+                return p;
+            }
+        }
+        p = fromJSON(new TypeReference<Preferences>() {
         }, user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, String.class, c.getName()));
+        if (companyPreferencesCacheConfig.getEnabled()) {
+
+            companyPreferencesCache.put(c, p);
+        }
+        return p;
     }
 
     /**
@@ -168,17 +213,13 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
      */
     @Override
     public String getPreference(User user, Company c, String preferenceKey) throws AlfrescoServiceException {
-        String pref = user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl() + REST_GET_SINGLEPREFERENCES,
-                        String.class, c.getName(), preferenceKey);
+
+        Object pref = getPreferences(user, c).get(preferenceKey);
 
         if (pref == null) {
             return "";
         }
-        //remove starting and finishing Quotes if exists    
-        pref = pref.replaceAll("^\"|\"$", "");
-
-        return pref;
+        return pref.toString();
     }
 
     @Override
