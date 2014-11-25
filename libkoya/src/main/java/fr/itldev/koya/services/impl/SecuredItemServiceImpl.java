@@ -20,6 +20,7 @@ package fr.itldev.koya.services.impl;
 
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.FavouriteService;
 import fr.itldev.koya.services.SecuredItemService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.HashMap;
@@ -39,21 +40,31 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
 
     private RestTemplate template;
 
+    private FavouriteService favouriteService;
+
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+    @Override
     public String getAlfrescoServerUrl() {
         return alfrescoServerUrl;
     }
 
+    @Override
     public void setAlfrescoServerUrl(String alfrescoServerUrl) {
         this.alfrescoServerUrl = alfrescoServerUrl;
     }
 
+    @Override
     public RestTemplate getTemplate() {
         return template;
     }
 
+    @Override
     public void setTemplate(RestTemplate template) {
         this.template = template;
+    }
+
+    public void setFavouriteService(FavouriteService favouriteService) {
+        this.favouriteService = favouriteService;
     }
 
     // </editor-fold>
@@ -66,6 +77,21 @@ public class SecuredItemServiceImpl extends AlfrescoRestService implements Secur
      */
     @Override
     public void delete(User user, SecuredItem securedItem) throws AlfrescoServiceException {
+        /**
+         * remove from favourites before delete if necessary
+         */
+
+        if (favouriteService.isFavourite(user, securedItem)) {
+            /**
+             * this action is realized in order to invalidate user favourites
+             * client cache. 
+             * 
+             * Unset favourite is also done on server side before delete node
+             * 
+             */
+            favouriteService.setFavouriteValue(user, securedItem, Boolean.FALSE);
+        }
+
         user.getRestTemplate().getForObject(
                 alfrescoServerUrl + REST_GET_DELITEM,
                 String.class, securedItem.getNodeRef());

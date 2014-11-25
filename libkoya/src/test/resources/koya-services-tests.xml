@@ -94,8 +94,10 @@
     
     <bean id="alfrescoService" class="fr.itldev.koya.services.impl.AlfrescoRestService" parent="abstractRestService"/>
      
-    <bean id="securedItemService" class="fr.itldev.koya.services.impl.SecuredItemServiceImpl" parent="abstractRestService"/>
-    
+    <bean id="securedItemService" class="fr.itldev.koya.services.impl.SecuredItemServiceImpl" parent="abstractRestService">
+        <property name="favouriteService" ref="favouriteService"/>
+    </bean>
+
     <bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl" parent="abstractRestService"/>
         
     <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService"/>
