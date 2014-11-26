@@ -23,7 +23,11 @@ import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.json.InviteWrapper;
+import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -56,17 +60,23 @@ public class Invite extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-
+        String response;
         try {
             ObjectMapper mapper = new ObjectMapper();
             InviteWrapper iw = mapper.readValue(req.getContent().getReader(), InviteWrapper.class);
-            companyAclService.inviteMember(koyaNodeService.companyBuilder(iw.getCompanyName()),
+            NominatedInvitation invitation = (NominatedInvitation) companyAclService.inviteMember(koyaNodeService.companyBuilder(iw.getCompanyName()),
                     iw.getEmail(), SitePermission.valueOf(iw.getRoleName()), iw.getServerPath(),
                     iw.getAcceptUrl(), iw.getRejectUrl());
+
+            Map<String, String> jsonInvitation = new HashMap<>();
+            jsonInvitation.put("inviteId", invitation.getInviteId());
+            jsonInvitation.put("ticket", invitation.getTicket());
+
+            response = KoyaWebscript.getObjectAsJson(jsonInvitation);
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");
-        res.getWriter().write("");
+        res.getWriter().write(response);
     }
 }
