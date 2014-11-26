@@ -39,5 +39,21 @@
         <property name="koyaNodeService" ref="koyaNodeService" />
         <property name="koyaContentService" ref="koyaContentService" />
         <property name="authenticationService" ref="authenticationService" />
+        <property name="unzipCommand">
+            <bean class="org.alfresco.util.exec.RuntimeExec">
+                <property name="commandsAndArguments">
+                    <map>
+                        <entry key=".*">
+                            <list>
+                                <value>/usr/bin/unzip</value>
+                                <value>${zipFile}</value>
+                                <value>-d</value>
+                                <value>${destDir}</value>
+                            </list>
+                        </entry>
+                    </map>
+                </property>
+            </bean>
+        </property>
     </bean>
 </beans>

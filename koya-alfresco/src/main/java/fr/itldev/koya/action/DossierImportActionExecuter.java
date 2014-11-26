@@ -18,29 +18,19 @@ import fr.itldev.koya.model.interfaces.SubSpace;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipException;
-import java.util.zip.ZipInputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.ContentReader;
@@ -52,12 +42,9 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.io.FileUtils;
+import org.alfresco.util.exec.RuntimeExec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.openxml4j.util.ZipInputStreamZipEntrySource;
 
 public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
@@ -74,6 +61,10 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     private KoyaNodeService koyaNodeService;
     private KoyaContentService koyaContentService;
     private AuthenticationService authenticationService;
+    private RuntimeExec unzipCommand;
+
+    private static String VAR_ZIPFILE = "zipFile";
+    private static String VAR_DESTDIR = "destDir";
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public SiteService getSiteService() {
@@ -143,6 +134,11 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     public void setAuthenticationService(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
+
+    public void setUnzipCommand(RuntimeExec unzipCommand) {
+        this.unzipCommand = unzipCommand;
+    }
+
     // </editor-fold>
     private static final int BUFFER_SIZE = 16384;
 
@@ -177,18 +173,12 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                 ContentReader reader = this.contentService.getReader(actionedUponNodeRef, ContentModel.PROP_CONTENT);
                 if (reader != null) {
                     // perform an dossiers import of a standard ZIP file
-                    ZipFile zipFile = null;
                     File tempFile = null;
                     try {
                         // unfortunately a ZIP file can not be read directly from an input stream so we have to create
                         // a temporary file first
                         tempFile = TempFileProvider.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX_ZIP);
                         reader.getContent(tempFile);
-                        // NOTE: This encoding allows us to workaround bug:
-                        //       http://bugs.sun.com/bugdatabase/view_bug.do;:WuuT?bug_id=4820807
-                        // We also try to use the extra encoding information if present
-                        // ALF-2016
-                        zipFile = new ZipFile(tempFile, "UTF-8", true);
 
                         // build a temp dir name based on the ID of the noderef we are importing
                         // also use the long life temp folder as large ZIP files can take a while
@@ -197,9 +187,13 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                         try {
                             // TODO: improve this code to directly pipe the zip stream output into the repo objects - 
                             //       to remove the need to expand to the filesystem first?
-                            logger.debug(getLogPrefix(companyName, username) + "Extracting " + zipFile);
+                            logger.debug(getLogPrefix(companyName, username) + "Extracting " + tempFile.getAbsolutePath());
 
-                            extractFile(zipFile, tempDir.getPath());
+                            Map<String, String> unzipImportParam = new HashMap<>(2);
+                            unzipImportParam.put(VAR_ZIPFILE, tempFile.getAbsolutePath());
+                            unzipImportParam.put(VAR_DESTDIR, tempDir.getAbsolutePath());
+
+                            unzipCommand.execute(unzipImportParam);
 
                             //Reading the new dossiers to create
                             File fileDossiersXml = new File(tempDir, FILE_DOSSIERS_XML);
@@ -295,10 +289,15 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                             if (fileContentZip.exists()) {
                                 //Extract content zip file
                                 File contentsDir = new File(tempDir, FOLDER_CONTENTS);
-                                contentsDir.mkdir();
+
 
                                 logger.debug(getLogPrefix(companyName, username) + "Extracting " + fileContentZip.getName());
-                                extractFile(new ZipFile(fileContentZip, "UTF-8", true), contentsDir.getPath());
+
+                                Map<String, String> unzipDocumentsParam = new HashMap<>(2);
+                                unzipDocumentsParam.put(VAR_ZIPFILE, fileContentZip.getAbsolutePath());
+                                unzipDocumentsParam.put(VAR_DESTDIR, contentsDir.getAbsolutePath());
+
+                                unzipCommand.execute(unzipDocumentsParam);
 
                                 //Reading contents files descriptor
                                 File fileContentXml = new File(contentsDir.getPath(), FILE_CONTENT_XML);
@@ -377,7 +376,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                     logger.debug(getLogPrefix(companyName, username) + countContentAdded + " contents added");
                                     logger.debug(getLogPrefix(companyName, username) + countContentDuplicate + " contents duplicates name");
                                     logger.debug(getLogPrefix(companyName, username) + countContentFileNotFound + " file not found");
-                                    logger.debug(getLogPrefix(companyName, username) + countContentDossierNotFound + " dossiers found");
+                                    logger.debug(getLogPrefix(companyName, username) + countContentDossierNotFound + " dossiers not found");
                                     logger.debug(getLogPrefix(companyName, username) + countContentError + " contents not added (error)");
                                 }
                             }
@@ -385,19 +384,12 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                         } finally {
                             deleteDir(tempDir);
                         }
-                    } catch (IOException ioErr) {
+                    } catch (Exception ioErr) {
                         throw new AlfrescoRuntimeException("Failed to import ZIP file.", ioErr);
                     } finally {
                         // now the import is done, delete the temporary file
                         if (tempFile != null) {
                             tempFile.delete();
-                        }
-                        if (zipFile != null) {
-                            try {
-                                zipFile.close();
-                            } catch (IOException e) {
-                                throw new AlfrescoRuntimeException(getLogPrefix(companyName, username) + "Failed to close zip package.", e);
-                            }
                         }
                     }
                 }
@@ -421,55 +413,6 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
     }
 
-    /**
-     * Extract the file and folder structure of a ZIP file into the specified
-     * directory
-     *
-     * @param archive The ZIP archive to extract
-     * @param extractDir The directory to extract into
-     */
-    private void extractFile(ZipFile archive, String extractDir) {
-        String fileName;
-        String destFileName;
-        byte[] buffer = new byte[BUFFER_SIZE];
-        extractDir = extractDir + File.separator;
-
-        try {
-            for (Enumeration e = archive.getEntries(); e.hasMoreElements();) {
-                ZipArchiveEntry entry = (ZipArchiveEntry) e.nextElement();
-                if (!entry.isDirectory()) {
-                    fileName = entry.getName();
-                    fileName = fileName.replace('/', File.separatorChar);
-                    destFileName = extractDir + fileName;
-                    File destFile = new File(destFileName);
-                    String parent = destFile.getParent();
-                    if (parent != null) {
-                        File parentFile = new File(parent);
-                        if (!parentFile.exists()) {
-                            parentFile.mkdirs();
-                        }
-                    }
-                    InputStream in = new BufferedInputStream(archive.getInputStream(entry), BUFFER_SIZE);
-                    OutputStream out = new BufferedOutputStream(new FileOutputStream(destFileName), BUFFER_SIZE);
-                    int count;
-                    while ((count = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, count);
-                    }
-                    in.close();
-                    out.close();
-                } else {
-                    File newdir = new File(extractDir + entry.getName());
-                    newdir.mkdirs();
-                }
-            }
-        } catch (ZipException e) {
-            throw new AlfrescoRuntimeException("Failed to process ZIP file.", e);
-        } catch (FileNotFoundException e) {
-            throw new AlfrescoRuntimeException("Failed to process ZIP file.", e);
-        } catch (IOException e) {
-            throw new AlfrescoRuntimeException("Failed to process ZIP file.", e);
-        }
-    }
 
     /**
      * Recursively delete a dir of files and directories

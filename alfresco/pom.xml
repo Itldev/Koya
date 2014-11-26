@@ -141,7 +141,7 @@ language governing permissions and limitations under the License. -->
             </dependencies>   
             <properties>                
                 <alfresco.db.datasource.class>com.mysql.jdbc.Driver</alfresco.db.datasource.class>
-                <alfresco.db.url>jdbc:mysql://127.0.0.1:3306/alfresco?useUnicode=yes&amp;characterEncoding=utf-8</alfresco.db.url>
+                <alfresco.db.url>jdbc:mysql://127.0.0.1:3306/alfresco?useUnicode=yes&amp;characterEncoding=utf-8&amp;autoReconnect=true</alfresco.db.url>
                 <alfresco.db.username>root</alfresco.db.username>
                 <alfresco.db.password>${dbrootpassword}</alfresco.db.password>
             </properties>
