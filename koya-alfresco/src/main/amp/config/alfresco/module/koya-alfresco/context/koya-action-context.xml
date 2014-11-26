@@ -53,6 +53,7 @@
                         </entry>
                     </map>
                 </property>
+                <property name="waitForCompletion" value="true" />
             </bean>
         </property>
     </bean>
