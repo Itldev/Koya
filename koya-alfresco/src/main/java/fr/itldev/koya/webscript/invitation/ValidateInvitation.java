@@ -92,12 +92,11 @@ public class ValidateInvitation extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
         Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 
-        final String invitationId = (String) urlParams.get("inviteId");
-        final String inviteTicket = (String) urlParams.get("inviteTicket");
-        final String newPassword = (String) urlParams.get("password");
+        final String invitationId = (String) jsonPostMap.get("inviteId");
+        final String inviteTicket = (String) jsonPostMap.get("inviteTicket");
+        final String newPassword = (String) jsonPostMap.get("password");
         final User userInvited = new User();
         userInvited.setName((String) jsonPostMap.get("lastName"));
         userInvited.setFirstName((String) jsonPostMap.get("firstName"));
@@ -247,7 +246,8 @@ public class ValidateInvitation extends AbstractWebScript {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");
-        res.getWriter().write("");
+        //TODO return validation status
+        res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));
     }
 
     /**

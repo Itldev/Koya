@@ -23,6 +23,7 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.InviteWrapper;
 import fr.itldev.koya.services.InvitationService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.HashMap;
 import java.util.Map;
 import org.codehaus.jackson.type.TypeReference;
 
@@ -30,7 +31,7 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
 
     private static final String REST_GET_INVITATION = "/s/fr/itldev/koya/invitation/invitation/{userName}/{companyName}";
     private static final String REST_POST_INVITATION = "/s/fr/itldev/koya/invitation/sendmail";
-    private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/invitation/validate/{inviteId}/{inviteTicket}/{password}";
+    private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/invitation/validate";
     private static final String REST_POST_INVITEUSER = "/s/fr/itldev/koya/invitation/invite";
 
     /**
@@ -72,9 +73,17 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
      */
     @Override
     public void validateInvitation(User user, String inviteId, String inviteTicket) throws AlfrescoServiceException {
-        getTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE,
-                user, String.class, inviteId, inviteTicket, user.getPassword());
 
+        Map<String, String> params = new HashMap<>();
+        params.put("inviteId", inviteId);
+        params.put("inviteTicket", inviteTicket);
+        params.put("password", user.getPassword());
+        params.put("lastName", user.getName());
+        params.put("firstName", user.getFirstName());
+
+        User u = fromJSON(new TypeReference<User>() {
+        }, getTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE,
+                params, String.class));
     }
 
     /**

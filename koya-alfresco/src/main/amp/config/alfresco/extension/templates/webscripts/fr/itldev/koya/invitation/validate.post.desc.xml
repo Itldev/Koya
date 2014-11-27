@@ -24,8 +24,8 @@
     <description>Validate Invitation
         no authentication but invitation ticket</description>        
     <family>Itldev</family>
-    <url>/fr/itldev/koya/invitation/validate/{inviteId}/{inviteTicket}/{password}</url>
-    <authentication>none</authentication>    
+    <url>/fr/itldev/koya/invitation/validate</url>
+    <authentication>none</authentication> 
     <transaction>required</transaction>
     <format default="json"/>
 </webscript>
