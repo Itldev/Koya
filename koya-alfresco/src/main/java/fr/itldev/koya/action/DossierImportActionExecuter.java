@@ -410,7 +410,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             subSpaceCollaboratorsAclService.shareSecuredItem( 
                     (SubSpace) koyaNodeService.getSecuredItem(d.getNodeRefasObject()),
                     userService.getUserByUsername(u.getUserName()).getEmail(),
-                    permissionCollaborator, "", "", "", true);
+                    permissionCollaborator, "", "", "", true, "");
         }
     }
 
