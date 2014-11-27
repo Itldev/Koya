@@ -193,8 +193,9 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                             unzipImportParam.put(VAR_ZIPFILE, tempFile.getAbsolutePath());
                             unzipImportParam.put(VAR_DESTDIR, tempDir.getAbsolutePath());
 
-                            unzipCommand.execute(unzipImportParam);
+                            RuntimeExec.ExecutionResult er = unzipCommand.execute(unzipImportParam);
 
+                            logger.debug(er.toString());
                             //Reading the new dossiers to create
                             File fileDossiersXml = new File(tempDir, FILE_DOSSIERS_XML);
                             if (fileDossiersXml.exists()) {
@@ -290,14 +291,14 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                 //Extract content zip file
                                 File contentsDir = new File(tempDir, FOLDER_CONTENTS);
 
-                                logger.debug(getLogPrefix(companyName, username) + "Extracting " + fileContentZip.getName());
+                                logger.debug(getLogPrefix(companyName, username) + "Extracting " + fileContentZip.getName() + " to " + contentsDir.getAbsolutePath());
 
                                 Map<String, String> unzipDocumentsParam = new HashMap<>(2);
                                 unzipDocumentsParam.put(VAR_ZIPFILE, fileContentZip.getAbsolutePath());
                                 unzipDocumentsParam.put(VAR_DESTDIR, contentsDir.getAbsolutePath());
 
-                                unzipCommand.execute(unzipDocumentsParam);
-
+                                er = unzipCommand.execute(unzipDocumentsParam);
+                                logger.debug(er.toString());
                                 //Reading contents files descriptor
                                 File fileContentXml = new File(contentsDir.getPath(), FILE_CONTENT_XML);
                                 if (!fileContentXml.exists()) {
@@ -381,16 +382,21 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                             }
 
                         } finally {
-                            deleteDir(tempDir);
+//                            deleteDir(tempDir);
                         }
-                    } catch (Exception ioErr) {
-                        throw new AlfrescoRuntimeException("Failed to import ZIP file.", ioErr);
-                    } finally {
-                        // now the import is done, delete the temporary file
+                        deleteDir(tempDir);
                         if (tempFile != null) {
                             tempFile.delete();
                         }
+                    } catch (Exception ioErr) {
+                        throw new AlfrescoRuntimeException("Failed to import ZIP file.", ioErr);
                     }
+//                        finally {
+                    // now the import is done, delete the temporary file
+//                        if (tempFile != null) {
+//                            tempFile.delete();
+//                        }
+//                    }
                 }
             } catch (KoyaServiceException ex) {
                 throw new AlfrescoRuntimeException(getLogPrefix(null, username) + "Company not found.", ex);
@@ -401,10 +407,10 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
     private void addKoyaPermissionCollaborator(Company c, Dossier d, User u, KoyaPermissionCollaborator permissionCollaborator) throws KoyaServiceException {
         if (societePermissions.contains(SitePermission.valueOf(siteService.getMembersRole(c.getName(), u.getUserName())))) {
-            subSpaceCollaboratorsAclService.shareSecuredItem(
+            subSpaceCollaboratorsAclService.shareSecuredItem( 
                     (SubSpace) koyaNodeService.getSecuredItem(d.getNodeRefasObject()),
                     userService.getUserByUsername(u.getUserName()).getEmail(),
-                    permissionCollaborator, "", "", "", true, "");
+                    permissionCollaborator, "", "", "", true);
         }
     }
 
