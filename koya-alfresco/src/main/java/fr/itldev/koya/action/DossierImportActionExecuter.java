@@ -187,7 +187,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                         try {
                             // TODO: improve this code to directly pipe the zip stream output into the repo objects - 
                             //       to remove the need to expand to the filesystem first?
-                            logger.debug(getLogPrefix(companyName, username) + "Extracting " + tempFile.getAbsolutePath());
+                            logger.debug(getLogPrefix(companyName, username) + "Extracting " +nodeService.getProperty(actionedUponNodeRef, ContentModel.PROP_NAME)+" ("+ tempFile.getAbsolutePath()+")"+" to "+tempDir.getAbsolutePath());
 
                             Map<String, String> unzipImportParam = new HashMap<>(2);
                             unzipImportParam.put(VAR_ZIPFILE, tempFile.getAbsolutePath());

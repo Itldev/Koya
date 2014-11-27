@@ -46,9 +46,11 @@
                         <entry key=".*">
                             <list>
                                 <value>/usr/bin/unzip</value>
-                                <value>${zipFile}</value>
+                                <value>-q</value>
+                                <value>-o</value>
                                 <value>-d</value>
                                 <value>${destDir}</value>
+                                <value>${zipFile}</value>
                             </list>
                         </entry>
                     </map>
