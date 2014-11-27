@@ -77,7 +77,8 @@ public class ShareItems extends AbstractWebScript {
                         if (!sw.isResetSharings()) {
                             subSpaceConsumersAclService.shareSecuredItem(subSpace, userMail,
                                     KoyaPermissionConsumer.CLIENT,
-                                    sw.getServerPath(), sw.getAcceptUrl(), sw.getRejectUrl(), false);
+                                    sw.getServerPath(), sw.getAcceptUrl(), sw.getRejectUrl(), false,
+                                    sw.getDirectAccessUrl());
                         } else {
                             subSpaceConsumersAclService.unShareSecuredItem(subSpace, userMail,
                                     KoyaPermissionConsumer.CLIENT);

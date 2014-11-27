@@ -39,27 +39,27 @@ import org.springframework.beans.factory.InitializingBean;
  *
  */
 public class ShareServiceImpl extends AlfrescoRestService implements ShareService, InitializingBean {
-    
+
     protected static final String REST_POST_SHAREITEMS = "/s/fr/itldev/koya/share/shareitems";
     protected static final String REST_GET_SHAREDUSERS = "/s/fr/itldev/koya/share/sharedusers/{noderef}";
     protected static final String REST_GET_SHAREDITEMS = "/s/fr/itldev/koya/share/listusershares/{userName}/{companyName}";
     protected static final String REST_GET_ISSHAREDWITHCONSUMER = "/s/fr/itldev/koya/share/consumer/{noderef}";
-    
+
     private Cache<SubSpace, Boolean> nodeSharedWithConsumerCache;
     private CacheConfig nodeSharedWithConsumerCacheConfig;
-    
+
     public void setNodeSharedWithConsumerCacheConfig(CacheConfig nodeSharedWithConsumerCacheConfig) {
         this.nodeSharedWithConsumerCacheConfig = nodeSharedWithConsumerCacheConfig;
     }
-    
+
     @Override
     public void afterPropertiesSet() throws Exception {
-        
+
         if (nodeSharedWithConsumerCacheConfig == null) {
             nodeSharedWithConsumerCacheConfig = CacheConfig.noCache();
         }
         nodeSharedWithConsumerCacheConfig.debugLogConfig("nodeSharedWithConsumerCache");
-        
+
         if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
             nodeSharedWithConsumerCache = CacheBuilder.newBuilder()
                     .maximumSize(nodeSharedWithConsumerCacheConfig.getMaxSize())
@@ -80,18 +80,18 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
      * @param rejectUrl
      */
     @Override
-    public void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails, String serverPath, String acceptUrl, String rejectUrl) {
-        
+    public void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails, String serverPath, String acceptUrl, String rejectUrl, String directAccessUrl) {
+
         if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
             for (SecuredItem si : sharedItems) {
                 nodeSharedWithConsumerCache.invalidate(si);
             }
         }
-        
+
         user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_SHAREITEMS,
                 new SharingWrapper(sharedItems, usersMails,
-                        serverPath, acceptUrl, rejectUrl), String.class);
+                        serverPath, acceptUrl, rejectUrl, directAccessUrl), String.class);
 
         //TODO analyse return
     }
@@ -127,11 +127,11 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
      */
     @Override
     public List<User> sharedUsers(User user, SecuredItem item) throws AlfrescoServiceException {
-        
+
         return fromJSON(new TypeReference<List<User>>() {
         }, user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_SHAREDUSERS, String.class, item.getNodeRef()));
-        
+
     }
 
     /**
@@ -145,12 +145,12 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
      */
     @Override
     public List<SecuredItem> sharedItems(User userLogged, User userToGetShares, Company c) throws AlfrescoServiceException {
-        
+
         return fromJSON(new TypeReference<List<SecuredItem>>() {
         }, userLogged.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_SHAREDITEMS,
                 String.class, userToGetShares.getUserName(), c.getName()));
-        
+
     }
 
     /**
@@ -161,7 +161,7 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
      */
     @Override
     public Boolean isSharedWithConsumerPermission(SubSpace item) {
-        
+
         if (item == null) {
             return Boolean.FALSE;
         }
@@ -179,7 +179,7 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
             nodeSharedWithConsumerCache.put(item, shared);
         }
         return shared;
-        
+
     }
-    
+
 }

@@ -37,7 +37,7 @@ public class ShareMailNotificationBehaviour implements SharePolicies.AfterShareP
 
     @Override
     public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation,
-            User inviter, Boolean sharedByImporter) {
+            User inviter, Boolean sharedByImporter,String directAccessUrl) {
 
         /**
          * Ininbits mail sending if any invitation or 
@@ -45,7 +45,7 @@ public class ShareMailNotificationBehaviour implements SharePolicies.AfterShareP
          */
         if (invitation == null && !sharedByImporter) {
             try {
-                koyaMailService.sendShareNotifMail(inviter, userMail, nodeRef);
+                koyaMailService.sendShareNotifMail(inviter, userMail, nodeRef,directAccessUrl);
             } catch (KoyaServiceException ex) {
                 logger.fatal("erreur a remonter a l'user : " + ex.toString());
             }

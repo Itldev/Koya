@@ -78,7 +78,7 @@ public class AddResponsible extends AbstractWebScript {
             SubSpaceCollaboratorsAclService.shareSecuredItem(
                     (SubSpace) koyaNodeService.getSecuredItem(nodeRef),
                     userService.getUserByUsername(userName).getEmail(),
-                    KoyaPermissionCollaborator.RESPONSIBLE, "", "", "", false);
+                    KoyaPermissionCollaborator.RESPONSIBLE, "", "", "", false, "");
 
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

@@ -187,7 +187,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                         try {
                             // TODO: improve this code to directly pipe the zip stream output into the repo objects - 
                             //       to remove the need to expand to the filesystem first?
-                            logger.debug(getLogPrefix(companyName, username) + "Extracting " +nodeService.getProperty(actionedUponNodeRef, ContentModel.PROP_NAME)+" ("+ tempFile.getAbsolutePath()+")"+" to "+tempDir.getAbsolutePath());
+                            logger.debug(getLogPrefix(companyName, username) + "Extracting " + nodeService.getProperty(actionedUponNodeRef, ContentModel.PROP_NAME) + " (" + tempFile.getAbsolutePath() + ")" + " to " + tempDir.getAbsolutePath());
 
                             Map<String, String> unzipImportParam = new HashMap<>(2);
                             unzipImportParam.put(VAR_ZIPFILE, tempFile.getAbsolutePath());
@@ -289,7 +289,6 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                             if (fileContentZip.exists()) {
                                 //Extract content zip file
                                 File contentsDir = new File(tempDir, FOLDER_CONTENTS);
-
 
                                 logger.debug(getLogPrefix(companyName, username) + "Extracting " + fileContentZip.getName());
 
@@ -402,17 +401,16 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
     private void addKoyaPermissionCollaborator(Company c, Dossier d, User u, KoyaPermissionCollaborator permissionCollaborator) throws KoyaServiceException {
         if (societePermissions.contains(SitePermission.valueOf(siteService.getMembersRole(c.getName(), u.getUserName())))) {
-            subSpaceCollaboratorsAclService.shareSecuredItem( 
+            subSpaceCollaboratorsAclService.shareSecuredItem(
                     (SubSpace) koyaNodeService.getSecuredItem(d.getNodeRefasObject()),
                     userService.getUserByUsername(u.getUserName()).getEmail(),
-                    permissionCollaborator, "", "", "", true);
+                    permissionCollaborator, "", "", "", true, "");
         }
     }
 
     @Override
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
     }
-
 
     /**
      * Recursively delete a dir of files and directories

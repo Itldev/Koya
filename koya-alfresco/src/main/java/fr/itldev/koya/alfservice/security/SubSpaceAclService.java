@@ -272,10 +272,12 @@ public class SubSpaceAclService {
      * @param acceptUrl
      * @param rejectUrl
      * @param sharedByImporter
+     * @param directAccessUrl
      * @throws KoyaServiceException
      */
     public void shareSecuredItem(final SubSpace subSpace, final String userMail, final KoyaPermission perm,
-            final String serverPath, final String acceptUrl, final String rejectUrl, final Boolean sharedByImporter) throws KoyaServiceException {
+            final String serverPath, final String acceptUrl, final String rejectUrl, final Boolean sharedByImporter,
+            final String directAccessUrl) throws KoyaServiceException {
 
         UserTransaction ut = transactionService.getNonPropagatingUserTransaction();
 
@@ -287,7 +289,7 @@ public class SubSpaceAclService {
                     .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
             Invitation invitation = shareSecuredItemImpl(subSpace, userMail, perm, serverPath, acceptUrl, rejectUrl);
             afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                    .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter);
+                    .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter, directAccessUrl);
             ut.commit();
         } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException ex) {
 

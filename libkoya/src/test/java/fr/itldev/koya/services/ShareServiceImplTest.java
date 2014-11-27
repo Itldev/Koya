@@ -85,6 +85,6 @@ public class ShareServiceImplTest extends TestCase {
         List<String> shareToUsersMails = new ArrayList<>();
         shareToUsersMails.add("test@itldev.fr");
 
-        shareService.shareItems(admin, sharedDossiers, shareToUsersMails, "http://localhost:9090/test", "accept.xhtml", "reject.xhtml");
+        shareService.shareItems(admin, sharedDossiers, shareToUsersMails, "http://localhost:9090/test", "accept.xhtml", "reject.xhtml","");
     }
 }

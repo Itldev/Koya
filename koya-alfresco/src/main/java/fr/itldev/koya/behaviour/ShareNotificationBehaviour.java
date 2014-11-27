@@ -58,7 +58,8 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
     }
 
     @Override
-    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter, Boolean sharedByImporter) {
+    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter, Boolean sharedByImporter,
+            String directAccessUrl) {
         if (invitation == null) {
             try {
                 User user = userService.getUser(userMail);
