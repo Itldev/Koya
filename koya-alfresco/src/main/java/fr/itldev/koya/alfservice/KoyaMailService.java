@@ -81,7 +81,7 @@ public class KoyaMailService {
         this.resetPasswordTemplateLocation = resetPasswordTemplateLocation;
     }
 
-    public void sendShareNotifMail(User sender, String destMail, NodeRef sharedNodeRef,String directAccessUrl) throws KoyaServiceException {
+    public void sendShareNotifMail(User sender, String destMail, NodeRef sharedNodeRef, String directAccessUrl) throws KoyaServiceException {
         Map<String, Serializable> paramsMail = new HashMap<>();
 
         paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
@@ -97,6 +97,7 @@ public class KoyaMailService {
 
         SecuredItem s = koyaNodeService.getSecuredItem(sharedNodeRef);
         templateParams.put("directAccessUrl", directAccessUrl);
+        templateParams.put("sharedItemNodeRef", s.getNodeRef());
         templateParams.put("sharedItemName", s.getTitle());
         templateParams.put("inviterName", sender.getName());
         templateParams.put("inviterFirstName", sender.getFirstName());
