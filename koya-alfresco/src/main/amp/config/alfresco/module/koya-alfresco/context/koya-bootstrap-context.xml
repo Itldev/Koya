@@ -43,7 +43,7 @@
                 <props>
                     <prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}</prop>
                     <prop key="location">alfresco/module/${project.artifactId}/bootstrap/koya-mail-templates.xml</prop>
-                </props>        
+                </props> 
             </list>
         </property>
 
@@ -78,6 +78,25 @@
                       
     </bean>
     
+    <!-- Boostrap scripts -->
+    <bean id="koya.scripts-bootstrap" class="org.alfresco.repo.module.ImporterModuleComponent" 
+        parent="module.baseComponent">
+        <property name="moduleId" value="${project.artifactId}" />
+        <property name="name" value="koyaScriptsBootstrap" />
+        <property name="description" value="Koya-scripts" />
+        <property name="sinceVersion" value="0.7" />
+        <property name="appliesFromVersion" value="0.7" />
+        <!-- Data properties -->
+        <property name="importer" ref="spacesBootstrap"/>
+        <property name="bootstrapViews">
+            <list>
+                <props>
+                    <prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.scripts.childname}</prop>
+                    <prop key="location">alfresco/module/${project.artifactId}/bootstrap/koya-scripts.xml</prop>
+                </props>
+            </list>
+        </property>
+    </bean>
     
     <bean id="koya-workflowBootstrap" parent="workflowDeployer">
         <property name="workflowDefinitions">
