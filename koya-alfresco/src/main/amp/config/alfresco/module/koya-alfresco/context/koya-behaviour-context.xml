@@ -94,12 +94,6 @@
         <property name="nodeService" ref="NodeService"/>
     </bean>
     
-    <bean id="InstantNotificationMaintainerBehaviour" class="fr.itldev.koya.behaviour.InstantNotificationMaintainerBehaviour"
-          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
-        <property name="policyComponent" ref="policyComponent" />
-        <property name="emailNotificationService" ref="emailNotificationService"/>
-        <property name="userService" ref="userService"/>
-    </bean>
     
     <bean id="ShareNotificationBehaviour" class="fr.itldev.koya.behaviour.ShareNotificationBehaviour"
           init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
