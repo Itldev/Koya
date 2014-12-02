@@ -59,4 +59,21 @@
             </bean>
         </property>
     </bean>
+    
+    
+    
+    <!--Koya notifications actions Actions--> 
+    
+    
+    <bean id="koyaNotifier" abstract="true" class="fr.itldev.koya.action.notification.KoyaNotifierActionExecuter">
+        <property name="koyaNotificationService" ref="koyaNotificationService"/>        
+    </bean>
+    
+    <bean id="newContentNotifier" class="fr.itldev.koya.action.notification.NewContentNotifierActionExecuter" parent="koyaNotifier">
+        <property name="koyaMailService" ref="koyaMailService"/>        
+        <property name="koyaNodeService" ref="koyaNodeService"/>        
+        <property name="nodeService" ref="NodeService"/>        
+        <property name="companyAclService" ref="companyAclService"/> 
+        <property name="subSpaceAclService" ref="subSpaceAclService"/>        
+    </bean>
 </beans>

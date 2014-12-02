@@ -55,6 +55,8 @@ public class KoyaModel {
 
     public static final QName ASPECT_MAILUNIQUE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "mailunique");
 
+    public static final QName ASPECT_USERNOTIFIED = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "userNotified");
+
     //================= Aspects Properties
     public static final QName PROP_ISACTIVE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "isActive");
 
@@ -72,8 +74,8 @@ public class KoyaModel {
     public static final QName PROP_DESCRIPTION = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "description");
 
     public static final QName PROP_LEGALINFOS = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "legalInformations");
-    
-    public static final QName PROP_REFERENCE =  QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "reference");
+
+    public static final QName PROP_REFERENCE = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "reference");
 
     //================= Type associations ===========================================
     public static final QName ASSOC_CONTACT_USER = QName.createQName(NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");
@@ -99,6 +101,5 @@ public class KoyaModel {
                     put(Dossier.class, TYPE_DOSSIER);
                 }
             });
-    
 
 }

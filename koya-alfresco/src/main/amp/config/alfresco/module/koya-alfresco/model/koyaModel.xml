@@ -209,6 +209,10 @@
             </properties>  
         </aspect>        
         
+        <aspect name="koya:userNotified">
+            <title>Person Notified Aspect</title>            
+        </aspect>        
+        
         
     </aspects>
     

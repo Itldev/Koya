@@ -578,7 +578,8 @@
     <bean id="webscript.fr.itldev.koya.user.emailnotification.get" 
           class="fr.itldev.koya.webscript.user.NotificationStatus"
           parent="webscript">
-        <property name="emailNotificationService" ref="emailNotificationService" />   
+        <property name="koyaNotificationService" ref="koyaNotificationService" />
+        <property name="userService" ref="userService"/>   
     </bean>
     
     

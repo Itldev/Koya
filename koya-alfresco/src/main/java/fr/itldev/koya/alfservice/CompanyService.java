@@ -75,6 +75,7 @@ public class CompanyService {
     protected ModelService modelService;
     protected AuthenticationService authenticationService;
     protected FileFolderService fileFolderService;
+    protected KoyaNotificationService koyaNotificationService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setSiteService(SiteService siteService) {
@@ -105,6 +106,10 @@ public class CompanyService {
         this.fileFolderService = fileFolderService;
     }
 
+    public void setKoyaNotificationService(KoyaNotificationService koyaNotificationService) {
+        this.koyaNotificationService = koyaNotificationService;
+    }
+
     // </editor-fold>
     public Company create(String title, SalesOffer sO, String spaceTemplate) throws KoyaServiceException {
 
@@ -122,6 +127,9 @@ public class CompanyService {
         modelService.companyInitTemplate(shortName, spaceTemplate);
 
         modelService.companyInitImports(shortName);
+
+        // add users notification rule on documentLibraryNode
+        koyaNotificationService.createCompanyNotificationRule(created);
 
         //TODO copy config files to the koy-config directory
         return created;

@@ -52,6 +52,7 @@
         <property name="modelService" ref="modelService" />
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="fileFolderService" ref="FileFolderService" />      
+        <property name="koyaNotificationService" ref="koyaNotificationService"/>
     </bean>     
     
     <!--Spaces Handling service-->
@@ -150,21 +151,15 @@
     <bean id="nameBasedUserNameGenerator" class="fr.itldev.koya.repo.security.authentication.EmailBasedNameGenerator" />
     
     
-    <bean id="emailNotificationService" class="fr.itldev.koya.alfservice.EmailNotificationService">
+    <bean id="koyaNotificationService" class="fr.itldev.koya.alfservice.KoyaNotificationService">
         <property name="actionService" ref="actionService"/> 
         <property name="ruleService" ref="ruleService"/> 
         <property name="userService" ref="userService"/> 
-        <property name="feedEmailTemplateLocation">
-            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
-                <property name="path">
-                    <value>${koya.template.instant-notification}</value>
-                </property>                 
-                <property name="queryLanguage" value="xpath"/>
-            </bean>
-        </property>
-        <property name="transactionService" ref="transactionService"/>
-        <property name="subSpaceAclService" ref="subSpaceAclService"/>
         <property name="koyaMailService" ref="koyaMailService"/>
+        <property name="nodeService" ref="NodeService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="companyAclService" ref="companyAclService"/>
+        <property name="subSpaceAclService" ref="subSpaceAclService"/>        
     </bean>
     
     
@@ -186,6 +181,8 @@
         <property name="nodeService" ref="NodeService"/>
         <property name="actionService" ref="actionService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/> 
+        <property name="userService" ref="userService"/> 
+        <property name="serviceRegistry" ref="ServiceRegistry"/> 
         <!-- param properties-->
         
         <property name="i18nMailSubjectPropertiesLocation">
@@ -214,7 +211,18 @@
                 </property>                    
                 <property name="queryLanguage" value="xpath"/>
             </bean>
-        </property>      
+        </property> 
+        <property name="newContentNoficationTemplateLocation">
+            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
+                <property name="path">
+                    <value>${koya.template.newContent-notification}</value>
+                </property>                 
+                <property name="queryLanguage" value="xpath"/>
+            </bean>
+        </property>     
+        <property name="koyaDirectLinkUrlTemplate" >
+            <value>${koya.client.directLinkUrlTemplate}</value>
+        </property>                  
     </bean>
 
    

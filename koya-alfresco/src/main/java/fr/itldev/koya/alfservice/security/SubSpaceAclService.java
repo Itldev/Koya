@@ -343,15 +343,6 @@ public class SubSpaceAclService {
         }
     }
 
-    public List<User> listUsers(SecuredItem s, final KoyaPermission permission) {
-        return listUsers(s, new ArrayList<KoyaPermission>() {
-            {
-                add(permission);
-            }
-        });
-
-    }
-
     /**
      *
      * List Users who have a specific KoyaPermission defined in filter on the
