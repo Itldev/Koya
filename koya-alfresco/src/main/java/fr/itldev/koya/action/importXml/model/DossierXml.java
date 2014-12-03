@@ -1,4 +1,4 @@
-package fr.itldev.koya.alfservice.importXml.model;
+package fr.itldev.koya.action.importXml.model;
 
 import java.util.ArrayList;
 import java.util.List;

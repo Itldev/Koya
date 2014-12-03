@@ -1,4 +1,4 @@
-package fr.itldev.koya.alfservice.importXml.model;
+package fr.itldev.koya.action.importXml.model;
 
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
