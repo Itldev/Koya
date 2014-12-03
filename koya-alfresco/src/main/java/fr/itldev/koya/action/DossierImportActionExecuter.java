@@ -380,26 +380,28 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                     logger.debug(getLogPrefix(companyName, username) + countContentError + " contents not added (error)");
                                 }
                             }
-
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                            throw e;
                         } finally {
-//                            deleteDir(tempDir);
+                            deleteDir(tempDir);
                         }
-                        deleteDir(tempDir);
+//                        deleteDir(tempDir);
                         if (tempFile != null) {
                             tempFile.delete();
                         }
                     } catch (Exception ioErr) {
                         throw new AlfrescoRuntimeException("Failed to import ZIP file.", ioErr);
                     }
-//                        finally {
-                    // now the import is done, delete the temporary file
-//                        if (tempFile != null) {
-//                            tempFile.delete();
-//                        }
-//                    }
+                        finally {
+//                     now the import is done, delete the temporary file
+                        if (tempFile != null) {
+                            tempFile.delete();
+                        }
+                    }
                 }
-            } catch (KoyaServiceException ex) {
-                throw new AlfrescoRuntimeException(getLogPrefix(null, username) + "Company not found.", ex);
+            } catch (Exception ex) {
+                throw new AlfrescoRuntimeException(getLogPrefix(null, username) + " "+ex.getMessage(), ex);
             }
 
         }

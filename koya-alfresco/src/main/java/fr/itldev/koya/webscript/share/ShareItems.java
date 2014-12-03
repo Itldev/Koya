@@ -26,6 +26,9 @@ import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.interfaces.SubSpace;
 import fr.itldev.koya.model.json.SharingWrapper;
 import java.io.IOException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -44,12 +47,18 @@ public class ShareItems extends AbstractWebScript {
     private SubSpaceConsumersAclService subSpaceConsumersAclService;
     private KoyaNodeService koyaNodeService;
 
+    private TransactionService transactionService;
+
     public void setSubSpaceConsumersAclService(SubSpaceConsumersAclService subSpaceConsumersAclService) {
         this.subSpaceConsumersAclService = subSpaceConsumersAclService;
     }
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
+    }
+
+    public void setTransactionService(TransactionService transactionService) {
+        this.transactionService = transactionService;
     }
 
     /**
@@ -74,14 +83,28 @@ public class ShareItems extends AbstractWebScript {
                     SubSpace subSpace = (SubSpace) si;
 
                     for (String userMail : sw.getSharingUsersMails()) { //TODO limiter aux subspaces dans le wrapper unique
-                        if (!sw.isResetSharings()) {
-                            subSpaceConsumersAclService.shareSecuredItem(subSpace, userMail,
-                                    KoyaPermissionConsumer.CLIENT,
-                                    sw.getServerPath(), sw.getAcceptUrl(), sw.getRejectUrl(), false,
-                                    sw.getDirectAccessUrl());
-                        } else {
-                            subSpaceConsumersAclService.unShareSecuredItem(subSpace, userMail,
-                                    KoyaPermissionConsumer.CLIENT);
+                        UserTransaction ut = transactionService.getNonPropagatingUserTransaction();
+
+                        try {
+
+                            ut.begin();
+                            if (!sw.isResetSharings()) {
+                                subSpaceConsumersAclService.shareSecuredItem(subSpace, userMail,
+                                        KoyaPermissionConsumer.CLIENT,
+                                        sw.getServerPath(), sw.getAcceptUrl(), sw.getRejectUrl(), false,
+                                        sw.getDirectAccessUrl());
+                            } else {
+                                subSpaceConsumersAclService.unShareSecuredItem(subSpace, userMail,
+                                        KoyaPermissionConsumer.CLIENT);
+                            }
+                            ut.commit();
+                        } catch (Exception ex) {
+                            logger.error(ex.getMessage(), ex);
+
+                            try {
+                                ut.rollback();
+                            } catch (IllegalStateException | SecurityException | SystemException ex1) {
+                            }
                         }
                     }
                 }

@@ -47,6 +47,7 @@ import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 import org.alfresco.repo.policy.ClassPolicyDelegate;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -279,25 +280,16 @@ public class SubSpaceAclService {
             final String serverPath, final String acceptUrl, final String rejectUrl, final Boolean sharedByImporter,
             final String directAccessUrl) throws KoyaServiceException {
 
-        UserTransaction ut = transactionService.getNonPropagatingUserTransaction();
-
-        try {
-            ut.begin();
-
             User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
+
             beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
                     .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
+
             Invitation invitation = shareSecuredItemImpl(subSpace, userMail, perm, serverPath, acceptUrl, rejectUrl);
+
             afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
                     .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter, directAccessUrl);
-            ut.commit();
-        } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException ex) {
 
-            try {
-                ut.rollback();
-            } catch (IllegalStateException | SecurityException | SystemException ex1) {
-            }
-        }
     }
 
     protected Invitation shareSecuredItemImpl(SubSpace subSpace, String userMail, KoyaPermission perm,

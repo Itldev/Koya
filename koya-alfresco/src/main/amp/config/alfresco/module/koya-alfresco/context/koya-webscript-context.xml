@@ -513,6 +513,7 @@
           parent="webscript">                
         <property name="subSpaceConsumersAclService" ref="subSpaceConsumersAclService" />   
         <property name="koyaNodeService" ref="koyaNodeService" />   
+        <property name="transactionService" ref="transactionService"/>
     </bean>
     
     <!-- items shared with users -->
