@@ -496,6 +496,7 @@
         <property name="workflowService" ref="WorkflowService" /> 
         <property name="subSpaceAclService" ref="subSpaceAclService" /> 
         <property name="activityService" ref="activityService" />
+        <property name="actionService" ref="ActionService" />
         <property name="siteService" ref="siteService" />
     </bean>
 

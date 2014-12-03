@@ -70,6 +70,8 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
 
                     if (invitations.isEmpty()) {
                         //Posting the according activity
+
+                        //TODO call action or use condition
                         activityService.postActivity(NotificationType.KOYA_SHARED,
                                 siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
                     }
@@ -94,6 +96,7 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
                 List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName, null, user.getUserName());
 
                 if (invitations.isEmpty()) {
+                    //TODO call action
                     //Posting the according activity
                     activityService.postActivity(NotificationType.KOYA_UNSHARED, siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
 

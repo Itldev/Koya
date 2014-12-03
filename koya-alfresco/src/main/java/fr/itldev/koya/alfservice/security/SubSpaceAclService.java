@@ -499,6 +499,7 @@ public class SubSpaceAclService {
      * @param koyaPermisssionFilter
      * @return
      */
+    @Deprecated
     public List<SecuredItem> getUsersSecuredItemWithKoyaPermissions(User u,
             List<QName> typesFilter, List<KoyaPermission> koyaPermisssionFilter) {
 

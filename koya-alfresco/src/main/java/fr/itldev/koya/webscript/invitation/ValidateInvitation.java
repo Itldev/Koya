@@ -18,33 +18,32 @@
  */
 package fr.itldev.koya.webscript.invitation;
 
+import fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter;
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.NotificationType;
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -64,8 +63,10 @@ public class ValidateInvitation extends AbstractWebScript {
     private WorkflowService workflowService;
     protected SubSpaceAclService subSpaceAclService;
     protected ActivityService activityService;
+    protected ActionService actionService;
     protected SiteService siteService;
 
+    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
@@ -86,10 +87,15 @@ public class ValidateInvitation extends AbstractWebScript {
         this.activityService = activityService;
     }
 
+    public void setActionService(ActionService actionService) {
+        this.actionService = actionService;
+    }
+
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
 
+    //</editor-fold>
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
@@ -203,73 +209,29 @@ public class ValidateInvitation extends AbstractWebScript {
                 throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
             }
 
-            //Post an activity for dossiers shared to this user 
-            /*
-            
-             TODO make it asynchronous process to avoid lock invitation process
-            
+            /**
+             * Post an activity for dossiers shared to this user executed
+             * asynchronously
              */
-            final String companyId = (String) startTask.getProperties().get(WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME);
-            Exception ePostActivity = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
+          
+            AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>() {
                 @Override
-                public Exception doWork() throws Exception {
-                    try {
+                public Void doWork() throws Exception {
+                    Action doPostActivity = actionService.createAction(
+                            AfterValidateInvitePostActivityActionExecuter.NAME, null);
 
-                        List<SecuredItem> securedItems = subSpaceAclService.getUsersSecuredItemWithKoyaPermissions(userInvited, new ArrayList<QName>() {
-                            {
-                                add(KoyaModel.TYPE_DOSSIER);
-                            }
-                        }, null);
-                        for (SecuredItem item : securedItems) {
-                            if (siteService.getSite(item.getNodeRefasObject()).getShortName().equals(companyId)) {
-                                activityService.postActivity(NotificationType.KOYA_SHARED, companyId, "koya", getActivityData(userInvited, item.getNodeRefasObject()), invitation.getInviteeUserName());
-                            }
-                        }
-                    } catch (Exception ex) {
-                        return ex;
-                    }
+                    actionService.executeAction(doPostActivity,
+                            siteService.getSite(invitation.getResourceName()).getNodeRef(), false, true);
                     return null;
                 }
             }, invitation.getInviteeUserName());
 
-            if (ePostActivity != null) {
-                /**
-                 * TODO handle this exception : throw new
-                 * KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_POST_ACTIVITY_ERROR,
-                 * ePostActivity);
-                 *
-                 */
-                logger.error("Validate Invitation Post Activity error (non blocking) : " + ePostActivity.toString());
-                ePostActivity.printStackTrace();
-            }
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");
         //TODO return validation status
         res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));
-    }
-
-    /**
-     * Helper method to get the activity data for a user
-     *
-     * @param userName user name
-     * @param role role
-     * @return
-     */
-    private String getActivityData(User user, NodeRef nodeRef) throws KoyaServiceException {
-        String memberFN = user.getFirstName();
-        String memberLN = user.getName();
-        String userMail = user.getEmail();
-
-        JSONObject activityData = new JSONObject();
-        activityData.put("memberUserName", userMail);
-        activityData.put("memberFirstName", memberFN);
-        activityData.put("memberLastName", memberLN);
-        activityData.put("title", (memberFN + " " + memberLN + " ("
-                + userMail + ")").trim());
-        activityData.put("nodeRef", nodeRef.toString());
-        return activityData.toString();
     }
 
     private boolean taskTypeMatches(WorkflowTask task, QName... types) {
