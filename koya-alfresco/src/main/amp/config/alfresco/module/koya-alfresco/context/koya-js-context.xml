@@ -33,5 +33,9 @@
         <property name="userService" ref="userService"/>
         <property name="companyService" ref="companyService"/>
         <property name="serviceRegistry" ref="ServiceRegistry"/>
+        <property name="koyaNotificationService" ref="koyaNotificationService"/>
+        <property name="nodeService" ref="NodeService"/>
+        <property name="ruleService" ref="ruleService"/>
+         
     </bean>    
 </beans>
