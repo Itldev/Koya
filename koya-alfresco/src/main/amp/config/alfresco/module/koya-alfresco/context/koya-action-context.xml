@@ -60,7 +60,34 @@
         </property>
     </bean>
     
-    
+    <bean id="koyaUnzip" class="fr.itldev.koya.action.UnzipActionExecuter">
+        <property name="nodeService" ref="nodeService" />
+        <property name="contentService" ref="contentService" />
+
+        <property name="koyaContentService" ref="koyaContentService" />
+
+        <property name="unzipCommand">
+            <bean class="org.alfresco.util.exec.RuntimeExec">
+                <property name="commandsAndArguments">
+                    <map>
+                        <entry key=".*">
+                            <list>
+                                <value>/usr/bin/unzip</value>
+                                <value>-q</value>
+                                <value>-o</value>
+                                <value>-U</value>
+                                <value>-d</value>
+                                <value>${destDir}</value>
+                                <value>${zipFile}</value>
+                            </list>
+                        </entry>
+                    </map>
+                </property>
+                <property name="waitForCompletion" value="true" />
+            </bean>
+        </property>
+    </bean>
+
     
     <!--Koya notifications actions Actions--> 
     

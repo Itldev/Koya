@@ -350,8 +350,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                             try {
                                                 logger.trace(getLogPrefix(companyName, username) + "Adding " + filename + " to " + path + " as " + name);
 
-                                                koyaContentService.createContentNode(dirNodeRef, name, filename, null, null,
-                                                        new FileInputStream(new File(contentsDir, filename)));
+                                                koyaContentService.createContentNode(dirNodeRef, name, filename, new FileInputStream(new File(contentsDir, filename)));
                                                 countContentAdded++;
                                             } catch (FileNotFoundException ex) {
                                                 logger.error(ex.getMessage(), ex);
@@ -392,8 +391,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                         }
                     } catch (Exception ioErr) {
                         throw new AlfrescoRuntimeException("Failed to import ZIP file.", ioErr);
-                    }
-                        finally {
+                    } finally {
 //                     now the import is done, delete the temporary file
                         if (tempFile != null) {
                             tempFile.delete();
@@ -401,7 +399,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                     }
                 }
             } catch (Exception ex) {
-                throw new AlfrescoRuntimeException(getLogPrefix(null, username) + " "+ex.getMessage(), ex);
+                throw new AlfrescoRuntimeException(getLogPrefix(null, username) + " " + ex.getMessage(), ex);
             }
 
         }
@@ -409,7 +407,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
     private void addKoyaPermissionCollaborator(Company c, Dossier d, User u, KoyaPermissionCollaborator permissionCollaborator) throws KoyaServiceException {
         if (societePermissions.contains(SitePermission.valueOf(siteService.getMembersRole(c.getName(), u.getUserName())))) {
-            subSpaceCollaboratorsAclService.shareSecuredItem( 
+            subSpaceCollaboratorsAclService.shareSecuredItem(
                     (SubSpace) koyaNodeService.getSecuredItem(d.getNodeRefasObject()),
                     userService.getUserByUsername(u.getUserName()).getEmail(),
                     permissionCollaborator, "", "", "", true, "");

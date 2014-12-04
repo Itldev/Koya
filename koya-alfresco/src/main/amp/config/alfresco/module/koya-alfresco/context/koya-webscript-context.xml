@@ -271,8 +271,10 @@
     <bean id="webscript.fr.itldev.koya.content.importzip.get" 
           class="fr.itldev.koya.webscript.content.ImportZip"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />
-        <property name="koyaNodeService" ref="koyaNodeService" />   
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="nodeService" ref="nodeService" />   
+        <property name="actionService" ref="ActionService"/>
+
     </bean>
     
     

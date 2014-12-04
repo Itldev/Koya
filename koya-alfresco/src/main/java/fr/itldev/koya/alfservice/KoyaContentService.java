@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -265,6 +266,14 @@ public class KoyaContentService {
         return createContentNode(parent, fileName, null, content.getMimetype(), content.getEncoding(), content.getInputStream());
     }
 
+    public Map<String, String> createContentNode(NodeRef parent, String fileName, InputStream contentInputStream) throws KoyaServiceException {
+        return createContentNode(parent, fileName, null, contentInputStream);
+    }
+
+    public Map<String, String> createContentNode(NodeRef parent, String fileName, String name, InputStream contentInputStream) throws KoyaServiceException {
+        return createContentNode(parent, fileName, name, null, null, contentInputStream);
+    }
+
     public Map<String, String> createContentNode(NodeRef parent, String fileName, String name,
             String mimetype, String encoding, InputStream contentInputStream) throws KoyaServiceException {
         Boolean rename = false;
@@ -297,8 +306,15 @@ public class KoyaContentService {
          *
          */
         ContentWriter writer = this.contentService.getWriter(createdNode, ContentModel.PROP_CONTENT, true);
-        writer.setMimetype(mimetype);
-        writer.setEncoding(encoding);
+        if (mimetype != null) {
+            writer.setMimetype(mimetype);
+        } else {
+            writer.guessMimetype(fileName);
+        }
+        if (encoding != null) {
+            writer.setEncoding(encoding);
+        }
+        writer.guessEncoding();
         writer.putContent(contentInputStream);
 
         Map<String, String> retMap = new HashMap<>();
@@ -370,54 +386,6 @@ public class KoyaContentService {
             add("application/x-zip");
         }
     });
-
-    /**
-     * Extract selected zipfile and delete it if succeed.
-     *
-     * use 'import' Action :
-     * https://svn.alfresco.com/repos/alfresco-open-mirror/alfresco/HEAD/root/projects/repository/source/java/org/alfresco/repo/action/executer/ImporterActionExecuter.java
-     *
-     * @param zipFile
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public void importZip(NodeRef zipFile) throws KoyaServiceException {
-
-        /**
-         * Checks if nodeRef is a zip file
-         */
-        try {
-            ContentReader reader = contentService.getReader(zipFile, ContentModel.PROP_CONTENT);
-            if (!ZIP_MIMETYPES.contains(reader.getMimetype())) {
-                throw new KoyaServiceException(KoyaErrorCodes.CONTENT_IS_NOT_ZIP);
-            }
-        } catch (InvalidNodeRefException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF, ex);
-        }
-
-        try {
-            Map<String, Serializable> paramsImport = new HashMap<>();
-            paramsImport.put(ImporterActionExecuter.PARAM_ENCODING, "UTF-8");
-            paramsImport.put(ImporterActionExecuter.PARAM_DESTINATION_FOLDER, nodeService.getPrimaryParent(zipFile).getParentRef());
-            Action importZip = actionService.createAction(ImporterActionExecuter.NAME, paramsImport);
-            /**
-             * Process must be executed synchronously in order to delete
-             * original zip
-             *
-             * We could also have written a new action that exctracts AND delete
-             * zip.
-             */
-            importZip.setExecuteAsynchronously(false);
-            actionService.executeAction(importZip, zipFile);
-        } catch (InvalidNodeRefException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.ZIP_EXTRACTION_PROCESS_ERROR, ex);
-        }
-
-        try {
-            fileFolderService.delete(zipFile);
-        } catch (Exception ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.FILE_DELETE_ERROR, ex);
-        }
-    }
 
     private void addToZip(NodeRef node, ZipArchiveOutputStream out, String path) throws IOException {
         QName nodeQnameType = this.nodeService.getType(node);
