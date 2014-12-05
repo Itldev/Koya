@@ -310,11 +310,8 @@ public class CompanyAclService {
         Assert.notNull(rejectUrl, "rejectUrl is null");
 
         User u = userService.getUserByEmailFailOver(userMail);
-        if (u == null) {
 
-//            return invitationService.inviteNominated(null, userMail, userMail,
-//                    Invitation.ResourceType.WEB_SITE, c.getName(),
-//                    permission.toString(), serverPath, acceptUrl, rejectUrl);
+        if (u == null) {
             /**
              * Workaround to resolve invite by user bug :
              *
@@ -336,13 +333,18 @@ public class CompanyAclService {
             });
 
         } else {
+            /**
+             *
+             * User exist so we've to check if he has already a role on company
+             *
+             */
             SitePermission sitePermission = getSitePermission(c, u);
 
             if (sitePermission == null) {
                 //no setted permission -> do it
                 siteService.setMembership(c.getName(), u.getUserName(), permission.toString());
             } else {
-                //already site member ...
+                throw new KoyaServiceException(KoyaErrorCodes.SECU_USER_CANT_BE_INVITED_ALREADY_EXISTS_IN_COMPANY_WITH_OTHER_ROLE);
             }
         }
 
