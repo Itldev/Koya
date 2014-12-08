@@ -156,7 +156,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(directory))) {
             for (Path path : directoryStream) {
                 String fileName = path.getFileName().toString();
-                                logger.debug("nex :"+fileName);
+                logger.debug("nex :" + fileName);
 
                 if (Files.isRegularFile(path)) {
                     koyaContentService.createContentNode(root, fileName, Files.newInputStream(path));
@@ -174,29 +174,6 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
             }
         } catch (IOException ex) {
         }
-//
-//        File topdir = new File(dir);
-//        for (File file : topdir.listFiles()) {
-//            try {
-//                String fileName = file.getName();
-//                logger.debug(fileName);
-//                if (file.isFile()) {
-//                    // create content node 
-//                    koyaContentService.createContentNode(root, fileName, new FileInputStream(file));
-//                } else {
-//                    // create a folder node
-//                    Directory d = koyaContentService.createDir(fileName, root);
-//
-//                    logger.debug(file.getPath());
-//                    // recurcive call to import folder contents
-//                    importDirectory(file.getPath(), d.getNodeRefasObject());
-//                }
-//            } catch (FileNotFoundException e) {
-//
-//            } catch (FileExistsException e) {
-//                //TODO: Do something, rename ?
-//            }
-//        }
     }
 
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) {

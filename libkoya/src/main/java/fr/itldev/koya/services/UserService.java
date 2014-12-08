@@ -22,6 +22,7 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.net.MalformedURLException;
 import java.util.List;
 import org.springframework.web.client.RestClientException;
 
@@ -89,7 +90,7 @@ public interface UserService {
      * @param newPassword
      * @throws AlfrescoServiceException
      */
-    void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException;
+    void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException, MalformedURLException;
 
     /**
      * find users list wich first/last name or email starts with query. Return
