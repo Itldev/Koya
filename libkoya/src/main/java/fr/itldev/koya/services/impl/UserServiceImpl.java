@@ -244,9 +244,12 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     }
 
     @Override
-    public void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException {
+    public void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException, MalformedURLException {
         userLog.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_CHANGEPASSWORD, String.class, oldPassword, newPassword);
+                
+        userLog.setRestTemplate(getAuthenticatedRestTemplate(userLog.getUserName(), newPassword));
+
     }
 
     /**
