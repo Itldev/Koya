@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.alfresco.repo.invitation.InvitationSearchCriteriaImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteDoesNotExistException;
@@ -52,7 +51,6 @@ import org.alfresco.util.collections.CollectionUtils;
 import org.alfresco.util.collections.Filter;
 import org.alfresco.util.collections.Function;
 import org.apache.log4j.Logger;
-import org.springframework.util.Assert;
 
 public class CompanyAclService {
 
@@ -68,6 +66,13 @@ public class CompanyAclService {
 
     protected CompanyService companyService;
     protected KoyaNodeService koyaNodeService;
+
+    /*
+     * Invitation Url Params     
+     */
+    private String koyaClientServerPath;
+    private String koyaClientAcceptUrl;
+    private String koyaClientRejectUrl;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setAuthorityService(AuthorityService authorityService) {
@@ -96,6 +101,18 @@ public class CompanyAclService {
 
     public void setPermissionService(PermissionService permissionService) {
         this.permissionService = permissionService;
+    }
+
+    public void setKoyaClientServerPath(String koyaClientServerPath) {
+        this.koyaClientServerPath = koyaClientServerPath;
+    }
+
+    public void setKoyaClientAcceptUrl(String koyaClientAcceptUrl) {
+        this.koyaClientAcceptUrl = koyaClientAcceptUrl;
+    }
+
+    public void setKoyaClientRejectUrl(String koyaClientRejectUrl) {
+        this.koyaClientRejectUrl = koyaClientRejectUrl;
     }
 
     //</editor-fold>
@@ -296,18 +313,11 @@ public class CompanyAclService {
      * @param c
      * @param userMail
      * @param permission
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
      * @return
      * @throws KoyaServiceException
      */
-    public Invitation inviteMember(final Company c, final String userMail, final SitePermission permission,
-            final String serverPath, final String acceptUrl, final String rejectUrl) throws KoyaServiceException {
-
-        Assert.notNull(serverPath, "serverPath is null");
-        Assert.notNull(acceptUrl, "acceptUrl is null");
-        Assert.notNull(rejectUrl, "rejectUrl is null");
+    public Invitation inviteMember(final Company c, final String userMail,
+            final SitePermission permission) throws KoyaServiceException {
 
         User u = userService.getUserByEmailFailOver(userMail);
 
@@ -328,7 +338,8 @@ public class CompanyAclService {
                 public Invitation doWork() throws Exception {
                     return invitationService.inviteNominated(null, userMail, userMail,
                             Invitation.ResourceType.WEB_SITE, c.getName(),
-                            permission.toString(), serverPath, acceptUrl, rejectUrl);
+                            permission.toString(), koyaClientServerPath,
+                            koyaClientAcceptUrl, koyaClientRejectUrl);
                 }
             });
 

@@ -58,13 +58,11 @@ public interface SharePolicies {
          *
          * @param nodeRef the reference to the item has been shared
          * @param userMail
-         * @param invitation
          * @param inviter
          * @param sharedByImporter
-         * @param directAccessUrl
          */
-        public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation,
-                User inviter, Boolean sharedByImporter,String directAccessUrl);
+        public void afterShareItem(NodeRef nodeRef, String userMail,
+                User inviter, Boolean sharedByImporter);
     }
 
     public interface BeforeUnsharePolicy extends ClassPolicy {

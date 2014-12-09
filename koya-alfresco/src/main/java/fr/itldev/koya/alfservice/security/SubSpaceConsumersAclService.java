@@ -28,15 +28,11 @@ public class SubSpaceConsumersAclService extends SubSpaceAclService {
      * @param subSpace
      * @param userMail
      * @param perm
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
-     * @return
      * @throws KoyaServiceException
      */
     @Override
-    protected Invitation shareSecuredItemImpl(final SubSpace subSpace, String userMail, KoyaPermission perm,
-            String serverPath, String acceptUrl, String rejectUrl) throws KoyaServiceException {
+    protected void shareSecuredItemImpl(final SubSpace subSpace, String userMail,
+            KoyaPermission perm) throws KoyaServiceException {
 
         if (!Dossier.class.isAssignableFrom(subSpace.getClass())) {
             throw new KoyaServiceException(KoyaErrorCodes.SECU_UNSHARABLE_TYPE);
@@ -45,16 +41,15 @@ public class SubSpaceConsumersAclService extends SubSpaceAclService {
         if (!KoyaPermissionConsumer.getAll().contains(perm)) {
             throw new KoyaServiceException(KoyaErrorCodes.SECU_UNSETTABLE_PERMISSION);
         }
-      
+
         //Get company the shared Node belongs To
-        Company company = koyaNodeService.getFirstParentOfType(subSpace.getNodeRefasObject(),Company.class);
+        Company company = koyaNodeService.getFirstParentOfType(subSpace.getNodeRefasObject(), Company.class);
         SitePermission userPermissionInCompany = companyAclService.getSitePermission(company, userMail);
-        
+
         Invitation invitation = null;
         //If user can't access specified company then invite him even if he alredy exists in alfresco
         if (userPermissionInCompany == null) {
-            invitation = companyAclService.inviteMember(company, userMail, SitePermission.CONSUMER,
-                    serverPath, acceptUrl, rejectUrl);
+            invitation = companyAclService.inviteMember(company, userMail, SitePermission.CONSUMER);
             userPermissionInCompany = companyAclService.getSitePermission(company, userMail);
         }
 
@@ -64,14 +59,13 @@ public class SubSpaceConsumersAclService extends SubSpaceAclService {
         if (userPermissionInCompany.equals(SitePermission.CONSUMER)) {
             //exec as system user if current user is member of dossier -> get temporarly more permissions
             //TODO check user role (is KoyaMember on shared dossier) before run
-               AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
-                    @Override
-                    public Object doWork() throws Exception {
-                         grantSubSpacePermission(subSpace, u.getUserName(), KoyaPermissionConsumer.CLIENT);
-                      return null;
-                    }
-                });            
-            return invitation;
+            AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
+                @Override
+                public Object doWork() throws Exception {
+                    grantSubSpacePermission(subSpace, u.getUserName(), KoyaPermissionConsumer.CLIENT);
+                    return null;
+                }
+            });
         } else {
             logger.error("Consumer Share not available for " + userPermissionInCompany.toString() + " users");
             throw new KoyaServiceException(KoyaErrorCodes.SECU_USER_MUSTBE_CONSUMER_TO_APPLY_PERMISSION);

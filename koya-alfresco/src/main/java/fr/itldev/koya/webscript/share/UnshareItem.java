@@ -20,17 +20,16 @@ package fr.itldev.koya.webscript.share;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SubSpaceConsumersAclService;
-import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.interfaces.SubSpace;
-import fr.itldev.koya.model.json.SharingWrapper;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
-import org.alfresco.service.transaction.TransactionService;
+import java.util.Map;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -40,14 +39,12 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  * Share secured items webscript.
  *
  */
-public class ShareItems extends AbstractWebScript {
+public class UnshareItem extends AbstractWebScript {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
     private SubSpaceConsumersAclService subSpaceConsumersAclService;
     private KoyaNodeService koyaNodeService;
-
-    private TransactionService transactionService;
 
     public void setSubSpaceConsumersAclService(SubSpaceConsumersAclService subSpaceConsumersAclService) {
         this.subSpaceConsumersAclService = subSpaceConsumersAclService;
@@ -55,10 +52,6 @@ public class ShareItems extends AbstractWebScript {
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
-    }
-
-    public void setTransactionService(TransactionService transactionService) {
-        this.transactionService = transactionService;
     }
 
     /**
@@ -70,45 +63,21 @@ public class ShareItems extends AbstractWebScript {
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
+        Map<String, Object> params = KoyaWebscript.getJsonMap(req);
+
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            SharingWrapper sw = mapper.readValue(req.getContent().getReader(), SharingWrapper.class);
-
-            //extract shared elements
-            for (String n : sw.getSharedNodeRefs()) {
-
-                SecuredItem si = koyaNodeService.getSecuredItem(koyaNodeService.getNodeRef(n));
-
-                if (SubSpace.class.isAssignableFrom(si.getClass())) {
-                    SubSpace subSpace = (SubSpace) si;
-
-                    for (String userMail : sw.getSharingUsersMails()) { //TODO limiter aux subspaces dans le wrapper unique
-                        UserTransaction ut = transactionService.getNonPropagatingUserTransaction();
-
-                        try {
-
-                            ut.begin();
-                            if (!sw.isResetSharings()) {
-                                subSpaceConsumersAclService.shareSecuredItem(subSpace, userMail,
-                                        KoyaPermissionConsumer.CLIENT,
-                                        sw.getServerPath(), sw.getAcceptUrl(), sw.getRejectUrl(), false,
-                                        sw.getDirectAccessUrl());
-                            } else {
-                                subSpaceConsumersAclService.unShareSecuredItem(subSpace, userMail,
-                                        KoyaPermissionConsumer.CLIENT);
-                            }
-                            ut.commit();
-                        } catch (Exception ex) {
-                            logger.error(ex.getMessage(), ex);
-
-                            try {
-                                ut.rollback();
-                            } catch (IllegalStateException | SecurityException | SystemException ex1) {
-                            }
-                        }
-                    }
-                }
+            NodeRef n = koyaNodeService.getNodeRef((String) params.get(KoyaWebscript.WSCONST_NODEREF));
+            SubSpace s;
+            SecuredItem si = koyaNodeService.getSecuredItem(n);
+            if (SubSpace.class.isAssignableFrom(si.getClass())) {
+                s = (SubSpace) si;
+            } else {
+                throw new KoyaServiceException(KoyaErrorCodes.INVALID_SECUREDITEM_NODEREF);
             }
+
+            subSpaceConsumersAclService.unShareSecuredItem(s,
+                    (String) params.get(KoyaWebscript.WSCONST_EMAIL),
+                    KoyaPermission.valueOf((String) params.get(KoyaWebscript.WSCONST_KOYAPERMISSION)));
 
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

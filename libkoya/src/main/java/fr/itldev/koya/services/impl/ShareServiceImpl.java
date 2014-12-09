@@ -24,12 +24,14 @@ import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.SubSpace;
-import fr.itldev.koya.model.json.SharingWrapper;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.ShareService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import fr.itldev.koya.services.impl.util.CacheConfig;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.InitializingBean;
@@ -40,10 +42,12 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class ShareServiceImpl extends AlfrescoRestService implements ShareService, InitializingBean {
 
-    protected static final String REST_POST_SHAREITEMS = "/s/fr/itldev/koya/share/shareitems";
     protected static final String REST_GET_SHAREDUSERS = "/s/fr/itldev/koya/share/sharedusers/{noderef}";
     protected static final String REST_GET_SHAREDITEMS = "/s/fr/itldev/koya/share/listusershares/{userName}/{companyName}";
     protected static final String REST_GET_ISSHAREDWITHCONSUMER = "/s/fr/itldev/koya/share/consumer/{noderef}";
+
+    protected static final String REST_POST_SHARESINGLE = "/s/fr/itldev/koya/share/do";
+    protected static final String REST_POST_UNSHARESINGLE = "/s/fr/itldev/koya/share/undo";
 
     private Cache<SubSpace, Boolean> nodeSharedWithConsumerCache;
     private CacheConfig nodeSharedWithConsumerCacheConfig;
@@ -69,52 +73,41 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
         }
     }
 
-    /**
-     * Shares SecuredItems to a list of users (pre created or not)
-     *
-     * @param user
-     * @param sharedItems
-     * @param usersMails
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
-     */
     @Override
-    public void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails, String serverPath, String acceptUrl, String rejectUrl, String directAccessUrl) {
-
+    public void shareItem(User user, SecuredItem itemToShare, String sharedUserMail) throws AlfrescoServiceException {
         if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-            for (SecuredItem si : sharedItems) {
-                nodeSharedWithConsumerCache.invalidate(si);
-            }
+            nodeSharedWithConsumerCache.invalidate(itemToShare);
         }
 
-        user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_SHAREITEMS,
-                new SharingWrapper(sharedItems, usersMails,
-                        serverPath, acceptUrl, rejectUrl, directAccessUrl), String.class);
+        Map<String, String> shareParams = new HashMap<>();
+        shareParams.put("email", sharedUserMail);
+        shareParams.put("nodeRef", itemToShare.getNodeRef());
+        shareParams.put("koyaPermission", KoyaPermissionConsumer.CLIENT.toString());
 
-        //TODO analyse return
+        user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_SHARESINGLE,
+                shareParams, String.class);
     }
 
     /**
-     * Undo shares to sepcified users.
+     * Undo shares to sepcified user.
      *
      * @param user
-     * @param sharedItems
-     * @param usersMails
      */
     @Override
-    public void unShareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails) {
+    public void unShareItem(User user, SecuredItem itemToUnShare, String unsharedUserMail) throws AlfrescoServiceException {
         if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-            for (SecuredItem si : sharedItems) {
-                nodeSharedWithConsumerCache.invalidate(si);
-            }
+            nodeSharedWithConsumerCache.invalidate(itemToUnShare);
         }
-        user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_SHAREITEMS,
-                new SharingWrapper(sharedItems, usersMails, Boolean.TRUE), String.class);
 
-        //TODO analyse return
+        Map<String, String> unshareParams = new HashMap<>();
+        unshareParams.put("email", unsharedUserMail);
+        unshareParams.put("nodeRef", itemToUnShare.getNodeRef());
+        unshareParams.put("koyaPermission", KoyaPermissionConsumer.CLIENT.toString());
+
+        user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_POST_UNSHARESINGLE,
+                unshareParams, String.class);
     }
 
     /**

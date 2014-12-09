@@ -31,6 +31,16 @@
         <property name="invitationService" ref="invitationService"/>
         <property name="actionService" ref="ActionService"/>
         <property name="authorityService" ref="AuthorityService"/>
+        
+        <property name="koyaClientServerPath" >
+            <value>${koya.client.serverPath}</value>
+        </property>           
+        <property name="koyaClientAcceptUrl" >
+            <value>${koya.client.acceptUrl}</value>
+        </property>           
+        <property name="koyaClientRejectUrl" >
+            <value>${koya.client.rejectUrl}</value>
+        </property>           
     </bean>
     
     

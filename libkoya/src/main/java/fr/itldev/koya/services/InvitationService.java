@@ -17,14 +17,10 @@ public interface InvitationService extends AlfrescoService {
      * @param userLogged
      * @param c
      * @param userEmail
-     * @param roleName
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
+     * @param roleName    
      * @throws AlfrescoServiceException
      */
-    void inviteUser(User userLogged, Company c, String userEmail, String roleName,
-            String serverPath, String acceptUrl, String rejectUrl) throws AlfrescoServiceException;
+    void inviteUser(User userLogged, Company c, String userEmail, String roleName) throws AlfrescoServiceException;
 
     /**
      * Validate invitation giving user modifications;

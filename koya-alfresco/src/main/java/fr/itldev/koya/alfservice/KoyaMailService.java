@@ -8,7 +8,6 @@ import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +114,7 @@ public class KoyaMailService {
     }
 
     //</editor-fold>
-    public void sendShareNotifMail(User sender, String destMail, NodeRef sharedNodeRef, String directAccessUrl) throws KoyaServiceException {
+    public void sendShareNotifMail(User sender, String destMail, NodeRef sharedNodeRef) throws KoyaServiceException {
         Map<String, Serializable> paramsMail = new HashMap<>();
         
         paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
@@ -133,7 +132,7 @@ public class KoyaMailService {
         /**
          * TODO use global-properties param to set reset request url
          */
-        templateParams.put("directAccessUrl", directAccessUrl);
+        templateParams.put("directAccessUrl", getDirectLinkUrl(sharedNodeRef));
         templateParams.put("sharedItemNodeRef", s.getNodeRef());
         templateParams.put("sharedItemName", s.getTitle());
         templateParams.put("inviterName", sender.getName());
@@ -197,9 +196,9 @@ public class KoyaMailService {
             }
         });
         templateModel.put("date", nodeService.getProperty(sharedItem, ContentModel.PROP_UPDATED));
-        
+
         /**
-         * TODO Add company and dossiers  (or all path ) references to template
+         * TODO Add company and dossiers (or all path ) references to template
          */
         paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
         

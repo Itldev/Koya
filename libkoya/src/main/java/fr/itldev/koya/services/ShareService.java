@@ -32,26 +32,24 @@ import java.util.List;
 public interface ShareService extends AlfrescoService {
 
     /**
-     * Shares SecuredItems to a list of users (pre created or not)
+     * Public share SecuredItem to a user (pre created or not)
      *
      * @param user
-     * @param sharedItems
-     * @param usersMails
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
-     * @param directAccessUrl
+     * @param itemToShare
+     * @param sharedUserMail
+     *
      */
-    void shareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails, String serverPath, String acceptUrl, String rejectUrl,String directAccessUrl);
+    void shareItem(User user, SecuredItem itemToShare, String sharedUserMail) throws AlfrescoServiceException;
 
     /**
      * Revoke Shares SecuredItems to a list of users
      *
      * @param user
-     * @param sharedItems
-     * @param usersMails
+     * @param itemToUnShare
+     * @param unsharedUserMail
+     *
      */
-    void unShareItems(User user, List<SecuredItem> sharedItems, List<String> usersMails);
+    void unShareItem(User user, SecuredItem itemToUnShare, String unsharedUserMail) throws AlfrescoServiceException;
 
     /**
      * Show Users who can publicly access to given element.
