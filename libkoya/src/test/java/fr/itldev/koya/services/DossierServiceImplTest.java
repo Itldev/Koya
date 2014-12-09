@@ -86,7 +86,7 @@ public class DossierServiceImplTest extends TestCase {
                 String userName = "userdossiertest" + randomPart + "_test_com";
 
                 invitationService.inviteUser(admin, companyTests, mail,
-                        "SiteManager", "", "", "");
+                        "SiteManager");
                 secuService.setUserRole(admin, companyTests, userName, "SiteManager");
                 users = userService.find(admin, null, 10, companyTests, null);
             } catch (Exception ex) {

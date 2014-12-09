@@ -58,32 +58,25 @@ public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolic
     }
 
     @Override
-    public void afterShareItem(NodeRef nodeRef, String userMail, Invitation invitation, User inviter, Boolean sharedByImporter,
-            String directAccessUrl) {
-        if (invitation == null) {
-            try {
-                User user = userService.getUser(userMail);
-                if (user.isEnabled() != null && user.isEnabled()) {
-                    String siteShortName = siteService.getSiteShortName(nodeRef);
+    public void afterShareItem(NodeRef nodeRef, String userMail, User inviter, Boolean sharedByImporter) {
+        try {
+            User user = userService.getUser(userMail);
+            if (user.isEnabled() != null && user.isEnabled()) {
+                String siteShortName = siteService.getSiteShortName(nodeRef);
 
-                    List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName, null, user.getUserName());
+                List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName, null, user.getUserName());
 
-                    if (invitations.isEmpty()) {
+                if (invitations.isEmpty()) {
                         //Posting the according activity
 
-                        //TODO call action or use condition
-                        activityService.postActivity(NotificationType.KOYA_SHARED,
-                                siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
-                    }
+                    //TODO call action or use condition
+                    activityService.postActivity(NotificationType.KOYA_SHARED,
+                            siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
                 }
-            } catch (KoyaServiceException ex) {
-                logger.error(ex.getMessage(), ex);
             }
-
-        } else {
-            //Nothing to do : invitation sent 
+        } catch (KoyaServiceException ex) {
+            logger.error(ex.getMessage(), ex);
         }
-
     }
 
     @Override

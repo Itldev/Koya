@@ -78,13 +78,11 @@ public class ShareServiceImplTest extends TestCase {
 
     @Test
     public void testShareDossiers() throws AlfrescoServiceException {
-        List<SecuredItem> sharedDossiers = new ArrayList<>();
-        sharedDossiers.add(dossierService.create(admin, spaceTests, "doss1"));
-        sharedDossiers.add(dossierService.create(admin, spaceTests, "doss2"));
 
-        List<String> shareToUsersMails = new ArrayList<>();
-        shareToUsersMails.add("test@itldev.fr");
+        Dossier d1 = dossierService.create(admin, spaceTests, "doss1");
+        Dossier d2 = dossierService.create(admin, spaceTests, "doss2");
 
-        shareService.shareItems(admin, sharedDossiers, shareToUsersMails, "http://localhost:9090/test", "accept.xhtml", "reject.xhtml","");
+        shareService.shareItem(admin, d1, "test@itldev.fr");
+        shareService.shareItem(admin, d2, "test@itldev.fr");
     }
 }

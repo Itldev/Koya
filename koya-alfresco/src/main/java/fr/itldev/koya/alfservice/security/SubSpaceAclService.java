@@ -269,31 +269,26 @@ public class SubSpaceAclService {
      * @param subSpace
      * @param userMail
      * @param perm
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
      * @param sharedByImporter
-     * @param directAccessUrl
      * @throws KoyaServiceException
      */
-    public void shareSecuredItem(final SubSpace subSpace, final String userMail, final KoyaPermission perm,
-            final String serverPath, final String acceptUrl, final String rejectUrl, final Boolean sharedByImporter,
-            final String directAccessUrl) throws KoyaServiceException {
+    public void shareSecuredItem(final SubSpace subSpace, final String userMail,
+            final KoyaPermission perm, final Boolean sharedByImporter) throws KoyaServiceException {
 
-            User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
+        User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
 
-            beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                    .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
+        beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
+                .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
 
-            Invitation invitation = shareSecuredItemImpl(subSpace, userMail, perm, serverPath, acceptUrl, rejectUrl);
+        shareSecuredItemImpl(subSpace, userMail, perm);
 
-            afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                    .afterShareItem(subSpace.getNodeRefasObject(), userMail, invitation, inviter, sharedByImporter, directAccessUrl);
+        afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
+                .afterShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
 
     }
 
-    protected Invitation shareSecuredItemImpl(SubSpace subSpace, String userMail, KoyaPermission perm,
-            String serverPath, String acceptUrl, String rejectUrl) throws KoyaServiceException {
+    protected void shareSecuredItemImpl(SubSpace subSpace, String userMail,
+            KoyaPermission perm) throws KoyaServiceException {
         throw new KoyaServiceException(0);//TODO errror code - shoulnever be called
     }
 

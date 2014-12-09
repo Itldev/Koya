@@ -16,58 +16,69 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.dossier;
+package fr.itldev.koya.webscript.share;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
-import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
+import fr.itldev.koya.alfservice.security.SubSpaceConsumersAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.interfaces.SubSpace;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
- *
- * Add one or many persons in charge of specified dossier.
+ * Share secured items webscript.
  *
  */
-public class AddMember extends AbstractWebScript {
+public class ShareItem extends AbstractWebScript {
 
-    private SubSpaceCollaboratorsAclService SubSpaceCollaboratorsAclService;
+    private final Logger logger = Logger.getLogger(this.getClass());
+
+    private SubSpaceConsumersAclService subSpaceConsumersAclService;
     private KoyaNodeService koyaNodeService;
-    private UserService userService;
 
-    public void setSubSpaceCollaboratorsAclService(SubSpaceCollaboratorsAclService SubSpaceCollaboratorsAclService) {
-        this.SubSpaceCollaboratorsAclService = SubSpaceCollaboratorsAclService;
+    public void setSubSpaceConsumersAclService(SubSpaceConsumersAclService subSpaceConsumersAclService) {
+        this.subSpaceConsumersAclService = subSpaceConsumersAclService;
     }
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
+    /**
+     *
+     * @param req
+     * @param res
+     * @throws IOException
+     */
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+
+        Map<String, Object> params = KoyaWebscript.getJsonMap(req);
 
         try {
-            NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-            String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
+            NodeRef n = koyaNodeService.getNodeRef((String) params.get(KoyaWebscript.WSCONST_NODEREF));
+           
+            SubSpace s;
+            SecuredItem si = koyaNodeService.getSecuredItem(n);
+            if (SubSpace.class.isAssignableFrom(si.getClass())) {
+                s = (SubSpace) si;
+            } else {
+                throw new KoyaServiceException(KoyaErrorCodes.INVALID_SECUREDITEM_NODEREF);
+            }
 
-            SubSpaceCollaboratorsAclService.shareSecuredItem(
-                    (SubSpace) koyaNodeService.getSecuredItem(nodeRef),
-                    userService.getUserByUsername(userName).getEmail(),
-                    KoyaPermissionCollaborator.MEMBER, false);
+            subSpaceConsumersAclService.shareSecuredItem((SubSpace) koyaNodeService.getSecuredItem(n),
+                    (String) params.get(KoyaWebscript.WSCONST_EMAIL),
+                    KoyaPermission.valueOf((String) params.get(KoyaWebscript.WSCONST_KOYAPERMISSION)), false);
 
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

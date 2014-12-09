@@ -518,12 +518,19 @@
     -->
     
     <!-- share secured item -->
-    <bean id="webscript.fr.itldev.koya.share.shareitems.post" 
-          class="fr.itldev.koya.webscript.share.ShareItems"
+    <bean id="webscript.fr.itldev.koya.share.doshare.post" 
+          class="fr.itldev.koya.webscript.share.ShareItem"
           parent="webscript">                
         <property name="subSpaceConsumersAclService" ref="subSpaceConsumersAclService" />   
         <property name="koyaNodeService" ref="koyaNodeService" />   
-        <property name="transactionService" ref="transactionService"/>
+    </bean>
+    
+    <!-- unshare secured item -->
+    <bean id="webscript.fr.itldev.koya.share.undoshare.post" 
+          class="fr.itldev.koya.webscript.share.UnshareItem"
+          parent="webscript">                
+        <property name="subSpaceConsumersAclService" ref="subSpaceConsumersAclService" />   
+        <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     <!-- items shared with users -->

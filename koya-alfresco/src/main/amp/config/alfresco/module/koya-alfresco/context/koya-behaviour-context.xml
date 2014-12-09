@@ -111,6 +111,9 @@
           init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
         <property name="policyComponent" ref="policyComponent" />       
         <property name="koyaMailService" ref="koyaMailService" />       
+        <property name="koyaNodeService" ref="koyaNodeService" />       
+        <property name="userService" ref="userService" />       
+        <property name="companyAclService" ref="companyAclService" />       
     </bean>
     
     

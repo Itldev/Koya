@@ -64,6 +64,7 @@ public abstract class KoyaWebscript {
     public static final String WSCONST_XPATH = "xPath";
     public static final String WSCONST_SPACETEMPLATE = "spacetemplate";
     public static final String WSCONST_SALESOFFER = "salesoffer";
+    public static final String WSCONST_KOYAPERMISSION = "koyaPermission";
 
     /**
      * Extracts JSON POST data.
@@ -102,7 +103,7 @@ public abstract class KoyaWebscript {
                  * Decode double encoded url parameter : ex string with accent
                  * characters
                  *
-                 * TODO charset  permissive implementation 
+                 * TODO charset permissive implementation
                  */
                 param = new String(req.getParameter(k).getBytes("iso-8859-1"), "UTF-8");
             } catch (UnsupportedEncodingException ex) {

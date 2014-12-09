@@ -26,16 +26,12 @@ public class SubSpaceCollaboratorsAclService extends SubSpaceAclService {
      *
      * @param subSpace
      * @param userMail
-     * @param perm
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
+     * @param perm    
      * @return
      * @throws KoyaServiceException
      */
     @Override
-    protected Invitation shareSecuredItemImpl(SubSpace subSpace, String userMail, KoyaPermission perm,
-            String serverPath, String acceptUrl, String rejectUrl) throws KoyaServiceException {
+    protected void shareSecuredItemImpl(SubSpace subSpace, String userMail, KoyaPermission perm) throws KoyaServiceException {
 
         if (!Dossier.class.isAssignableFrom(subSpace.getClass())) {
             throw new KoyaServiceException(KoyaErrorCodes.SECU_UNSHARABLE_TYPE);
@@ -63,7 +59,6 @@ public class SubSpaceCollaboratorsAclService extends SubSpaceAclService {
         if (userPermissionInCompany.equals(SitePermission.COLLABORATOR)
                 || userPermissionInCompany.equals(SitePermission.MANAGER)) {
             grantSubSpacePermission(subSpace, u.getUserName(), perm);
-            return null;
         } else {
             logger.error("Collaborator Share not available for " + userPermissionInCompany.toString() + " users");
             throw new KoyaServiceException(KoyaErrorCodes.SECU_USER_MUSTBE_COLLABORATOR_OR_ADMIN_TO_APPLY_PERMISSION);

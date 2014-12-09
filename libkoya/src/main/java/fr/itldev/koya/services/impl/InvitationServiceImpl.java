@@ -41,22 +41,16 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
      * @param c
      * @param userEmail
      * @param roleName
-     * @param serverPath
-     * @param acceptUrl
-     * @param rejectUrl
      * @throws AlfrescoServiceException
      */
     @Override
-    public void inviteUser(User userLogged, Company c, String userEmail, String roleName,
-            String serverPath, String acceptUrl, String rejectUrl) throws AlfrescoServiceException {
+    public void inviteUser(User userLogged, Company c, String userEmail,
+            String roleName) throws AlfrescoServiceException {
 
         InviteWrapper iw = new InviteWrapper();
         iw.setCompanyName(c.getName());
         iw.setEmail(userEmail);
         iw.setRoleName(roleName);
-        iw.setAcceptUrl(acceptUrl);
-        iw.setServerPath(serverPath);
-        iw.setRejectUrl(rejectUrl);
 
         userLogged.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_INVITEUSER, iw,
