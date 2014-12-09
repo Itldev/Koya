@@ -174,4 +174,12 @@ public interface UserService {
      */
     void validateNewPasswordfromResetProcess(String resetId, String resetTicket, String newPassword) throws AlfrescoServiceException;
 
+    /**
+     * Get Groups curretn user belongs to
+     *
+     * @param user
+     * @return
+     */
+    List<String> getGroups(User user);
+
 }

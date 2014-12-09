@@ -447,6 +447,14 @@
           parent="webscript">                
         <property name="userService" ref="userService" /> 
     </bean>
+    
+    <bean id="webscript.fr.itldev.koya.user.groups.get"
+          class="fr.itldev.koya.webscript.user.GetGroups"
+          parent="webscript">                        
+        <property name="authorityService" ref="AuthorityService"/>
+        <property name="authenticationService" ref="AuthenticationService"/>
+
+    </bean>
 
     
     

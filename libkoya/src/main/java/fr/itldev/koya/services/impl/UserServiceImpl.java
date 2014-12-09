@@ -21,6 +21,7 @@ package fr.itldev.koya.services.impl;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
+import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
 import fr.itldev.koya.services.UserService;
@@ -70,6 +71,7 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find?"
             + "query={query}&maxResults={maxresults}&companyName={companyName}&roleFilter={roleFilter}";
     private static final String REST_GET_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword/{oldpwd}/{newpwd}";
+    private static final String REST_GET_GROUPS = "/s/fr/itldev/koya/user/groups";
 
     //===== Preferences
     private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
@@ -431,4 +433,13 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
                 + REST_POST_RESET_PASSWORD_VALIDATION, params, String.class);
     }
 
+    @Override
+    public List<String> getGroups(User user) {
+
+        return fromJSON(new TypeReference<List<String>>() {
+        }, user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_GROUPS,
+                String.class));
+
+    }
 }
