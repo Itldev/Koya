@@ -163,7 +163,7 @@ public class KoyaNodeService {
                 try {
                     NodeRef n = getNodeRef(favStr);
                     favourites.add(getSecuredItem(n));
-                } catch (KoyaServiceException e) {
+                } catch (KoyaServiceException | NullPointerException e) {
                     logger.error("Ignored Favourite nodeRef (FOLDERS) " + favStr + " : " + e.getMessage());
                 }
             }
@@ -175,7 +175,7 @@ public class KoyaNodeService {
                 try {
                     NodeRef n = getNodeRef(favStr);
                     favourites.add(getSecuredItem(n));
-                } catch (KoyaServiceException e) {
+                } catch (KoyaServiceException | NullPointerException e) {
                     logger.error("Ignored Favourite nodeRef (DOCS) " + favStr + " : " + e.getMessage());
                 }
             }
@@ -188,7 +188,7 @@ public class KoyaNodeService {
                 String compName = k.substring(FAVOURITES_PREF_COMPANIES.length() + 1);
                 try {
                     favourites.add(companyBuilder(compName));
-                } catch (KoyaServiceException e) {
+                } catch (KoyaServiceException | NullPointerException e) {
                     logger.error("Ignored Favourite nodeRef (COMPANY) " + k + " : " + e.getMessage());
                 }
 
