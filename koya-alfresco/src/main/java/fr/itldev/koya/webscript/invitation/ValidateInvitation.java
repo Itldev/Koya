@@ -19,11 +19,9 @@
 package fr.itldev.koya.webscript.invitation;
 
 import fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter;
-import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
@@ -213,7 +211,6 @@ public class ValidateInvitation extends AbstractWebScript {
              * Post an activity for dossiers shared to this user executed
              * asynchronously
              */
-          
             AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>() {
                 @Override
                 public Void doWork() throws Exception {
@@ -229,6 +226,7 @@ public class ValidateInvitation extends AbstractWebScript {
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
+        logger.info("[Koya] invitation validation : user " + userInvited.getEmail() + "has validated his account");
         res.setContentType("application/json");
         //TODO return validation status
         res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));

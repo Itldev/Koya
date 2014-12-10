@@ -107,7 +107,9 @@ public class DossierService {
                 KoyaModel.TYPE_DOSSIER,
                 properties);
 
-        return koyaNodeService.getSecuredItem(car.getChildRef(), Dossier.class);
+        Dossier created = koyaNodeService.getSecuredItem(car.getChildRef(), Dossier.class);
+        logger.info("[Koya] Dossier creation : " + created.getTitle() + " created (" + created.getNodeRef() + ")");
+        return created;
     }
 
     /**
