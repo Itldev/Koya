@@ -18,21 +18,52 @@
  */
 package fr.itldev.koya.services.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.InviteWrapper;
 import fr.itldev.koya.services.InvitationService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.impl.util.CacheConfig;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.beans.factory.InitializingBean;
 
-public class InvitationServiceImpl extends AlfrescoRestService implements InvitationService {
+public class InvitationServiceImpl extends AlfrescoRestService
+        implements InvitationService, InitializingBean {
 
     private static final String REST_GET_INVITATION = "/s/fr/itldev/koya/invitation/invitation/{userName}/{companyName}";
     private static final String REST_POST_INVITATION = "/s/fr/itldev/koya/invitation/sendmail";
     private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/invitation/validate";
     private static final String REST_POST_INVITEUSER = "/s/fr/itldev/koya/invitation/invite";
+
+    private Cache<String, Map<String, String>> invitationsCache;
+    private CacheConfig invitationsCacheConfig;
+
+    public void setInvitationsCacheConfig(CacheConfig invitationsCacheConfig) {
+        this.invitationsCacheConfig = invitationsCacheConfig;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+
+        if (invitationsCacheConfig == null) {
+            invitationsCacheConfig = CacheConfig.noCache();
+        }
+        invitationsCacheConfig.debugLogConfig("invitationsCache");
+
+        if (invitationsCacheConfig.getEnabled()) {
+            invitationsCache = CacheBuilder.newBuilder()
+                    .maximumSize(invitationsCacheConfig.getMaxSize())
+                    .expireAfterWrite(invitationsCacheConfig.getExpireAfterWriteSeconds(),
+                            TimeUnit.SECONDS)
+                    .build();
+        }
+    }
 
     /**
      * Invite user identified by email on company with rolename granted.
@@ -46,6 +77,10 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
     @Override
     public void inviteUser(User userLogged, Company c, String userEmail,
             String roleName) throws AlfrescoServiceException {
+
+        if (invitationsCacheConfig.getEnabled()) {
+            invitationsCache.invalidate(userEmail);
+        }
 
         InviteWrapper iw = new InviteWrapper();
         iw.setCompanyName(c.getName());
@@ -78,6 +113,10 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
         User u = fromJSON(new TypeReference<User>() {
         }, getTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE,
                 params, String.class));
+
+        if (invitationsCacheConfig.getEnabled()) {
+            invitationsCache.invalidate(u.getEmail());
+        }
     }
 
     /**
@@ -91,11 +130,31 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
      */
     @Override
     public Map<String, String> getInvitation(User user, Company c, User userToGetInvitaion) throws AlfrescoServiceException {
+        Map m;
+        if (invitationsCacheConfig.getEnabled()) {
+            m = invitationsCache.getIfPresent(userToGetInvitaion.getEmail());
+            if (m.isEmpty()) {
+                return null;
+            } else {
+                return m;
+            }
+        }
 
-        return fromJSON(new TypeReference<Map>() {
+        m = fromJSON(new TypeReference<Map>() {
         }, user.getRestTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_INVITATION,
                 String.class, userToGetInvitaion.getUserName(), c.getName()
         ));
+
+        if (invitationsCacheConfig.getEnabled()) {
+            Map<String, String> value;
+            if (m == null) {
+                value = new HashMap<>();
+            } else {
+                value = m;
+            }
+            invitationsCache.put(userToGetInvitaion.getEmail(), value);
+        }
+        return m;
 
     }
 

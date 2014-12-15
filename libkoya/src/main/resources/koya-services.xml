@@ -148,5 +148,13 @@
 
     <bean id="notificationService" class="fr.itldev.koya.services.impl.NotificationServiceImpl" parent="abstractRestService"/>
     
-    <bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl" parent="abstractRestService"/>
+    <bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl" parent="abstractRestService">
+         <property name="invitationsCacheConfig">
+            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+                <property name="enabled" value="${invitationsCache.enabled}" />
+                <property name="maxSize" value="${invitationsCache.maxSize}"/>
+                <property name="expireAfterWriteSeconds" value="${invitationsCache.expireAfterWriteSeconds}"/>
+            </bean>
+        </property>  
+    </bean>
 </beans>
