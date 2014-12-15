@@ -133,10 +133,12 @@ public class InvitationServiceImpl extends AlfrescoRestService
         Map m;
         if (invitationsCacheConfig.getEnabled()) {
             m = invitationsCache.getIfPresent(userToGetInvitaion.getEmail());
-            if (m.isEmpty()) {
-                return null;
-            } else {
-                return m;
+            if (m != null) {
+                if (m.isEmpty()) {
+                    return null;
+                } else {
+                    return m;
+                }
             }
         }
 
