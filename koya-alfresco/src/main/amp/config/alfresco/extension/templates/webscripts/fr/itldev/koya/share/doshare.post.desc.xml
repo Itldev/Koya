@@ -24,6 +24,7 @@
     <family>Itldev</family>
     <url>/fr/itldev/koya/share/do</url>
     <authentication>user</authentication>    
+    <transaction>requiresnew</transaction>
     <format default="json"/>
 </webscript>
 
