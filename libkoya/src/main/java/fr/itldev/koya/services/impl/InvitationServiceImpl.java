@@ -37,6 +37,7 @@ public class InvitationServiceImpl extends AlfrescoRestService
         implements InvitationService, InitializingBean {
 
     private static final String REST_GET_INVITATION = "/s/fr/itldev/koya/invitation/invitation/{userName}/{companyName}";
+    private static final String REST_GET_INVITATIONPENDING = "/s/fr/itldev/koya/invitation/pending/{inviteId}";
     private static final String REST_POST_INVITATION = "/s/fr/itldev/koya/invitation/sendmail";
     private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/invitation/validate";
     private static final String REST_POST_INVITEUSER = "/s/fr/itldev/koya/invitation/invite";
@@ -158,6 +159,19 @@ public class InvitationServiceImpl extends AlfrescoRestService
         }
         return m;
 
+    }
+
+    /**
+     * Checks anynomously if given inviteId exists (is is a pending invite).
+     *
+     * @param inviteId
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public Boolean isInvitationPending(String inviteId) throws AlfrescoServiceException {
+        return getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_INVITATIONPENDING,
+                String.class, inviteId).equals("true");
     }
 
     /**

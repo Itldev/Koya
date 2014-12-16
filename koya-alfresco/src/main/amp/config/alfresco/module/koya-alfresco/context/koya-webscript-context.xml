@@ -498,6 +498,13 @@
     </bean>
     
     
+    <bean id="webscript.fr.itldev.koya.invitation.invitationpending.get" 
+          class="fr.itldev.koya.webscript.invitation.GetInvitationPending"
+          parent="webscript">                
+        <property name="workflowService" ref="WorkflowService" /> 
+    </bean>
+    
+    
     <bean id="webscript.fr.itldev.koya.invitation.validate.post" 
           class="fr.itldev.koya.webscript.invitation.ValidateInvitation"
           parent="webscript">
