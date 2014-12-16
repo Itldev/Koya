@@ -74,6 +74,7 @@ public interface KoyaErrorCodes {
     public static final Integer CANT_MODIFY_USER_PASSWORD = 504;
     public static final Integer CANNOT_LOGOUT_USER = 505;
     public static final Integer NORESETPWD_ONDISABLED_USERS = 506;
+    public static final Integer NORESETPWD_INVITATION_SENT_AGAIN = 507;
 
     //550 -> invitation process errors
     public static final Integer INVALID_INVITATION_TICKET = 550;
@@ -99,7 +100,6 @@ public interface KoyaErrorCodes {
     public static final Integer SECU_USER_MUSTBE_COMPANY_MEMBER_TO_CHANGE_COMPANYROLE = 804;
     public static final Integer SECU_USER_CANT_BE_INVITED_ALREADY_EXISTS_IN_COMPANY_WITH_OTHER_ROLE = 805;
 
-    
     //900 -> Koya mail
     public static final Integer KOYAMAIL_INVALID_SUBJECT_PROPERTIES_PATH = 900;
     public static final Integer KOYAMAIL_CANNOT_FIND_TEMPLATE = 901;

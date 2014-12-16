@@ -477,11 +477,8 @@
     
     <bean id="webscript.fr.itldev.koya.invitation.sendmail.post"
           class="fr.itldev.koya.webscript.invitation.SendInviteMail"
-          parent="webscript">                    
+          parent="webscript">                         
         <property name="workflowService" ref="WorkflowService"/>
-        <property name="serviceRegistry" ref="ServiceRegistry"/>
-        <property name="repositoryHelper" ref="repositoryHelper"/>
-        <property name="messageService" ref="messageService"/>        
         <property name="koyaMailService" ref="koyaMailService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/> 
         <property name="companyAclService" ref="companyAclService"/> 
@@ -619,7 +616,9 @@
           class="fr.itldev.koya.webscript.resetpassword.ResetRequest"
           parent="webscript">
         <property name="userService" ref="userService" />   
-        <property name="workflowService" ref="WorkflowService" />   
+        <property name="workflowService" ref="WorkflowService" />  
+        <property name="companyAclService" ref="companyAclService"/> 
+        <property name="koyaMailService" ref="koyaMailService"/> 
     </bean>
     
     

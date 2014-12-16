@@ -183,6 +183,12 @@
         <property name="koyaNodeService" ref="koyaNodeService"/> 
         <property name="userService" ref="userService"/> 
         <property name="serviceRegistry" ref="ServiceRegistry"/> 
+        <property name="workflowService" ref="WorkflowService"/>
+        <property name="repositoryHelper" ref="repositoryHelper"/>
+        <property name="messageService" ref="messageService"/>        
+        <property name="companyAclService" ref="companyAclService"/> 
+        <property name="authenticationService" ref="AuthenticationService"/> 
+        
         <!-- param properties-->
         
         <property name="i18nMailSubjectPropertiesLocation">
