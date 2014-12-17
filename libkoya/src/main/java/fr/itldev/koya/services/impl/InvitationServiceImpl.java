@@ -110,6 +110,7 @@ public class InvitationServiceImpl extends AlfrescoRestService
         params.put("password", user.getPassword());
         params.put("lastName", user.getName());
         params.put("firstName", user.getFirstName());
+        params.put("civilTitle", user.getCivilTitle());
 
         User u = fromJSON(new TypeReference<User>() {
         }, getTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE,

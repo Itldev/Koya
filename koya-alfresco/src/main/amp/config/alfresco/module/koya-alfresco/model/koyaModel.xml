@@ -211,6 +211,15 @@
         
         <aspect name="koya:userNotified">
             <title>Person Notified Aspect</title>            
+        </aspect>  
+        
+         <aspect name="koya:civilTitled">
+            <title>Person civil title</title>  
+            <properties>
+                <property name="koya:civilTitle">
+                    <type>d:text</type>
+                </property>     
+            </properties>            
         </aspect>        
         
         

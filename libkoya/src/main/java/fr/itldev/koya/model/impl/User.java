@@ -46,6 +46,8 @@ public final class User extends SecuredItem implements AlfrescoNode {
     private Boolean emailFeedDisabled;
     @JsonIgnore
     private String password;
+    @JsonProperty("civilTitle")
+    private String civilTitle;
 
     private String ticketAlfresco;
     @JsonIgnore
@@ -136,6 +138,14 @@ public final class User extends SecuredItem implements AlfrescoNode {
     public void setPassword(String password) {
         this.password = password;
     }
+    
+    public String getCivilTitle() {
+		return civilTitle;
+	}
+
+	public void setCivilTitle(String civilTitle) {
+		this.civilTitle = civilTitle;
+	}    
 
     public String getTicketAlfresco() {
         return ticketAlfresco;
@@ -199,4 +209,5 @@ public final class User extends SecuredItem implements AlfrescoNode {
         return "user";
     }
 
+	
 }
