@@ -53,6 +53,7 @@
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="fileFolderService" ref="FileFolderService" />      
         <property name="koyaNotificationService" ref="koyaNotificationService"/>
+        <property name="searchService" ref="SearchService"/>        
     </bean>     
     
     <!--Spaces Handling service-->

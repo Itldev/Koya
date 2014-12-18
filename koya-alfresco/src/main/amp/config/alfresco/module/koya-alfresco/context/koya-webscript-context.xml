@@ -60,6 +60,15 @@
         <property name="companyService" ref="companyService" />        
     </bean>
     
+    <!-- get company logo-->
+    <bean id="webscript.fr.itldev.koya.company.logo.get" 
+          class="fr.itldev.koya.webscript.company.GetLogo"
+          parent="webscript">                
+        <property name="companyService" ref="companyService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />  
+        <property name="contentService" ref="ContentService"/>      
+    </bean>
+    
     
     <!-- commit preferences-->
     <bean id="webscript.fr.itldev.koya.company.preferences.post" 
