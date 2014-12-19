@@ -36,8 +36,7 @@
 	xmlns:bpm="http://www.alfresco.org/model/bpm/1.0" xmlns:reg="http://www.alfresco.org/system/registry/1.0"
 	xmlns:wcmwf="http://www.alfresco.org/model/wcmworkflow/1.0" xmlns:act="http://www.alfresco.org/model/action/1.0">
 
-	<cm:folder view:childName="cm:koya_templates">
-
+	<cm:folder view:childName="cm:koya">
 		<view:aspects>
 			<cm:auditable></cm:auditable>
 			<sys:referenceable></sys:referenceable>
@@ -46,99 +45,130 @@
 		</view:aspects>
 		<view:acl></view:acl>
 		<view:properties>
-			<cm:name>Koya Mail Templates</cm:name>
+			<cm:name>koya</cm:name>
 			<sys:store-identifier>SpacesStore</sys:store-identifier>
 			<sys:locale>fr_FR_</sys:locale>
 			<cm:title>
-				<view:mlvalue view:locale="fr">Koya Mail Templates
-				</view:mlvalue>
+				<view:mlvalue view:locale="fr">koya</view:mlvalue>
 			</cm:title>
-			<sys:node-uuid>c91be38d-f4f7-4f82-a53d-e690d1b83176</sys:node-uuid>
+			<sys:node-uuid>00758582-1330-4b8a-ac6e-f0f62dd0c5ce</sys:node-uuid>
 			<sys:store-protocol>workspace</sys:store-protocol>
 			<cm:description>
 				<view:mlvalue view:locale="fr"></view:mlvalue>
 			</cm:description>
 		</view:properties>
-
 		<view:associations>
 			<cm:contains>
-				<cm:content view:childName="cm:share-notification.html.ftl">
+				<cm:folder view:childName="cm:default-company">
 					<view:aspects>
-						<cm:titled />
-						<cm:author />
-						<app:inlineeditable />
+						<cm:auditable></cm:auditable>
+						<sys:referenceable></sys:referenceable>
+						<cm:titled></cm:titled>
+						<sys:localized></sys:localized>
 					</view:aspects>
+					<view:acl></view:acl>
 					<view:properties>
-						<sys:node-uuid>34c1e5bf-9115-4496-84f1-8e695911020f</sys:node-uuid>
-						<app:editInline>true</app:editInline>
-						<cm:description></cm:description>
-						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/share-notification.html.ftl|mimetype=text/plain|size=1455|encoding=UTF-8
-						</cm:content>
-						<cm:title>Share notification Template</cm:title>
-						<cm:author>Me</cm:author>
-						<cm:name>share-notification.html.ftl</cm:name>
+						<cm:name>default-company</cm:name>
+						<sys:store-identifier>SpacesStore</sys:store-identifier>
+						<sys:locale>fr_FR_</sys:locale>
+						<cm:title>
+							<view:mlvalue view:locale="fr"></view:mlvalue>
+						</cm:title>
+						<sys:node-uuid>c408d2f2-cd0d-485a-838e-abdd33da501c</sys:node-uuid>
+						<sys:store-protocol>workspace</sys:store-protocol>
+						<cm:description>
+							<view:mlvalue view:locale="fr"></view:mlvalue>
+						</cm:description>
 					</view:properties>
-					<view:associations></view:associations>
-				</cm:content>
-				<cm:content view:childName="cm:reset-password.html.ftl">
+					<view:associations>
+						<cm:contains>
+							<koya:companyProperties view:childName="cm:company.properties">
+								<view:aspects>
+									<cm:auditable></cm:auditable>
+									<sys:referenceable></sys:referenceable>
+									<sys:localized></sys:localized>
+								</view:aspects>
+								<view:acl></view:acl>
+								<view:properties>
+									<koya:description></koya:description>
+									<cm:name>company.properties</cm:name>
+									<sys:store-identifier>SpacesStore</sys:store-identifier>
+									<sys:locale>fr_FR_</sys:locale>
+									<koya:legalInformations></koya:legalInformations>
+									<sys:node-uuid>0b997019-4641-43dd-bb51-254c33ddf9e5</sys:node-uuid>
+									<koya:address></koya:address>
+									<sys:store-protocol>workspace</sys:store-protocol>
+								</view:properties>
+								<cm:contains>
+									<cm:content view:childName="cm:logo.png">
+										<view:aspects>
+											<cm:titled />
+											<cm:author />
+										</view:aspects>
+										<view:properties>
+											<cm:description></cm:description>
+											<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/default-config/logo.png|mimetype=image/png</cm:content>
+											<cm:title>logo.png</cm:title>
+											<sys:node-uuid>207297eb-77ee-4380-a129-fd94b24d5ec9</sys:node-uuid>
+											<cm:author>Me</cm:author>
+											<cm:name>logo.png</cm:name>
+										</view:properties>
+										<view:associations></view:associations>
+									</cm:content>
+								</cm:contains>
+							</koya:companyProperties>
+						</cm:contains>
+					</view:associations>
+				</cm:folder>
+				<cm:folder view:childName="cm:templates">
 					<view:aspects>
-						<cm:titled />
-						<cm:author />
-						<app:inlineeditable />
+						<cm:auditable></cm:auditable>
+						<sys:referenceable></sys:referenceable>
+						<cm:titled></cm:titled>
+						<sys:localized></sys:localized>
 					</view:aspects>
+					<view:acl></view:acl>
 					<view:properties>
-						<sys:node-uuid>9d5fbb22-9810-40f3-b461-aa1a253e73bb</sys:node-uuid>
-						<app:editInline>true</app:editInline>
-						<cm:description></cm:description>
-						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/reset-password.html.ftl|mimetype=text/plain|size=1455|encoding=UTF-8
-						</cm:content>
-						<cm:title>Share notification Template</cm:title>
-						<cm:author>Me</cm:author>
-						<cm:name>reset-password.html.ftl</cm:name>
+						<cm:name>templates</cm:name>
+						<sys:store-identifier>SpacesStore</sys:store-identifier>
+						<sys:locale>fr_FR_</sys:locale>
+						<cm:title>
+							<view:mlvalue view:locale="fr"></view:mlvalue>
+						</cm:title>
+						<sys:node-uuid>75149303-3aa1-479a-b622-1fec4fcdc9b1</sys:node-uuid>
+						<sys:store-protocol>workspace</sys:store-protocol>
+						<cm:description>
+							<view:mlvalue view:locale="fr"></view:mlvalue>
+						</cm:description>
 					</view:properties>
-					<view:associations></view:associations>
-				</cm:content>
-				<cm:content view:childName="cm:koyamail.properties">
-					<view:aspects>
-						<cm:titled />
-						<cm:author />
-						<app:inlineeditable />
-					</view:aspects>
-					<view:properties>
-						<sys:node-uuid>b6bf4b3d-317d-4145-808e-92b5e3ae5fea</sys:node-uuid>
-						<app:editInline>true</app:editInline>
-						<cm:description></cm:description>
-						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/koyamail.properties|mimetype=text/plain|size=1455|encoding=UTF-8
-						</cm:content>
-						<cm:title>koyamail.properties</cm:title>
-						<cm:author>Me</cm:author>
-						<cm:name>koyamail.properties</cm:name>
-					</view:properties>
-					<view:associations></view:associations>
-				</cm:content>
-				<cm:content view:childName="cm:new-content.html.ftl">
-					<view:aspects>
-						<cm:titled />
-						<cm:author />
-						<app:inlineeditable />
-					</view:aspects>
-					<view:properties>
-						<sys:node-uuid>3fa532bb-222c-4045-bbe2-584a72a0afcb</sys:node-uuid>
-						<app:editInline>true</app:editInline>
-						<cm:description></cm:description>
-						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/new-content.html.ftl|mimetype=text/plain|size=1455|encoding=UTF-8
-						</cm:content>
-						<cm:title>new-content.html.ftl</cm:title>
-						<cm:author>Me</cm:author>
-						<cm:name>new-content.html.ftl</cm:name>
-					</view:properties>
-					<view:associations></view:associations>
-				</cm:content>
-
+					<view:associations>
+						<cm:contains>
+							<cm:folder view:childName="cm:space">
+								<view:aspects>
+									<cm:auditable></cm:auditable>
+									<sys:referenceable></sys:referenceable>
+									<cm:titled></cm:titled>
+									<sys:localized></sys:localized>
+								</view:aspects>
+								<view:acl></view:acl>
+								<view:properties>
+									<cm:name>space</cm:name>
+									<sys:store-identifier>SpacesStore</sys:store-identifier>
+									<sys:locale>fr_FR_</sys:locale>
+									<cm:title>
+										<view:mlvalue view:locale="fr"></view:mlvalue>
+									</cm:title>
+									<sys:node-uuid>29681d8d-a7d8-418b-94c3-9bade397350e</sys:node-uuid>
+									<sys:store-protocol>workspace</sys:store-protocol>
+									<cm:description>
+										<view:mlvalue view:locale="fr"></view:mlvalue>
+									</cm:description>
+								</view:properties>
+							</cm:folder>
+						</cm:contains>
+					</view:associations>
+				</cm:folder>
 			</cm:contains>
 		</view:associations>
 	</cm:folder>
-
 </view:view>
-
-
