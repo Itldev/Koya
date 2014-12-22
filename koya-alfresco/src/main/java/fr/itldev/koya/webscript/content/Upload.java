@@ -93,9 +93,8 @@ public class Upload extends AbstractWebScript {
 			retMap = koyaContentService.createContentNode(parent, fileName,
 					content);
 		} catch (KoyaServiceException ex) {
-//			throw new WebScriptException("KoyaError : "
-//					+ ex.getErrorCode().toString());
-                        retMap.put("error", ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
 		}
 		writeResponse(res, retMap, format);
 	}
