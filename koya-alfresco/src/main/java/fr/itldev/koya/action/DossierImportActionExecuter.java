@@ -326,6 +326,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                     int countContentError = 0;
                                     int countContentFileNotFound = 0;
                                     int countContentDossierNotFound = 0;
+                                    int countPathCreation = 0;
 
                                     for (ContentXml contentXml : contentXmls) {
                                         try {
@@ -344,27 +345,30 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                             }
 
                                             String filename = contentXml.getFilename();
-                                            int extIdx = filename.lastIndexOf(".");
-                                            String name = contentXml.getName() + (extIdx != -1 ? filename.substring(extIdx) : "");
+                                            if (filename != null) {
+                                                int extIdx = filename.lastIndexOf(".");
+                                                String title = contentXml.getName() + (extIdx != -1 ? filename.substring(extIdx) : "");
+                                                try {
+                                                    logger.trace(getLogPrefix(companyName, username) + "Adding " + filename + " to " + path + " as " + title);
 
-                                            try {
-                                                logger.trace(getLogPrefix(companyName, username) + "Adding " + filename + " to " + path + " as " + name);
-
-                                                koyaContentService.createContentNode(dirNodeRef, name, filename, new FileInputStream(new File(contentsDir, filename)));
-                                                countContentAdded++;
-                                            } catch (FileNotFoundException ex) {
-                                                logger.error(ex.getMessage(), ex);
-                                                countContentFileNotFound++;
-                                            } catch (KoyaServiceException ex) {
-                                                //TODO Do something about duplicate - update/rename
-                                                if (KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS.equals(ex.getErrorCode())) {
-                                                    //TODO Do something about duplicate - update/rename/ignore
-                                                    logger.error(getLogPrefix(companyName, username) + "File " + filename + " - " + name + " already exist");
-                                                    countContentDuplicate++;
-                                                } else {
-                                                    logger.error(getLogPrefix(companyName, username) + ex.getMessage(), ex);
-                                                    countContentError++;
+                                                    koyaContentService.createContentNode(dirNodeRef, title, filename, new FileInputStream(new File(contentsDir, filename)));
+                                                    countContentAdded++;
+                                                } catch (FileNotFoundException ex) {
+                                                    logger.error(ex.getMessage(), ex);
+                                                    countContentFileNotFound++;
+                                                } catch (KoyaServiceException ex) {
+                                                    //TODO Do something about duplicate - update/rename
+                                                    if (KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS.equals(ex.getErrorCode())) {
+                                                        //TODO Do something about duplicate - update/rename/ignore
+                                                        logger.error(getLogPrefix(companyName, username) + "File " + filename + " - " + title + " already exist");
+                                                        countContentDuplicate++;
+                                                    } else {
+                                                        logger.error(getLogPrefix(companyName, username) + ex.getMessage(), ex);
+                                                        countContentError++;
+                                                    }
                                                 }
+                                            } else {
+                                                countPathCreation++;
                                             }
                                         } catch (KoyaServiceException ex) {
                                             //TODO Dossier not found or multiple dossiers found
