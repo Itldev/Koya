@@ -26,6 +26,7 @@
   
   
    <bean id="koya.config-bootstrap" parent="spacesStoreImporter">
+        <property name="allowWrite"><value>${koya.bootstrapconfig.active}</value></property>
 		<property name="useExistingStore">
 			<value>true</value>
 		</property>
@@ -43,7 +44,7 @@
 				</props>
 			</list>
 		</property>
-	</bean>
+	</bean> 
     
 	<!-- deletes xpath defined nodes if exists : clear before correct uuid bootstrap import -->
     <bean id="patch.deleteNodesTemplates0.7.2" class="fr.itldev.koya.patch.DeleteXpathNodes"
