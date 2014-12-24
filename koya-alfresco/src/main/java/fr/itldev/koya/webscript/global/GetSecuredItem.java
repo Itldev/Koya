@@ -20,9 +20,11 @@ package fr.itldev.koya.webscript.global;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
@@ -53,6 +55,8 @@ public class GetSecuredItem extends AbstractWebScript {
                     koyaNodeService.getSecuredItem(nodeRefStr));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+        } catch (AccessDeniedException ade) {
+            throw new WebScriptException("KoyaError : " +KoyaErrorCodes.ACCESS_DENIED.toString());
         }
         res.setContentType("application/json");
         res.getWriter().write(response);

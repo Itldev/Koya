@@ -33,7 +33,7 @@ public interface KoyaErrorCodes {
     public static final Integer INVALID_LUCENE_PATH = 5;
     public static final Integer INVALID_XPATH_NODE = 6;
     public static final Integer CANNOT_FIND_XPATH_NODE = 7;
-
+    public static final Integer ACCESS_DENIED=8;
     //100 -> companies errors
     public static final Integer COMPANY_EMPTY_TITLE = 100;
     public static final Integer COMPANY_SITE_NOT_FOUND = 101;
