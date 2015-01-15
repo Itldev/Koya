@@ -20,7 +20,7 @@
                     <cm:versionLabel>1.0</cm:versionLabel>
                     <app:editInline>true</app:editInline>
                     <cm:description></cm:description>
-                    <cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/scripts/deleteCompany.js|mimetype=text/plain|size=1455|encoding=UTF-8</cm:content>
+                    <cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/scripts/deleteCompany.js|mimetype=text/plain|size=|encoding=UTF-8</cm:content>
                     <cm:title>delete Company Script</cm:title>
                     <cm:author>Me</cm:author>
                     <cm:name>deleteCompany.js</cm:name>

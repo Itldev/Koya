@@ -72,8 +72,7 @@
 						<sys:node-uuid>34c1e5bf-9115-4496-84f1-8e695911020f</sys:node-uuid>
 						<app:editInline>true</app:editInline>
 						<cm:description></cm:description>
-						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/share-notification.html.ftl|mimetype=text/plain|size=1455|encoding=UTF-8
-						</cm:content>
+						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/share-notification.html.ftl|mimetype=text/plain|size=|encoding=UTF-8</cm:content>
 						<cm:title>Share notification Template</cm:title>
 						<cm:author>Me</cm:author>
 						<cm:name>share-notification.html.ftl</cm:name>
@@ -90,8 +89,7 @@
 						<sys:node-uuid>9d5fbb22-9810-40f3-b461-aa1a253e73bb</sys:node-uuid>
 						<app:editInline>true</app:editInline>
 						<cm:description></cm:description>
-						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/reset-password.html.ftl|mimetype=text/plain|size=1455|encoding=UTF-8
-						</cm:content>
+						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/reset-password.html.ftl|mimetype=text/plain|size=|encoding=UTF-8</cm:content>
 						<cm:title>Share notification Template</cm:title>
 						<cm:author>Me</cm:author>
 						<cm:name>reset-password.html.ftl</cm:name>
@@ -108,8 +106,7 @@
 						<sys:node-uuid>b6bf4b3d-317d-4145-808e-92b5e3ae5fea</sys:node-uuid>
 						<app:editInline>true</app:editInline>
 						<cm:description></cm:description>
-						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/koyamail.properties|mimetype=text/plain|size=1455|encoding=UTF-8
-						</cm:content>
+						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/koyamail.properties|mimetype=text/plain|size=|encoding=UTF-8</cm:content>
 						<cm:title>koyamail.properties</cm:title>
 						<cm:author>Me</cm:author>
 						<cm:name>koyamail.properties</cm:name>
@@ -126,8 +123,7 @@
 						<sys:node-uuid>3fa532bb-222c-4045-bbe2-584a72a0afcb</sys:node-uuid>
 						<app:editInline>true</app:editInline>
 						<cm:description></cm:description>
-						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/new-content.html.ftl|mimetype=text/plain|size=1455|encoding=UTF-8
-						</cm:content>
+						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/new-content.html.ftl|mimetype=text/plain|size=|encoding=UTF-8</cm:content>
 						<cm:title>new-content.html.ftl</cm:title>
 						<cm:author>Me</cm:author>
 						<cm:name>new-content.html.ftl</cm:name>
