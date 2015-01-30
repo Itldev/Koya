@@ -117,6 +117,7 @@ public class KoyaInviteSender extends InviteSender {
         String inviteeName = properties.get(wfVarInviteeUserName);
         NodeRef invitee = personService.getPerson(inviteeName);
         Action mail = actionService.createAction(MailActionExecuter.NAME);
+        mail.setExecuteAsynchronously(true);
         mail.setParameterValue(MailActionExecuter.PARAM_FROM, getEmail(inviter));
         mail.setParameterValue(MailActionExecuter.PARAM_TO, getEmail(invitee));
 
