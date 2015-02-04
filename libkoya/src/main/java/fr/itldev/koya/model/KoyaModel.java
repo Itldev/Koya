@@ -90,6 +90,15 @@ public class KoyaModel {
 
 	public static final QName PROP_ADDRESS = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "address");
+	
+	public static final QName PROP_ADDRESS2 = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "address2");
+	
+	public static final QName PROP_ZIPCODE = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "zipcode");
+	
+	public static final QName PROP_CITY = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "city");
 
 	public static final QName PROP_DESCRIPTION = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "description");

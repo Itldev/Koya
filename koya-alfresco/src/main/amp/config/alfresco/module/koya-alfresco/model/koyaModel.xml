@@ -136,13 +136,22 @@
         </type>
         
         <type name="koya:companyProperties">
-            <title>Company properties</title>
+        <title>Company properties</title>
             <parent>cm:folder</parent>
             <properties>
                 <property name="koya:address">
                     <type>d:text</type>
                 </property>
-                <property name="koya:description">
+                <property name="koya:address2">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:zipcode">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:city">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:description">                               
                     <type>d:text</type>
                 </property>
                 <property name="koya:legalInformations">

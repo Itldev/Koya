@@ -314,6 +314,9 @@ public class CompanyService {
 		}
 
 		if (companyPropertiesNodeRef != null) {
+			
+			cp.setTitle(c.getTitle());
+			
 			// if geographic aspect is set, get latitude and longitude
 			if (nodeService.hasAspect(companyPropertiesNodeRef,
 					ContentModel.ASPECT_GEOGRAPHIC)) {
@@ -323,11 +326,18 @@ public class CompanyService {
 								companyPropertiesNodeRef,
 								ContentModel.PROP_LONGITUDE)));
 			}
-
+			
 			// address, description,legal informations - company properties
 			// attributes
-			cp.setCompanyAddress((String) nodeService.getProperty(
+			cp.setAddress((String) nodeService.getProperty(
 					companyPropertiesNodeRef, KoyaModel.PROP_ADDRESS));
+			cp.setAddress2((String) nodeService.getProperty(
+					companyPropertiesNodeRef, KoyaModel.PROP_ADDRESS2));
+			cp.setZipCode((String) nodeService.getProperty(
+					companyPropertiesNodeRef, KoyaModel.PROP_ZIPCODE));
+			cp.setCity((String) nodeService.getProperty(
+					companyPropertiesNodeRef, KoyaModel.PROP_CITY));
+			
 			cp.setDescription((String) nodeService.getProperty(
 					companyPropertiesNodeRef, KoyaModel.PROP_DESCRIPTION));
 			cp.setLegalInformations((String) nodeService.getProperty(
