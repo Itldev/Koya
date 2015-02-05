@@ -130,6 +130,24 @@
 					</view:properties>
 					<view:associations></view:associations>
 				</cm:content>
+				
+				<cm:content view:childName="cm:invite.html.ftl">
+					<view:aspects>
+						<cm:titled />
+						<cm:author />
+						<app:inlineeditable />
+					</view:aspects>
+					<view:properties>
+						<sys:node-uuid>035a2bac-77f8-4747-a25d-e695d9f7651e</sys:node-uuid>
+						<app:editInline>true</app:editInline>
+						<cm:description></cm:description>
+						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/invite.html.ftl|mimetype=text/plain|size=|encoding=UTF-8</cm:content>
+						<cm:title>invite.html.ftl</cm:title>
+						<cm:author>Me</cm:author>
+						<cm:name>invite.html.ftl</cm:name>
+					</view:properties>
+					<view:associations></view:associations>
+				</cm:content>
 
 			</cm:contains>
 		</view:associations>

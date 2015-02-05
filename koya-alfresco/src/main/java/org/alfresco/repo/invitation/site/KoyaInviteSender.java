@@ -1,20 +1,5 @@
 package org.alfresco.repo.invitation.site;
 
-import fr.itldev.koya.alfservice.KoyaMailService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import org.alfresco.model.ContentModel;
-import org.alfresco.repo.action.executer.MailActionExecuter;
-import org.alfresco.repo.i18n.MessageService;
-import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarAcceptUrl;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarInviteTicket;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarInviteeGenPassword;
@@ -24,7 +9,19 @@ import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVa
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarResourceName;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarRole;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarServerPath;
-import static org.alfresco.repo.invitation.site.InviteSender.WF_INSTANCE_ID;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.alfresco.model.ContentModel;
+import org.alfresco.repo.action.executer.MailActionExecuter;
+import org.alfresco.repo.i18n.MessageService;
+import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -44,6 +41,12 @@ import org.alfresco.util.ModelUtil;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.surf.util.ParameterCheck;
 import org.springframework.extensions.surf.util.URLEncoder;
+
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
 
 /**
  * Ovverride invite sender in order to provide custom invite mail subject
@@ -83,9 +86,12 @@ public class KoyaInviteSender extends InviteSender {
     private final RepoAdminService repoAdminService;
     private final NamespaceService namespaceService;
     private final KoyaNodeService koyaNodeService;
+    private final CompanyAclService companyAclService;
+    private final CompanyService companyService;
 
     public KoyaInviteSender(ServiceRegistry services, Repository repository, MessageService messageService,
-            KoyaMailService koyaMailService, KoyaNodeService koyaNodeService) {
+            KoyaMailService koyaMailService, KoyaNodeService koyaNodeService,
+            CompanyAclService companyAclService,CompanyService companyService) {
 
         super(services, repository, messageService);
         this.actionService = services.getActionService();
@@ -105,6 +111,8 @@ public class KoyaInviteSender extends InviteSender {
          */
         this.koyaMailService = koyaMailService;
         this.koyaNodeService = koyaNodeService;
+        this.companyAclService = companyAclService;
+        this.companyService = companyService;
     }
 
     @Override
@@ -162,8 +170,8 @@ public class KoyaInviteSender extends InviteSender {
 
     private NodeRef getEmailTemplateNodeRef() {
         List<NodeRef> nodeRefs = searchService.selectNodes(repository.getRootHome(),
-                "app:company_home/app:dictionary/app:email_templates/cm:invite/cm:invite-email.html.ftl", null,
-                this.namespaceService, false);
+                "app:company_home/app:dictionary/app:email_templates/cm:koya_templates/cm:invite.html.ftl", null,
+                this.namespaceService, false);        
 
         if (nodeRefs.size() == 1) {
             // Now localise this
@@ -186,7 +194,16 @@ public class KoyaInviteSender extends InviteSender {
         // Build up the args for rendering inside the template
         Map<String, String> args = buildArgs(properties, inviter, invitee);
         model.put("args", (Serializable) args);
-
+        
+        
+        try{
+        	//Koya invitation specific variables
+        	//TODO get invite Items from specific workflow model
+        	//model.put("InviteItem", false);
+        	
+        	model.put("company",companyService.getProperties(properties.get(wfVarResourceName)).toHashMap());
+        }catch(Exception e){        	
+        }
         // All done
         return model;
     }
@@ -199,6 +216,7 @@ public class KoyaInviteSender extends InviteSender {
     private String getSiteName(Map<String, String> properties) {
         String siteFullName = properties.get(wfVarResourceName);
         SiteInfo site = siteService.getSite(siteFullName);
+
         if (site == null) {
             throw new InvitationException("The site " + siteFullName + " could not be found.");
         }
@@ -224,7 +242,9 @@ public class KoyaInviteSender extends InviteSender {
         args.put("inviteeUserName", properties.get(wfVarInviteeUserName));
         args.put("inviteeGenPassword", properties.get(wfVarInviteeGenPassword));
         args.put("acceptLink", acceptLink);
-        args.put("rejectLink", rejectLink);
+        args.put("rejectLink", rejectLink);               
+        args.put("koyaClientServerPath",companyAclService.getKoyaClientServerPath());
+        
         return args;
     }
 

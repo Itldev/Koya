@@ -128,5 +128,11 @@
         <property name="authenticationService" ref="AuthenticationService"/>        
     </bean>
 
-      
+      <bean id="koyaResourceBundles" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
+		<property name="resourceBundles">
+			<list>
+				<value>alfresco.module.koya-alfresco.messages.global</value>
+			</list>
+		</property>
+	</bean>
 </beans>

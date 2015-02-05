@@ -4,6 +4,7 @@ import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.model.permissions.SitePermission;
@@ -38,6 +39,8 @@ import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
 import org.alfresco.service.namespace.NamespaceService;
 import org.apache.log4j.Logger;
+import org.apache.tools.ant.taskdefs.condition.HasMethod;
+import org.hibernate.loader.custom.Return;
 
 /**
  *
@@ -60,6 +63,7 @@ public class KoyaMailService {
     protected UserService userService;
     protected ServiceRegistry serviceRegistry;
     protected CompanyAclService companyAclService;
+    protected CompanyService companyService;
     protected WorkflowService workflowService;
     protected AuthenticationService authenticationService;
     protected Repository repositoryHelper;
@@ -132,6 +136,10 @@ public class KoyaMailService {
 
     public void setCompanyAclService(CompanyAclService companyAclService) {
         this.companyAclService = companyAclService;
+    }
+    
+    public void setCompanyService(CompanyService companyService) {
+        this.companyService = companyService;
     }
 
     public void setWorkflowService(WorkflowService workflowService) {
@@ -225,13 +233,6 @@ public class KoyaMailService {
         templateModel.put("person", new ScriptNode(
                 userService.getUserByUsername((String) nodeService.getProperty(sharedItem, ContentModel.PROP_MODIFIER)).getNodeRefasObject(), serviceRegistry));
 
-        templateModel.put("document", new HashMap() {
-            {
-                put("name", nodeService.getProperty(sharedItem, ContentModel.PROP_TITLE));
-                put("siteShortName", koyaNodeService.getFirstParentOfType(sharedItem, Company.class).getTitle());
-                put("directLinkUrl", getDirectLinkUrl(sharedItem));
-            }
-        });
         templateModel.put("date", nodeService.getProperty(sharedItem, ContentModel.PROP_UPDATED));
 
         /**
@@ -261,7 +262,7 @@ public class KoyaMailService {
        
         KoyaInviteSender koyaInviteSender = new KoyaInviteSender(serviceRegistry,
                 repositoryHelper, messageService,
-                this, koyaNodeService);
+                this, koyaNodeService,companyAclService,companyService);
 
         Map<String, String> properties = new HashMap<>();
 
@@ -285,7 +286,7 @@ public class KoyaMailService {
                 (String) task.getProperties().get(WorkflowModelNominatedInvitation.WF_PROP_INVITE_TICKET));
 
         properties.put(WorkflowModelNominatedInvitation.wfVarWorkflowInstanceId,
-                (String) task.getProperties().get(WorkflowModel.PROP_WORKFLOW_INSTANCE_ID));
+                (String) task.getProperties().get(WorkflowModel.PROP_WORKFLOW_INSTANCE_ID));     
 
         properties.put(InviteSender.WF_PACKAGE, ((NodeRef) task.getProperties().get(WorkflowModel.ASSOC_PACKAGE)).toString());
         properties.put(InviteSender.WF_INSTANCE_ID, inviteId);
@@ -407,5 +408,5 @@ public class KoyaMailService {
         } else {
             return koyaDirectLinkUrlTemplate.replace("{nodeRef}", n.toString());
         }
-    }
+    }  
 }
