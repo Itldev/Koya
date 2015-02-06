@@ -22,6 +22,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.repo.i18n.MessageService;
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
+import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -88,12 +89,15 @@ public class KoyaInviteSender extends InviteSender {
     private final KoyaNodeService koyaNodeService;
     private final CompanyAclService companyAclService;
     private final CompanyService companyService;
-
+    private HashMap<String, Object> koyaClientParams;
+private ServiceRegistry serviceRegistry;
+    
     public KoyaInviteSender(ServiceRegistry services, Repository repository, MessageService messageService,
             KoyaMailService koyaMailService, KoyaNodeService koyaNodeService,
-            CompanyAclService companyAclService,CompanyService companyService) {
+            CompanyAclService companyAclService,CompanyService companyService,HashMap<String, Object> koyaClientParams) {
 
         super(services, repository, messageService);
+        this.serviceRegistry = services;
         this.actionService = services.getActionService();
         this.nodeService = services.getNodeService();
         this.personService = services.getPersonService();
@@ -113,6 +117,7 @@ public class KoyaInviteSender extends InviteSender {
         this.koyaNodeService = koyaNodeService;
         this.companyAclService = companyAclService;
         this.companyService = companyService;
+        this.koyaClientParams = koyaClientParams;
     }
 
     @Override
@@ -183,7 +188,7 @@ public class KoyaInviteSender extends InviteSender {
         }
     }
 
-    private Map<String, Serializable> buildMailTextModel(Map<String, String> properties, NodeRef inviter, NodeRef invitee) {
+    private Map<String, Serializable> buildMailTextModel(final Map<String, String> properties, NodeRef inviter, NodeRef invitee) {
         // Set the core model parts
         // Note - the user part is skipped, as that's implied via the run-as
         Map<String, Serializable> model = new HashMap<String, Serializable>();
@@ -192,12 +197,29 @@ public class KoyaInviteSender extends InviteSender {
         model.put(TemplateService.KEY_PRODUCT_NAME, ModelUtil.getProductName(repoAdminService));
 
         // Build up the args for rendering inside the template
-        Map<String, String> args = buildArgs(properties, inviter, invitee);
-        model.put("args", (Serializable) args);
+      
+        
+        String params = buildUrlParamString(properties);
+        final String acceptLink = makeLink(properties.get(wfVarServerPath), properties.get(wfVarAcceptUrl), params);
+        final String rejectLink = makeLink(properties.get(wfVarServerPath), properties.get(wfVarRejectUrl), params);
+        
+        model.put("invitation", new HashMap() {
+          	 {
+          		put("siteName", getSiteName(properties));
+          		put("inviteeSiteRole", getRoleName(properties));
+          		put("inviteeUserName", properties.get(wfVarInviteeUserName));
+                put("inviteeGenPassword", properties.get(wfVarInviteeGenPassword));
+                put("acceptLink", acceptLink);
+                put("rejectLink", rejectLink);             		
+          	 }
+          	 });
         
         
-        try{
-        	//Koya invitation specific variables
+        model.put("invitee",  new ScriptNode(invitee, serviceRegistry));
+        model.put("inviter", new ScriptNode(inviter,serviceRegistry));
+        model.put("koyaClient", koyaClientParams);
+
+        try{        
         	//TODO get invite Items from specific workflow model
         	//model.put("InviteItem", false);
         	
@@ -229,25 +251,7 @@ public class KoyaInviteSender extends InviteSender {
         return siteName;
     }
 
-    private Map<String, String> buildArgs(Map<String, String> properties, NodeRef inviter, NodeRef invitee) {
-        String params = buildUrlParamString(properties);
-        String acceptLink = makeLink(properties.get(wfVarServerPath), properties.get(wfVarAcceptUrl), params);
-        String rejectLink = makeLink(properties.get(wfVarServerPath), properties.get(wfVarRejectUrl), params);
-
-        Map<String, String> args = new HashMap<String, String>();
-        args.put("inviteePersonRef", invitee.toString());
-        args.put("inviterPersonRef", inviter.toString());
-        args.put("siteName", getSiteName(properties));
-        args.put("inviteeSiteRole", getRoleName(properties));
-        args.put("inviteeUserName", properties.get(wfVarInviteeUserName));
-        args.put("inviteeGenPassword", properties.get(wfVarInviteeGenPassword));
-        args.put("acceptLink", acceptLink);
-        args.put("rejectLink", rejectLink);               
-        args.put("koyaClientServerPath",companyAclService.getKoyaClientServerPath());
-        
-        return args;
-    }
-
+   
     private String buildUrlParamString(Map<String, String> properties) {
         StringBuilder params = new StringBuilder("?inviteId=");
         params.append(properties.get(WF_INSTANCE_ID));

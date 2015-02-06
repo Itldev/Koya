@@ -116,7 +116,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         this.workflowService = serviceRegistry.getWorkflowService();
         this.nodeService = serviceRegistry.getNodeService();
         this.inviteSender = new KoyaInviteSender(serviceRegistry, repositoryHelper, messageService,
-                koyaMailService, koyaNodeService,companyAclService,companyService);
+                koyaMailService, koyaNodeService,companyAclService,companyService,koyaMailService.getKoyaClientParams());
     }
 
     /**

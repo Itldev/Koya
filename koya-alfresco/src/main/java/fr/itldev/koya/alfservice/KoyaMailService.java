@@ -1,20 +1,12 @@
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.CompanyProperties;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.MailWrapper;
-import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.repo.dictionary.RepositoryLocation;
@@ -33,6 +25,7 @@ import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.TemplateService;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
@@ -40,13 +33,21 @@ import org.alfresco.service.cmr.workflow.WorkflowTask;
 import org.alfresco.service.namespace.NamespaceService;
 import org.apache.log4j.Logger;
 import org.apache.tools.ant.taskdefs.condition.HasMethod;
-import org.hibernate.loader.custom.Return;
+import org.springframework.beans.factory.InitializingBean;
+
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.MailWrapper;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 /**
  *
  *
  */
-public class KoyaMailService {
+public class KoyaMailService implements InitializingBean{
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
@@ -69,6 +70,7 @@ public class KoyaMailService {
     protected Repository repositoryHelper;
     protected MessageService messageService;
 
+
     //Mail subject properties template
     protected RepositoryLocation i18nMailSubjectPropertiesLocation;
 
@@ -80,6 +82,12 @@ public class KoyaMailService {
      * Optional parameters, if not set, use clasic share url
      */
     protected String koyaDirectLinkUrlTemplate;
+    
+    /**
+     * 
+     * 
+     */
+    protected HashMap<String,Object> koyaClientParams;
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     public void setNamespaceService(NamespaceService namespaceService) {
@@ -157,11 +165,22 @@ public class KoyaMailService {
     public void setMessageService(MessageService messageService) {
         this.messageService = messageService;
     }
+    
+    public HashMap getKoyaClientParams(){
+    	return koyaClientParams;
+    }
 
     //</editor-fold>
-    public void sendShareNotifMail(User sender, String destMail, NodeRef sharedNodeRef) throws KoyaServiceException {
+    
+    @Override
+	public void afterPropertiesSet() throws Exception {
+	koyaClientParams =new HashMap<>();
+	koyaClientParams.put("serverPath", companyAclService.getKoyaClientServerPath());    	
+	}  
+    
+    public void sendShareNotifMail(User sender, String destMail,Company c,
+    		final NodeRef sharedNodeRef) throws KoyaServiceException {
         Map<String, Serializable> paramsMail = new HashMap<>();
-
         paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
         /**
          * Get subject from properties file in repository
@@ -171,20 +190,27 @@ public class KoyaMailService {
 
         //TODO i18n templates
         Map<String, Serializable> templateModel = new HashMap<>();
-        Map<String, Serializable> templateParams = new HashMap<>();
 
-        SecuredItem s = koyaNodeService.getSecuredItem(sharedNodeRef);
+        final SecuredItem s = koyaNodeService.getSecuredItem(sharedNodeRef);
+       
         /**
-         * TODO use global-properties param to set reset request url
+         * Model Objects
          */
-        templateParams.put("directAccessUrl", getDirectLinkUrl(sharedNodeRef));
-        templateParams.put("sharedItemNodeRef", s.getNodeRef());
-        templateParams.put("sharedItemName", s.getTitle());
-        templateParams.put("inviterName", sender.getName());
-        templateParams.put("inviterFirstName", sender.getFirstName());
-        templateParams.put("inviterEmail", sender.getEmail());
+        templateModel.put("sharedItem", new HashMap() {
+       	 {
+       	 put("url", getDirectLinkUrl(sharedNodeRef));
+       	 put("nodeRef", s.getNodeRef());
+       	 put("title", s.getTitle());
+       	 }
+       	 });
+        
+        templateModel.put("koyaClient", koyaClientParams);
 
-        templateModel.put("args", (Serializable) templateParams);
+        templateModel.put("inviter", new ScriptNode(sender.getNodeRefasObject(),serviceRegistry));
+        templateModel.put(TemplateService.KEY_COMPANY_HOME, repositoryHelper.getCompanyHome());
+        	templateModel.put("company",companyService.getProperties(c.getName()).toHashMap());
+       
+        
         paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
 
         actionService.executeAction(actionService.createAction(
@@ -204,21 +230,21 @@ public class KoyaMailService {
 
         //TODO i18n templates
         Map<String, Serializable> templateModel = new HashMap<>();
-        Map<String, Serializable> templateParams = new HashMap<>();
 
         /**
          * TODO use global-properties param to set reset request url
          */
-        templateParams.put("resetRequestUrl", resetRequestUrl);
-
-        templateModel.put("args", (Serializable) templateParams);
+        templateModel.put("resetRequestUrl", resetRequestUrl);
+        templateModel.put("koyaClient", koyaClientParams);
+        
         paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
 
         actionService.executeAction(actionService.createAction(
                 MailActionExecuter.NAME, paramsMail), null);
     }
 
-    public void sendNewContentNotificationMail(User dest, final NodeRef sharedItem) throws KoyaServiceException {
+    public void sendNewContentNotificationMail(User dest, final NodeRef sharedItem) 
+    		throws KoyaServiceException {
         Map<String, Serializable> paramsMail = new HashMap<>();
 
         paramsMail.put(MailActionExecuter.PARAM_TO, dest.getEmail());
@@ -228,13 +254,31 @@ public class KoyaMailService {
         paramsMail.put(MailActionExecuter.PARAM_SUBJECT, getI18nSubject(INSTANT_NOTIFICATION_SUBJECT));
         paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, getFileTemplateRef(newContentNoficationTemplateLocation));
 
-        Map<String, Serializable> templateModel = new HashMap<>();
-
+        
+        
+        Map<String, Serializable> templateModel = new HashMap<>();       
+       
+        templateModel.put("koyaClient", koyaClientParams);
         templateModel.put("person", new ScriptNode(
-                userService.getUserByUsername((String) nodeService.getProperty(sharedItem, ContentModel.PROP_MODIFIER)).getNodeRefasObject(), serviceRegistry));
+                userService.getUserByUsername(
+                		(String) nodeService.getProperty(sharedItem, ContentModel.PROP_MODIFIER)).getNodeRefasObject(), 
+                		serviceRegistry));
 
         templateModel.put("date", nodeService.getProperty(sharedItem, ContentModel.PROP_UPDATED));
 
+        templateModel.put("document", new HashMap() {
+        	 {
+        	 put("name", nodeService.getProperty(sharedItem, ContentModel.PROP_TITLE));
+        	 put("siteShortName", koyaNodeService.getFirstParentOfType(sharedItem, Company.class).getTitle());
+        	 put("directLinkUrl", getDirectLinkUrl(sharedItem));
+        	 }
+        	 });
+        
+        	templateModel.put("company",
+        			companyService.getProperties(
+        					(Company) koyaNodeService.getFirstParentOfType(sharedItem, Company.class))
+        					.toHashMap());
+       
         /**
          * TODO Add company and dossiers (or all path ) references to template
          */
@@ -259,10 +303,10 @@ public class KoyaMailService {
                 return workflowService.getStartTask(inviteId);
             }
         });
-       
+               
         KoyaInviteSender koyaInviteSender = new KoyaInviteSender(serviceRegistry,
                 repositoryHelper, messageService,
-                this, koyaNodeService,companyAclService,companyService);
+                this, koyaNodeService,companyAclService,companyService, koyaClientParams);
 
         Map<String, String> properties = new HashMap<>();
 
@@ -408,5 +452,8 @@ public class KoyaMailService {
         } else {
             return koyaDirectLinkUrlTemplate.replace("{nodeRef}", n.toString());
         }
-    }  
+    }
+
+	
+   
 }

@@ -288,6 +288,14 @@ public class CompanyService {
 	/**
 	 * ================= Properties Methods ==============================
 	 */
+	
+	public CompanyProperties getProperties(String companyName)
+			throws KoyaServiceException {
+		Company c = koyaNodeService.getSecuredItem(
+				siteService.getSite(companyName).getNodeRef(), Company.class);
+		return getProperties(c);
+	}
+	
 	/**
 	 * Get Company properties.
 	 * 
@@ -295,12 +303,9 @@ public class CompanyService {
 	 * @return
 	 * @throws fr.itldev.koya.exception.KoyaServiceException
 	 */
-	public CompanyProperties getProperties(String companyName)
+	public CompanyProperties getProperties(Company c)
 			throws KoyaServiceException {
-
-		Company c = koyaNodeService.getSecuredItem(
-				siteService.getSite(companyName).getNodeRef(), Company.class);
-		CompanyProperties cp = new CompanyProperties(companyName);
+		CompanyProperties cp = new CompanyProperties(c.getName());
 
 		NodeRef companyPropertiesNodeRef = getCompanyConfigFile(c,
 				COMPANYPROPERTIES_FILE_NAME);
