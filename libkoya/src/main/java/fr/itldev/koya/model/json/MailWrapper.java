@@ -24,112 +24,125 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * 
  * This object wraps an email to send.
- *
- *
+ * 
+ * 
  */
 public class MailWrapper {
 
-    private List<String> to = new ArrayList<>();
-    private String from;
-    //withoutTemplate
-    private String subject;
-    private String content;
-    //template body
-    private String templateXPath;
-    private Map<String, String> templateParams = new HashMap<>();
-    // template subject
-    private String templateKoyaSubjectKey;
-    private List<String> templateKoyaSubjectParams = new ArrayList<>();
+	private List<String> to = new ArrayList<>();
+	private String from;
+	// withoutTemplate
+	private String subject;
+	private String content;
+	// template body
+	private String templateXPath;
+	private Map<String, String> templateParams = new HashMap<>();
+	// template subject
+	private String templateKoyaSubjectKey;
+	private List<String> templateKoyaSubjectParams = new ArrayList<>();
 
-    public List<String> getTo() {
-        return to;
-    }
+	// Company context
+	private String companyNodeRef;
 
-    public void setTo(List<String> to) {
-        this.to = to;
-    }
+	public List<String> getTo() {
+		return to;
+	}
 
-    public String getFrom() {
-        return from;
-    }
+	public void setTo(List<String> to) {
+		this.to = to;
+	}
 
-    public void setFrom(String from) {
-        this.from = from;
-    }
+	public String getFrom() {
+		return from;
+	}
 
-    public String getSubject() {
-        return subject;
-    }
+	public void setFrom(String from) {
+		this.from = from;
+	}
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
+	public String getSubject() {
+		return subject;
+	}
 
-    public String getContent() {
-        return content;
-    }
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+	public String getContent() {
+		return content;
+	}
 
-    public String getTemplateXPath() {
-        return templateXPath;
-    }
+	public void setContent(String content) {
+		this.content = content;
+	}
 
-    public void setTemplateXPath(String templateXPath) {
-        this.templateXPath = templateXPath;
-    }
+	public String getTemplateXPath() {
+		return templateXPath;
+	}
 
-    public Map<String, String> getTemplateParams() {
-        return templateParams;
-    }
+	public void setTemplateXPath(String templateXPath) {
+		this.templateXPath = templateXPath;
+	}
 
-    public void setTemplateParams(Map<String, String> templateParams) {
-        this.templateParams = templateParams;
-    }
+	public Map<String, String> getTemplateParams() {
+		return templateParams;
+	}
 
-    public String getTemplateKoyaSubjectKey() {
-        return templateKoyaSubjectKey;
-    }
+	public void setTemplateParams(Map<String, String> templateParams) {
+		this.templateParams = templateParams;
+	}
 
-    public void setTemplateKoyaSubjectKey(String templateKoyaSubjectKey) {
-        this.templateKoyaSubjectKey = templateKoyaSubjectKey;
-    }
+	public String getTemplateKoyaSubjectKey() {
+		return templateKoyaSubjectKey;
+	}
 
-    public List<String> getTemplateKoyaSubjectParams() {
-        return templateKoyaSubjectParams;
-    }
+	public void setTemplateKoyaSubjectKey(String templateKoyaSubjectKey) {
+		this.templateKoyaSubjectKey = templateKoyaSubjectKey;
+	}
 
-    public void setTemplateKoyaSubjectParams(List<String> templateKoyaSubjectParams) {
-        this.templateKoyaSubjectParams = templateKoyaSubjectParams;
-    }
+	public List<String> getTemplateKoyaSubjectParams() {
+		return templateKoyaSubjectParams;
+	}
 
-    @Override
-    public String toString() {
-        String str = "";
+	public void setTemplateKoyaSubjectParams(
+			List<String> templateKoyaSubjectParams) {
+		this.templateKoyaSubjectParams = templateKoyaSubjectParams;
+	}
 
-        str += "from = " + from + ",";
+	
+	public String getCompanyNodeRef() {
+		return companyNodeRef;
+	}
 
-        str += "to = [";
-        String sep = "";
-        for (String dest : to) {
-            str += sep + dest;
-            sep = ";";
-        }
-        str += "],";
+	public void setCompanyNodeRef(String companyNodeRef) {
+		this.companyNodeRef = companyNodeRef;
+	}
 
-        str += "subject = " + subject + ",";
+	@Override
+	public String toString() {
+		String str = "";
 
-        str += "content = " + content + ";";
+		str += "from = " + from + ",";
 
-        return str;
-    }
+		str += "to = [";
+		String sep = "";
+		for (String dest : to) {
+			str += sep + dest;
+			sep = ";";
+		}
+		str += "],";
 
-    public void addDest(String mailAdress) {
-        to.add(mailAdress);
-    }
+		str += "subject = " + subject + ",";
+
+		str += "content = " + content + ";";
+
+		return str;
+	}
+
+	public void addDest(String mailAdress) {
+		to.add(mailAdress);
+	}
 
 }
