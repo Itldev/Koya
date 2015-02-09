@@ -53,6 +53,17 @@ public class KoyaMailService implements InitializingBean {
 	private final static String SHARE_NOTIFICATION_SUBJECT = "koya.share-notification.subject";
 	private final static String RESET_PASSWORD_SUBJECT = "koya.reset-password.subject";
 	private final static String INSTANT_NOTIFICATION_SUBJECT = "koya.newcontent-notification.subject";
+	
+	//templates locations
+	private final static String TPL_MAIL_KOYAROOT = "//app:company_home/app:dictionary/app:email_templates/cm:koya_templates";
+	
+	private final static String TPL_MAIL_I18NSUBJECTS = TPL_MAIL_KOYAROOT+"/cm:koyamail.properties";
+	private final static String TPL_MAIL_SHARENOTIF = TPL_MAIL_KOYAROOT+"/cm:share-notification.html.ftl";
+	private final static String TPL_MAIL_RESET_PWD = TPL_MAIL_KOYAROOT+"/cm:reset-password.html.ftl";
+	private final static String TPL_MAIL_NEWCONTENTNOTIF_ = TPL_MAIL_KOYAROOT+"/cm:new-content.html.ftl";
+	public final static String  TPL_MAIL_INVITATION = TPL_MAIL_KOYAROOT+"/cm:invite.html.ftl";
+
+	
 
 	protected NamespaceService namespaceService;
 	protected FileFolderService fileFolderService;
@@ -112,25 +123,6 @@ public class KoyaMailService implements InitializingBean {
 		this.koyaNodeService = koyaNodeService;
 	}
 
-	public void setI18nMailSubjectPropertiesLocation(
-			RepositoryLocation i18nMailSubjectPropertiesLocation) {
-		this.i18nMailSubjectPropertiesLocation = i18nMailSubjectPropertiesLocation;
-	}
-
-	public void setShareNotificationTemplateLocation(
-			RepositoryLocation shareNotificationTemplateLocation) {
-		this.shareNotificationTemplateLocation = shareNotificationTemplateLocation;
-	}
-
-	public void setResetPasswordTemplateLocation(
-			RepositoryLocation resetPasswordTemplateLocation) {
-		this.resetPasswordTemplateLocation = resetPasswordTemplateLocation;
-	}
-
-	public void setNewContentNoficationTemplateLocation(
-			RepositoryLocation newContentNoficationTemplateLocation) {
-		this.newContentNoficationTemplateLocation = newContentNoficationTemplateLocation;
-	}
 
 	public void setUserService(UserService userService) {
 		this.userService = userService;
@@ -180,7 +172,22 @@ public class KoyaMailService implements InitializingBean {
 		koyaClientParams = new HashMap<>();
 		koyaClientParams.put("serverPath",
 				companyAclService.getKoyaClientServerPath());
+		initTemplatesRefs();
 	}
+	
+	private void initTemplatesRefs(){
+		i18nMailSubjectPropertiesLocation= new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_MAIL_I18NSUBJECTS, "xpath");
+		
+		shareNotificationTemplateLocation= new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_MAIL_SHARENOTIF, "xpath");
+		resetPasswordTemplateLocation= new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_MAIL_RESET_PWD, "xpath");
+		 newContentNoficationTemplateLocation= new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+					TPL_MAIL_NEWCONTENTNOTIF_, "xpath");
+	}
+	
+	
 
 	public void sendShareNotifMail(User sender, String destMail, Company c,
 			final NodeRef sharedNodeRef) throws KoyaServiceException {

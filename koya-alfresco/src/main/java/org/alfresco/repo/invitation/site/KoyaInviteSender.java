@@ -175,7 +175,7 @@ private ServiceRegistry serviceRegistry;
 
     private NodeRef getEmailTemplateNodeRef() {
         List<NodeRef> nodeRefs = searchService.selectNodes(repository.getRootHome(),
-                "app:company_home/app:dictionary/app:email_templates/cm:koya_templates/cm:invite.html.ftl", null,
+                koyaMailService.TPL_MAIL_INVITATION, null,
                 this.namespaceService, false);        
 
         if (nodeRefs.size() == 1) {
