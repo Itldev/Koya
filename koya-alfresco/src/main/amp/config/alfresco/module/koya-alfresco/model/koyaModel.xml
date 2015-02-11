@@ -243,7 +243,14 @@
             </properties>            
         </aspect>        
         
-        
+        <aspect name="koya:lastModified">
+            <title>Date last content change</title>
+            <properties>
+                <property name="koya:lastModificationDate">
+                    <type>d:datetime</type>
+                </property>
+            </properties>
+        </aspect>
     </aspects>
     
 </model>

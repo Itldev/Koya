@@ -72,6 +72,8 @@ public class KoyaModel {
 	public static final QName ASPECT_CIVILTITLED = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "civilTitled");
 
+    public static final QName ASPECT_LASTMODIFIED = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "lastModified");
 	// ================= Aspects Properties
 	
 	public static final QName PROP_COMPANYHOME = QName.createQName(
@@ -84,7 +86,15 @@ public class KoyaModel {
 			NAMESPACE_KOYA_CONTENT_MODEL, "mail");
 	
 	public static final QName PROP_CIVILTITLE = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "civilTitle");	
+			NAMESPACE_KOYA_CONTENT_MODEL, "civilTitle");
+
+
+    public static final QName PROP_LASTMODIFICATIONDATE = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "lastModificationDate");
+
+
+    public static final QName PROP_NOTIFIED = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "notified");
 
 	// ================= Types Properties =========================
 	public static final QName PROP_CONTACTITEM_VALUE = QName.createQName(
@@ -124,7 +134,7 @@ public class KoyaModel {
 	// ===========================================
 	public static final QName ASSOC_CONTACT_USER = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");
-	
+
 	/**
 	 * Used because koya namespace is not registered
 	 * 

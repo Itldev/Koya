@@ -116,5 +116,11 @@
         <property name="companyAclService" ref="companyAclService" />       
     </bean>
     
-    
+    <!-- Last Add/Update or delete date to dossier Aspect Behaviour -->
+    <bean id="LastModificationDateBehaviour" class="fr.itldev.koya.behaviour.LastModificationDateBehaviour"
+          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
+        <property name="policyComponent" ref="policyComponent" />       
+        <property name="nodeService" ref="NodeService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />       
+    </bean>
 </beans>
