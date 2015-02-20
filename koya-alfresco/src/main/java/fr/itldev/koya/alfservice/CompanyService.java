@@ -18,22 +18,14 @@
  */
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.CompanyProperties;
-import fr.itldev.koya.model.impl.Contact;
-import fr.itldev.koya.model.impl.ContactItem;
-import fr.itldev.koya.model.impl.GeoPos;
-import fr.itldev.koya.model.impl.Preferences;
-import fr.itldev.koya.model.impl.SalesOffer;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
@@ -45,16 +37,25 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.site.SiteVisibility;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.CompanyProperties;
+import fr.itldev.koya.model.impl.Contact;
+import fr.itldev.koya.model.impl.ContactItem;
+import fr.itldev.koya.model.impl.GeoPos;
+import fr.itldev.koya.model.impl.Preferences;
+import fr.itldev.koya.model.impl.SalesOffer;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 /**
  * 
@@ -125,14 +126,22 @@ public class CompanyService {
 	}
 
 	// </editor-fold>
-	public Company create(String title, SalesOffer sO, String spaceTemplate)
+	public Company create(String compTitle, SalesOffer sO, String spaceTemplate)
 			throws KoyaServiceException {
 
-		if (title == null || title.isEmpty()) {
+		if (compTitle == null || compTitle.isEmpty()) {
 			throw new KoyaServiceException(KoyaErrorCodes.COMPANY_EMPTY_TITLE);
+		}
+		String title;
+		try {
+			title = URLDecoder.decode(compTitle, "UTF-8");
+		} catch (Exception ex) {
+			title = compTitle;
+			logger.warn("not able to decode UTF-8 URL encoding company title : using input company title without modification");
 		}
 
 		String shortName = getShortNameFromTitle(title);
+
 		SiteInfo sInfo = siteService.createSite(SITE_PRESET, shortName, title,
 				DESC + " - " + shortName, SiteVisibility.PRIVATE);
 		Company created = koyaNodeService.getSecuredItem(sInfo.getNodeRef(),
@@ -148,7 +157,7 @@ public class CompanyService {
 		// add users notification rule on documentLibraryNode
 		koyaNotificationService.createCompanyNotificationRule(created);
 
-		// TODO copy config files to the koy-config directory
+		// TODO copy config files to the koya-config directory
 		return created;
 	}
 
@@ -288,14 +297,14 @@ public class CompanyService {
 	/**
 	 * ================= Properties Methods ==============================
 	 */
-	
+
 	public CompanyProperties getProperties(String companyName)
 			throws KoyaServiceException {
 		Company c = koyaNodeService.getSecuredItem(
 				siteService.getSite(companyName).getNodeRef(), Company.class);
 		return getProperties(c);
 	}
-	
+
 	/**
 	 * Get Company properties.
 	 * 
@@ -319,9 +328,9 @@ public class CompanyService {
 		}
 
 		if (companyPropertiesNodeRef != null) {
-			
+
 			cp.setTitle(c.getTitle());
-			
+
 			// if geographic aspect is set, get latitude and longitude
 			if (nodeService.hasAspect(companyPropertiesNodeRef,
 					ContentModel.ASPECT_GEOGRAPHIC)) {
@@ -331,7 +340,7 @@ public class CompanyService {
 								companyPropertiesNodeRef,
 								ContentModel.PROP_LONGITUDE)));
 			}
-			
+
 			// address, description,legal informations - company properties
 			// attributes
 			cp.setAddress((String) nodeService.getProperty(
@@ -342,7 +351,7 @@ public class CompanyService {
 					companyPropertiesNodeRef, KoyaModel.PROP_ZIPCODE));
 			cp.setCity((String) nodeService.getProperty(
 					companyPropertiesNodeRef, KoyaModel.PROP_CITY));
-			
+
 			cp.setDescription((String) nodeService.getProperty(
 					companyPropertiesNodeRef, KoyaModel.PROP_DESCRIPTION));
 			cp.setLegalInformations((String) nodeService.getProperty(
@@ -505,16 +514,15 @@ public class CompanyService {
 	 */
 	private String getShortNameFromTitle(String title) {
 
-		String shortTitle = koyaNodeService
-				.getUniqueValidFileNameFromTitle(title);
-
-		shortTitle = shortTitle.replaceAll("[àáâãäå]", "a")
+		String shortTitle = title.replaceAll("[àáâãäå]", "a")
 				.replaceAll("æ", "ae").replaceAll("ç", "c")
 				.replaceAll("[èéêë]", "e").replaceAll("[ìíîï]", "i")
 				.replaceAll("ñ", "n").replaceAll("[òóôõö]", "o")
 				.replaceAll("œ", "oe").replaceAll("[ùúûü]", "u")
 				.replaceAll("[ýÿ]", "y").replaceAll("&", "and")
 				.replaceAll("\\s+", "-").toLowerCase();
+
+		// TODO check invalid characters like €
 
 		/**
 		 * shortTitle is unique even if title alredy exists.
