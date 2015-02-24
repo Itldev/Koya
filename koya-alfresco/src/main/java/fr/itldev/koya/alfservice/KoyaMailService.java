@@ -532,9 +532,6 @@ public class KoyaMailService implements InitializingBean {
 					logger.warn("mail Subject remplacement token doesn't match a variable : "+m.group());
 				}
 			}
-
-			logger.error("mail subject = " + mailSubject);
-
 			return mailSubject;
 		} else {
 			throw new KoyaServiceException(
