@@ -6,7 +6,8 @@ for each (var s in sites){
 		var companyPropertiesFile = search.luceneSearch('PATH:"/app:company_home/st:sites/cm:'+s.name+'/cm:koya-config/cm:company.properties"');
 		//add aspect
 		var props = new Array(1);
-		props["koya:companyHome"] = companyPropertiesFile[0];		
+		props["koya:companyHome"] = companyPropertiesFile[0].nodeRef;		
 		s.addAspect("koya:companySite", props);
+		s.save();
 	}	
 }
