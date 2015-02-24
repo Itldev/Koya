@@ -137,6 +137,7 @@ public class LastModificationDateBehaviour implements NodeServicePolicies.OnDele
                     }
 
                     nodeService.setProperty(n, KoyaModel.PROP_LASTMODIFICATIONDATE, new Date());
+                    nodeService.setProperty(n, KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
                     return null;
                 }
             });

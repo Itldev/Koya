@@ -249,6 +249,10 @@
                 <property name="koya:lastModificationDate">
                     <type>d:datetime</type>
                 </property>
+                <property name="koya:notified">
+                    <type>d:boolean</type>
+                    <default>false</default>
+                </property>
             </properties>
         </aspect>
     </aspects>

@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    Koya is an alfresco module that provides a corporate orientated dataroom.
+
+    Copyright (C) Itl Developpement 2014
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
+
+-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans>
+    
+    <!--
+    Define the model factory used to generate object models suitable for use with freemarker templates. 
+    -->
+    <bean id="templateActionModelFactory" class="org.alfresco.repo.action.scheduled.FreeMarkerWithLuceneExtensionsModelFactory">
+        <property name="serviceRegistry" ref="ServiceRegistry"/>
+    </bean>
+    
+    <bean  id="inactiveDossierJobDefinition" class="fr.itldev.koya.action.scheduled.ActivableCronScheduledQueryBasedTemplateActionDefinition">
+        <property name="enable" value="${koya.inactivedossiers.enable}"/>
+        <property name="transactionMode" value="ISOLATED_TRANSACTIONS"/>
+        <property name="searchService" ref="SearchService" />
+        <property name="templateService" ref="TemplateService" />
+        <property name="queryLanguage" value="lucene"/>
+        <property name="stores">
+            <list>
+                <value>workspace://SpacesStore</value>
+            </list>
+        </property>
+        <property name="queryTemplate" value="+PATH:&quot;/app:company_home/st:sites/*&quot;"/>
+        <property name="cronExpression" value="${koya.inactivedossiers.cron}"/>
+        <property name="jobName" value="inactiveDossierJob"/>
+        <property name="jobGroup" value="koyaNotificationGroup"/>
+        <property name="triggerName" value="inactiveDossierTrigger"/>
+        <property name="triggerGroup" value="inactiveDossierTriggerGroup"/>
+        <property name="scheduler" ref="schedulerFactory" />
+        <property name="actionService" ref="ActionService" />
+        <property name="templateActionModelFactory" ref="templateActionModelFactory" />
+        <property name="templateActionDefinition" ref="inactiveDossierJobRunnerTemplate" />
+        <property name="transactionService" ref="TransactionService" />
+        <property name="runAsUser" value="System"/>
+    </bean>
+    
+    <bean id="inactiveDossierJobRunnerTemplate" class="org.alfresco.repo.action.scheduled.SimpleTemplateActionDefinition">
+        <property name="actionName" value="inactiveDossierJobRunner"/>
+        <property name="parameterTemplates">
+            <map>
+                <entry>
+                    <key>
+                        <value>dummy-param</value>
+                    </key>
+                    <value>dummy-value</value>
+                </entry>
+            </map>
+        </property>
+        <property name="templateActionModelFactory" ref="templateActionModelFactory" />
+        <property name="dictionaryService" ref="DictionaryService" />
+        <property name="actionService" ref="ActionService" />
+        <property name="templateService" ref="TemplateService" />
+    </bean>
+    
+    <bean id="inactiveDossierJobRunner" class="fr.itldev.koya.action.InactiveDossierActionExecuter"
+          parent="action-executer">
+        <property name="nodeService" ref="nodeService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="koyaMailService" ref="koyaMailService"/>
+        <property name="spaceService" ref="spaceService" />
+        <property name="dossierService" ref="dossierService" />
+        <property name="subSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService" />
+        <property name="inactiveFrom" value="${koya.inactivedossiers.duration}" />
+    </bean>
+</beans>

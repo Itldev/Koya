@@ -35,5 +35,6 @@
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-action-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-permissions-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-bootstrap-context.xml" />
+    <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-scheduled-action-context.xml" />
 
 </beans>
