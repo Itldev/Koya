@@ -146,10 +146,24 @@ public class CompanyService {
 				DESC + " - " + shortName, SiteVisibility.PRIVATE);
 		Company created = koyaNodeService.getSecuredItem(sInfo.getNodeRef(),
 				Company.class);
-
+		
 		// Creating koya-config directory
+		//todo difference between company config (ie company hime) and koya site config (default site)		
 		NodeRef koyaConfig = getKoyaConfigNodeRef(sInfo.getNodeRef(), true);
 
+		//Creating koya:companyProperties node (COMPANYPROPERTIES_FILE_NAME) = companyHome
+		//in site koyaConfig folder (default location)
+		//todo define outside site company home
+		NodeRef companyPropertiesNode = this.createCompanyConfigFile(created);
+		
+		
+		//put companySite Aspect with default company.properties reference.			
+		Map<QName, Serializable> props = new HashMap<>();
+		props.put(KoyaModel.PROP_COMPANYHOME,companyPropertiesNode);		
+		nodeService.addAspect(created.getNodeRefasObject(),
+						KoyaModel.ASPECT_COMPANYSITE, props);
+		
+	      
 		modelService.companyInitTemplate(shortName, spaceTemplate);
 
 		modelService.companyInitImports(shortName);
@@ -161,6 +175,10 @@ public class CompanyService {
 		return created;
 	}
 
+	
+	public Company getCompany(String shortName) throws KoyaServiceException{
+		return koyaNodeService.getSecuredItem(getSiteInfo(shortName).getNodeRef(), Company.class);
+	}
 	/**
 	 * List users available companies.
 	 * 
@@ -173,8 +191,11 @@ public class CompanyService {
 
 		for (SiteInfo s : siteService.listSites(authenticationService
 				.getCurrentUserName())) {
-			socs.add(koyaNodeService.getSecuredItem(s.getNodeRef(),
-					Company.class));
+			
+			if(nodeService.hasAspect(s.getNodeRef(),KoyaModel.ASPECT_COMPANYSITE)){
+				socs.add(koyaNodeService.getSecuredItem(s.getNodeRef(),
+						Company.class));	
+			}			
 		}
 		return socs;
 	}
@@ -298,13 +319,6 @@ public class CompanyService {
 	 * ================= Properties Methods ==============================
 	 */
 
-	public CompanyProperties getProperties(String companyName)
-			throws KoyaServiceException {
-		Company c = koyaNodeService.getSecuredItem(
-				siteService.getSite(companyName).getNodeRef(), Company.class);
-		return getProperties(c);
-	}
-
 	/**
 	 * Get Company properties.
 	 * 
@@ -315,16 +329,12 @@ public class CompanyService {
 	public CompanyProperties getProperties(Company c)
 			throws KoyaServiceException {
 		CompanyProperties cp = new CompanyProperties(c.getName());
-
-		NodeRef companyPropertiesNodeRef = getCompanyConfigFile(c,
-				COMPANYPROPERTIES_FILE_NAME);
-
+		
+		NodeRef companyPropertiesNodeRef =(NodeRef) nodeService.getProperty(c.getNodeRefasObject(),
+				KoyaModel.PROP_COMPANYHOME); 
+						
 		if (companyPropertiesNodeRef == null) {
-			FileInfo fi = fileFolderService.create(
-					getKoyaConfigNodeRef(c.getNodeRefasObject(), true),
-					COMPANYPROPERTIES_FILE_NAME,
-					KoyaModel.TYPE_COMPANYPROPERTIES);
-			companyPropertiesNodeRef = fi.getNodeRef();
+			this.createCompanyConfigFile(c);
 		}
 
 		if (companyPropertiesNodeRef != null) {
@@ -356,6 +366,9 @@ public class CompanyService {
 					companyPropertiesNodeRef, KoyaModel.PROP_DESCRIPTION));
 			cp.setLegalInformations((String) nodeService.getProperty(
 					companyPropertiesNodeRef, KoyaModel.PROP_LEGALINFOS));
+			
+			cp.setMailHeaderText((String) nodeService.getProperty(
+					companyPropertiesNodeRef, KoyaModel.PROP_MAILHEADERTEXT));
 
 			for (ChildAssociationRef car : nodeService
 					.getChildAssocs(companyPropertiesNodeRef)) {
@@ -601,8 +614,10 @@ public class CompanyService {
 	 * @return
 	 */
 	private NodeRef getCompanyConfigFile(Company c, String fileName) {
+		//TODO Read From company Home variable
 		NodeRef prefFileNodeRef = null;
 		try {
+												
 			prefFileNodeRef = nodeService.getChildByName(
 					getKoyaConfigNodeRef(c.getNodeRefasObject(), false),
 					ContentModel.ASSOC_CONTAINS, fileName);
@@ -610,5 +625,15 @@ public class CompanyService {
 		}
 		return prefFileNodeRef;
 	}
+	
+	private NodeRef createCompanyConfigFile(Company c) {
+		//TODO Read From company Home variable
+		FileInfo fi = fileFolderService.create(
+				getKoyaConfigNodeRef(c.getNodeRefasObject(), true),
+				COMPANYPROPERTIES_FILE_NAME,
+				KoyaModel.TYPE_COMPANYPROPERTIES);
+		return fi.getNodeRef();		
+	}
+	
 
 }

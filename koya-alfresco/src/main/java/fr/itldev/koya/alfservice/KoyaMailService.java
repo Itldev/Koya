@@ -223,7 +223,7 @@ public class KoyaMailService implements InitializingBean {
 				sender.getNodeRefasObject(), serviceRegistry));
 		templateModel.put(TemplateService.KEY_COMPANY_HOME,
 				repositoryHelper.getCompanyHome());
-		templateModel.put("company", companyService.getProperties(c.getName())
+		templateModel.put("company", companyService.getProperties(c)
 				.toHashMap());
 
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,

@@ -60,8 +60,6 @@
             <parent>cm:folder</parent>
         </type>        
                        
-        <!--Societies are sites-->                       
-
         <type name="koya:space">
             <title>space</title>
             <parent>koya:container</parent>            
@@ -156,7 +154,10 @@
                 </property>
                 <property name="koya:legalInformations">
                     <type>d:text</type>
-                </property>                                                                     
+                </property>               
+                <property name="koya:mailHeaderText">
+					<type>d:text</type>
+				</property>                                                      
             </properties>    
             <associations>                
                 <child-association name="koya:contactItemsAssoc">
@@ -195,6 +196,17 @@
     </types>
       
     <aspects>
+    
+    <aspect name="koya:companySite">
+			<title>Koya Company site Aspect</title>	
+			<properties>
+                <property name="koya:companyHome">
+                    <type>d:noderef</type>
+                    <default>true</default>
+                </property>                        
+            </properties>  
+		</aspect>
+    
         <!--Aspect available on containers to trigger active status-->
         <aspect name="koya:activable">
             <title>Active trigger</title>

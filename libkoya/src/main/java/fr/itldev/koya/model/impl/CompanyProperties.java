@@ -36,6 +36,8 @@ public class CompanyProperties {
 	private String address2;
 	private String zipCode;
 	private String city;
+	private String mailHeaderText;
+
 
 	private String logoNodeRef;
 	private String description;
@@ -93,6 +95,14 @@ public class CompanyProperties {
 
 	public void setCity(String city) {
 		this.city = city;
+	}		
+
+	public String getMailHeaderText() {
+		return mailHeaderText;
+	}
+
+	public void setMailHeaderText(String mailHeaderText) {
+		this.mailHeaderText = mailHeaderText;
 	}
 
 	public String getLogoNodeRef() {
@@ -160,6 +170,7 @@ public class CompanyProperties {
 		p.put("address2", address2);
 		p.put("zipCode", zipCode);
 		p.put("city", city);
+		p.put("mailHeaderText",mailHeaderText);
 
 		int indexfax = 1;
 		int indextel = 1;

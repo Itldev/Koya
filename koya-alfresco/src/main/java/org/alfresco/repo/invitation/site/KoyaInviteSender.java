@@ -48,6 +48,7 @@ import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Company;
 
 /**
  * Ovverride invite sender in order to provide custom invite mail subject
@@ -223,7 +224,8 @@ private ServiceRegistry serviceRegistry;
         	//TODO get invite Items from specific workflow model
         	//model.put("InviteItem", false);
         	
-        	model.put("company",companyService.getProperties(properties.get(wfVarResourceName)).toHashMap());
+        	Company c = companyService.getCompany(properties.get(wfVarResourceName));
+        	model.put("company",companyService.getProperties(c).toHashMap());
         }catch(Exception e){        	
         }
         // All done

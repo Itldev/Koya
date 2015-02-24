@@ -19,15 +19,18 @@
 
 package fr.itldev.koya.webscript.company;
 
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Get company current properties.
@@ -48,7 +51,8 @@ public class GetProperties extends AbstractWebScript {
         String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
         String response;
         try {
-            response = KoyaWebscript.getObjectAsJson(companyService.getProperties(companyName));
+        	Company c = companyService.getCompany(companyName);
+            response = KoyaWebscript.getObjectAsJson(companyService.getProperties(c));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

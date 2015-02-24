@@ -56,6 +56,10 @@ public class KoyaModel {
 			NAMESPACE_KOYA_CONTENT_MODEL, "companyProperties");
 
 	// ================ Aspects ==========================
+	
+	public static final QName ASPECT_COMPANYSITE = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "companySite");
+	
 	public static final QName ASPECT_ACTIVABLE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "activable");
 
@@ -69,6 +73,10 @@ public class KoyaModel {
 			NAMESPACE_KOYA_CONTENT_MODEL, "civilTitled");
 
 	// ================= Aspects Properties
+	
+	public static final QName PROP_COMPANYHOME = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "companyHome");
+	
 	public static final QName PROP_ISACTIVE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "isActive");
 
@@ -76,7 +84,7 @@ public class KoyaModel {
 			NAMESPACE_KOYA_CONTENT_MODEL, "mail");
 	
 	public static final QName PROP_CIVILTITLE = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "civilTitle");
+			NAMESPACE_KOYA_CONTENT_MODEL, "civilTitle");	
 
 	// ================= Types Properties =========================
 	public static final QName PROP_CONTACTITEM_VALUE = QName.createQName(
@@ -105,6 +113,9 @@ public class KoyaModel {
 
 	public static final QName PROP_LEGALINFOS = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "legalInformations");
+	
+	public static final QName PROP_MAILHEADERTEXT = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "mailHeaderText");
 
 	public static final QName PROP_REFERENCE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "reference");
@@ -113,7 +124,7 @@ public class KoyaModel {
 	// ===========================================
 	public static final QName ASSOC_CONTACT_USER = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");
-
+	
 	/**
 	 * Used because koya namespace is not registered
 	 * 
