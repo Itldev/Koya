@@ -141,15 +141,20 @@ private ServiceRegistry serviceRegistry;
              *
              */
 
-            mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT, koyaMailService.getI18nSubject(EMAIL_SUBJECT).replace("{0}", getSiteName(properties)));
+          
             /**
              *
              */
             mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT_PARAMS, new Object[]{
                 ModelUtil.getProductName(repoAdminService), getSiteName(properties)});
             mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, getEmailTemplateNodeRef());
+            
+            Map<String,Serializable> templateModel = buildMailTextModel(properties, inviter, invitee);
             mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,
-                    (Serializable) buildMailTextModel(properties, inviter, invitee));
+                    (Serializable) templateModel);
+            mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT,
+            		koyaMailService.getI18nSubject(EMAIL_SUBJECT,templateModel));
+            
             mail.setParameterValue(MailActionExecuter.PARAM_IGNORE_SEND_FAILURE, true);
             actionService.executeAction(mail, getWorkflowPackage(properties));
         } catch (KoyaServiceException ex) {

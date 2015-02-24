@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.MailActionExecuter;
@@ -53,17 +55,20 @@ public class KoyaMailService implements InitializingBean {
 	private final static String SHARE_NOTIFICATION_SUBJECT = "koya.share-notification.subject";
 	private final static String RESET_PASSWORD_SUBJECT = "koya.reset-password.subject";
 	private final static String INSTANT_NOTIFICATION_SUBJECT = "koya.newcontent-notification.subject";
-	
-	//templates locations
-	private final static String TPL_MAIL_KOYAROOT = "//app:company_home/app:dictionary/app:email_templates/cm:koya_templates";
-	
-	private final static String TPL_MAIL_I18NSUBJECTS = TPL_MAIL_KOYAROOT+"/cm:koyamail.properties";
-	private final static String TPL_MAIL_SHARENOTIF = TPL_MAIL_KOYAROOT+"/cm:share-notification.html.ftl";
-	private final static String TPL_MAIL_RESET_PWD = TPL_MAIL_KOYAROOT+"/cm:reset-password.html.ftl";
-	private final static String TPL_MAIL_NEWCONTENTNOTIF_ = TPL_MAIL_KOYAROOT+"/cm:new-content.html.ftl";
-	public final static String  TPL_MAIL_INVITATION = TPL_MAIL_KOYAROOT+"/cm:invite.html.ftl";
 
-	
+	// templates locations
+	private final static String TPL_MAIL_KOYAROOT = "//app:company_home/app:dictionary/app:email_templates/cm:koya_templates";
+
+	private final static String TPL_MAIL_I18NSUBJECTS = TPL_MAIL_KOYAROOT
+			+ "/cm:koyamail.properties";
+	private final static String TPL_MAIL_SHARENOTIF = TPL_MAIL_KOYAROOT
+			+ "/cm:share-notification.html.ftl";
+	private final static String TPL_MAIL_RESET_PWD = TPL_MAIL_KOYAROOT
+			+ "/cm:reset-password.html.ftl";
+	private final static String TPL_MAIL_NEWCONTENTNOTIF_ = TPL_MAIL_KOYAROOT
+			+ "/cm:new-content.html.ftl";
+	public final static String TPL_MAIL_INVITATION = TPL_MAIL_KOYAROOT
+			+ "/cm:invite.html.ftl";
 
 	protected NamespaceService namespaceService;
 	protected FileFolderService fileFolderService;
@@ -123,7 +128,6 @@ public class KoyaMailService implements InitializingBean {
 		this.koyaNodeService = koyaNodeService;
 	}
 
-
 	public void setUserService(UserService userService) {
 		this.userService = userService;
 	}
@@ -174,30 +178,28 @@ public class KoyaMailService implements InitializingBean {
 				companyAclService.getKoyaClientServerPath());
 		initTemplatesRefs();
 	}
-	
-	private void initTemplatesRefs(){
-		i18nMailSubjectPropertiesLocation= new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+
+	private void initTemplatesRefs() {
+		i18nMailSubjectPropertiesLocation = new RepositoryLocation(
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 				TPL_MAIL_I18NSUBJECTS, "xpath");
-		
-		shareNotificationTemplateLocation= new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-				TPL_MAIL_SHARENOTIF, "xpath");
-		resetPasswordTemplateLocation= new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-				TPL_MAIL_RESET_PWD, "xpath");
-		 newContentNoficationTemplateLocation= new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-					TPL_MAIL_NEWCONTENTNOTIF_, "xpath");
+
+		shareNotificationTemplateLocation = new RepositoryLocation(
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, TPL_MAIL_SHARENOTIF,
+				"xpath");
+		resetPasswordTemplateLocation = new RepositoryLocation(
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, TPL_MAIL_RESET_PWD,
+				"xpath");
+		newContentNoficationTemplateLocation = new RepositoryLocation(
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_MAIL_NEWCONTENTNOTIF_, "xpath");
 	}
-	
-	
 
 	public void sendShareNotifMail(User sender, String destMail, Company c,
 			final NodeRef sharedNodeRef) throws KoyaServiceException {
 		Map<String, Serializable> paramsMail = new HashMap<>();
 		paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
-		/**
-		 * Get subject from properties file in repository
-		 */
-		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
-				getI18nSubject(SHARE_NOTIFICATION_SUBJECT));
+
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE,
 				getFileTemplateRef(shareNotificationTemplateLocation));
 
@@ -229,6 +231,12 @@ public class KoyaMailService implements InitializingBean {
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,
 				(Serializable) templateModel);
 
+		/**
+		 * Get subject from properties file in repository
+		 */
+		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
+				getI18nSubject(SHARE_NOTIFICATION_SUBJECT, templateModel));
+
 		actionService
 				.executeAction(actionService.createAction(
 						MailActionExecuter.NAME, paramsMail), null, false, true);
@@ -240,11 +248,7 @@ public class KoyaMailService implements InitializingBean {
 		Map<String, Serializable> paramsMail = new HashMap<>();
 
 		paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
-		/**
-		 * Get subject from properties file in repository
-		 */
-		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
-				getI18nSubject(RESET_PASSWORD_SUBJECT));
+
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE,
 				getFileTemplateRef(resetPasswordTemplateLocation));
 
@@ -260,6 +264,12 @@ public class KoyaMailService implements InitializingBean {
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,
 				(Serializable) templateModel);
 
+		/**
+		 * Get subject from properties file in repository
+		 */
+		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
+				getI18nSubject(RESET_PASSWORD_SUBJECT, templateModel));
+
 		actionService
 				.executeAction(actionService.createAction(
 						MailActionExecuter.NAME, paramsMail), null, false, true);
@@ -270,11 +280,7 @@ public class KoyaMailService implements InitializingBean {
 		Map<String, Serializable> paramsMail = new HashMap<>();
 
 		paramsMail.put(MailActionExecuter.PARAM_TO, dest.getEmail());
-		/**
-		 * Get subject from properties file in repository
-		 */
-		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
-				getI18nSubject(INSTANT_NOTIFICATION_SUBJECT));
+
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE,
 				getFileTemplateRef(newContentNoficationTemplateLocation));
 
@@ -291,28 +297,37 @@ public class KoyaMailService implements InitializingBean {
 		templateModel.put("date",
 				nodeService.getProperty(sharedItem, ContentModel.PROP_UPDATED));
 
+		Company c = koyaNodeService.getFirstParentOfType(
+				sharedItem, Company.class);
+		
+		templateModel.put(
+				"company",
+				companyService.getProperties(c).toHashMap());
+		
+		final String compTitle = c.getTitle();
+		
 		templateModel.put("document", new HashMap() {
 			{
 				put("name", nodeService.getProperty(sharedItem,
 						ContentModel.PROP_TITLE));
-				put("siteShortName",
-						koyaNodeService.getFirstParentOfType(sharedItem,
-								Company.class).getTitle());
+				put("siteShortName",compTitle);
 				put("directLinkUrl", getDirectLinkUrl(sharedItem));
 			}
 		});
 
-		templateModel.put(
-				"company",
-				companyService.getProperties(
-						(Company) koyaNodeService.getFirstParentOfType(
-								sharedItem, Company.class)).toHashMap());
+		
 
 		/**
 		 * TODO Add company and dossiers (or all path ) references to template
 		 */
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,
 				(Serializable) templateModel);
+
+		/**
+		 * Get subject from properties file in repository
+		 */
+		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
+				getI18nSubject(INSTANT_NOTIFICATION_SUBJECT, templateModel));
 
 		actionService
 				.executeAction(actionService.createAction(
@@ -414,6 +429,7 @@ public class KoyaMailService implements InitializingBean {
 		paramsMail.put(MailActionExecuter.PARAM_TO_MANY,
 				new ArrayList(wrapper.getTo()));
 
+		Map<String, Serializable> templateModel = new HashMap<>();
 		/**
 		 * Get subject and body Templates
 		 */
@@ -431,7 +447,6 @@ public class KoyaMailService implements InitializingBean {
 
 			paramsMail.put(MailActionExecuter.PARAM_TEMPLATE,
 					getFileTemplateRef(templateLoc));
-			Map<String, Object> templateModel = new HashMap<>();
 
 			templateModel.put("args",
 					(Serializable) wrapper.getTemplateParams());
@@ -451,8 +466,8 @@ public class KoyaMailService implements InitializingBean {
 
 		if (wrapper.getTemplateKoyaSubjectKey() != null) {
 
-			String subject = (String) getI18nSubject(wrapper
-					.getTemplateKoyaSubjectKey());
+			String subject = (String) getI18nSubject(
+					wrapper.getTemplateKoyaSubjectKey(), templateModel);
 
 			/**
 			 * TODO replace MailActionExecuter.PARAM_SUBJECT_PARAMS parameter
@@ -477,7 +492,9 @@ public class KoyaMailService implements InitializingBean {
 
 	}
 
-	public String getI18nSubject(String propKey) throws KoyaServiceException {
+	public String getI18nSubject(String propKey,
+			Map<String, Serializable> templateValues)
+			throws KoyaServiceException {
 		Properties i18n = koyaNodeService
 				.readPropertiesFileContent(getFileTemplateRef(i18nMailSubjectPropertiesLocation));
 		if (i18n == null) {
@@ -487,10 +504,38 @@ public class KoyaMailService implements InitializingBean {
 							+ i18nMailSubjectPropertiesLocation.getPath());
 		}
 
-		String value = i18n.getProperty(propKey);
+		String mailSubject = i18n.getProperty(propKey);
 
-		if (value != null && !value.isEmpty()) {
-			return value;
+		if (mailSubject != null && !mailSubject.isEmpty()) {
+			// replace templates values in subject if exists
+
+			Pattern p = Pattern.compile("\\$\\{([^}]+)\\}");
+			Matcher m = p.matcher(mailSubject);
+			while (m.find()) {
+				String varName = m.group(1);
+				String varReplaced = null;
+				
+				try {
+					Object replaceValue = templateValues;
+					for (String varChunk : varName.split("\\.")) {
+						replaceValue = ((Map) replaceValue).get(varChunk);
+					}
+					varReplaced = replaceValue.toString();
+				} catch (Exception e) {
+				}
+
+				if (varReplaced != null) {
+					// Do replacement in value String
+					mailSubject = mailSubject.replace("${" + varName
+							+ "}", varReplaced);
+				}else{
+					logger.warn("mail Subject remplacement token doesn't match a variable : "+m.group());
+				}
+			}
+
+			logger.error("mail subject = " + mailSubject);
+
+			return mailSubject;
 		} else {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.KOYAMAIL_SUBJECT_KEY_NOT_EXISTS_IN_PROPERTIES,
