@@ -104,6 +104,7 @@ public class ValidateInvitation extends AbstractWebScript {
         final User userInvited = new User();
         userInvited.setName((String) jsonPostMap.get("lastName"));
         userInvited.setFirstName((String) jsonPostMap.get("firstName"));
+        userInvited.setCivilTitle((String) jsonPostMap.get("civilTitle"));
 
         try {
             final NominatedInvitation invitation;

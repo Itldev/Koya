@@ -22,19 +22,24 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.search.impl.lucene.LuceneUtils;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.namespace.NamespacePrefixResolver;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.collections.CollectionUtils;
@@ -53,6 +58,7 @@ public class DossierService {
     private NodeService nodeService;
     private KoyaNodeService koyaNodeService;
     protected SearchService searchService;
+    private NamespacePrefixResolver prefixResolver;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -65,6 +71,10 @@ public class DossierService {
 
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
+    }
+
+    public void setPrefixResolver(NamespacePrefixResolver prefixResolver) {
+        this.prefixResolver = prefixResolver;
     }
 
     // </editor-fold>
@@ -169,6 +179,30 @@ public class DossierService {
                 default:
                     throw new KoyaServiceException(KoyaErrorCodes.MANY_DOSSIERS_REFERENCE, reference);
             }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+        }
+    }
+
+    public List<Dossier> getInactiveDossier(final Space space, final Date inactiveFrom, final boolean notNotifiedOnly) throws KoyaServiceException {
+        String luceneRequest = "+PATH:\"" + nodeService.getPath(space.getNodeRefasObject()).toPrefixString(prefixResolver) + "/*\" +TYPE:\"koya:dossier\" +@koya\\:lastModificationDate:[MIN TO \"" + LuceneUtils.getLuceneDateString(inactiveFrom) + "\"]";
+        if (notNotifiedOnly) {
+            luceneRequest += " +@koya\\:notified:false";
+        }
+        logger.debug(luceneRequest);
+
+        ResultSet rs = null;
+        try {
+            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
+
+            List<Dossier> inactiveDossier = new ArrayList<>(rs.length());
+            for (NodeRef n : rs.getNodeRefs()) {
+                inactiveDossier.add(koyaNodeService.getSecuredItem(n, Dossier.class));
+            }
+
+            return inactiveDossier;
         } finally {
             if (rs != null) {
                 rs.close();

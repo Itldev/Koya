@@ -60,6 +60,15 @@
         <property name="companyService" ref="companyService" />        
     </bean>
     
+    <!-- get company logo-->
+    <bean id="webscript.fr.itldev.koya.company.logo.get" 
+          class="fr.itldev.koya.webscript.company.GetLogo"
+          parent="webscript">                
+        <property name="companyService" ref="companyService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />  
+        <property name="contentService" ref="ContentService"/>      
+    </bean>
+    
     
     <!-- commit preferences-->
     <bean id="webscript.fr.itldev.koya.company.preferences.post" 
@@ -477,11 +486,8 @@
     
     <bean id="webscript.fr.itldev.koya.invitation.sendmail.post"
           class="fr.itldev.koya.webscript.invitation.SendInviteMail"
-          parent="webscript">                    
+          parent="webscript">                         
         <property name="workflowService" ref="WorkflowService"/>
-        <property name="serviceRegistry" ref="ServiceRegistry"/>
-        <property name="repositoryHelper" ref="repositoryHelper"/>
-        <property name="messageService" ref="messageService"/>        
         <property name="koyaMailService" ref="koyaMailService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/> 
         <property name="companyAclService" ref="companyAclService"/> 
@@ -495,6 +501,13 @@
           parent="webscript">                
         <property name="companyAclService" ref="companyAclService" /> 
         <property name="koyaNodeService" ref="koyaNodeService" /> 
+    </bean>
+    
+    
+    <bean id="webscript.fr.itldev.koya.invitation.invitationpending.get" 
+          class="fr.itldev.koya.webscript.invitation.GetInvitationPending"
+          parent="webscript">                
+        <property name="workflowService" ref="WorkflowService" /> 
     </bean>
     
     
@@ -612,7 +625,9 @@
           class="fr.itldev.koya.webscript.resetpassword.ResetRequest"
           parent="webscript">
         <property name="userService" ref="userService" />   
-        <property name="workflowService" ref="WorkflowService" />   
+        <property name="workflowService" ref="WorkflowService" />  
+        <property name="companyAclService" ref="companyAclService"/> 
+        <property name="koyaMailService" ref="koyaMailService"/> 
     </bean>
     
     

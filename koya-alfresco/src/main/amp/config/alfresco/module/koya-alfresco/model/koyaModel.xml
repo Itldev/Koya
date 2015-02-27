@@ -60,8 +60,6 @@
             <parent>cm:folder</parent>
         </type>        
                        
-        <!--Societies are sites-->                       
-
         <type name="koya:space">
             <title>space</title>
             <parent>koya:container</parent>            
@@ -136,18 +134,30 @@
         </type>
         
         <type name="koya:companyProperties">
-            <title>Company properties</title>
+        <title>Company properties</title>
             <parent>cm:folder</parent>
             <properties>
                 <property name="koya:address">
                     <type>d:text</type>
                 </property>
-                <property name="koya:description">
+                <property name="koya:address2">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:zipcode">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:city">
+                    <type>d:text</type>
+                </property>
+                <property name="koya:description">                               
                     <type>d:text</type>
                 </property>
                 <property name="koya:legalInformations">
                     <type>d:text</type>
-                </property>                                                                     
+                </property>               
+                <property name="koya:mailHeaderText">
+					<type>d:text</type>
+				</property>                                                      
             </properties>    
             <associations>                
                 <child-association name="koya:contactItemsAssoc">
@@ -186,6 +196,17 @@
     </types>
       
     <aspects>
+    
+    <aspect name="koya:companySite">
+			<title>Koya Company site Aspect</title>	
+			<properties>
+                <property name="koya:companyHome">
+                    <type>d:noderef</type>
+                    <default>true</default>
+                </property>                        
+            </properties>  
+		</aspect>
+    
         <!--Aspect available on containers to trigger active status-->
         <aspect name="koya:activable">
             <title>Active trigger</title>
@@ -211,9 +232,29 @@
         
         <aspect name="koya:userNotified">
             <title>Person Notified Aspect</title>            
+        </aspect>  
+        
+         <aspect name="koya:civilTitled">
+            <title>Person civil title</title>  
+            <properties>
+                <property name="koya:civilTitle">
+                    <type>d:text</type>
+                </property>     
+            </properties>            
         </aspect>        
         
-        
+        <aspect name="koya:lastModified">
+            <title>Date last content change</title>
+            <properties>
+                <property name="koya:lastModificationDate">
+                    <type>d:datetime</type>
+                </property>
+                <property name="koya:notified">
+                    <type>d:boolean</type>
+                    <default>false</default>
+                </property>
+            </properties>
+        </aspect>
     </aspects>
     
 </model>

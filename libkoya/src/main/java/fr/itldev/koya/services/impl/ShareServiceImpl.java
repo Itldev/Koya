@@ -46,7 +46,7 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
     protected static final String REST_GET_SHAREDITEMS = "/s/fr/itldev/koya/share/listusershares/{userName}/{companyName}";
     protected static final String REST_GET_ISSHAREDWITHCONSUMER = "/s/fr/itldev/koya/share/consumer/{noderef}";
 
-    protected static final String REST_POST_SHARESINGLE = "/s/fr/itldev/koya/share/do";
+    protected static final String REST_POST_SHARESINGLE = "/s/fr/itldev/koya/share/do?alf_ticket={alf_ticket}";
     protected static final String REST_POST_UNSHARESINGLE = "/s/fr/itldev/koya/share/undo";
 
     private Cache<SubSpace, Boolean> nodeSharedWithConsumerCache;
@@ -84,9 +84,9 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
         shareParams.put("nodeRef", itemToShare.getNodeRef());
         shareParams.put("koyaPermission", KoyaPermissionConsumer.CLIENT.toString());
 
-        user.getRestTemplate().postForObject(
+        getTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_SHARESINGLE,
-                shareParams, String.class);
+                shareParams, String.class, user.getTicketAlfresco());
     }
 
     /**

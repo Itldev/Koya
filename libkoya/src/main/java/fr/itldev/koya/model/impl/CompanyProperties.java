@@ -20,6 +20,7 @@
 package fr.itldev.koya.model.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -29,87 +30,163 @@ import java.util.List;
  */
 public class CompanyProperties {
 
-    private String companyName;
-    private String companyAddress;
-    private String logoNodeRef;
-    private String description;
-    private String legalInformations;
-    private List<Contact> contacts = new ArrayList<>();
-    private List<ContactItem> contactItems = new ArrayList<>();
+	private String name;
+	private String title;
+	private String address;
+	private String address2;
+	private String zipCode;
+	private String city;
+	private String mailHeaderText;
 
-    private GeoPos geoPos;
 
-    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public String getCompanyName() {
-        return companyName;
-    }
+	private String logoNodeRef;
+	private String description;
+	private String legalInformations;
+	private List<Contact> contacts = new ArrayList<>();
+	private List<ContactItem> contactItems = new ArrayList<>();
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
+	private GeoPos geoPos;
 
-    public String getCompanyAddress() {
-        return companyAddress;
-    }
+	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 
-    public void setCompanyAddress(String companyAddress) {
-        this.companyAddress = companyAddress;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getLogoNodeRef() {
-        return logoNodeRef;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setLogoNodeRef(String logoNodeRef) {
-        this.logoNodeRef = logoNodeRef;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public String getAddress() {
+		return address;
+	}
 
-    public String getLegalInformations() {
-        return legalInformations;
-    }
+	public void setAddress(String address) {
+		this.address = address;
+	}
 
-    public void setLegalInformations(String legalInformations) {
-        this.legalInformations = legalInformations;
-    }
+	public String getAddress2() {
+		return address2;
+	}
 
-    public GeoPos getGeoPos() {
-        return geoPos;
-    }
+	public void setAddress2(String address2) {
+		this.address2 = address2;
+	}
 
-    public void setGeoPos(GeoPos geoPos) {
-        this.geoPos = geoPos;
-    }
+	public String getZipCode() {
+		return zipCode;
+	}
 
-    public List<Contact> getContacts() {
-        return contacts;
-    }
+	public void setZipCode(String zipCode) {
+		this.zipCode = zipCode;
+	}
 
-    public void setContacts(List<Contact> contacts) {
-        this.contacts = contacts;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public List<ContactItem> getContactItems() {
-        return contactItems;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}		
 
-    public void setContactItems(List<ContactItem> contactItems) {
-        this.contactItems = contactItems;
-    }
+	public String getMailHeaderText() {
+		return mailHeaderText;
+	}
 
-    // </editor-fold >
-    public CompanyProperties() {
-    }
+	public void setMailHeaderText(String mailHeaderText) {
+		this.mailHeaderText = mailHeaderText;
+	}
 
-    public CompanyProperties(String companyName) {
-        this.companyName = companyName;
-    }
+	public String getLogoNodeRef() {
+		return logoNodeRef;
+	}
 
+	public void setLogoNodeRef(String logoNodeRef) {
+		this.logoNodeRef = logoNodeRef;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getLegalInformations() {
+		return legalInformations;
+	}
+
+	public void setLegalInformations(String legalInformations) {
+		this.legalInformations = legalInformations;
+	}
+
+	public GeoPos getGeoPos() {
+		return geoPos;
+	}
+
+	public void setGeoPos(GeoPos geoPos) {
+		this.geoPos = geoPos;
+	}
+
+	public List<Contact> getContacts() {
+		return contacts;
+	}
+
+	public void setContacts(List<Contact> contacts) {
+		this.contacts = contacts;
+	}
+
+	public List<ContactItem> getContactItems() {
+		return contactItems;
+	}
+
+	public void setContactItems(List<ContactItem> contactItems) {
+		this.contactItems = contactItems;
+	}
+
+	// </editor-fold >
+	public CompanyProperties() {
+	}
+
+	public CompanyProperties(String name) {
+		this.name = name;
+	}
+
+	public HashMap<String, String> toHashMap() {
+		HashMap<String, String> p = new HashMap<>();
+		p.put("shortName", name);
+		p.put("title", title);
+
+		p.put("address", address);
+		p.put("address2", address2);
+		p.put("zipCode", zipCode);
+		p.put("city", city);
+		p.put("mailHeaderText",mailHeaderText);
+
+		int indexfax = 1;
+		int indextel = 1;
+		int indexmail = 1;
+		for (ContactItem ci : this.contactItems) {
+			if (ci.getType() == ContactItem.TYPE_FAX) {
+				p.put("fax" + indexfax, ci.getValue());
+			}
+			if (ci.getType() == ContactItem.TYPE_MAIL) {
+				p.put("mail" + indexmail, ci.getValue());
+			}
+			if (ci.getType() == ContactItem.TYPE_TEL) {
+				p.put("tel" + indextel, ci.getValue());
+			}
+		}
+
+		return p;
+	}
 }

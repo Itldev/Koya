@@ -30,10 +30,11 @@
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-service-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-acl-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-webscript-context.xml" />
-    <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-sample-context.xml" /> 
+    <!-- <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-sample-context.xml" /> -->
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-template-bootstrap-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-action-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-permissions-context.xml" />
     <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-bootstrap-context.xml" />
+    <import resource="classpath:alfresco/module/${project.artifactId}/context/koya-scheduled-action-context.xml" />
 
 </beans>

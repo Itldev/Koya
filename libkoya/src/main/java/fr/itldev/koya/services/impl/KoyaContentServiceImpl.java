@@ -29,6 +29,7 @@ import fr.itldev.koya.model.json.DiskSizeWrapper;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -80,9 +81,18 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     @Override
+    public Document upload(User user, NodeRef parent, File f) throws AlfrescoServiceException {
+       return upload(user, parent, f);
+    }
+
+    @Override
     public Document upload(User user, NodeRef parent, Resource r) throws AlfrescoServiceException {
+        return upload(user, parent, r);
+    }
+
+    private Document upload(User user, NodeRef parent, Object o) throws AlfrescoServiceException {
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-        parts.add("filedata", r);
+        parts.add("filedata", o);
         parts.add("destination", parent.toString());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);

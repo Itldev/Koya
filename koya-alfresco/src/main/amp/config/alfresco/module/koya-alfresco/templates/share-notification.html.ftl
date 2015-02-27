@@ -31,8 +31,9 @@
                                           <div style="font-size: 14px; margin: 12px 0px 24px 0px; padding-top: 10px; border-top: 1px solid #aaaaaa;">
                                              <p>Hello,</p>
                                              <br/>
-                                             ${args["inviterFirstName"]} ${args["inviterName"]} (${args["inviterName"]})
-                                             You can now access this element '${args["sharedItemName"]}'.
+                                            <b>${message(inviter.properties.civilTitle)!""} ${inviter.properties.firstName!""} ${inviter.properties.lastName!""}</b>
+                                <span style="color:#999;">(${inviter.properties.email!""})</span>
+                                             allowed you acces to this element '${sharedItem.title}'.
                                     </tr>
                                  </table>
                               </td>

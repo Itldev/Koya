@@ -24,39 +24,36 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
   
-
-    <bean id="koya.templates-bootstrap" 
-          class="org.alfresco.repo.module.ImporterModuleComponent" 
-          parent="module.baseComponent">
-   
-        <!-- Module Details -->
-        <property name="moduleId" value="${project.artifactId}" />
-        <property name="name" value="koyaMailsTemplatesBootstrap" />
-        <property name="description" value="Koya Mail Templates" />
-        <property name="sinceVersion" value="0.5" />
-        <property name="appliesFromVersion" value="0.5" />
-   
-        <!-- Data properties -->
-        <property name="importer" ref="spacesBootstrap"/>
-        <property name="bootstrapViews">
-            <list>
-                <props>
-                    <prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}</prop>
-                    <prop key="location">alfresco/module/${project.artifactId}/bootstrap/koya-mail-templates.xml</prop>
-                </props> 
-            </list>
-        </property>
-
-    </bean>
+  
+   <bean id="koya.config-bootstrap" parent="spacesStoreImporter">
+        <property name="allowWrite"><value>${koya.bootstrapconfig.active}</value></property>
+		<property name="useExistingStore">
+			<value>true</value>
+		</property>
+		<property name="bootstrapViews">
+			<list>
+				<props>
+					<prop key="uuidBinding">UPDATE_EXISTING</prop>
+					<prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}</prop>
+					<prop key="location">alfresco/module/${project.artifactId}/bootstrap/koya-config.xml</prop>
+				</props>
+				<props>
+					<prop key="uuidBinding">UPDATE_EXISTING</prop>
+					<prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}</prop>
+					<prop key="location">alfresco/module/${project.artifactId}/bootstrap/koya-mail-templates.xml</prop>
+				</props>
+			</list>
+		</property>
+	</bean> 
     
-    <!--add versionable aspect to defined node-->
-    <bean id="patch.koyaMakeNodesVersionable" class="fr.itldev.koya.patch.MakeNodesVersionable"
+	<!-- deletes xpath defined nodes if exists : clear before correct uuid bootstrap import -->
+    <bean id="patch.deleteNodesTemplates0.7.2" class="fr.itldev.koya.patch.DeleteXpathNodes"
           parent="basePatch">
         <property name="id">
-            <value>patch.koyaMakeNodesVersionable</value>
+            <value>patch.deleteNodesTemplates0.7.2</value>
         </property>       
         <property name="description">
-            <value>Make specified nodes versionable</value>
+            <value>Delete specifid nodes for version 0.7.2 if exists</value>
         </property>    
         <property name="fixesFromSchema">
             <value>0</value>
@@ -68,14 +65,12 @@
             <value>10000</value>
         </property>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="versionService" ref="versionService"/>
         <property name="xPathNodes">
             <list>
-                <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/cm:invite/cm:invite-email_fr.html.ftl</value>                
-                <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/app:notify_email_templates/cm:notify_user_email_fr.html.ftl</value>                
+                <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/cm:koya</value>                
+                <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/cm:koya_templates</value>                
             </list>
-        </property>
-                      
+        </property>                      
     </bean>
     
     <!-- Boostrap scripts -->
@@ -133,5 +128,11 @@
         <property name="authenticationService" ref="AuthenticationService"/>        
     </bean>
 
-      
+      <bean id="koyaResourceBundles" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
+		<property name="resourceBundles">
+			<list>
+				<value>alfresco.module.koya-alfresco.messages.global</value>
+			</list>
+		</property>
+	</bean>
 </beans>

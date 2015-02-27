@@ -25,6 +25,7 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.Container;
 import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -36,6 +37,8 @@ public interface KoyaContentService extends AlfrescoService {
 
     Document upload(User user, NodeRef parent, Resource r) throws AlfrescoServiceException;
 
+    Document upload(User user, NodeRef parent, File f) throws AlfrescoServiceException;
+    
     Content move(User user, NodeRef contentToMove, NodeRef destination) throws AlfrescoServiceException;
 
     Content copy(User user, NodeRef contentToCopy, NodeRef destination) throws AlfrescoServiceException;

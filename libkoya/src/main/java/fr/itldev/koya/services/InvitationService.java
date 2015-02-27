@@ -17,7 +17,7 @@ public interface InvitationService extends AlfrescoService {
      * @param userLogged
      * @param c
      * @param userEmail
-     * @param roleName    
+     * @param roleName
      * @throws AlfrescoServiceException
      */
     void inviteUser(User userLogged, Company c, String userEmail, String roleName) throws AlfrescoServiceException;
@@ -42,6 +42,15 @@ public interface InvitationService extends AlfrescoService {
      * @throws AlfrescoServiceException
      */
     public Map<String, String> getInvitation(User user, Company c, User userToGetInvitaion) throws AlfrescoServiceException;
+
+    /**
+     * Checks anynomously if given inviteId exists (is is a pending invite).
+     *
+     * @param inviteId
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    public Boolean isInvitationPending(String inviteId) throws AlfrescoServiceException;
 
     /**
      * Send invitation mail again to invitee based on invitationId

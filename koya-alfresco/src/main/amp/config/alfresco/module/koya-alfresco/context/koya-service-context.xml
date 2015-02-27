@@ -53,6 +53,7 @@
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="fileFolderService" ref="FileFolderService" />      
         <property name="koyaNotificationService" ref="koyaNotificationService"/>
+        <property name="searchService" ref="SearchService"/>        
     </bean>     
     
     <!--Spaces Handling service-->
@@ -68,6 +69,7 @@
         <property name="nodeService" ref="NodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="searchService" ref="searchService"/>
+        <property name="prefixResolver" ref="namespaceService" />
     </bean>
 
     <!--Contents handling service-->
@@ -145,6 +147,8 @@
         <property name="messageService" ref="messageService"/>        
         <property name="koyaMailService" ref="koyaMailService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="companyAclService" ref="companyAclService"/>  
+        <property name="companyService" ref="companyService"/>                      
     </bean>
 
 
@@ -183,43 +187,15 @@
         <property name="koyaNodeService" ref="koyaNodeService"/> 
         <property name="userService" ref="userService"/> 
         <property name="serviceRegistry" ref="ServiceRegistry"/> 
-        <!-- param properties-->
+        <property name="workflowService" ref="WorkflowService"/>
+        <property name="repositoryHelper" ref="repositoryHelper"/>
+        <property name="messageService" ref="messageService"/>        
+        <property name="companyAclService" ref="companyAclService"/> 
+        <property name="companyService" ref="companyService"/>         
+        <property name="authenticationService" ref="AuthenticationService"/> 
         
-        <property name="i18nMailSubjectPropertiesLocation">
-            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
-                <property name="path">
-                    <value>${koya.i18n.mail}</value>
-                </property>                    
-                <property name="queryLanguage" value="xpath"/>
-            </bean>
-        </property>      
+        <!-- param properties-->       
         
-        
-        <property name="shareNotificationTemplateLocation">
-            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
-                <property name="path">
-                    <value>${koya.template.share-notification}</value>
-                </property>                    
-                <property name="queryLanguage" value="xpath"/>
-            </bean>
-        </property>     
-        
-        <property name="resetPasswordTemplateLocation">
-            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
-                <property name="path">
-                    <value>${koya.template.reset-password}</value>
-                </property>                    
-                <property name="queryLanguage" value="xpath"/>
-            </bean>
-        </property> 
-        <property name="newContentNoficationTemplateLocation">
-            <bean class="org.alfresco.repo.dictionary.RepositoryLocation">
-                <property name="path">
-                    <value>${koya.template.newContent-notification}</value>
-                </property>                 
-                <property name="queryLanguage" value="xpath"/>
-            </bean>
-        </property>     
         <property name="koyaDirectLinkUrlTemplate" >
             <value>${koya.client.directLinkUrlTemplate}</value>
         </property>                  

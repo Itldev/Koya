@@ -72,7 +72,7 @@ public class SecuredItemBuilder {
         Dossier d = Dossier.newInstance();
         d.setNodeRef(dossierNodeRef.toString());
         d.setName((String) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_NAME));
-        d.setLastModifiedDate((Date) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_MODIFIED));
+        d.setLastModifiedDate((Date) nodeService.getProperty(dossierNodeRef, KoyaModel.PROP_LASTMODIFICATIONDATE));
         d.setTitle((String) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_TITLE));
         return d;
     }

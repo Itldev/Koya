@@ -170,7 +170,7 @@ public class KoyaContentService {
             if (pathElement != null && !pathElement.isEmpty()) {
                 // does it exist?
                 // Navigation should not check permissions
-                NodeRef nodeRef = AuthenticationUtil.runAsSystem(new SearchAsSystem(fileFolderService, parentNodeRef, koyaNodeService.getUniqueValidFileNameFromTitle(pathElement)));
+                NodeRef nodeRef = AuthenticationUtil.runAsSystem(new SearchAsSystem(fileFolderService, currentParentRef, koyaNodeService.getUniqueValidFileNameFromTitle(pathElement)));
 
                 if (nodeRef == null) {
                     try {

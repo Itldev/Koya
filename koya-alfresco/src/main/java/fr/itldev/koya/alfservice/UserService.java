@@ -18,14 +18,11 @@
  */
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.impl.UserConnection;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.cmr.invitation.InvitationService;
@@ -42,318 +39,379 @@ import org.alfresco.util.PropertyMap;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.impl.UserConnection;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+
 /**
  *
  */
 public class UserService {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+	private final Logger logger = Logger.getLogger(this.getClass());
 
-    protected NodeService nodeService;
-    protected PersonService personService;
-    protected SearchService searchService;
-    protected MutableAuthenticationService authenticationService;
-    protected SiteService siteService;
-    protected InvitationService invitationService;
-    protected KoyaNodeService koyaNodeService;
+	protected NodeService nodeService;
+	protected PersonService personService;
+	protected SearchService searchService;
+	protected MutableAuthenticationService authenticationService;
+	protected SiteService siteService;
+	protected InvitationService invitationService;
+	protected KoyaNodeService koyaNodeService;
 
-    // <editor-fold defaultstate="collapsed" desc="getters/setters">
-    public void setNodeService(NodeService nodeService) {
-        this.nodeService = nodeService;
-    }
+	// <editor-fold defaultstate="collapsed" desc="getters/setters">
+	public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
 
-    public void setPersonService(PersonService personService) {
-        this.personService = personService;
-    }
+	public void setPersonService(PersonService personService) {
+		this.personService = personService;
+	}
 
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
-    }
+	public void setSearchService(SearchService searchService) {
+		this.searchService = searchService;
+	}
 
-    public void setAuthenticationService(MutableAuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+	public void setAuthenticationService(
+			MutableAuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
+	}
 
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
-    }
+	public void setSiteService(SiteService siteService) {
+		this.siteService = siteService;
+	}
 
-    public void setInvitationService(InvitationService invitationService) {
-        this.invitationService = invitationService;
-    }
+	public void setInvitationService(InvitationService invitationService) {
+		this.invitationService = invitationService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    //</editor-fold>
-    /**
-     * User creation method.
-     *
-     * @param userToCreate
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public void createUser(User userToCreate) throws KoyaServiceException {
+	// </editor-fold>
+	/**
+	 * User creation method.
+	 * 
+	 * @param userToCreate
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public void createUser(User userToCreate) throws KoyaServiceException {
 
-        PropertyMap propsUser = new PropertyMap();
-        propsUser.put(ContentModel.PROP_USERNAME, userToCreate.getUserName());
-        propsUser.put(ContentModel.PROP_FIRSTNAME, userToCreate.getFirstName());
-        propsUser.put(ContentModel.PROP_LASTNAME, userToCreate.getName());
-        propsUser.put(ContentModel.PROP_EMAIL, userToCreate.getEmail());
-        if (!personService.personExists(userToCreate.getUserName())) {
-            authenticationService.createAuthentication(userToCreate.getUserName(), userToCreate.getPassword().toCharArray());
-            personService.createPerson(propsUser);
-        } else {
-            throw new KoyaServiceException(KoyaErrorCodes.LOGIN_ALREADY_EXISTS);
-        }
-    }
+		PropertyMap propsUser = new PropertyMap();
+		propsUser.put(ContentModel.PROP_USERNAME, userToCreate.getUserName());
+		propsUser.put(ContentModel.PROP_FIRSTNAME, userToCreate.getFirstName());
+		propsUser.put(ContentModel.PROP_LASTNAME, userToCreate.getName());
+		propsUser.put(ContentModel.PROP_EMAIL, userToCreate.getEmail());
+		if (!personService.personExists(userToCreate.getUserName())) {
+			authenticationService.createAuthentication(userToCreate
+					.getUserName(), userToCreate.getPassword().toCharArray());
+			personService.createPerson(propsUser);
 
-    /**
-     * Modify user fields according to user object.
-     *
-     * @param userToModify
-     * @throws KoyaServiceException
-     */
-    public void modifyUser(User userToModify) throws KoyaServiceException {
+			NodeRef userNr = personService
+					.getPerson(userToCreate.getUserName());
+			nodeService.addAspect(userNr, KoyaModel.ASPECT_CIVILTITLED, null);
+			nodeService.setProperty(userNr, KoyaModel.PROP_CIVILTITLE,
+					userToCreate.getCivilTitle());
 
-        //TODO check who request user modification : user can only modify his own information
-        //admin can modify everyone informations
-        if (personService.personExists(userToModify.getUserName())) {
-            NodeRef userNr = personService.getPerson(userToModify.getUserName());
+		} else {
+			throw new KoyaServiceException(KoyaErrorCodes.LOGIN_ALREADY_EXISTS);
+		}
+	}
 
-            //update 4 fields : firstname,lastname,email,emailFeedDisabled         
-            nodeService.setProperty(userNr, ContentModel.PROP_FIRSTNAME, userToModify.getFirstName());
-            nodeService.setProperty(userNr, ContentModel.PROP_LASTNAME, userToModify.getName());
-            nodeService.setProperty(userNr, ContentModel.PROP_EMAIL, userToModify.getEmail());
-            nodeService.setProperty(userNr, ContentModel.PROP_EMAIL_FEED_DISABLED, userToModify.getEmailFeedDisabled());
+	/**
+	 * Modify user fields according to user object.
+	 * 
+	 * @param userToModify
+	 * @throws KoyaServiceException
+	 */
+	public void modifyUser(User userToModify) throws KoyaServiceException {
 
-            //TODO change password if necessary + uncrypted password
-            //nodeService.setProperty(userNr, ContentModel.PROP_PASSWORD, userToModify.getPassword());
-        } else {
-            throw new KoyaServiceException(KoyaErrorCodes.UNKNOWN_USER);
-        }
+		// TODO check who request user modification : user can only modify his
+		// own information
+		// admin can modify everyone informations
+		if (personService.personExists(userToModify.getUserName())) {
+			NodeRef userNr = personService
+					.getPerson(userToModify.getUserName());
 
-    }
+			// update 4 fields : firstname,lastname,email,emailFeedDisabled
+			nodeService.setProperty(userNr, ContentModel.PROP_FIRSTNAME,
+					userToModify.getFirstName());
+			nodeService.setProperty(userNr, ContentModel.PROP_LASTNAME,
+					userToModify.getName());
+			nodeService.setProperty(userNr, ContentModel.PROP_EMAIL,
+					userToModify.getEmail());
+			nodeService.setProperty(userNr,
+					ContentModel.PROP_EMAIL_FEED_DISABLED,
+					userToModify.getEmailFeedDisabled());
 
-    /**
-     * Change users password
-     *
-     * @param oldPassword
-     * @param newPassword
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public void changePassword(String oldPassword, String newPassword) throws KoyaServiceException {
-        try {
-            authenticationService.updateAuthentication(authenticationService.getCurrentUserName(), oldPassword.toCharArray(), newPassword.toCharArray());
-        } catch (AuthenticationException aex) {
-            throw new KoyaServiceException(KoyaErrorCodes.CANT_MODIFY_USER_PASSWORD);
-        }
-    }
+			if (!nodeService.hasAspect(userNr, KoyaModel.ASPECT_CIVILTITLED)) {
+				nodeService
+						.addAspect(userNr, KoyaModel.ASPECT_CIVILTITLED, null);
+			}
 
-    /**
-     * return users list that matches query . email, lastname or first name
-     * starts with query String.
-     *
-     *
-     *
-     * @param queryStartsWith
-     * @param maxResults - 0 = no limit
-     * @param companyName
-     * @param companyRolesFilter
-     * @return
-     */
-    public List<User> find(String queryStartsWith, int maxResults,
-            String companyName, List<String> companyRolesFilter) {
-        List<User> users = new ArrayList<>();
+			nodeService.setProperty(userNr, KoyaModel.PROP_CIVILTITLE,
+					userToModify.getCivilTitle());
 
-        if (queryStartsWith == null) {
-            queryStartsWith = "";
-        }
-        queryStartsWith = queryStartsWith.toLowerCase();
+			// TODO change password if necessary + uncrypted password
+			// nodeService.setProperty(userNr, ContentModel.PROP_PASSWORD,
+			// userToModify.getPassword());
+		} else {
+			throw new KoyaServiceException(KoyaErrorCodes.UNKNOWN_USER);
+		}
 
-        //application global search
-        if (companyName == null || companyName.isEmpty()) {
+	}
 
-            String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\""
-                    + queryStartsWith + "*\" OR @cm\\:firstName:\""
-                    + queryStartsWith + "*\" OR @cm\\:email:\""
-                    + queryStartsWith + "*\" )";
+	/**
+	 * Change users password
+	 * 
+	 * @param oldPassword
+	 * @param newPassword
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public void changePassword(String oldPassword, String newPassword)
+			throws KoyaServiceException {
+		try {
+			authenticationService.updateAuthentication(
+					authenticationService.getCurrentUserName(),
+					oldPassword.toCharArray(), newPassword.toCharArray());
+		} catch (AuthenticationException aex) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.CANT_MODIFY_USER_PASSWORD);
+		}
+	}
 
-            logger.trace(luceneRequest);
-            ResultSet rs = null;
-            try {
-                rs = searchService.query(
-                        StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-                        SearchService.LANGUAGE_LUCENE, luceneRequest);
-                for (ResultSetRow r : rs) {
-                    users.add(buildUser(r.getNodeRef()));
-                    if (users.size() >= maxResults) {
-                        break;
-                    }
-                }
-            } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-            }
-        } else {
+	/**
+	 * return users list that matches query . email, lastname or first name
+	 * starts with query String.
+	 * 
+	 * 
+	 * 
+	 * @param queryStartsWith
+	 * @param maxResults
+	 *            - 0 = no limit
+	 * @param companyName
+	 * @param companyRolesFilter
+	 * @return
+	 */
+	public List<User> find(String queryStartsWith, int maxResults,
+			String companyName, List<String> companyRolesFilter) {
+		List<User> users = new ArrayList<>();
 
-            //TODO apply user filter
-            Map<String, String> companyMembers = new HashMap<>();
-            if (companyRolesFilter != null && companyRolesFilter.size() > 0) {
-                for (String role : companyRolesFilter) {
-                    companyMembers.putAll(siteService.listMembers(
-                            companyName, null, role, 0, true));
-                }
-            } else {
-                companyMembers.putAll(siteService.listMembers(
-                        companyName, null, null, 0, true));
-            }
+		if (queryStartsWith == null) {
+			queryStartsWith = "";
+		}
+		queryStartsWith = queryStartsWith.toLowerCase();
 
-            for (String userName : companyMembers.keySet()) {
-                //remove from results where query is not name|firstname|email substring
-                //---> prevent display changed mail adress (username not changed )
-                User u = buildUser(personService.getPerson(userName));
-                if (u.getName().toLowerCase().startsWith(queryStartsWith)
-                        || u.getFirstName().toLowerCase().startsWith(queryStartsWith)
-                        || u.getEmail().toLowerCase().startsWith(queryStartsWith)) {
-                    users.add(buildUser(personService.getPerson(userName)));
-                }
+		// application global search
+		if (companyName == null || companyName.isEmpty()) {
 
-                if (users.size() >= maxResults) {
-                    break;
-                }
-            }
+			String luceneRequest = "TYPE:\"cm:person\" AND (@cm\\:lastName:\""
+					+ queryStartsWith + "*\" OR @cm\\:firstName:\""
+					+ queryStartsWith + "*\" OR @cm\\:email:\""
+					+ queryStartsWith + "*\" )";
 
-        }
+			logger.trace(luceneRequest);
+			ResultSet rs = null;
+			try {
+				rs = searchService.query(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						SearchService.LANGUAGE_LUCENE, luceneRequest);
+				for (ResultSetRow r : rs) {
+					users.add(buildUser(r.getNodeRef()));
+					if (users.size() >= maxResults) {
+						break;
+					}
+				}
+			} finally {
+				if (rs != null) {
+					rs.close();
+				}
+			}
+		} else {
 
-        logger.trace(users.size() + " results found");
+			// TODO apply user filter
+			Map<String, String> companyMembers = new HashMap<>();
+			if (companyRolesFilter != null && companyRolesFilter.size() > 0) {
+				for (String role : companyRolesFilter) {
+					companyMembers.putAll(siteService.listMembers(companyName,
+							null, role, 0, true));
+				}
+			} else {
+				companyMembers.putAll(siteService.listMembers(companyName,
+						null, null, 0, true));
+			}
 
-        return users;
-    }
+			for (String userName : companyMembers.keySet()) {
+				// remove from results where query is not name|firstname|email
+				// substring
+				// ---> prevent display changed mail adress (username not
+				// changed )
+				User u = buildUser(personService.getPerson(userName));
+				if (u.getName().toLowerCase().startsWith(queryStartsWith)
+						|| u.getFirstName().toLowerCase()
+								.startsWith(queryStartsWith)
+						|| u.getEmail().toLowerCase()
+								.startsWith(queryStartsWith)) {
+					users.add(buildUser(personService.getPerson(userName)));
+				}
 
-    public User buildUser(NodeRef userNodeRef) {
-        User u = new User();
+				if (users.size() >= maxResults) {
+					break;
+				}
+			}
 
-        //TODO complete build with all properties
-        u.setUserName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_USERNAME));
-        u.setFirstName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_FIRSTNAME));
-        u.setName((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_LASTNAME));
-        u.setEmail((String) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL));
-        u.setEmailFeedDisabled((Boolean) nodeService.getProperty(userNodeRef, ContentModel.PROP_EMAIL_FEED_DISABLED));
-        u.setEnabled(!(Boolean) nodeService.hasAspect(userNodeRef, ContentModel.ASPECT_PERSON_DISABLED));
-        u.setNodeRef(userNodeRef.toString());
+		}
 
-        return u;
-    }
+		logger.trace(users.size() + " results found");
 
-    public User getUserByUsername(final String username) {
-        if (personService.personExists(username)) {
-            return buildUser(personService.getPerson(username));
-        } else {
-            return null;
-        }
-    }
+		return users;
+	}
 
-    /**
-     * Get User by authenticationKey that could mail address or username.
-     *
-     * @param authKey
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public User getUser(final String authKey) throws KoyaServiceException {
+	public User buildUser(NodeRef userNodeRef) {
+		User u = new User();
 
-        if (personService.personExists(authKey)) {
-            return buildUser(personService.getPerson(authKey));
-        } else {
-            String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"" + authKey + "\" ";
-            List<User> users = new ArrayList<>();
-            ResultSet rs = null;
-            try {
-                rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
-                for (ResultSetRow r : rs) {
-                    users.add(buildUser(r.getNodeRef()));
-                }
-            } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-            }
-            if (users.isEmpty()) {
-                throw new KoyaServiceException(KoyaErrorCodes.NO_SUCH_USER_IDENTIFIED_BY_AUTHKEY, authKey);
-            } else if (users.size() > 1) {
-                throw new KoyaServiceException(KoyaErrorCodes.MANY_USERS_IDENTIFIED_BY_AUTHKEY, authKey);
-            } else {
-                return users.get(0);
-            }
-        }
-    }
+		// TODO complete build with all properties
+		u.setUserName((String) nodeService.getProperty(userNodeRef,
+				ContentModel.PROP_USERNAME));
+		u.setFirstName((String) nodeService.getProperty(userNodeRef,
+				ContentModel.PROP_FIRSTNAME));
+		u.setName((String) nodeService.getProperty(userNodeRef,
+				ContentModel.PROP_LASTNAME));
+		u.setEmail((String) nodeService.getProperty(userNodeRef,
+				ContentModel.PROP_EMAIL));
+		u.setEmailFeedDisabled((Boolean) nodeService.getProperty(userNodeRef,
+				ContentModel.PROP_EMAIL_FEED_DISABLED));
+		u.setEnabled(!(Boolean) nodeService.hasAspect(userNodeRef,
+				ContentModel.ASPECT_PERSON_DISABLED));
+		u.setNodeRef(userNodeRef.toString());
+		u.setCivilTitle((String) nodeService.getProperty(userNodeRef,
+				KoyaModel.PROP_CIVILTITLE));
 
-    /**
-     * Return user found by email. Return null if not found : no exception
-     * thrown
-     *
-     * @param authKey
-     * @return
-     */
-    public User getUserByEmailFailOver(final String authKey) {
-        String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"" + authKey + "\" ";
-        List<User> users = new ArrayList<>();
-        ResultSet rs = null;
-        try {
-            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
-            for (ResultSetRow r : rs) {
-                users.add(buildUser(r.getNodeRef()));
-            }
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-        }
-        if (users.isEmpty() || users.size() > 1) {
-            return null;
-        } else {
-            return users.get(0);
-        }
-    }
+		return u;
+	}
 
-    public List<UserConnection> getConnectionLog(String userName, List<String> companyFilter, Integer maxResults) {
-        List<UserConnection> connectionLog = new ArrayList<>();
-        //TODO build full connection log
-        return connectionLog;
-    }
+	public User getUserByUsername(final String username) {
+		if (personService.personExists(username)) {
+			return buildUser(personService.getPerson(username));
+		} else {
+			return null;
+		}
+	}
 
-    /**
-     * Helper method to get the activity data for a user
-     *
-     * @param userMail user mail
-     * @return
-     */
-    public String getActivityUserData(String userMail) throws KoyaServiceException {
-        User user = getUser(userMail);
-        String memberFN = "";
-        String memberLN = "";
+	/**
+	 * Get User by authenticationKey that could mail address or username.
+	 * 
+	 * @param authKey
+	 * @return
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public User getUser(final String authKey) throws KoyaServiceException {
 
-        memberFN = user.getFirstName();
-        memberLN = user.getName();
+		if (personService.personExists(authKey)) {
+			return buildUser(personService.getPerson(authKey));
+		} else {
+			String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\""
+					+ authKey + "\" ";
+			List<User> users = new ArrayList<>();
+			ResultSet rs = null;
+			try {
+				rs = searchService.query(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						SearchService.LANGUAGE_LUCENE, luceneRequest);
+				for (ResultSetRow r : rs) {
+					users.add(buildUser(r.getNodeRef()));
+				}
+			} finally {
+				if (rs != null) {
+					rs.close();
+				}
+			}
+			if (users.isEmpty()) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.NO_SUCH_USER_IDENTIFIED_BY_AUTHKEY,
+						authKey);
+			} else if (users.size() > 1) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.MANY_USERS_IDENTIFIED_BY_AUTHKEY,
+						authKey);
+			} else {
+				return users.get(0);
+			}
+		}
+	}
 
-        JSONObject activityData = new JSONObject();
-        activityData.put("memberUserName", userMail);
-        activityData.put("memberFirstName", memberFN);
-        activityData.put("memberLastName", memberLN);
-        activityData.put("title", (memberFN + " " + memberLN + " ("
-                + userMail + ")").trim());
-        return activityData.toString();
-    }
+	/**
+	 * Return user found by email. Return null if not found : no exception
+	 * thrown
+	 * 
+	 * @param authKey
+	 * @return
+	 */
+	public User getUserByEmailFailOver(final String authKey) {
+		String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\""
+				+ authKey + "\" ";
+		List<User> users = new ArrayList<>();
+		ResultSet rs = null;
+		try {
+			rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+					SearchService.LANGUAGE_LUCENE, luceneRequest);
+			for (ResultSetRow r : rs) {
+				users.add(buildUser(r.getNodeRef()));
+			}
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+		}
+		if (users.isEmpty() || users.size() > 1) {
+			return null;
+		} else {
+			return users.get(0);
+		}
+	}
 
-    /**
-     * Checks if user has disabled aspect
-     *
-     * @param u
-     * @return
-     */
-    public Boolean isDisabled(User u) {
-        return nodeService.getAspects(u.getNodeRefasObject()).contains(ContentModel.ASPECT_PERSON_DISABLED);
-    }
+	public List<UserConnection> getConnectionLog(String userName,
+			List<String> companyFilter, Integer maxResults) {
+		List<UserConnection> connectionLog = new ArrayList<>();
+		// TODO build full connection log
+		return connectionLog;
+	}
+
+	/**
+	 * Helper method to get the activity data for a user
+	 * 
+	 * @param userMail
+	 *            user mail
+	 * @return
+	 */
+	public String getActivityUserData(String userMail)
+			throws KoyaServiceException {
+		User user = getUser(userMail);
+		String memberFN = "";
+		String memberLN = "";
+
+		memberFN = user.getFirstName();
+		memberLN = user.getName();
+
+		JSONObject activityData = new JSONObject();
+		activityData.put("memberUserName", userMail);
+		activityData.put("memberFirstName", memberFN);
+		activityData.put("memberLastName", memberLN);
+		activityData.put("title",
+				(memberFN + " " + memberLN + " (" + userMail + ")").trim());
+		return activityData.toString();
+	}
+
+	/**
+	 * Checks if user has disabled aspect
+	 * 
+	 * @param u
+	 * @return
+	 */
+	public Boolean isDisabled(User u) {
+		return nodeService.getAspects(u.getNodeRefasObject()).contains(
+				ContentModel.ASPECT_PERSON_DISABLED);
+	}
 }

@@ -1,7 +1,10 @@
 package org.alfresco.repo.invitation;
 
+import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -80,6 +83,9 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
      */
     private KoyaMailService koyaMailService;
     private KoyaNodeService koyaNodeService;
+    private CompanyAclService companyAclService;
+    private CompanyService companyService;
+    
 
     public void setKoyaMailService(KoyaMailService koyaMailService) {
         this.koyaMailService = koyaMailService;
@@ -88,8 +94,16 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
+   
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    @Override
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
+
+	@Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
         this.actionService = serviceRegistry.getActionService();
@@ -102,7 +116,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         this.workflowService = serviceRegistry.getWorkflowService();
         this.nodeService = serviceRegistry.getNodeService();
         this.inviteSender = new KoyaInviteSender(serviceRegistry, repositoryHelper, messageService,
-                koyaMailService, koyaNodeService);
+                koyaMailService, koyaNodeService,companyAclService,companyService,koyaMailService.getKoyaClientParams());
     }
 
     /**

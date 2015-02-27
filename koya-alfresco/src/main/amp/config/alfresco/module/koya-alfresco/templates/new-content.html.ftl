@@ -29,10 +29,7 @@
                                     <tr>
                                        <td>
                                           <table cellpadding="0" cellspacing="0" border="0">
-                                             <tr>
-                                                <td>
-                                                   <img src="${shareUrl}/res/components/images/page-64.png" alt="" width="64" height="64" border="0" style="padding-right: 20px;" />
-                                                </td>
+                                             <tr>                                                
                                                 <td>
                                                    <div style="font-size: 22px; padding-bottom: 4px;">
                                                       ${person.properties.firstName} <#if person.properties.lastName?exists> ${person.properties.lastName}</#if> has added a new content item, ${document.name}, in the ${document.siteShortName!""} site
@@ -65,12 +62,7 @@
                               <td>
                                  <div style="border-bottom: 1px solid #aaaaaa;">&nbsp;</div>
                               </td>
-                           </tr>
-                           <tr>
-                              <td style="padding: 10px 30px;">
-                                 <img src="${shareUrl}/themes/default/images/app-logo.png" alt="" width="117" height="48" border="0" />
-                              </td>
-                           </tr>
+                           </tr>                          
                         </table>
                      </td>
                   </tr>

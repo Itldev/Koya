@@ -106,14 +106,27 @@ public class CompanyAclService {
     public void setKoyaClientServerPath(String koyaClientServerPath) {
         this.koyaClientServerPath = koyaClientServerPath;
     }
+    
+    public String getKoyaClientServerPath(){
+    	return this.koyaClientServerPath;
+    }
 
     public void setKoyaClientAcceptUrl(String koyaClientAcceptUrl) {
         this.koyaClientAcceptUrl = koyaClientAcceptUrl;
+    }
+    
+    public String getKoyaClientAcceptUrl(){
+    	return this.koyaClientAcceptUrl;
     }
 
     public void setKoyaClientRejectUrl(String koyaClientRejectUrl) {
         this.koyaClientRejectUrl = koyaClientRejectUrl;
     }
+    
+    public String getKoyaClientRejectUrl(){
+    	return this.koyaClientRejectUrl;
+    }
+    
 
     //</editor-fold>
     //TODO refine by userTypes : Collaborators Roles, Client Roles

@@ -18,13 +18,10 @@
  */
 package fr.itldev.koya.webscript.content;
 
-import fr.itldev.koya.alfservice.KoyaContentService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.surf.util.Content;
@@ -34,66 +31,83 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 import org.springframework.extensions.webscripts.servlet.FormData;
 
+import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
- *
- * Import Zip Webscript
- *
- *
- *
+ * 
+ * Upload file Webscript
+ * 
+ * 
+ * 
  */
 public class Upload extends AbstractWebScript {
 
-    private final Logger logger = Logger.getLogger(Upload.class);
+	private final Logger logger = Logger.getLogger(Upload.class);
 
-    /*services*/
-    private KoyaContentService koyaContentService;
-    private KoyaNodeService koyaNodeService;
+	/* services */
+	private KoyaContentService koyaContentService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setKoyaContentService(KoyaContentService koyaContentService) {
-        this.koyaContentService = koyaContentService;
-    }
+	public void setKoyaContentService(KoyaContentService koyaContentService) {
+		this.koyaContentService = koyaContentService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
 
-        Map<String, String> retMap = new HashMap<>();
+		Map<String, String> retMap = new HashMap<>();
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String fileName = null;
-        Content content = null;
-        String parentnoderef = null;
+		String format = urlParams.get("format");
 
-        FormData formData = (FormData) req.parseContent();
-        FormData.FormField[] fields = formData.getFields();
-        for (FormData.FormField field : fields) {
-            if (field.getName().equals("parentnoderef")) {
-                parentnoderef = field.getValue();
-            }
-            if (field.getName().equals("file") && field.getIsFile()) {
-                fileName = field.getFilename();
-                content = field.getContent();
-            }
-        }
-        if (fileName == null || content == null) {
-            retMap.put("error", "Uploaded file cannot be located in request");
-            writeResponse(res, retMap);
-            return;
-        }
-        try {
-            NodeRef parent = koyaNodeService.getNodeRef(parentnoderef);
-            retMap = koyaContentService.createContentNode(parent, fileName, content);
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        writeResponse(res, retMap);
-    }
+		String fileName = null;
+		Content content = null;
+		String parentnoderef = null;
 
-    private void writeResponse(WebScriptResponse res, Map<String, String> responseMap) throws IOException {
-        res.setContentType("application/json");
-        res.getWriter().write(KoyaWebscript.getObjectAsJson(responseMap));
-    }
+		FormData formData = (FormData) req.parseContent();
+		FormData.FormField[] fields = formData.getFields();
+		for (FormData.FormField field : fields) {
+			if (field.getName().equals("parentnoderef")) {
+				parentnoderef = field.getValue();
+			}
+			if (field.getName().equals("file") && field.getIsFile()) {
+				fileName = field.getFilename();
+				content = field.getContent();
+			}
+		}
+		if (fileName == null || content == null) {
+			retMap.put("error", "Uploaded file cannot be located in request");
+			writeResponse(res, retMap, format);
+			return;
+		}
+		try {
+			NodeRef parent = koyaNodeService.getNodeRef(parentnoderef);
+			retMap = koyaContentService.createContentNode(parent, fileName,
+					content);
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		writeResponse(res, retMap, format);
+	}
+
+	private void writeResponse(WebScriptResponse res,
+			Map<String, String> responseMap, String format) throws IOException {
+
+		if (format != null && format.equals("text")) {
+			res.setContentType("text/plain");
+		} else {
+			res.setContentType("application/json");
+		}
+		res.getWriter().write(KoyaWebscript.getObjectAsJson(responseMap));
+	}
 
 }

@@ -37,7 +37,7 @@ public class SearchServiceImpl extends AlfrescoRestService implements SearchServ
 
     private static final String REST_GET_SEARCH = "/s/slingshot/search?"
             + "term={term}&maxResults={maxResults}"
-            + "&sort=&repo=true&rootNode={rootNode}&query={query}";
+            + "&sort=&repo=false&rootNode={rootNode}&query={query}";
 
     private static final String SEARCHRESULTKEY_TOTALRECORDS = "totalRecords";
     private static final String SEARCHRESULTKEY_TOTALRECORDSUPPER = "totalRecordsUpper";
@@ -119,8 +119,10 @@ public class SearchServiceImpl extends AlfrescoRestService implements SearchServ
          
          */
 
+
+        StringBuilder searchExpr = new StringBuilder();
         if (inSearch == null || inSearch.isEmpty()) {
-            return "*";
+            searchExpr.append("*");
         } else {
 
             //remove AND terms
@@ -130,14 +132,12 @@ public class SearchServiceImpl extends AlfrescoRestService implements SearchServ
             inSearch = inSearch.replaceAll("\\s+$", "");
             inSearch = inSearch.replaceAll("\\s+", " ");
 
-            String searchExpr = "";
             String sep = "";
             for (String term : inSearch.split(" ")) {
-                searchExpr += sep + " " + term + "*";
+                searchExpr.append(sep).append(" ").append(term).append("*");
                 sep = " AND ";
             }
-            return searchExpr;
         }
-
+        return searchExpr.toString();
     }
 }

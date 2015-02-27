@@ -67,7 +67,7 @@ public class ShareMailNotificationBehaviour implements SharePolicies.AfterShareP
              * set by importer
              */
             if (invitations.isEmpty() && !sharedByImporter) {
-                koyaMailService.sendShareNotifMail(inviter, userMail, nodeRef);
+                koyaMailService.sendShareNotifMail(inviter, userMail, c, nodeRef);
             } else {
                 //Nothing to do : invitation already sent 
             }

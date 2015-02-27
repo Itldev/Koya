@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view:view xmlns:view="http://www.alfresco.org/view/repository/1.0"
+	xmlns="" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:download="http://www.alfresco.org/model/download/1.0"
+	xmlns:twitter="http://www.alfresco.org/model/publishing/twitter/1.0"
+	xmlns:fm="http://www.alfresco.org/model/forum/1.0" xmlns:facebook="http://www.alfresco.org/model/publishing/facebook/1.0"
+	xmlns:wcm="http://www.alfresco.org/model/wcmmodel/1.0" xmlns:youtube="http://www.alfresco.org/model/publishing/youtube/1.0"
+	xmlns:sv="http://www.jcp.org/jcr/sv/1.0" xmlns:st="http://www.alfresco.org/model/site/1.0"
+	xmlns:surf="http://www.alfresco.org/model/surf/1.0" xmlns:custom="custom.model"
+	xmlns:exif="http://www.alfresco.org/model/exif/1.0" xmlns:qshare="http://www.alfresco.org/model/qshare/1.0"
+	xmlns:alfcmis="http://www.alfresco.org/model/cmis/1.0/alfcmis"
+	xmlns:pub="http://www.alfresco.org/model/publishing/1.0" xmlns:wca="http://www.alfresco.org/model/wcmappmodel/1.0"
+	xmlns:inwf="http://www.alfresco.org/model/workflow/invite/nominated/1.0"
+	xmlns:flickr="http://www.alfresco.org/model/publishing/flickr/1.0"
+	xmlns:cm="http://www.alfresco.org/model/content/1.0" xmlns:imap="http://www.alfresco.org/model/imap/1.0"
+	xmlns:koyarpwf="http://www.itldev.fr/model/workflow/resetPassword/1.0"
+	xmlns:stcp="http://www.alfresco.org/model/sitecustomproperty/1.0"
+	xmlns:ver2="http://www.alfresco.org/model/versionstore/2.0"
+	xmlns:imwf="http://www.alfresco.org/model/workflow/invite/moderated/1.0"
+	xmlns:cmisext="http://www.alfresco.org/model/cmis/1.0/cs01ext"
+	xmlns:wf="http://www.alfresco.org/model/workflow/1.0" xmlns:trx="http://www.alfresco.org/model/transfer/1.0"
+	xmlns:slideshare="http://www.alfresco.org/model/publishing/slideshare/1.0"
+	xmlns:rn="http://www.alfresco.org/model/rendition/1.0" xmlns:sys="http://www.alfresco.org/model/system/1.0"
+	xmlns:lnk="http://www.alfresco.org/model/linksmodel/1.0" xmlns:webdav="http://www.alfresco.org/model/webdav/1.0"
+	xmlns:pubwf="http://www.alfresco.org/model/publishingworkflow/1.0"
+	xmlns:ver="http://www.alfresco.org/model/versionstore/1.0"
+	xmlns:cmiscustom="http://www.alfresco.org/model/cmis/custom" xmlns:rc="http://www.alfresco.org/model/remotecredentials/1.0"
+	xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:emailserver="http://www.alfresco.org/model/emailserver/1.0"
+	xmlns:ia="http://www.alfresco.org/model/calendar" xmlns:rule="http://www.alfresco.org/model/rule/1.0"
+	xmlns:dl="http://www.alfresco.org/model/datalist/1.0" xmlns:usr="http://www.alfresco.org/model/user/1.0"
+	xmlns:dp="http://www.alfresco.org/model/distributionpolicies/1.0/model"
+	xmlns:app="http://www.alfresco.org/model/application/1.0" xmlns:d="http://www.alfresco.org/model/dictionary/1.0"
+	xmlns:module="http://www.alfresco.org/system/modules/1.0" xmlns:blg="http://www.alfresco.org/model/blogintegration/1.0"
+	xmlns:audio="http://www.alfresco.org/model/audio/1.0" xmlns:linkedin="http://www.alfresco.org/model/publishing/linkedin/1.0"
+	xmlns:alf="http://www.alfresco.org" xmlns:cmis="http://www.alfresco.org/model/cmis/1.0/cs01"
+	xmlns:mix="http://www.jcp.org/jcr/mix/1.0" xmlns:koya="http://www.itldev.fr/koyamodel/content/1.0"
+	xmlns:bpm="http://www.alfresco.org/model/bpm/1.0" xmlns:reg="http://www.alfresco.org/system/registry/1.0"
+	xmlns:wcmwf="http://www.alfresco.org/model/wcmworkflow/1.0" xmlns:act="http://www.alfresco.org/model/action/1.0">
+
+	<cm:folder view:childName="cm:koya">
+		<view:aspects>
+			<cm:auditable></cm:auditable>
+			<sys:referenceable></sys:referenceable>
+			<cm:titled></cm:titled>
+			<sys:localized></sys:localized>
+		</view:aspects>
+		<view:acl></view:acl>
+		<view:properties>
+			<cm:name>koya</cm:name>
+			<sys:store-identifier>SpacesStore</sys:store-identifier>
+			<sys:locale>fr_FR_</sys:locale>
+			<cm:title>
+				<view:mlvalue view:locale="fr">koya</view:mlvalue>
+			</cm:title>
+			<sys:node-uuid>00758582-1330-4b8a-ac6e-f0f62dd0c5ce</sys:node-uuid>
+			<sys:store-protocol>workspace</sys:store-protocol>
+			<cm:description>
+				<view:mlvalue view:locale="fr"></view:mlvalue>
+			</cm:description>
+		</view:properties>
+		<view:associations>
+			<cm:contains>
+				<cm:folder view:childName="cm:default-company">
+					<view:aspects>
+						<cm:auditable></cm:auditable>
+						<sys:referenceable></sys:referenceable>
+						<cm:titled></cm:titled>
+						<sys:localized></sys:localized>
+					</view:aspects>
+					<view:acl></view:acl>
+					<view:properties>
+						<cm:name>default-company</cm:name>
+						<sys:store-identifier>SpacesStore</sys:store-identifier>
+						<sys:locale>fr_FR_</sys:locale>
+						<cm:title>
+							<view:mlvalue view:locale="fr"></view:mlvalue>
+						</cm:title>
+						<sys:node-uuid>c408d2f2-cd0d-485a-838e-abdd33da501c</sys:node-uuid>
+						<sys:store-protocol>workspace</sys:store-protocol>
+						<cm:description>
+							<view:mlvalue view:locale="fr"></view:mlvalue>
+						</cm:description>
+					</view:properties>
+					<view:associations>
+						<cm:contains>
+							<koya:companyProperties view:childName="cm:company.properties">
+								<view:aspects>
+									<cm:auditable></cm:auditable>
+									<sys:referenceable></sys:referenceable>
+									<sys:localized></sys:localized>
+								</view:aspects>
+								<view:acl></view:acl>
+								<view:properties>
+									<koya:description></koya:description>
+									<cm:name>company.properties</cm:name>
+									<sys:store-identifier>SpacesStore</sys:store-identifier>
+									<sys:locale>fr_FR_</sys:locale>
+									<koya:legalInformations></koya:legalInformations>
+									<sys:node-uuid>0b997019-4641-43dd-bb51-254c33ddf9e5</sys:node-uuid>
+									<koya:address></koya:address>
+									<sys:store-protocol>workspace</sys:store-protocol>
+								</view:properties>
+								<cm:contains>
+									<cm:content view:childName="cm:logo.png">
+										<view:aspects>
+											<cm:titled />
+											<cm:author />
+										</view:aspects>
+										<view:properties>
+											<cm:description></cm:description>
+											<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/default-config/logo.png|mimetype=image/png</cm:content>
+											<cm:title>logo.png</cm:title>
+											<sys:node-uuid>207297eb-77ee-4380-a129-fd94b24d5ec9</sys:node-uuid>
+											<cm:author>Me</cm:author>
+											<cm:name>logo.png</cm:name>
+										</view:properties>
+										<view:associations></view:associations>
+									</cm:content>
+								</cm:contains>
+							</koya:companyProperties>
+						</cm:contains>
+					</view:associations>
+				</cm:folder>
+				<cm:folder view:childName="cm:templates">
+					<view:aspects>
+						<cm:auditable></cm:auditable>
+						<sys:referenceable></sys:referenceable>
+						<cm:titled></cm:titled>
+						<sys:localized></sys:localized>
+					</view:aspects>
+					<view:acl></view:acl>
+					<view:properties>
+						<cm:name>templates</cm:name>
+						<sys:store-identifier>SpacesStore</sys:store-identifier>
+						<sys:locale>fr_FR_</sys:locale>
+						<cm:title>
+							<view:mlvalue view:locale="fr"></view:mlvalue>
+						</cm:title>
+						<sys:node-uuid>75149303-3aa1-479a-b622-1fec4fcdc9b1</sys:node-uuid>
+						<sys:store-protocol>workspace</sys:store-protocol>
+						<cm:description>
+							<view:mlvalue view:locale="fr"></view:mlvalue>
+						</cm:description>
+					</view:properties>
+					<view:associations>
+						<cm:contains>
+							<cm:folder view:childName="cm:space">
+								<view:aspects>
+									<cm:auditable></cm:auditable>
+									<sys:referenceable></sys:referenceable>
+									<cm:titled></cm:titled>
+									<sys:localized></sys:localized>
+								</view:aspects>
+								<view:acl></view:acl>
+								<view:properties>
+									<cm:name>space</cm:name>
+									<sys:store-identifier>SpacesStore</sys:store-identifier>
+									<sys:locale>fr_FR_</sys:locale>
+									<cm:title>
+										<view:mlvalue view:locale="fr"></view:mlvalue>
+									</cm:title>
+									<sys:node-uuid>29681d8d-a7d8-418b-94c3-9bade397350e</sys:node-uuid>
+									<sys:store-protocol>workspace</sys:store-protocol>
+									<cm:description>
+										<view:mlvalue view:locale="fr"></view:mlvalue>
+									</cm:description>
+								</view:properties>
+							</cm:folder>
+						</cm:contains>
+					</view:associations>
+				</cm:folder>
+			</cm:contains>
+		</view:associations>
+	</cm:folder>
+</view:view>
