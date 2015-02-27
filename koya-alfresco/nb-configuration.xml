@@ -19,7 +19,6 @@
     along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
 
 -->
-
 <project-shared-configuration>
     <!--
 This file contains additional configuration written by modules in the NetBeans IDE.
@@ -35,5 +34,12 @@ That way multiple projects can share the same settings (useful for formatting ru
 Any value defined here will override the pom.xml file value but is only applicable to the current project.
 -->
         <netbeans.compile.on.save>all</netbeans.compile.on.save>
+        <de-markiewb-netbeans-plugins-eclipse-formatter.showNotifications>true</de-markiewb-netbeans-plugins-eclipse-formatter.showNotifications>
+        <de-markiewb-netbeans-plugins-eclipse-formatter.useProjectSettings>true</de-markiewb-netbeans-plugins-eclipse-formatter.useProjectSettings>
+        <de-markiewb-netbeans-plugins-eclipse-formatter.eclipseFormatterActiveProfile>itl</de-markiewb-netbeans-plugins-eclipse-formatter.eclipseFormatterActiveProfile>
+        <de-markiewb-netbeans-plugins-eclipse-formatter.eclipseFormatterEnabled>true</de-markiewb-netbeans-plugins-eclipse-formatter.eclipseFormatterEnabled>
+        <de-markiewb-netbeans-plugins-eclipse-formatter.preserveBreakPoints>true</de-markiewb-netbeans-plugins-eclipse-formatter.preserveBreakPoints>
+        <de-markiewb-netbeans-plugins-eclipse-formatter.eclipseFormatterLocation>/home/nico/Boulot/eclipse-itl-formatter.xml</de-markiewb-netbeans-plugins-eclipse-formatter.eclipseFormatterLocation>
+        <de-markiewb-netbeans-plugins-eclipse-formatter.enableFormatAsSaveAction>true</de-markiewb-netbeans-plugins-eclipse-formatter.enableFormatAsSaveAction>
     </properties>
 </project-shared-configuration>

@@ -24,17 +24,20 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * Updates dossier's last modification date on content modification 
+ * Updates dossier's last modification date on content modification
  */
-public class LastModificationDateBehaviour implements NodeServicePolicies.OnDeleteNodePolicy, ContentServicePolicies.OnContentUpdatePolicy {
+public class LastModificationDateBehaviour implements
+        NodeServicePolicies.OnDeleteNodePolicy,
+        ContentServicePolicies.OnContentUpdatePolicy {
 
-    private Logger logger = Logger.getLogger(LastModificationDateBehaviour.class);
+    private Logger logger = Logger
+            .getLogger(LastModificationDateBehaviour.class);
 
-// Dependencies
+    // Dependencies
     private NodeService nodeService;
     private PolicyComponent policyComponent;
     private KoyaNodeService koyaNodeService;
-// Behaviours
+    // Behaviours
     private Behaviour onDeleteNode;
     private Behaviour onContentUpdate;
 
@@ -65,27 +68,26 @@ public class LastModificationDateBehaviour implements NodeServicePolicies.OnDele
     public void init() {
 
         // Create behaviours
-        this.onDeleteNode = new JavaBehaviour(this, "onDeleteNode", NotificationFrequency.TRANSACTION_COMMIT);
-        this.onContentUpdate = new JavaBehaviour(this, "onContentUpdate", NotificationFrequency.TRANSACTION_COMMIT);
+        this.onDeleteNode = new JavaBehaviour(this, "onDeleteNode",
+                NotificationFrequency.FIRST_EVENT);
+        this.onContentUpdate = new JavaBehaviour(this, "onContentUpdate",
+                NotificationFrequency.TRANSACTION_COMMIT);
 
         // Bind behaviours to node policies
-        //Delete behaviour
+        // Delete behaviour
         this.policyComponent.bindClassBehaviour(
                 NodeServicePolicies.OnDeleteNodePolicy.QNAME,
-                ContentModel.TYPE_CONTENT,
-                this.onDeleteNode
-        );
+                ContentModel.TYPE_CONTENT, this.onDeleteNode);
 
         // Update or create behaviour
         this.policyComponent.bindClassBehaviour(
                 ContentServicePolicies.OnContentUpdatePolicy.QNAME,
-                ContentModel.TYPE_CONTENT,
-                this.onContentUpdate
-        );
+                ContentModel.TYPE_CONTENT, this.onContentUpdate);
     }
 
     @Override
-    public void onDeleteNode(ChildAssociationRef childAssocRef, boolean isNodeArchived) {
+    public void onDeleteNode(ChildAssociationRef childAssocRef,
+            boolean isNodeArchived) {
         if (nodeService.exists(childAssocRef.getChildRef())) {
             addOrUpdateLastModifiedDate(childAssocRef.getChildRef());
         }
@@ -100,47 +102,66 @@ public class LastModificationDateBehaviour implements NodeServicePolicies.OnDele
 
     private void addOrUpdateLastModifiedDate(NodeRef nodeRef) {
         if (!nodeService.getType(nodeRef).equals(ContentModel.TYPE_CONTENT)) {
-            // We want to update the lastModified Aspect only for content, not for thumbnail or whatever
+            // We want to update the lastModified Aspect only for content, not
+            // for thumbnail or whatever
             return;
         }
 
         Dossier d = null;
-        
-        try{
 
-        logger.debug("node " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME) + "of type " + nodeService.getType(nodeRef).getLocalName() + " Modified (" + nodeRef.toString()+")");
-        for (Map.Entry<QName, Serializable> e : nodeService.getProperties(nodeRef).entrySet()) {
-            logger.trace(e.getKey().getLocalName() + " : " + e.getValue().toString());
-        }
-        //get dossier
         try {
 
-            d = koyaNodeService.getFirstParentOfType(nodeRef, Dossier.class);
-        } catch (KoyaServiceException ex) {
-            logger.error("error while determinating nodeRef Koya Typed parents");
-        }
-        if (d != null) {
+            logger.debug("node "
+                    + nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE)
+                    + "/"
+                    + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME)
+                    + "of type " + nodeService.getType(nodeRef).getLocalName()
+                    + " Modified");
+            for (Map.Entry<QName, Serializable> e : nodeService.getProperties(
+                    nodeRef).entrySet()) {
+                logger.debug(e.getKey().getLocalName() + " : "
+                        + e.getValue().toString());
+            }
+            // get dossier
+            try {
 
-            logger.debug("Updating lastModificationDate of dossier : " + d.getTitle());
-            final NodeRef n = d.getNodeRefasObject();
-            AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Object>() {
-                @Override
-                public Object doWork() throws Exception {
+                d = koyaNodeService
+                        .getFirstParentOfType(nodeRef, Dossier.class);
+            } catch (KoyaServiceException ex) {
+                logger.error("error while determinating nodeRef Koya Typed parents");
+            }
+            if (d != null) {
 
-                    //Add lastModified Aspect if not already present
-                    if (!nodeService.hasAspect(n, KoyaModel.ASPECT_LASTMODIFIED)) {
-                        Map<QName, Serializable> props = new HashMap<>();
-                        nodeService.addAspect(n, KoyaModel.ASPECT_LASTMODIFIED, props);
-                    }
+                logger.debug("Updating lastModificationDate of dossier : "
+                        + d.getTitle());
+                final NodeRef n = d.getNodeRefasObject();
+                AuthenticationUtil
+                        .runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
+                            @Override
+                            public Object doWork() throws Exception {
 
-                    nodeService.setProperty(n, KoyaModel.PROP_LASTMODIFICATIONDATE, new Date());
-                    nodeService.setProperty(n, KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
-                    return null;
-                }
-            });
-        }
-        }catch(Exception e){
-            logger.error("failed to execute LastModificationDateBehaviour : "+e.toString());
+                                // Add lastModified Aspect if not already
+                                // present
+                                if (!nodeService.hasAspect(n,
+                                        KoyaModel.ASPECT_LASTMODIFIED)) {
+                                    Map<QName, Serializable> props = new HashMap<>();
+                                    nodeService.addAspect(n,
+                                            KoyaModel.ASPECT_LASTMODIFIED,
+                                            props);
+                                }
+
+                                nodeService.setProperty(n,
+                                        KoyaModel.PROP_LASTMODIFICATIONDATE,
+                                        new Date());
+                                nodeService.setProperty(n,
+                                        KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
+                                return null;
+                            }
+                        });
+            }
+        } catch (Exception e) {
+            logger.error("failed to execute LastModificationDateBehaviour : "
+                    + e.toString());
         }
     }
 
