@@ -67,6 +67,7 @@ done
 
 if [ -f alfresco/src/main/properties/dev/alfresco-global.properties ];then
 	MVNOPTS="$MVNOPTS -Denv=dev"
+	echo "ENV = DEV"
 fi
 
 # Define Alfresco Home that is used as log dir base

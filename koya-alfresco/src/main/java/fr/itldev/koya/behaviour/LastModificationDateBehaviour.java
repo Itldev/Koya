@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.itldev.koya.behaviour;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
@@ -29,7 +24,7 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * @author nico
+ * Updates dossier's last modification date on content modification 
  */
 public class LastModificationDateBehaviour implements NodeServicePolicies.OnDeleteNodePolicy, ContentServicePolicies.OnContentUpdatePolicy {
 
@@ -110,10 +105,12 @@ public class LastModificationDateBehaviour implements NodeServicePolicies.OnDele
         }
 
         Dossier d = null;
+        
+        try{
 
-        logger.debug("node " + nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE) + "/" + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME) + "of type " + nodeService.getType(nodeRef).getLocalName() + " Modified");
+        logger.debug("node " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME) + "of type " + nodeService.getType(nodeRef).getLocalName() + " Modified (" + nodeRef.toString()+")");
         for (Map.Entry<QName, Serializable> e : nodeService.getProperties(nodeRef).entrySet()) {
-            logger.debug(e.getKey().getLocalName() + " : " + e.getValue().toString());
+            logger.trace(e.getKey().getLocalName() + " : " + e.getValue().toString());
         }
         //get dossier
         try {
@@ -141,6 +138,9 @@ public class LastModificationDateBehaviour implements NodeServicePolicies.OnDele
                     return null;
                 }
             });
+        }
+        }catch(Exception e){
+            logger.error("failed to execute LastModificationDateBehaviour : "+e.toString());
         }
     }
 

@@ -199,7 +199,8 @@ public class KoyaMailService implements InitializingBean {
         newContentNoficationTemplateLocation = new RepositoryLocation(
                 StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                 TPL_MAIL_NEWCONTENTNOTIF_, "xpath");
-        inactiveDossierNoficationTemplateLocation = new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+        inactiveDossierNoficationTemplateLocation = new RepositoryLocation(
+                StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                 TPL_MAIL_INACTIVEDOSSIERNOTIF_, "xpath");
 
     }
@@ -248,7 +249,7 @@ public class KoyaMailService implements InitializingBean {
 
         actionService
                 .executeAction(actionService.createAction(
-                                MailActionExecuter.NAME, paramsMail), null, false, true);
+                        MailActionExecuter.NAME, paramsMail), null, false, true);
 
     }
 
@@ -281,7 +282,7 @@ public class KoyaMailService implements InitializingBean {
 
         actionService
                 .executeAction(actionService.createAction(
-                                MailActionExecuter.NAME, paramsMail), null, false, true);
+                        MailActionExecuter.NAME, paramsMail), null, false, true);
     }
 
     public void sendNewContentNotificationMail(User dest,
@@ -299,19 +300,18 @@ public class KoyaMailService implements InitializingBean {
         templateModel.put(
                 "person",
                 new ScriptNode(userService.getUserByUsername(
-                                (String) nodeService.getProperty(sharedItem,
-                                        ContentModel.PROP_MODIFIER))
+                        (String) nodeService.getProperty(sharedItem,
+                                ContentModel.PROP_MODIFIER))
                         .getNodeRefasObject(), serviceRegistry));
 
         templateModel.put("date",
                 nodeService.getProperty(sharedItem, ContentModel.PROP_UPDATED));
 
-        Company c = koyaNodeService.getFirstParentOfType(
-                sharedItem, Company.class);
+        Company c = koyaNodeService.getFirstParentOfType(sharedItem,
+                Company.class);
 
-        templateModel.put(
-                "company",
-                companyService.getProperties(c).toHashMap());
+        templateModel.put("company", companyService.getProperties(c)
+                .toHashMap());
 
         final String compTitle = c.getTitle();
 
@@ -338,10 +338,12 @@ public class KoyaMailService implements InitializingBean {
 
         actionService
                 .executeAction(actionService.createAction(
-                                MailActionExecuter.NAME, paramsMail), null, false, true);
+                        MailActionExecuter.NAME, paramsMail), null, false, true);
     }
 
-    public void sendInactiveDossierNotification(User dest, NodeRef space, List<NodeRef> inactiveDossiers) throws KoyaServiceException {
+    public void sendInactiveDossierNotification(User dest, NodeRef space,
+            List<NodeRef> inactiveDossiers, Company c)
+            throws KoyaServiceException {
         Map<String, Serializable> paramsMail = new HashMap<>();
 
         paramsMail.put(MailActionExecuter.PARAM_TO, dest.getEmail());
@@ -354,20 +356,25 @@ public class KoyaMailService implements InitializingBean {
                 repositoryHelper.getCompanyHome());
 
         templateModel.put("koyaClient", koyaClientParams);
-        List<Map<String, Serializable>> params = CollectionUtils.transform(inactiveDossiers, new Function<NodeRef, Map<String, Serializable>>() {
+        List<Map<String, Serializable>> params = CollectionUtils.transform(
+                inactiveDossiers,
+                new Function<NodeRef, Map<String, Serializable>>() {
 
-            @Override
-            public Map<String, Serializable> apply(final NodeRef value) {
-                return new HashMap<String, Serializable>() {
-                    {
-                        put("nodeRef", value);
-                        put("url", getDirectLinkUrl(value));
+                    @Override
+                    public Map<String, Serializable> apply(final NodeRef value) {
+                        return new HashMap<String, Serializable>() {
+                            {
+                                put("nodeRef", value);
+                                put("url", getDirectLinkUrl(value));
 
+                            }
+                        };
                     }
-                };
-            }
-        });
+                });
         templateModel.put("inactiveDossiers", (Serializable) params);
+
+        templateModel.put("company", companyService.getProperties(c)
+                .toHashMap());
 
         /**
          * TODO Add company and dossiers (or all path ) references to template
@@ -378,16 +385,20 @@ public class KoyaMailService implements InitializingBean {
         /**
          * Get subject from properties file in repository
          */
-        paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
-                getI18nSubject(INACTIVEDOSSIER_NOTIFICATION_SUBJECT, templateModel));
+        paramsMail.put(
+                MailActionExecuter.PARAM_SUBJECT,
+                getI18nSubject(INACTIVEDOSSIER_NOTIFICATION_SUBJECT,
+                        templateModel));
 
-        actionService.executeAction(actionService.createAction(
-                MailActionExecuter.NAME, paramsMail), space, false, true);
+        actionService
+                .executeAction(actionService.createAction(
+                        MailActionExecuter.NAME, paramsMail), space, false,
+                        true);
     }
 
     /**
      * Send again invitation mail return destination email adress.
-     *
+     * 
      * @param inviteId
      * @return
      * @throws KoyaServiceException
@@ -413,8 +424,8 @@ public class KoyaMailService implements InitializingBean {
         properties
                 .put(WorkflowModelNominatedInvitation.wfVarInviteeUserName,
                         (String) task
-                        .getProperties()
-                        .get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_USER_NAME));
+                                .getProperties()
+                                .get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_USER_NAME));
         properties.put(
                 WorkflowModelNominatedInvitation.wfVarAcceptUrl,
                 (String) task.getProperties().get(
@@ -430,18 +441,18 @@ public class KoyaMailService implements InitializingBean {
         properties
                 .put(WorkflowModelNominatedInvitation.wfVarInviterUserName,
                         (String) task
-                        .getProperties()
-                        .get(WorkflowModelNominatedInvitation.WF_PROP_INVITER_USER_NAME));
+                                .getProperties()
+                                .get(WorkflowModelNominatedInvitation.WF_PROP_INVITER_USER_NAME));
         properties
                 .put(WorkflowModelNominatedInvitation.wfVarInviteeGenPassword,
                         (String) task
-                        .getProperties()
-                        .get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_GEN_PASSWORD));
+                                .getProperties()
+                                .get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_GEN_PASSWORD));
         properties
                 .put(WorkflowModelNominatedInvitation.wfVarResourceName,
                         (String) task
-                        .getProperties()
-                        .get(WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME));
+                                .getProperties()
+                                .get(WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME));
         properties.put(
                 WorkflowModelNominatedInvitation.wfVarRejectUrl,
                 (String) task.getProperties().get(
@@ -449,8 +460,8 @@ public class KoyaMailService implements InitializingBean {
         properties
                 .put(WorkflowModelNominatedInvitation.wfVarInviteTicket,
                         (String) task
-                        .getProperties()
-                        .get(WorkflowModelNominatedInvitation.WF_PROP_INVITE_TICKET));
+                                .getProperties()
+                                .get(WorkflowModelNominatedInvitation.WF_PROP_INVITE_TICKET));
 
         properties.put(
                 WorkflowModelNominatedInvitation.wfVarWorkflowInstanceId,
@@ -467,7 +478,7 @@ public class KoyaMailService implements InitializingBean {
     }
 
     /**
-     *
+     * 
      * @param wrapper
      * @throws KoyaServiceException
      */
@@ -491,7 +502,7 @@ public class KoyaMailService implements InitializingBean {
             // xpath
             templateLoc.setPath(wrapper.getTemplateXPath());
 
-			// TODO wrapper should only indicate mail template name. Root path
+            // TODO wrapper should only indicate mail template name. Root path
             // is determniated
             // by company context (spcific template or koya generic template or
             // null)
@@ -538,7 +549,7 @@ public class KoyaMailService implements InitializingBean {
          */
         actionService
                 .executeAction(actionService.createAction(
-                                MailActionExecuter.NAME, paramsMail), null);
+                        MailActionExecuter.NAME, paramsMail), null);
 
     }
 
@@ -551,7 +562,7 @@ public class KoyaMailService implements InitializingBean {
             throw new KoyaServiceException(
                     KoyaErrorCodes.KOYAMAIL_INVALID_SUBJECT_PROPERTIES_PATH,
                     "Invalid koya Mail subject properties path : "
-                    + i18nMailSubjectPropertiesLocation.getPath());
+                            + i18nMailSubjectPropertiesLocation.getPath());
         }
 
         String mailSubject = i18n.getProperty(propKey);
@@ -576,10 +587,11 @@ public class KoyaMailService implements InitializingBean {
 
                 if (varReplaced != null) {
                     // Do replacement in value String
-                    mailSubject = mailSubject.replace("${" + varName
-                            + "}", varReplaced);
+                    mailSubject = mailSubject.replace("${" + varName + "}",
+                            varReplaced);
                 } else {
-                    logger.warn("mail Subject remplacement token doesn't match a variable : " + m.group());
+                    logger.warn("mail Subject remplacement token doesn't match a variable : "
+                            + m.group());
                 }
             }
 
@@ -595,7 +607,7 @@ public class KoyaMailService implements InitializingBean {
 
     /**
      * Returns nodeRef of template location. retruns I18n version if found
-     *
+     * 
      * @param templateRepoLocation
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
