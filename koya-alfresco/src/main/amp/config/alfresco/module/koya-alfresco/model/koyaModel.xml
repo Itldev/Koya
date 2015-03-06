@@ -26,7 +26,7 @@
     <!-- Optional meta-data about the model -->
     <description>Koya Data Model</description>
     <author>Itldev</author>
-    <version>0.3</version>
+    <version>${project.version}</version>
     <!-- Imports are required to allow references to definitions in other models
     -->
     
@@ -50,6 +50,7 @@
                     <value>1</value>
                     <value>2</value>
                     <value>3</value>
+                    <value>4</value>                    
                 </list>
             </parameter>
         </constraint>
@@ -99,21 +100,16 @@
         
         <type name="koya:contact">
             <title>Koya Contact</title>
-            <parent>cm:folder</parent>
-            <properties>
-                <property name="koya:contactTitle">
-                    <type>d:text</type>
-                </property>                                             
-            </properties>    
+            <parent>cm:folder</parent>           
             <associations>
                 <association name="koya:contactUserAssoc">
                     <source>
                         <mandatory>false</mandatory>
-                        <many>false</many>
+                        <many>true</many>                       
                     </source>
                     <target>
                         <class>cm:person</class>
-                        <mandatory>false</mandatory>
+                        <mandatory>true</mandatory>
                         <many>false</many>
                     </target>
                 </association>
@@ -159,7 +155,19 @@
 					<type>d:text</type>
 				</property>                                                      
             </properties>    
-            <associations>                
+            <associations>   
+            	 <association name="koya:companyLogo">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </source>
+                    <target>
+                        <class>cm:content</class>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </target>
+                </association>
+                         
                 <child-association name="koya:contactItemsAssoc">
                     <source>
                         <mandatory>false</mandatory>
