@@ -19,174 +19,193 @@
 
 package fr.itldev.koya.model.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.services.impl.util.ContactItemListDeserializer;
+import fr.itldev.koya.services.impl.util.ContactListDeserializer;
+import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 
 /**
  *
  *
  *
  */
-public class CompanyProperties {
+public class CompanyProperties extends KoyaNode {
 
-	private String name;
-	private String title;
-	private String address;
-	private String address2;
-	private String zipCode;
-	private String city;
-	private String mailHeaderText;
+    
+    private String address;
+    private String address2;
+    private String zipCode;
+    private String city;
+    private String mailHeaderText;
+    private String description;
+    private String legalInformations;
+    
+    private NodeRef logoNodeRef;
+    
+    private List<Contact> contacts = new ArrayList<>();
+    private List<ContactItem> contactItems = new ArrayList<>();
+    private GeoPos geoPos;
 
+    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+   
+    
+    public String getAddress() {
+        return address;
+    }
 
-	private String logoNodeRef;
-	private String description;
-	private String legalInformations;
-	private List<Contact> contacts = new ArrayList<>();
-	private List<ContactItem> contactItems = new ArrayList<>();
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-	private GeoPos geoPos;
+    public String getAddress2() {
+        return address2;
+    }
 
-	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+    public void setAddress2(String address2) {
+        this.address2 = address2;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getZipCode() {
+        return zipCode;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getCity() {
+        return city;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-	public String getAddress() {
-		return address;
-	}
+    public String getMailHeaderText() {
+        return mailHeaderText;
+    }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+    public void setMailHeaderText(String mailHeaderText) {
+        this.mailHeaderText = mailHeaderText;
+    }
 
-	public String getAddress2() {
-		return address2;
-	}
+    @JsonDeserialize(using = NodeRefDeserializer.class)
+    public NodeRef getLogoNodeRef() {
+        return logoNodeRef;
+    }
 
-	public void setAddress2(String address2) {
-		this.address2 = address2;
-	}
+    public void setLogoNodeRef(NodeRef logoNodeRef) {
+        this.logoNodeRef = logoNodeRef;
+    }
 
-	public String getZipCode() {
-		return zipCode;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setZipCode(String zipCode) {
-		this.zipCode = zipCode;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getCity() {
-		return city;
-	}
+    public String getLegalInformations() {
+        return legalInformations;
+    }
 
-	public void setCity(String city) {
-		this.city = city;
-	}		
+    public void setLegalInformations(String legalInformations) {
+        this.legalInformations = legalInformations;
+    }
 
-	public String getMailHeaderText() {
-		return mailHeaderText;
-	}
+    public GeoPos getGeoPos() {
+        return geoPos;
+    }
 
-	public void setMailHeaderText(String mailHeaderText) {
-		this.mailHeaderText = mailHeaderText;
-	}
+    public void setGeoPos(GeoPos geoPos) {
+        this.geoPos = geoPos;
+    }
 
-	public String getLogoNodeRef() {
-		return logoNodeRef;
-	}
+    @JsonProperty("contacts")
+    @JsonDeserialize(using = ContactListDeserializer.class)
+    public List<Contact> getContacts() {
+        return contacts;
+    }
 
-	public void setLogoNodeRef(String logoNodeRef) {
-		this.logoNodeRef = logoNodeRef;
-	}
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    @JsonProperty("contactItems")
+    @JsonDeserialize(using = ContactItemListDeserializer.class)
+    public List<ContactItem> getContactItems() {
+        return contactItems;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setContactItems(List<ContactItem> contactItems) {
+        this.contactItems = contactItems;
+    }
 
-	public String getLegalInformations() {
-		return legalInformations;
-	}
+    // </editor-fold >
 
-	public void setLegalInformations(String legalInformations) {
-		this.legalInformations = legalInformations;
-	}
+    public CompanyProperties(){
+        super();
+    }
+    
+    public CompanyProperties(String name, NodeRef nodeRef) {
+        super(nodeRef,name);
+    }
 
-	public GeoPos getGeoPos() {
-		return geoPos;
-	}
+    // complete json serialisation
+    //TODO improve serialisation for mails
+    @Deprecated
+    public HashMap<String, String> toHashMap() {
+        HashMap<String, String> p = new HashMap<>();
+        p.put("shortName", name);
+        p.put("title", title);
 
-	public void setGeoPos(GeoPos geoPos) {
-		this.geoPos = geoPos;
-	}
+        p.put("address", address);
+        p.put("address2", address2);
+        p.put("zipCode", zipCode);
+        p.put("city", city);
+        p.put("mailHeaderText", mailHeaderText);
 
-	public List<Contact> getContacts() {
-		return contacts;
-	}
+        int indexfax = 1;
+        int indextel = 1;
+        int indexmail = 1;
+        for (ContactItem ci : this.contactItems) {
+            if (ci.getType() == ContactItem.TYPE_FAX) {
+                p.put("fax" + indexfax, ci.getValue());
+            }
+            if (ci.getType() == ContactItem.TYPE_MAIL) {
+                p.put("mail" + indexmail, ci.getValue());
+            }
+            if (ci.getType() == ContactItem.TYPE_TEL) {
+                p.put("tel" + indextel, ci.getValue());
+            }
+        }
 
-	public void setContacts(List<Contact> contacts) {
-		this.contacts = contacts;
-	}
+        return p;
+    }
 
-	public List<ContactItem> getContactItems() {
-		return contactItems;
-	}
+   
 
-	public void setContactItems(List<ContactItem> contactItems) {
-		this.contactItems = contactItems;
-	}
+    @Override
+    public String toString() {
+        ObjectMapper mapper = new ObjectMapper();        
+        try {
+            return mapper.writeValueAsString(this);
+        } catch ( IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return"";
+    }
 
-	// </editor-fold >
-	public CompanyProperties() {
-	}
-
-	public CompanyProperties(String name) {
-		this.name = name;
-	}
-
-	public HashMap<String, String> toHashMap() {
-		HashMap<String, String> p = new HashMap<>();
-		p.put("shortName", name);
-		p.put("title", title);
-
-		p.put("address", address);
-		p.put("address2", address2);
-		p.put("zipCode", zipCode);
-		p.put("city", city);
-		p.put("mailHeaderText",mailHeaderText);
-
-		int indexfax = 1;
-		int indextel = 1;
-		int indexmail = 1;
-		for (ContactItem ci : this.contactItems) {
-			if (ci.getType() == ContactItem.TYPE_FAX) {
-				p.put("fax" + indexfax, ci.getValue());
-			}
-			if (ci.getType() == ContactItem.TYPE_MAIL) {
-				p.put("mail" + indexmail, ci.getValue());
-			}
-			if (ci.getType() == ContactItem.TYPE_TEL) {
-				p.put("tel" + indextel, ci.getValue());
-			}
-		}
-
-		return p;
-	}
 }
