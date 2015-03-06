@@ -53,7 +53,19 @@
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="fileFolderService" ref="FileFolderService" />      
         <property name="koyaNotificationService" ref="koyaNotificationService"/>
-        <property name="searchService" ref="SearchService"/>        
+        <property name="searchService" ref="SearchService"/>  
+        <property name="companyPropertiesService" ref="companyPropertiesService"/>          
+    </bean>     
+    
+     <!--Companies handling service-->
+    <bean name="companyPropertiesService" class="fr.itldev.koya.alfservice.CompanyPropertiesService">
+        <property name="koyaNodeService" ref="koyaNodeService"/>     
+        <property name="searchService" ref="SearchService"/>   
+        <property name="nodeService" ref="NodeService"/>
+        <property name="contentService" ref="contentService"/>
+        <property name="userService" ref="userService"/>
+        <property name="unprotNodeService" ref="nodeService" />
+        <property name="fileFolderService" ref="FileFolderService" />      
     </bean>     
     
     <!--Spaces Handling service-->
@@ -148,7 +160,8 @@
         <property name="koyaMailService" ref="koyaMailService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="companyAclService" ref="companyAclService"/>  
-        <property name="companyService" ref="companyService"/>                      
+        <property name="companyService" ref="companyService"/>      
+       	<property name="companyPropertiesService" ref="companyPropertiesService"/>                      
     </bean>
 
 
@@ -191,7 +204,8 @@
         <property name="repositoryHelper" ref="repositoryHelper"/>
         <property name="messageService" ref="messageService"/>        
         <property name="companyAclService" ref="companyAclService"/> 
-        <property name="companyService" ref="companyService"/>         
+        <property name="companyService" ref="companyService"/>   
+        <property name="companyPropertiesService" ref="companyPropertiesService"/>                      
         <property name="authenticationService" ref="AuthenticationService"/> 
         
         <!-- param properties-->       

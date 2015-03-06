@@ -43,6 +43,7 @@ import org.apache.log4j.Logger;
 import org.springframework.extensions.surf.util.ParameterCheck;
 import org.springframework.extensions.surf.util.URLEncoder;
 
+import fr.itldev.koya.alfservice.CompanyPropertiesService;
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
@@ -52,7 +53,7 @@ import fr.itldev.koya.model.impl.Company;
 
 /**
  * Ovverride invite sender in order to provide custom invite mail subject
- *
+ * 
  */
 public class KoyaInviteSender extends InviteSender {
 
@@ -63,7 +64,8 @@ public class KoyaInviteSender extends InviteSender {
     private KoyaMailService koyaMailService;
     //
 
-    private static final List<String> expectedProperties = Arrays.asList(wfVarInviteeUserName,//
+    private static final List<String> expectedProperties = Arrays.asList(
+            wfVarInviteeUserName,//
             WorkflowModelNominatedInvitation.wfVarResourceName,//
             wfVarInviterUserName,//
             wfVarInviteeUserName,//
@@ -84,18 +86,23 @@ public class KoyaInviteSender extends InviteSender {
     private final Repository repository;
     private final MessageService messageService;
     private final FileFolderService fileFolderService;
-//    private final SysAdminParams sysAdminParams;
+    // private final SysAdminParams sysAdminParams;
     private final RepoAdminService repoAdminService;
     private final NamespaceService namespaceService;
     private final KoyaNodeService koyaNodeService;
     private final CompanyAclService companyAclService;
     private final CompanyService companyService;
+
+    private final CompanyPropertiesService companyPropertiesService;
     private HashMap<String, Object> koyaClientParams;
-private ServiceRegistry serviceRegistry;
-    
-    public KoyaInviteSender(ServiceRegistry services, Repository repository, MessageService messageService,
-            KoyaMailService koyaMailService, KoyaNodeService koyaNodeService,
-            CompanyAclService companyAclService,CompanyService companyService,HashMap<String, Object> koyaClientParams) {
+    private ServiceRegistry serviceRegistry;
+
+    public KoyaInviteSender(ServiceRegistry services, Repository repository,
+            MessageService messageService, KoyaMailService koyaMailService,
+            KoyaNodeService koyaNodeService,
+            CompanyAclService companyAclService, CompanyService companyService,
+            CompanyPropertiesService companyPropertiesService,
+            HashMap<String, Object> koyaClientParams) {
 
         super(services, repository, messageService);
         this.serviceRegistry = services;
@@ -105,7 +112,7 @@ private ServiceRegistry serviceRegistry;
         this.searchService = services.getSearchService();
         this.siteService = services.getSiteService();
         this.fileFolderService = services.getFileFolderService();
-//        this.sysAdminParams = services.getSysAdminParams();
+        // this.sysAdminParams = services.getSysAdminParams();
         this.repoAdminService = services.getRepoAdminService();
         this.namespaceService = services.getNamespaceService();
         this.repository = repository;
@@ -118,6 +125,7 @@ private ServiceRegistry serviceRegistry;
         this.koyaNodeService = koyaNodeService;
         this.companyAclService = companyAclService;
         this.companyService = companyService;
+        this.companyPropertiesService = companyPropertiesService;
         this.koyaClientParams = koyaClientParams;
     }
 
@@ -127,7 +135,8 @@ private ServiceRegistry serviceRegistry;
         checkProperties(properties);
 
         ParameterCheck.mandatory("Properties", properties);
-        NodeRef inviter = personService.getPerson(properties.get(wfVarInviterUserName));
+        NodeRef inviter = personService.getPerson(properties
+                .get(wfVarInviterUserName));
         String inviteeName = properties.get(wfVarInviteeUserName);
         NodeRef invitee = personService.getPerson(inviteeName);
         Action mail = actionService.createAction(MailActionExecuter.NAME);
@@ -138,24 +147,28 @@ private ServiceRegistry serviceRegistry;
         try {
             /**
              * KOYA : specific email subject
-             *
+             * 
              */
 
-          
             /**
              *
              */
-            mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT_PARAMS, new Object[]{
-                ModelUtil.getProductName(repoAdminService), getSiteName(properties)});
-            mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, getEmailTemplateNodeRef());
-            
-            Map<String,Serializable> templateModel = buildMailTextModel(properties, inviter, invitee);
+            mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT_PARAMS,
+                    new Object[] { ModelUtil.getProductName(repoAdminService),
+                            getSiteName(properties) });
+            mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE,
+                    getEmailTemplateNodeRef());
+
+            Map<String, Serializable> templateModel = buildMailTextModel(
+                    properties, inviter, invitee);
             mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,
                     (Serializable) templateModel);
             mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT,
-            		koyaMailService.getI18nSubject(EMAIL_SUBJECT,templateModel));
-            
-            mail.setParameterValue(MailActionExecuter.PARAM_IGNORE_SEND_FAILURE, true);
+                    koyaMailService
+                            .getI18nSubject(EMAIL_SUBJECT, templateModel));
+
+            mail.setParameterValue(
+                    MailActionExecuter.PARAM_IGNORE_SEND_FAILURE, true);
             actionService.executeAction(mail, getWorkflowPackage(properties));
         } catch (KoyaServiceException ex) {
             throw new RuntimeException(ex);
@@ -169,20 +182,24 @@ private ServiceRegistry serviceRegistry;
     private void checkProperties(Map<String, String> properties) {
         Set<String> keys = properties.keySet();
         if (!keys.containsAll(expectedProperties)) {
-            LinkedList<String> missingProperties = new LinkedList<>(expectedProperties);
+            LinkedList<String> missingProperties = new LinkedList<>(
+                    expectedProperties);
             missingProperties.removeAll(keys);
-            throw new InvitationException("The following mandatory properties are missing:\n" + missingProperties);
+            throw new InvitationException(
+                    "The following mandatory properties are missing:\n"
+                            + missingProperties);
         }
     }
 
     private String getEmail(NodeRef person) {
-        return (String) nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+        return (String) nodeService
+                .getProperty(person, ContentModel.PROP_EMAIL);
     }
 
     private NodeRef getEmailTemplateNodeRef() {
-        List<NodeRef> nodeRefs = searchService.selectNodes(repository.getRootHome(),
-                koyaMailService.TPL_MAIL_INVITATION, null,
-                this.namespaceService, false);        
+        List<NodeRef> nodeRefs = searchService.selectNodes(
+                repository.getRootHome(), koyaMailService.TPL_MAIL_INVITATION,
+                null, this.namespaceService, false);
 
         if (nodeRefs.size() == 1) {
             // Now localise this
@@ -194,50 +211,58 @@ private ServiceRegistry serviceRegistry;
         }
     }
 
-    private Map<String, Serializable> buildMailTextModel(final Map<String, String> properties, NodeRef inviter, NodeRef invitee) {
+    private Map<String, Serializable> buildMailTextModel(
+            final Map<String, String> properties, NodeRef inviter,
+            NodeRef invitee) {
         // Set the core model parts
         // Note - the user part is skipped, as that's implied via the run-as
         Map<String, Serializable> model = new HashMap<String, Serializable>();
         model.put(TemplateService.KEY_COMPANY_HOME, repository.getCompanyHome());
-        model.put(TemplateService.KEY_USER_HOME, repository.getUserHome(inviter));
-        model.put(TemplateService.KEY_PRODUCT_NAME, ModelUtil.getProductName(repoAdminService));
+        model.put(TemplateService.KEY_USER_HOME,
+                repository.getUserHome(inviter));
+        model.put(TemplateService.KEY_PRODUCT_NAME,
+                ModelUtil.getProductName(repoAdminService));
 
         // Build up the args for rendering inside the template
-      
-        
+
         String params = buildUrlParamString(properties);
-        final String acceptLink = makeLink(properties.get(wfVarServerPath), properties.get(wfVarAcceptUrl), params);
-        final String rejectLink = makeLink(properties.get(wfVarServerPath), properties.get(wfVarRejectUrl), params);
-        
+        final String acceptLink = makeLink(properties.get(wfVarServerPath),
+                properties.get(wfVarAcceptUrl), params);
+        final String rejectLink = makeLink(properties.get(wfVarServerPath),
+                properties.get(wfVarRejectUrl), params);
+
         model.put("invitation", new HashMap() {
-          	 {
-          		put("siteName", getSiteName(properties));
-          		put("inviteeSiteRole", getRoleName(properties));
-          		put("inviteeUserName", properties.get(wfVarInviteeUserName));
-                put("inviteeGenPassword", properties.get(wfVarInviteeGenPassword));
+            {
+                put("siteName", getSiteName(properties));
+                put("inviteeSiteRole", getRoleName(properties));
+                put("inviteeUserName", properties.get(wfVarInviteeUserName));
+                put("inviteeGenPassword",
+                        properties.get(wfVarInviteeGenPassword));
                 put("acceptLink", acceptLink);
-                put("rejectLink", rejectLink);             		
-          	 }
-          	 });
-        
-        
-        model.put("invitee",  new ScriptNode(invitee, serviceRegistry));
-        model.put("inviter", new ScriptNode(inviter,serviceRegistry));
+                put("rejectLink", rejectLink);
+            }
+        });
+
+        model.put("invitee", new ScriptNode(invitee, serviceRegistry));
+        model.put("inviter", new ScriptNode(inviter, serviceRegistry));
         model.put("koyaClient", koyaClientParams);
 
-        try{        
-        	//TODO get invite Items from specific workflow model
-        	//model.put("InviteItem", false);
-        	
-        	Company c = companyService.getCompany(properties.get(wfVarResourceName));
-        	model.put("company",companyService.getProperties(c).toHashMap());
-        }catch(Exception e){        	
+        try {
+            // TODO get invite Items from specific workflow model
+            // model.put("InviteItem", false);
+
+            Company c = companyService.getCompany(properties
+                    .get(wfVarResourceName));
+            model.put("company", companyPropertiesService.getProperties(c)
+                    .toHashMap());
+        } catch (Exception e) {
         }
         // All done
         return model;
     }
 
-    private NodeRef getWorkflowPackage(Map<String, String> properties) throws KoyaServiceException {
+    private NodeRef getWorkflowPackage(Map<String, String> properties)
+            throws KoyaServiceException {
         String packageRef = properties.get(WF_PACKAGE);
         return koyaNodeService.getNodeRef(packageRef);
     }
@@ -247,7 +272,8 @@ private ServiceRegistry serviceRegistry;
         SiteInfo site = siteService.getSite(siteFullName);
 
         if (site == null) {
-            throw new InvitationException("The site " + siteFullName + " could not be found.");
+            throw new InvitationException("The site " + siteFullName
+                    + " could not be found.");
         }
 
         String siteName = site.getShortName();
@@ -258,7 +284,6 @@ private ServiceRegistry serviceRegistry;
         return siteName;
     }
 
-   
     private String buildUrlParamString(Map<String, String> properties) {
         StringBuilder params = new StringBuilder("?inviteId=");
         params.append(properties.get(WF_INSTANCE_ID));
@@ -273,7 +298,8 @@ private ServiceRegistry serviceRegistry;
 
     private String getRoleName(Map<String, String> properties) {
         String roleName = properties.get(wfVarRole);
-        String role = messageService.getMessage("invitation.invitesender.email.role." + roleName);
+        String role = messageService
+                .getMessage("invitation.invitesender.email.role." + roleName);
         if (role == null) {
             role = roleName;
         }

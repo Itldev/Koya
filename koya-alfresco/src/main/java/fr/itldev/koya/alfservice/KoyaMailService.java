@@ -85,6 +85,8 @@ public class KoyaMailService implements InitializingBean {
     protected ServiceRegistry serviceRegistry;
     protected CompanyAclService companyAclService;
     protected CompanyService companyService;
+    protected CompanyPropertiesService companyPropertiesService;
+
     protected WorkflowService workflowService;
     protected AuthenticationService authenticationService;
     protected Repository repositoryHelper;
@@ -153,6 +155,11 @@ public class KoyaMailService implements InitializingBean {
 
     public void setCompanyService(CompanyService companyService) {
         this.companyService = companyService;
+    }
+
+    public void setCompanyPropertiesService(
+            CompanyPropertiesService companyPropertiesService) {
+        this.companyPropertiesService = companyPropertiesService;
     }
 
     public void setWorkflowService(WorkflowService workflowService) {
@@ -235,7 +242,7 @@ public class KoyaMailService implements InitializingBean {
                 sender.getNodeRefasObject(), serviceRegistry));
         templateModel.put(TemplateService.KEY_COMPANY_HOME,
                 repositoryHelper.getCompanyHome());
-        templateModel.put("company", companyService.getProperties(c)
+        templateModel.put("company", companyPropertiesService.getProperties(c)
                 .toHashMap());
 
         paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,
@@ -310,7 +317,7 @@ public class KoyaMailService implements InitializingBean {
         Company c = koyaNodeService.getFirstParentOfType(sharedItem,
                 Company.class);
 
-        templateModel.put("company", companyService.getProperties(c)
+        templateModel.put("company", companyPropertiesService.getProperties(c)
                 .toHashMap());
 
         final String compTitle = c.getTitle();
@@ -373,7 +380,7 @@ public class KoyaMailService implements InitializingBean {
                 });
         templateModel.put("inactiveDossiers", (Serializable) params);
 
-        templateModel.put("company", companyService.getProperties(c)
+        templateModel.put("company", companyPropertiesService.getProperties(c)
                 .toHashMap());
 
         /**
@@ -417,7 +424,7 @@ public class KoyaMailService implements InitializingBean {
         KoyaInviteSender koyaInviteSender = new KoyaInviteSender(
                 serviceRegistry, repositoryHelper, messageService, this,
                 koyaNodeService, companyAclService, companyService,
-                koyaClientParams);
+                companyPropertiesService, koyaClientParams);
 
         Map<String, String> properties = new HashMap<>();
 
@@ -516,8 +523,8 @@ public class KoyaMailService implements InitializingBean {
             Company c = koyaNodeService.getSecuredItem(
                     koyaNodeService.getNodeRef(wrapper.getCompanyNodeRef()),
                     Company.class);
-            templateModel.put("company", companyService.getProperties(c)
-                    .toHashMap());
+            templateModel.put("company", companyPropertiesService
+                    .getProperties(c).toHashMap());
 
             paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,
                     (Serializable) templateModel);
