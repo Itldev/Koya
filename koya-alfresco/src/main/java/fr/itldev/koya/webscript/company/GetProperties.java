@@ -27,34 +27,37 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
-import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.CompanyPropertiesService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Get company current properties.
- *
+ * 
  */
 public class GetProperties extends AbstractWebScript {
 
-    private CompanyService companyService;
+    private CompanyPropertiesService companyPropertiesService;
 
-    public void setCompanyService(CompanyService companyService) {
-        this.companyService = companyService;
+    public void setCompanyPropertiesService(
+            CompanyPropertiesService companyPropertiesService) {
+        this.companyPropertiesService = companyPropertiesService;
     }
 
     @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+    public void execute(WebScriptRequest req, WebScriptResponse res)
+            throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
+        String companyName = (String) urlParams
+                .get(KoyaWebscript.WSCONST_COMPANYNAME);
         String response;
         try {
-        	Company c = companyService.getCompany(companyName);
-            response = KoyaWebscript.getObjectAsJson(companyService.getProperties(c));
+            response = KoyaWebscript.getObjectAsJson(companyPropertiesService
+                    .getProperties(companyName));
         } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+            throw new WebScriptException("KoyaError : "
+                    + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");
         res.getWriter().write(response);

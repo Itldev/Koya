@@ -43,6 +43,13 @@
         <property name="companyService" ref="companyService" />        
     </bean>
     
+    <!--get Company by shortName-->
+    <bean id="webscript.fr.itldev.koya.company.company.get"
+          class="fr.itldev.koya.webscript.company.GetCompany"
+          parent="webscript">                
+        <property name="companyService" ref="companyService" />        
+    </bean>
+    
     
     <!-- list members-->
     <bean id="webscript.fr.itldev.koya.company.listMembers.get" 
@@ -64,8 +71,7 @@
     <bean id="webscript.fr.itldev.koya.company.logo.get" 
           class="fr.itldev.koya.webscript.company.GetLogo"
           parent="webscript">                
-        <property name="companyService" ref="companyService" />
-        <property name="koyaNodeService" ref="koyaNodeService" />  
+        <property name="companyPropertiesService" ref="companyPropertiesService" />
         <property name="contentService" ref="ContentService"/>      
     </bean>
     
@@ -83,7 +89,7 @@
     <bean id="webscript.fr.itldev.koya.company.properties.get" 
           class="fr.itldev.koya.webscript.company.GetProperties"
           parent="webscript">                
-        <property name="companyService" ref="companyService" />        
+        <property name="companyPropertiesService" ref="companyPropertiesService" />        
     </bean>
     
     
@@ -91,7 +97,7 @@
     <bean id="webscript.fr.itldev.koya.company.properties.post" 
           class="fr.itldev.koya.webscript.company.CommitProperties"
           parent="webscript">                
-        <property name="companyService" ref="companyService" />        
+        <property name="companyPropertiesService" ref="companyPropertiesService" />        
     </bean>
     
     
@@ -292,6 +298,7 @@
           parent="webscript">                
         <property name="koyaContentService" ref="koyaContentService" />
         <property name="koyaNodeService" ref="koyaNodeService" />         
+        <property name="companyPropertiesService" ref="companyPropertiesService" />         
     </bean>
     
     <!--
