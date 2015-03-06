@@ -602,7 +602,7 @@ public class KoyaMailService implements InitializingBean {
                 }
             }
 
-            logger.error("mail subject = " + mailSubject);
+            logger.trace("mail subject = " + mailSubject);
 
             return mailSubject;
         } else {
