@@ -119,7 +119,7 @@ public class LastModificationDateBehaviour implements
                     + " Modified");
             for (Map.Entry<QName, Serializable> e : nodeService.getProperties(
                     nodeRef).entrySet()) {
-                logger.debug(e.getKey().getLocalName() + " : "
+                logger.trace(e.getKey().getLocalName() + " : "
                         + e.getValue().toString());
             }
             // get dossier
