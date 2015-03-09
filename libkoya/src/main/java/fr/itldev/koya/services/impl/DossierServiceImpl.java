@@ -18,6 +18,15 @@
  */
 package fr.itldev.koya.services.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import org.alfresco.service.namespace.QName;
+import org.codehaus.jackson.type.TypeReference;
+import org.springframework.core.io.Resource;
+
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
@@ -26,14 +35,9 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
-import java.util.HashSet;
-import java.util.List;
-import org.alfresco.service.namespace.QName;
-import org.codehaus.jackson.type.TypeReference;
-import org.springframework.core.io.Resource;
 
-public class DossierServiceImpl extends AlfrescoRestService implements DossierService {
+public class DossierServiceImpl extends AlfrescoRestService implements
+        DossierService {
 
     private static final String REST_GET_CREATEDOSSIER = "/s/fr/itldev/koya/dossier/create/{parentNodeRef}?title={title}";
 
@@ -48,6 +52,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 
     private static final String REST_GET_DELRESP = "/s/fr/itldev/koya/dossier/resp/del/{userName}/{nodeRef}";
 
+    private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}";
+
     private KoyaContentService KoyaContentService;
 
     public void setKoyaContentService(KoyaContentService KoyaContentService) {
@@ -55,76 +61,98 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
     }
 
     @Override
-    public Dossier create(User user, Space parentSpace, String title) throws AlfrescoServiceException {
-        return fromJSON(new TypeReference<Dossier>() {
-        }, user.getRestTemplate().getForObject(getAlfrescoServerUrl()
-                + REST_GET_CREATEDOSSIER, String.class, parentSpace.getNodeRef(), title));
+    public Dossier create(User user, Space parentSpace, String title)
+            throws AlfrescoServiceException {
+        return fromJSON(
+                new TypeReference<Dossier>() {
+                },
+                user.getRestTemplate().getForObject(
+                        getAlfrescoServerUrl() + REST_GET_CREATEDOSSIER,
+                        String.class, parentSpace.getNodeRef(), title));
 
     }
 
     /**
      * Creates a new Dossier with content in a zip file
-     *
+     * 
      * TODO make this process atomic
-     *
+     * 
      * @param user
      * @param parentSpace
      * @param zipFile
-     *
-     *
+     * 
+     * 
      * @return
      * @throws AlfrescoServiceException
      */
     @Override
-    public Dossier create(User user, Space parentSpace, String title, Resource zipFile) throws AlfrescoServiceException {
+    public Dossier create(User user, Space parentSpace, String title,
+            Resource zipFile) throws AlfrescoServiceException {
         Dossier d = create(user, parentSpace, title);
-        Document zipDoc = KoyaContentService.upload(user, d.getNodeRefasObject(), zipFile);
+        Document zipDoc = KoyaContentService.upload(user,
+                d.getNodeRefasObject(), zipFile);
         KoyaContentService.importZipedContent(user, zipDoc);
         return d;
     }
 
     /**
-     *
+     * 
      * @param user
      * @param dossier
      * @return
      * @throws AlfrescoServiceException
      */
     @Override
-    public Dossier edit(User user, Dossier dossier) throws AlfrescoServiceException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Dossier edit(User user, Dossier dossier)
+            throws AlfrescoServiceException {
+        throw new UnsupportedOperationException("Not supported yet."); // To
+                                                                       // change
+                                                                       // body
+                                                                       // of
+                                                                       // generated
+                                                                       // methods,
+                                                                       // choose
+                                                                       // Tools
+                                                                       // |
+                                                                       // Templates.
     }
 
     /**
      * List all Space Dossiers
-     *
+     * 
      * @param user
      * @param space
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<Dossier> list(User user, Space space, int skipCount, int maxItems, String... filter) throws AlfrescoServiceException {
+    public List<Dossier> list(User user, Space space, int skipCount,
+            int maxItems, String... filter) throws AlfrescoServiceException {
         String filterStr = "";
         if (filter.length == 1) {
             filterStr = filter[0];
         }
 
-        return fromJSON(new TypeReference<List<Dossier>>() {
-        }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_LISTCHILD, String.class, space.getNodeRef(), skipCount, maxItems, filterStr));
+        return fromJSON(
+                new TypeReference<List<Dossier>>() {
+                },
+                user.getRestTemplate().getForObject(
+                        getAlfrescoServerUrl() + REST_GET_LISTCHILD,
+                        String.class, space.getNodeRef(), skipCount, maxItems,
+                        filterStr));
 
     }
 
     /**
      * Count all Space Dossiers
-     *
+     * 
      * @param user
      * @param space
      * @return
      * @throws AlfrescoServiceException
      */
     @Override
-    public Integer countChildren(User user, Space space) throws AlfrescoServiceException {
+    public Integer countChildren(User user, Space space)
+            throws AlfrescoServiceException {
         return countChildren(user, space, new HashSet<QName>() {
             {
                 add(KoyaModel.TYPE_DOSSIER);
@@ -134,53 +162,61 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 
     /**
      * List all users in charge of specified Dossier.
-     *
+     * 
      * @param user
      * @param dossier
      * @return
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<User> listResponsibles(User user, Dossier dossier) throws AlfrescoServiceException {
-        return fromJSON(new TypeReference<List<User>>() {
-        }, user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl()
-                        + REST_GET_LISTRESP, String.class, dossier.getNodeRef()));
+    public List<User> listResponsibles(User user, Dossier dossier)
+            throws AlfrescoServiceException {
+        return fromJSON(
+                new TypeReference<List<User>>() {
+                },
+                user.getRestTemplate().getForObject(
+                        getAlfrescoServerUrl() + REST_GET_LISTRESP,
+                        String.class, dossier.getNodeRef()));
     }
 
     /**
      * List all users in charge of specified Dossier.
-     *
+     * 
      * @param user
      * @param dossier
      * @return
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<User> listMembers(User user, Dossier dossier) throws AlfrescoServiceException {
-        return fromJSON(new TypeReference<List<User>>() {
-        }, user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl()
-                        + REST_GET_LISTMEMBERS, String.class, dossier.getNodeRef()));
+    public List<User> listMembers(User user, Dossier dossier)
+            throws AlfrescoServiceException {
+        return fromJSON(
+                new TypeReference<List<User>>() {
+                },
+                user.getRestTemplate().getForObject(
+                        getAlfrescoServerUrl() + REST_GET_LISTMEMBERS,
+                        String.class, dossier.getNodeRef()));
     }
 
     /**
      * Adds a user in charge of specified Dossier.
-     *
+     * 
      * @param user
      * @param dossier
      * @param responsible
      * @throws AlfrescoServiceException
      */
     @Override
-    public void addResponsible(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
+    public void addResponsible(User user, Dossier dossier, User responsible)
+            throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDRESP, String.class,
                 responsible.getUserName(), dossier.getNodeRef());
     }
 
     @Override
-    public void addMember(User user, Dossier dossier, User responsible) throws AlfrescoServiceException {
+    public void addMember(User user, Dossier dossier, User responsible)
+            throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDMEMBER, String.class,
                 responsible.getUserName(), dossier.getNodeRef());
@@ -188,14 +224,15 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 
     /**
      * Add a list of users in charge of specified Dossier.
-     *
+     * 
      * @param user
      * @param dossier
      * @param responsibles
      * @throws AlfrescoServiceException
      */
     @Override
-    public void addResponsible(User user, Dossier dossier, List<User> responsibles) throws AlfrescoServiceException {
+    public void addResponsible(User user, Dossier dossier,
+            List<User> responsibles) throws AlfrescoServiceException {
         for (User u : responsibles) {
             addResponsible(user, dossier, u);
         }
@@ -203,34 +240,68 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 
     /**
      * Removes any collaborator role set on dossier.
-     *
+     * 
      * @param user
      * @param dossier
      * @param collaborator
      * @throws AlfrescoServiceException
      */
     @Override
-    public void removeKoyaCollaboratorRole(User user, Dossier dossier, User collaborator) throws AlfrescoServiceException {
+    public void removeKoyaCollaboratorRole(User user, Dossier dossier,
+            User collaborator) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_DELRESP,
-                String.class, dossier.getNodeRef(), collaborator.getUserName()
-        );
+                getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
+                dossier.getNodeRef(), collaborator.getUserName());
 
     }
 
     /**
      * Remove user member or responsible of specified Dossier.
-     *
+     * 
      * @param user
      * @param dossier
      * @param memberOrResp
      * @throws AlfrescoServiceException
      */
     @Override
-    public void delMemberOrResponsible(User user, Dossier dossier, User memberOrResp) throws AlfrescoServiceException {
+    public void delMemberOrResponsible(User user, Dossier dossier,
+            User memberOrResp) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_DELRESP,
-                String.class, memberOrResp.getUserName(), dossier.getNodeRef());
+                getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
+                memberOrResp.getUserName(), dossier.getNodeRef());
     }
 
+    /**
+     * checks if dossier is confidential
+     * 
+     * @param user
+     * @param dossier
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public Boolean isConfidential(User user, Dossier dossier)
+            throws AlfrescoServiceException {
+        return Boolean.valueOf(user.getRestTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_CONFIDENTIAL, String.class,
+                dossier.getNodeRef()));
+    }
+
+    /**
+     * change dossier confidentiality status
+     * 
+     * @param user
+     * @param dossier
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public Boolean setConfidentiality(User user, Dossier dossier,
+            Boolean confidential) throws AlfrescoServiceException {
+        Map<String, String> params = new HashMap<>();
+        params.put("confidential", confidential.toString());
+        return Boolean.valueOf(user.getRestTemplate().postForObject(
+                getAlfrescoServerUrl() + REST_CONFIDENTIAL, params,
+                String.class,dossier.getNodeRef()));
+    }
 }

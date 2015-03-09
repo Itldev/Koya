@@ -72,29 +72,33 @@ public class DossierServiceImplTest extends TestCase {
     public void init() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
         companyTests = companyService.create(admin,
-                "company" + new Random().nextInt(1000),
-                companyService.listSalesOffer(admin).get(0).getName(), "default");
-        spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
+                "company" + new Random().nextInt(1000), companyService
+                        .listSalesOffer(admin).get(0).getName(), "default");
+        spaceTests = spaceService.create(admin, new Space("testSpace"),
+                companyTests);
 
-        //create to 2 test users if they don't exists (ie while nb users < 3)
-        List<User> users = userService.find(admin, null, 10, companyTests, null);
+        // create to 2 test users if they don't exists (ie while nb users < 3)
+        List<User> users = userService
+                .find(admin, null, 10, companyTests, null);
         while (users.size() < 3) {
 
             try {
-                String randomPart = Integer.toString(new Random().nextInt(1000));
+                String randomPart = Integer
+                        .toString(new Random().nextInt(1000));
                 String mail = "userdossiertest" + randomPart + "@test.com";
                 String userName = "userdossiertest" + randomPart + "_test_com";
 
                 invitationService.inviteUser(admin, companyTests, mail,
                         "SiteManager");
-                secuService.setUserRole(admin, companyTests, userName, "SiteManager");
+                secuService.setUserRole(admin, companyTests, userName,
+                        "SiteManager");
                 users = userService.find(admin, null, 10, companyTests, null);
             } catch (Exception ex) {
-                //silent catch any exception to execute a new try
+                // silent catch any exception to execute a new try
             }
         }
 
-        //select 2 test users = 2 users that are not admin
+        // select 2 test users = 2 users that are not admin
         testUsers = new ArrayList<>();
         for (User u : users) {
             if (!u.getUserName().equals("admin")) {
@@ -105,29 +109,30 @@ public class DossierServiceImplTest extends TestCase {
     }
 
     @After
-    public void deleteCompany() throws RestClientException, AlfrescoServiceException {
+    public void deleteCompany() throws RestClientException,
+            AlfrescoServiceException {
         companyService.delete(admin, companyTests);
     }
 
-    @Test
+     @Test
     public void testCreateDossier() throws AlfrescoServiceException {
         Dossier created = dossierService.create(admin, spaceTests, "doss1");
         assertNotNull("error creating 'child dossier'", created);
 
-        dossierService.list(admin, spaceTests,0,10);
-        //  dossierService.supprimer(admin, cree);
+        dossierService.list(admin, spaceTests, 0, 10);
+        // dossierService.supprimer(admin, cree);
     }
 
-    @Test
+     @Test
     public void testListDossiers() throws AlfrescoServiceException {
         dossierService.create(admin, spaceTests, "doss1");
         dossierService.create(admin, spaceTests, "doss2");
         dossierService.create(admin, spaceTests, "doss3");
         dossierService.create(admin, spaceTests, "doss4");
-        assertEquals(4, dossierService.list(admin, spaceTests,0,10).size());
+        assertEquals(4, dossierService.list(admin, spaceTests, 0, 10).size());
     }
 
-    @Test
+     @Test
     public void testListResponsibles() throws AlfrescoServiceException {
         Dossier d = dossierService.create(admin, spaceTests, "dossLstResp");
         List<User> resp = dossierService.listResponsibles(admin, d);
@@ -142,35 +147,49 @@ public class DossierServiceImplTest extends TestCase {
 
         Dossier d = dossierService.create(admin, spaceTests, "dossAddDelResp");
         List<User> resp = dossierService.listResponsibles(admin, d);
-        assertEquals(resp.size(), 1);//creator automaticly set as responsible
+        assertEquals(resp.size(), 1);// creator automaticly set as responsible
 
         User u1 = testUsers.get(0);
         User u2 = testUsers.get(1);
 
-        //Add a new responsibles --> now 2 reponsibles
+        // Add a new responsibles --> now 2 reponsibles
         dossierService.addResponsible(admin, d, u1);
         assertEquals(2, dossierService.listResponsibles(admin, d).size());
-        //adding twice same user shouldn't be taken in account
+        // adding twice same user shouldn't be taken in account
         dossierService.addResponsible(admin, d, u1);
         assertEquals(2, dossierService.listResponsibles(admin, d).size());
 
-        //del a responsible --> now only 1
-        dossierService.delMemberOrResponsible(admin, d, admin);//-> NPE ???
+        // del a responsible --> now only 1
+        dossierService.delMemberOrResponsible(admin, d, admin);// -> NPE ???
         assertEquals(1, dossierService.listResponsibles(admin, d).size());
         assertEquals(u1, dossierService.listResponsibles(admin, d).get(0));
-        //remove non responsive shouldn't have impact
+        // remove non responsive shouldn't have impact
         dossierService.delMemberOrResponsible(admin, d, admin);
         assertEquals(1, dossierService.listResponsibles(admin, d).size());
 
-        //Add / del collection test
+        // Add / del collection test
         dossierService.addResponsible(admin, d, testUsers);
         assertEquals(2, dossierService.listResponsibles(admin, d).size());
-        //2 because u1 is already in responsibles list
+        // 2 because u1 is already in responsibles list
 
         for (User u : testUsers) {
             dossierService.delMemberOrResponsible(admin, d, u);
         }
         assertEquals(0, dossierService.listResponsibles(admin, d).size());
+
+    }
+
+    @Test
+    public void testConfidentiality() throws AlfrescoServiceException {
+        Dossier d = dossierService.create(admin, spaceTests,
+                "testConfidentility");
+        assertFalse(dossierService.isConfidential(admin, d));
+        assertTrue(dossierService.setConfidentiality(admin, d, true));        
+        assertTrue(dossierService.isConfidential(admin, d));
+
+        //
+        assertFalse(dossierService.setConfidentiality(admin, d, false));   
+        assertFalse(dossierService.isConfidential(admin, d));
 
     }
 
