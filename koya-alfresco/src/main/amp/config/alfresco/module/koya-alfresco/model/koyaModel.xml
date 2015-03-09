@@ -263,6 +263,11 @@
                 </property>
             </properties>
         </aspect>
+        
+        
+        <aspect name="koya:confidential">
+            <title>confidential item</title>
+        </aspect>
     </aspects>
     
 </model>

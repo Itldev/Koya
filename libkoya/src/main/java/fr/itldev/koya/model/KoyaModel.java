@@ -75,6 +75,10 @@ public class KoyaModel {
 
     public static final QName ASPECT_LASTMODIFIED = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "lastModified");
+
+    public static final QName ASPECT_CONFIDENTIAL = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "confidential");
+
     // ================= Aspects Properties
 
     public static final QName PROP_COMPANYHOME = QName.createQName(
@@ -130,7 +134,7 @@ public class KoyaModel {
     // ===========================================
     public static final QName ASSOC_CONTACT_USER = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");
-    
+
     public static final QName ASSOC_LOGO_COMPANY = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "companyLogo");
 

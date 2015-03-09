@@ -32,7 +32,7 @@ public class SubSpaceCollaboratorsAclService extends SubSpaceAclService {
      */
     @Override
     protected void shareSecuredItemImpl(SubSpace subSpace, String userMail, KoyaPermission perm) throws KoyaServiceException {
-
+        
         if (!Dossier.class.isAssignableFrom(subSpace.getClass())) {
             throw new KoyaServiceException(KoyaErrorCodes.SECU_UNSHARABLE_TYPE);
         }
