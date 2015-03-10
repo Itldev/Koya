@@ -25,16 +25,11 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
-import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.alfservice.CompanyPropertiesService;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -43,17 +38,14 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  */
 public class GetLogo extends AbstractWebScript {
 
-	private CompanyService companyService;
-	private KoyaNodeService koyaNodeService;
+	private CompanyPropertiesService companyPropertiesService;
 	private ContentService contentService;
 
-	public void setCompanyService(CompanyService companyService) {
-		this.companyService = companyService;
-	}
+    public void setCompanyPropertiesService(
+            CompanyPropertiesService companyPropertiesService) {
+        this.companyPropertiesService = companyPropertiesService;
+    }
 
-	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-		this.koyaNodeService = koyaNodeService;
-	}
 
 	// for Spring injection
 	public void setContentService(ContentService contentService) {
@@ -68,12 +60,10 @@ public class GetLogo extends AbstractWebScript {
 
 		String companyName = (String) urlParams
 				.get(KoyaWebscript.WSCONST_COMPANYNAME);
-		Logger logger = Logger.getLogger(GetLogo.class);
 
 		try {
 			
-			NodeRef logoNodeRef = companyService.getLogo(koyaNodeService
-					.companyBuilder(companyName));
+			NodeRef logoNodeRef = companyPropertiesService.getLogo(companyName);
 			ContentReader reader = contentService.getReader(logoNodeRef,
 					ContentModel.PROP_CONTENT);
 			reader.getContent(res.getOutputStream());

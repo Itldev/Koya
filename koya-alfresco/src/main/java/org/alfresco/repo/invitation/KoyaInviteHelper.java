@@ -1,14 +1,5 @@
 package org.alfresco.repo.invitation;
 
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.alfservice.KoyaMailService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.security.CompanyAclService;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import org.alfresco.repo.i18n.MessageService;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarAcceptUrl;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarInviteTicket;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarInviteeGenPassword;
@@ -18,6 +9,12 @@ import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVa
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarResourceName;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarRole;
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarServerPath;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+
+import org.alfresco.repo.i18n.MessageService;
 import org.alfresco.repo.invitation.site.InviteSender;
 import org.alfresco.repo.invitation.site.KoyaInviteSender;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -40,26 +37,33 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import fr.itldev.koya.alfservice.CompanyPropertiesService;
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+
 /**
  *
  *
  */
 public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
 
-    private static final Log logger = LogFactory.getLog(ModeratedActionReject.class);
+    private static final Log logger = LogFactory
+            .getLog(ModeratedActionReject.class);
 
-    private static final Collection<String> sendInvitePropertyNames = Arrays.asList(wfVarInviteeUserName,//
-            wfVarResourceName,//
-            wfVarInviterUserName,//
-            wfVarInviteeUserName,//
-            wfVarRole,//
-            wfVarInviteeGenPassword,//
-            wfVarResourceName,//
-            wfVarInviteTicket,//
-            wfVarServerPath,//
-            wfVarAcceptUrl,//
-            wfVarRejectUrl,
-            InviteSender.WF_INSTANCE_ID);
+    private static final Collection<String> sendInvitePropertyNames = Arrays
+            .asList(wfVarInviteeUserName,//
+                    wfVarResourceName,//
+                    wfVarInviterUserName,//
+                    wfVarInviteeUserName,//
+                    wfVarRole,//
+                    wfVarInviteeGenPassword,//
+                    wfVarResourceName,//
+                    wfVarInviteTicket,//
+                    wfVarServerPath,//
+                    wfVarAcceptUrl,//
+                    wfVarRejectUrl, InviteSender.WF_INSTANCE_ID);
 
     private Repository repositoryHelper;
     private ServiceRegistry serviceRegistry;
@@ -74,18 +78,18 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
     private TemplateService templateService;
     private WorkflowService workflowService;
     private NodeService nodeService;
+    private CompanyPropertiesService companyPropertiesService;
 
     private InviteSender inviteSender;
 
     /**
-     *
+     * 
      * Koya specific property
      */
     private KoyaMailService koyaMailService;
     private KoyaNodeService koyaNodeService;
     private CompanyAclService companyAclService;
     private CompanyService companyService;
-    
 
     public void setKoyaMailService(KoyaMailService koyaMailService) {
         this.koyaMailService = koyaMailService;
@@ -94,16 +98,21 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
-   
-	public void setCompanyAclService(CompanyAclService companyAclService) {
-		this.companyAclService = companyAclService;
-	}
 
-	public void setCompanyService(CompanyService companyService) {
-		this.companyService = companyService;
-	}
+    public void setCompanyAclService(CompanyAclService companyAclService) {
+        this.companyAclService = companyAclService;
+    }
 
-	@Override
+    public void setCompanyService(CompanyService companyService) {
+        this.companyService = companyService;
+    }
+
+    public void setCompanyPropertiesService(
+            CompanyPropertiesService companyPropertiesService) {
+        this.companyPropertiesService = companyPropertiesService;
+    }
+
+    @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
         this.actionService = serviceRegistry.getActionService();
@@ -115,14 +124,16 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         this.templateService = serviceRegistry.getTemplateService();
         this.workflowService = serviceRegistry.getWorkflowService();
         this.nodeService = serviceRegistry.getNodeService();
-        this.inviteSender = new KoyaInviteSender(serviceRegistry, repositoryHelper, messageService,
-                koyaMailService, koyaNodeService,companyAclService,companyService,koyaMailService.getKoyaClientParams());
+        this.inviteSender = new KoyaInviteSender(serviceRegistry,
+                repositoryHelper, messageService, koyaMailService,
+                koyaNodeService, companyAclService, companyService,
+                companyPropertiesService, koyaMailService.getKoyaClientParams());
     }
 
     /**
      * redefined method in order to execute membership setting as system user so
      * collaborator can send invitations that are acceptable.
-     *
+     * 
      * @param invitee
      * @param siteName
      * @param role
@@ -131,11 +142,13 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
      */
     @Override
     public void addSiteMembership(final String invitee, final String siteName,
-            final String role, final String runAsUser, final boolean overrideExisting) {
+            final String role, final String runAsUser,
+            final boolean overrideExisting) {
         AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>() {
             @Override
             public Void doWork() throws Exception {
-                if (overrideExisting || !siteService.isMember(siteName, invitee)) {
+                if (overrideExisting
+                        || !siteService.isMember(siteName, invitee)) {
                     siteService.setMembership(siteName, invitee, role);
                 }
                 return null;
@@ -145,16 +158,21 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
 
     @Override
     public void acceptNominatedInvitation(Map<String, Object> executionVariables) {
-        final String invitee = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarInviteeUserName);
-        String siteShortName = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarResourceName);
-        String inviter = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarInviterUserName);
-        String role = (String) executionVariables.get(WorkflowModelNominatedInvitation.wfVarRole);
+        final String invitee = (String) executionVariables
+                .get(WorkflowModelNominatedInvitation.wfVarInviteeUserName);
+        String siteShortName = (String) executionVariables
+                .get(WorkflowModelNominatedInvitation.wfVarResourceName);
+        String inviter = (String) executionVariables
+                .get(WorkflowModelNominatedInvitation.wfVarInviterUserName);
+        String role = (String) executionVariables
+                .get(WorkflowModelNominatedInvitation.wfVarRole);
 
         AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
             @Override
             public Void doWork() throws Exception {
                 if (authenticationService.isAuthenticationMutable(invitee)) {
-                    authenticationService.setAuthenticationEnabled(invitee, true);
+                    authenticationService.setAuthenticationEnabled(invitee,
+                            true);
                 }
                 return null;
             }
@@ -163,12 +181,16 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
     }
 
     @Override
-    public void sendNominatedInvitation(String inviteId, Map<String, Object> executionVariables) {
+    public void sendNominatedInvitation(String inviteId,
+            Map<String, Object> executionVariables) {
         if (invitationService.isSendEmails()) {
-            Map<String, String> properties = makePropertiesFromContextVariables(executionVariables, sendInvitePropertyNames);
+            Map<String, String> properties = makePropertiesFromContextVariables(
+                    executionVariables, sendInvitePropertyNames);
 
-            String packageName = WorkflowModel.ASSOC_PACKAGE.toPrefixString(namespaceService).replace(":", "_");
-            ScriptNode packageNode = (ScriptNode) executionVariables.get(packageName);
+            String packageName = WorkflowModel.ASSOC_PACKAGE.toPrefixString(
+                    namespaceService).replace(":", "_");
+            ScriptNode packageNode = (ScriptNode) executionVariables
+                    .get(packageName);
             String packageRef = packageNode.getNodeRef().toString();
             properties.put(InviteSender.WF_PACKAGE, packageRef);
 
@@ -179,12 +201,16 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, String> makePropertiesFromContextVariables(Map<?, ?> executionVariables, Collection<String> propertyNames) {
-        return CollectionUtils.filterKeys((Map<String, String>) executionVariables, CollectionUtils.containsFilter(propertyNames));
+    private Map<String, String> makePropertiesFromContextVariables(
+            Map<?, ?> executionVariables, Collection<String> propertyNames) {
+        return CollectionUtils.filterKeys(
+                (Map<String, String>) executionVariables,
+                CollectionUtils.containsFilter(propertyNames));
     }
 
     /**
-     * @param messageService the messageService to set
+     * @param messageService
+     *            the messageService to set
      */
     @Override
     public void setMessageService(MessageService messageService) {
@@ -193,7 +219,8 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
     }
 
     /**
-     * @param repositoryHelper the repositoryHelper to set
+     * @param repositoryHelper
+     *            the repositoryHelper to set
      */
     @Override
     public void setRepositoryHelper(Repository repositoryHelper) {
@@ -202,7 +229,8 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
     }
 
     /**
-     * @param serviceRegistry the serviceRegistry to set
+     * @param serviceRegistry
+     *            the serviceRegistry to set
      */
     @Override
     public void setServiceRegistry(ServiceRegistry serviceRegistry) {

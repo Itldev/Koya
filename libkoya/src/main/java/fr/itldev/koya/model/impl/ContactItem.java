@@ -19,15 +19,20 @@
 
 package fr.itldev.koya.model.impl;
 
+import org.alfresco.service.cmr.repository.NodeRef;
+
+import fr.itldev.koya.model.KoyaNode;
+
 /**
  * Basic contact item : can be a telephone number, fax number or mail address
- *
+ * 
  */
-public class ContactItem {
+public class ContactItem extends KoyaNode {
 
     public static final Integer TYPE_TEL = 1;
     public static final Integer TYPE_FAX = 2;
     public static final Integer TYPE_MAIL = 3;
+    public static final Integer TYPE_MOBILE = 4;
 
     private Integer type;
     private String value;
@@ -48,4 +53,45 @@ public class ContactItem {
         this.value = value;
     }
 
+     public ContactItem() {
+         super();
+     }
+
+    public ContactItem(NodeRef n) {
+        super(n);
+    }
+
+    private ContactItem(Integer type, String value) {
+        this.type = type;
+        this.value = value;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((nodeRef == null) ? 0 : nodeRef.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ContactItem other = (ContactItem) obj;
+        if (nodeRef == null) {
+            if (other.nodeRef != null)
+                return false;
+        } else if (!nodeRef.equals(other.nodeRef))
+            return false;
+        return true;
+    }
+
+    public static ContactItem newInstance(Integer type, String value) {
+        return new ContactItem(type, value);
+    }
 }

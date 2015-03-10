@@ -18,19 +18,20 @@
  */
 package fr.itldev.koya.model;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Space;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.alfresco.repo.site.SiteModel;
 import org.alfresco.service.namespace.QName;
 
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
+
 /**
  * Model definition and constants.
- *
+ * 
  */
 public class KoyaModel {
 
@@ -55,13 +56,13 @@ public class KoyaModel {
     public static final QName TYPE_COMPANYPROPERTIES = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "companyProperties");
 
-	// ================ Aspects ==========================
-	
-	public static final QName ASPECT_COMPANYSITE = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "companySite");
-	
-	public static final QName ASPECT_ACTIVABLE = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "activable");
+    // ================ Aspects ==========================
+
+    public static final QName ASPECT_COMPANYSITE = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "companySite");
+
+    public static final QName ASPECT_ACTIVABLE = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "activable");
 
     public static final QName ASPECT_MAILUNIQUE = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "mailunique");
@@ -74,13 +75,13 @@ public class KoyaModel {
 
     public static final QName ASPECT_LASTMODIFIED = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "lastModified");
-	// ================= Aspects Properties
-	
-	public static final QName PROP_COMPANYHOME = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "companyHome");
-	
-	public static final QName PROP_ISACTIVE = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "isActive");
+    // ================= Aspects Properties
+
+    public static final QName PROP_COMPANYHOME = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "companyHome");
+
+    public static final QName PROP_ISACTIVE = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "isActive");
 
     public static final QName PROP_MAIL = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "mail");
@@ -90,19 +91,16 @@ public class KoyaModel {
 
     public static final QName PROP_LASTMODIFICATIONDATE = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "lastModificationDate");
-    
+
     public static final QName PROP_NOTIFIED = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "notified");
-    
+
     // ================= Types Properties =========================
     public static final QName PROP_CONTACTITEM_VALUE = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "contactItemValue");
 
     public static final QName PROP_CONTACTITEM_TYPE = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "contactItemType");
-
-    public static final QName PROP_CONTACT_TITLE = QName.createQName(
-            NAMESPACE_KOYA_CONTENT_MODEL, "contactTitle");
 
     public static final QName PROP_ADDRESS = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "address");
@@ -122,8 +120,8 @@ public class KoyaModel {
     public static final QName PROP_LEGALINFOS = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "legalInformations");
 
-	public static final QName PROP_MAILHEADERTEXT = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "mailHeaderText");
+    public static final QName PROP_MAILHEADERTEXT = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "mailHeaderText");
 
     public static final QName PROP_REFERENCE = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "reference");
@@ -132,10 +130,13 @@ public class KoyaModel {
     // ===========================================
     public static final QName ASSOC_CONTACT_USER = QName.createQName(
             NAMESPACE_KOYA_CONTENT_MODEL, "contactUserAssoc");
+    
+    public static final QName ASSOC_LOGO_COMPANY = QName.createQName(
+            NAMESPACE_KOYA_CONTENT_MODEL, "companyLogo");
 
     /**
      * Used because koya namespace is not registered
-     *
+     * 
      * TODO register koya namespace
      */
     public static final Map<QName, String> TYPES_SHORT_PREFIX = Collections

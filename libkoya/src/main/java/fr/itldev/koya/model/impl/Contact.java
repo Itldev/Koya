@@ -22,49 +22,30 @@ package fr.itldev.koya.model.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
+
 /**
  *
  *
  */
-public class Contact {
+public class Contact extends KoyaNode {
 
-    private String userNodeRef;
-    private String firstName;
-    private String lastName;
-    private String title;
+    private User user;
     private List<ContactItem> contactItems = new ArrayList<>();
-
+  
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public String getUserNodeRef() {
-        return userNodeRef;
+    
+    // @JsonDeserialize(using = NodeRefDeserializer.class)
+    public User getUser() {
+        return user;
     }
 
-    public void setUserNodeRef(String userNodeRef) {
-        this.userNodeRef = userNodeRef;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public List<ContactItem> getContactItems() {
@@ -74,6 +55,44 @@ public class Contact {
     public void setContactItems(List<ContactItem> contactItems) {
         this.contactItems = contactItems;
     }
-
+   
     // </editor-fold >
+
+    public Contact(NodeRef nodeRef) {
+        super(nodeRef);
+    }
+
+    private Contact() {
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((nodeRef == null) ? 0 : nodeRef.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Contact other = (Contact) obj;
+        if (nodeRef == null) {
+            if (other.nodeRef != null)
+                return false;
+        } else if (!nodeRef.equals(other.nodeRef))
+            return false;
+        return true;
+    }
+
+    public static Contact newInstance(User user) {
+        Contact c = new Contact();
+        c.setUser(user);
+        return c;
+    }
 }

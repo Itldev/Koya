@@ -40,6 +40,8 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add";
     private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
+    private static final String REST_GET_COMPANY = "/s/fr/itldev/koya/company/get/{companyName}";
+
     private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/company/members/{companyName}";
     private static final String REST_GET_LISTMEMBERS_ROLEFILTER = "/s/fr/itldev/koya/company/members/{companyName}/{roleFilter}";
 
@@ -107,6 +109,16 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
         }, admin.getRestTemplate()
                 .getForObject(getAlfrescoServerUrl() + REST_GET_LISTCOMPANY, String.class));
     }
+    
+    
+    public Company get(User user, String shortName) throws RestClientException, AlfrescoServiceException{
+     
+        return fromJSON(new TypeReference<Company>() {
+        }, user.getRestTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_COMPANY,
+                        String.class, shortName));
+    }
+
 
     /**
      * Company removing method

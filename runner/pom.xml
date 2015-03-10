@@ -9,7 +9,7 @@
     <parent>
         <groupId>fr.itldev</groupId>
         <artifactId>koya</artifactId>
-        <version>0.7.3</version>
+        <version>0.7.4</version>
     </parent>
 
     <profiles>
@@ -38,11 +38,11 @@
                         <configuration>
                             
                             <!-- Runs Solr as the "fake" main webapp. This is useful due to the currently poor OOTB zip packaging of Alfresco Solr -->
-                            <warDirectory>${solr.project.dir}/target/solr-overlay</warDirectory>
-                            <path>/solr</path>
-                            <systemProperties>
+                            <!--<warDirectory>${solr.project.dir}/target/solr-overlay</warDirectory>-->
+                            <path>/solr</path> 
+                            <!--<systemProperties>
                                 <solr.solr.home>${solr.project.dir}/solr_home</solr.solr.home>
-                            </systemProperties>
+                            </systemProperties>-->
                             <!-- Configures the custom Alfresco and Share to run as embedded webapps -->
                             <webapps>
                                 <webapp>
@@ -51,7 +51,7 @@
                                     <version>${project.version}</version>
                                     <type>war</type>
                                     <asWebapp>true</asWebapp>
-                                    <contextPath>alfresco</contextPath>
+                                    <contextPath>alfresco</contextPath>                                   
                                 </webapp>
                                 <webapp>
                                     <groupId>${project.groupId}</groupId>

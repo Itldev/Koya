@@ -22,51 +22,43 @@ package fr.itldev.koya.webscript.company;
 import java.io.IOException;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
-import fr.itldev.koya.alfservice.CompanyPropertiesService;
+import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
- * Commit company properties.
- *
- *
+ * Get company
+ * 
  */
-public class CommitProperties extends AbstractWebScript {
+public class GetCompany extends AbstractWebScript {
 
-    private CompanyPropertiesService companyPropertiesService;
+    private CompanyService companyService;
 
-    public void setCompanyPropertiesService(
-            CompanyPropertiesService companyPropertiesService) {
-        this.companyPropertiesService = companyPropertiesService;
+    public void setCompanyService(CompanyService companyService) {
+        this.companyService = companyService;
     }
 
-    /**
-     *
-     * @param req
-     * @param res
-     * @throws IOException
-     */
     @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+    public void execute(WebScriptRequest req, WebScriptResponse res)
+            throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
+        String companyName = (String) urlParams
+                .get(KoyaWebscript.WSCONST_COMPANYNAME);
+        String response;
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            CompanyProperties cp = mapper.readValue(req.getContent().getReader(), CompanyProperties.class);
-            companyPropertiesService.commitProperties(companyName, cp);
+            response = KoyaWebscript.getObjectAsJson(companyService
+                    .getCompany(companyName));
         } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+            throw new WebScriptException("KoyaError : "
+                    + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");
-        res.getWriter().write("");
-
+        res.getWriter().write(response);
     }
 }

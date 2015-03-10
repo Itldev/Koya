@@ -21,14 +21,20 @@ package fr.itldev.koya.action;
 import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.utils.Zips;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +46,6 @@ import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
-import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
@@ -48,7 +53,9 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.log4j.Logger;
+import org.mozilla.universalchardet.UniversalDetector;
 
 public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
@@ -88,43 +95,45 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     }
 
     /**
-     * @see
-     * org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
-     * org.alfresco.repo.ref.NodeRef)
+     * @see org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
+     *      org.alfresco.repo.ref.NodeRef)
      */
     @Override
     public void executeImpl(Action ruleAction, NodeRef actionedUponNodeRef) {
         if (this.nodeService.exists(actionedUponNodeRef) == true) {
             // The node being passed in should be an Alfresco content package
-            ContentReader reader = this.contentService.getReader(actionedUponNodeRef, ContentModel.PROP_CONTENT);
+            ContentReader reader = this.contentService.getReader(
+                    actionedUponNodeRef, ContentModel.PROP_CONTENT);
             if (reader != null) {
                 File tempFile = null;
                 File tempDir = null;
                 try {
-                    tempFile = TempFileProvider.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX_ZIP);
+                    tempFile = TempFileProvider.createTempFile(
+                            TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX_ZIP);
                     reader.getContent(tempFile);
 
-                    // build a temp dir name based on the ID of the noderef we are importing
-                    // also use the long life temp folder as large ZIP files can take a while
-                    File alfTempDir = TempFileProvider.getLongLifeTempDir("unzip");
-                    tempDir = new File(alfTempDir.getPath() + File.separatorChar + actionedUponNodeRef.getId());
+                    // build a temp dir name based on the ID of the noderef we
+                    // are importing
+                    // also use the long life temp folder as large ZIP files can
+                    // take a while
+                    File alfTempDir = TempFileProvider
+                            .getLongLifeTempDir("unzip");
+                    tempDir = new File(alfTempDir.getPath()
+                            + File.separatorChar + actionedUponNodeRef.getId());
 
-                    Map<String, String> unzipImportParam = new HashMap<>(2);
-                    unzipImportParam.put(VAR_ZIPFILE, tempFile.getAbsolutePath());
-                    unzipImportParam.put(VAR_DESTDIR, tempDir.getAbsolutePath());
+                    if (Zips.unzip(tempFile.getAbsolutePath(),
+                            tempDir.getAbsolutePath())) {
 
-                    RuntimeExec.ExecutionResult er = unzipCommand.execute(unzipImportParam);
-
-                    if (er.getSuccess()) {
-
-                        NodeRef importDest = (NodeRef) ruleAction.getParameterValue(PARAM_DESTINATION_FOLDER);
+                        NodeRef importDest = (NodeRef) ruleAction
+                                .getParameterValue(PARAM_DESTINATION_FOLDER);
 
                         importDirectory(tempDir.getPath(), importDest);
 
                     }
 
                 } catch (KoyaServiceException | ContentIOException ex) {
-                    throw new AlfrescoRuntimeException("Failed to import ZIP file. " + ex.getMessage(), ex);
+                    throw new AlfrescoRuntimeException(
+                            "Failed to import ZIP file. " + ex.getMessage(), ex);
                 } finally {
                     // now the import is done, delete the temporary file
                     if (tempDir != null) {
@@ -147,24 +156,29 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Recursively import a directory structure into the specified root node
      *
-     * @param dir The directory of files and folders to import
-     * @param root The root node to import into
+     * @param dir
+     *            The directory of files and folders to import
+     * @param root
+     *            The root node to import into
      */
-    private void importDirectory(String directory, NodeRef root) throws KoyaServiceException {
-//        Path topdir = Paths.get(dir);
+    private void importDirectory(String directory, NodeRef root)
+            throws KoyaServiceException {
+        // Path topdir = Paths.get(dir);
 
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(directory))) {
+        try (DirectoryStream<Path> directoryStream = Files
+                .newDirectoryStream(Paths.get(directory))) {
             for (Path path : directoryStream) {
                 String fileName = path.getFileName().toString();
                 logger.debug("nex :" + fileName);
 
                 if (Files.isRegularFile(path)) {
-                    koyaContentService.createContentNode(root, fileName, Files.newInputStream(path));
+                    koyaContentService.createContentNode(root, fileName,
+                            Files.newInputStream(path));
 
                 } else {
                     // create a folder node
                     Directory d = koyaContentService.createDir(fileName, root);
-//                    logger.debug(file.getPath());
+                    // logger.debug(file.getPath());
 
                     logger.debug(path);
                     // recurcive call to import folder contents
@@ -177,20 +191,23 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     }
 
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
-        paramList.add(new ParameterDefinitionImpl(PARAM_DESTINATION_FOLDER, DataTypeDefinition.NODE_REF,
-                true, getParamDisplayLabel(PARAM_DESTINATION_FOLDER)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_DESTINATION_FOLDER,
+                DataTypeDefinition.NODE_REF, true,
+                getParamDisplayLabel(PARAM_DESTINATION_FOLDER)));
     }
 
     /**
      * Recursively delete a dir of files and directories
      *
-     * @param dir directory to delete
+     * @param dir
+     *            directory to delete
      */
     private static void deleteDir(File dir) {
         if (dir != null) {
             File elenco = new File(dir.getPath());
 
-            // listFiles can return null if the path is invalid i.e. already been deleted,
+            // listFiles can return null if the path is invalid i.e. already
+            // been deleted,
             // therefore check for null before using in loop
             File[] files = elenco.listFiles();
             if (files != null) {
