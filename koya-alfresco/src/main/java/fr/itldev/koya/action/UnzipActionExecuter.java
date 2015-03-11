@@ -24,20 +24,11 @@ import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.utils.Zips;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
@@ -52,10 +43,7 @@ import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.util.TempFileProvider;
-import org.alfresco.util.exec.RuntimeExec;
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.log4j.Logger;
-import org.mozilla.universalchardet.UniversalDetector;
 
 public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
@@ -68,15 +56,10 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     private static final String TEMP_FILE_PREFIX = "koya";
     private static final String TEMP_FILE_SUFFIX_ZIP = ".zip";
 
-    private static final String VAR_ZIPFILE = "zipFile";
-    private static final String VAR_DESTDIR = "destDir";
-
     private NodeService nodeService;
     private ContentService contentService;
 
     private KoyaContentService koyaContentService;
-
-    private RuntimeExec unzipCommand;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -84,10 +67,6 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     public void setContentService(ContentService contentService) {
         this.contentService = contentService;
-    }
-
-    public void setUnzipCommand(RuntimeExec unzipCommand) {
-        this.unzipCommand = unzipCommand;
     }
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
@@ -190,6 +169,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
         }
     }
 
+    @Override
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
         paramList.add(new ParameterDefinitionImpl(PARAM_DESTINATION_FOLDER,
                 DataTypeDefinition.NODE_REF, true,
