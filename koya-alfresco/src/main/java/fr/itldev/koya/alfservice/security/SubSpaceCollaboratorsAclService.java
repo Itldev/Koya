@@ -9,7 +9,6 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.SubSpace;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import org.alfresco.service.cmr.invitation.Invitation;
 import org.apache.log4j.Logger;
 
 /**
