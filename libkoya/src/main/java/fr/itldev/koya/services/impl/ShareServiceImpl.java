@@ -34,7 +34,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.codehaus.jackson.type.TypeReference;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 /**
  *
@@ -46,13 +50,16 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
     protected static final String REST_GET_SHAREDITEMS = "/s/fr/itldev/koya/share/listusershares/{userName}/{companyName}";
     protected static final String REST_GET_ISSHAREDWITHCONSUMER = "/s/fr/itldev/koya/share/consumer/{noderef}";
 
-    protected static final String REST_POST_SHARESINGLE = "/s/fr/itldev/koya/share/do?alf_ticket={alf_ticket}";
+    protected static final String REST_POST_SHARESINGLE = "/s/fr/itldev/koya/share/do";
+//    protected static final String REST_POST_SHARESINGLE = "/s/fr/itldev/koya/share/do?alf_ticket={alf_ticket}";
+
     protected static final String REST_POST_UNSHARESINGLE = "/s/fr/itldev/koya/share/undo";
 
     private Cache<SubSpace, Boolean> nodeSharedWithConsumerCache;
     private CacheConfig nodeSharedWithConsumerCacheConfig;
 
-    public void setNodeSharedWithConsumerCacheConfig(CacheConfig nodeSharedWithConsumerCacheConfig) {
+    public void setNodeSharedWithConsumerCacheConfig(
+            CacheConfig nodeSharedWithConsumerCacheConfig) {
         this.nodeSharedWithConsumerCacheConfig = nodeSharedWithConsumerCacheConfig;
     }
 
@@ -74,7 +81,8 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
     }
 
     @Override
-    public void shareItem(User user, SecuredItem itemToShare, String sharedUserMail) throws AlfrescoServiceException {
+    public void shareItem(User user, SecuredItem itemToShare,
+            String sharedUserMail) throws AlfrescoServiceException {
         if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
             nodeSharedWithConsumerCache.invalidate(itemToShare);
         }
@@ -84,9 +92,7 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
         shareParams.put("nodeRef", itemToShare.getNodeRef());
         shareParams.put("koyaPermission", KoyaPermissionConsumer.CLIENT.toString());
 
-        getTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_SHARESINGLE,
-                shareParams, String.class, user.getTicketAlfresco());
+        user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_SHARESINGLE, shareParams, String.class);
     }
 
     /**
@@ -95,7 +101,8 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
      * @param user
      */
     @Override
-    public void unShareItem(User user, SecuredItem itemToUnShare, String unsharedUserMail) throws AlfrescoServiceException {
+    public void unShareItem(User user, SecuredItem itemToUnShare,
+            String unsharedUserMail) throws AlfrescoServiceException {
         if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
             nodeSharedWithConsumerCache.invalidate(itemToUnShare);
         }
@@ -137,7 +144,8 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<SecuredItem> sharedItems(User userLogged, User userToGetShares, Company c) throws AlfrescoServiceException {
+    public List<SecuredItem> sharedItems(User userLogged, User userToGetShares,
+            Company c) throws AlfrescoServiceException {
 
         return fromJSON(new TypeReference<List<SecuredItem>>() {
         }, userLogged.getRestTemplate().getForObject(

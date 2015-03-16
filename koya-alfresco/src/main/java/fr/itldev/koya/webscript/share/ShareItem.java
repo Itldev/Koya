@@ -46,7 +46,8 @@ public class ShareItem extends AbstractWebScript {
     private SubSpaceConsumersAclService subSpaceConsumersAclService;
     private KoyaNodeService koyaNodeService;
 
-    public void setSubSpaceConsumersAclService(SubSpaceConsumersAclService subSpaceConsumersAclService) {
+    public void setSubSpaceConsumersAclService(
+            SubSpaceConsumersAclService subSpaceConsumersAclService) {
         this.subSpaceConsumersAclService = subSpaceConsumersAclService;
     }
 
@@ -61,27 +62,31 @@ public class ShareItem extends AbstractWebScript {
      * @throws IOException
      */
     @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-
+    public void execute(WebScriptRequest req, WebScriptResponse res)
+            throws IOException {
         Map<String, Object> params = KoyaWebscript.getJsonMap(req);
-
         try {
-            NodeRef n = koyaNodeService.getNodeRef((String) params.get(KoyaWebscript.WSCONST_NODEREF));
-           
+            NodeRef n = koyaNodeService.getNodeRef((String) params
+                    .get(KoyaWebscript.WSCONST_NODEREF));
+
             SubSpace s;
             SecuredItem si = koyaNodeService.getSecuredItem(n);
             if (SubSpace.class.isAssignableFrom(si.getClass())) {
                 s = (SubSpace) si;
             } else {
-                throw new KoyaServiceException(KoyaErrorCodes.INVALID_SECUREDITEM_NODEREF);
+                throw new KoyaServiceException(
+                        KoyaErrorCodes.INVALID_SECUREDITEM_NODEREF);
             }
 
-            subSpaceConsumersAclService.shareSecuredItem((SubSpace) koyaNodeService.getSecuredItem(n),
+            subSpaceConsumersAclService.shareSecuredItem(
+                    (SubSpace) koyaNodeService.getSecuredItem(n),
                     (String) params.get(KoyaWebscript.WSCONST_EMAIL),
-                    KoyaPermission.valueOf((String) params.get(KoyaWebscript.WSCONST_KOYAPERMISSION)), false);
+                    KoyaPermission.valueOf((String) params
+                            .get(KoyaWebscript.WSCONST_KOYAPERMISSION)), false);
 
         } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+            throw new WebScriptException("KoyaError : "
+                    + ex.getErrorCode().toString());
         }
         res.setContentType("application/json");
         res.getWriter().write("");

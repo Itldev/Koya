@@ -19,9 +19,11 @@
 package fr.itldev.koya.webscript;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -32,6 +34,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public abstract class KoyaWebscript {
+
+    private static final Logger LOGGER = Logger.getLogger(KoyaWebscript.class);
 
     public static final String WSCONST_NODEREF = "nodeRef";
     public static final String WSCONST_DESTNODEREF = "destNodeRef";
@@ -68,13 +72,15 @@ public abstract class KoyaWebscript {
      * @return
      * @throws java.io.IOException
      */
-    public static Map<String, Object> getJsonMap(WebScriptRequest req) throws IOException {
+    public static Map<String, Object> getJsonMap(WebScriptRequest req)
+            throws IOException {
 
         JSONParser parser = new JSONParser();
-        //TODO improve json POST reading
+        // TODO improve json POST reading
         try {
-            return (JSONObject) parser.parse(req.getContent().getReader());
+            return (JSONObject) parser.parse(req.getContent().getContent());
         } catch (ParseException ex) {
+            LOGGER.error(ex.getMessage(), ex);
         }
 
         return new HashMap<>();
@@ -100,9 +106,12 @@ public abstract class KoyaWebscript {
                  *
                  * TODO charset permissive implementation
                  */
-                param = new String(req.getParameter(k).getBytes("iso-8859-1"), "UTF-8");
+                param = new String(req.getParameter(k).getBytes("iso-8859-1"),
+                        "UTF-8");
             } catch (UnsupportedEncodingException ex) {
                 param = req.getParameter(k);
+                LOGGER.error(ex.getMessage(), ex);
+
             }
 
             params.put(k, param);
