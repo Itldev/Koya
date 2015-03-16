@@ -178,14 +178,14 @@
 
 	<distributionManagement>
 		<repository>
-			<id>itldev</id>
+			<id>itldev-public-releases</id>
 			<name>itldev artifactory</name>
-			<url>https://private.itldev.fr/artifactory/koya-releases</url>
+			<url>https://private.itldev.fr/artifactory/public-releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>itldev</id>
+			<id>itldev-private-snapshots</id>
 			<name>itldev artifactory</name>
-			<url>https://private.itldev.fr/artifactory/koya-snapshots</url>
+			<url>https://private.itldev.fr/artifactory/private-snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 </project>
