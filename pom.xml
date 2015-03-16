@@ -180,12 +180,12 @@
 		<repository>
 			<id>itldev-public-releases</id>
 			<name>itldev artifactory</name>
-			<url>https://private.itldev.fr/artifactory/public-releases</url>
+			<url>http://private.itldev.fr/artifactory/public-releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>itldev-private-snapshots</id>
 			<name>itldev artifactory</name>
-			<url>https://private.itldev.fr/artifactory/private-snapshots</url>
+			<url>http://private.itldev.fr/artifactory/private-snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 </project>
