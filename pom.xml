@@ -15,12 +15,12 @@
 	</parent>
 
 	<properties>
-
 		<alfresco.groupId>org.alfresco</alfresco.groupId>
 		<alfresco.version>4.2.f</alfresco.version>
 		<app.log.root.level>WARN</app.log.root.level>
 		<alfresco.data.location>alf_data_dev</alfresco.data.location>
 		<env>local</env>
+		<skipTests>true</skipTests>
 	</properties>
 
 	<dependencyManagement>
