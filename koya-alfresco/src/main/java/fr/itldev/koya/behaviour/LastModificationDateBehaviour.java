@@ -111,11 +111,11 @@ public class LastModificationDateBehaviour implements
 
         try {
 
-            logger.debug("node "
+            logger.trace("node "
                     + nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE)
                     + "/"
                     + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME)
-                    + "of type " + nodeService.getType(nodeRef).getLocalName()
+                    + " of type " + nodeService.getType(nodeRef).getLocalName()
                     + " Modified");
             for (Map.Entry<QName, Serializable> e : nodeService.getProperties(
                     nodeRef).entrySet()) {
@@ -132,7 +132,7 @@ public class LastModificationDateBehaviour implements
             }
             if (d != null) {
 
-                logger.debug("Updating lastModificationDate of dossier : "
+                logger.trace("Updating lastModificationDate of dossier : "
                         + d.getTitle());
                 final NodeRef n = d.getNodeRefasObject();
                 AuthenticationUtil
