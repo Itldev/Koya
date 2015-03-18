@@ -548,6 +548,7 @@
         <property name="activityService" ref="activityService" />
         <property name="actionService" ref="ActionService" />
         <property name="siteService" ref="siteService" />
+        <property name="koyaNotificationService" ref="koyaNotificationService" />
     </bean>
 
 
