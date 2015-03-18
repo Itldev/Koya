@@ -3,11 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package fr.itldev.koya.utils;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.primitives.Bytes;
+import com.ibm.icu.text.CharsetDetector;
+import com.ibm.icu.text.CharsetMatch;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -17,7 +25,10 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.log4j.Logger;
@@ -28,6 +39,7 @@ import org.mozilla.universalchardet.UniversalDetector;
  * @author nico
  */
 public class Zips {
+
     static Logger logger = Logger.getLogger(Zips.class);
 
     /**
@@ -45,7 +57,7 @@ public class Zips {
             final Path destDir = Paths.get(destPath);
             // if the destination doesn't exist, create it
             if (Files.notExists(destDir)) {
-                logger.debug(destDir + " does not exist. Creating...");
+                logger.trace(destDir + " does not exist. Creating...");
                 Files.createDirectories(destDir);
             }
 
@@ -58,7 +70,8 @@ public class Zips {
                 switch (charset.toLowerCase()) {
                 case "windows-1252":
                     // cp437 (winzip?), is detected as windows-1252)
-                    zipProperties.put("encoding", "cp437");
+                    zipProperties.put("encoding", "ibm850");
+
                     break;
                 default:
                     zipProperties.put("encoding", charset);
@@ -69,6 +82,9 @@ public class Zips {
                 zipProperties.put("encoding", "UTF-8");
 
             }
+            logger.debug(zipPath + " willl be extracted using "
+                    + zipProperties.get("encoding"));
+
             // convert the filename to a URI
             final Path path = Paths.get(zipPath);
             final URI uri = URI.create("jar:file:" + path.toUri().getPath());
@@ -84,7 +100,7 @@ public class Zips {
 
                         final Path destFile = Paths.get(destDir.toString(),
                                 file.toString());
-                        logger.debug("Extracting file " + file + " to "
+                        logger.trace("Extracting file " + file + " to "
                                 + destFile);
                         Files.copy(file, destFile,
                                 StandardCopyOption.REPLACE_EXISTING);
@@ -97,7 +113,7 @@ public class Zips {
                         final Path dirToCreate = Paths.get(destDir.toString(),
                                 dir.toString());
                         if (Files.notExists(dirToCreate)) {
-                            logger.debug("Creating directory " + dirToCreate);
+                            logger.trace("Creating directory " + dirToCreate);
                             Files.createDirectory(dirToCreate);
                         }
                         return FileVisitResult.CONTINUE;
@@ -115,6 +131,7 @@ public class Zips {
     private static String determineCharset(String zipPath) throws IOException {
         try (FileSystem zipFileSystem = FileSystems.newFileSystem(
                 Paths.get(zipPath), null)) {
+
             final Path root = zipFileSystem.getPath("/");
             final UniversalDetector detector = new UniversalDetector(null);
 
@@ -152,6 +169,7 @@ public class Zips {
                 private void handleData(Path p) throws IllegalAccessException {
                     if (p.getFileName() != null) {
                         byte[] b = getPathBytes(p.getFileName());
+
                         detector.handleData(b, 0, b.length);
                     }
                 }
@@ -159,7 +177,9 @@ public class Zips {
 
             detector.dataEnd();
 
-            return detector.getDetectedCharset();
+            String charsetDetectedName = detector.getDetectedCharset();
+
+            return charsetDetectedName;
         }
     }
 }
