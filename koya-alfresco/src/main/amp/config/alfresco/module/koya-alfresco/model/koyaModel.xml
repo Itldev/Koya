@@ -268,6 +268,33 @@
         <aspect name="koya:confidential">
             <title>confidential item</title>
         </aspect>
+        
+        
+        <!--
+			This aspect add associations between 
+			a user and shared items. It stores 
+			all user's shared items before he validates 
+			invitation
+		-->
+		
+		
+        <aspect name="koya:userShares">
+            <title>user Shares</title>
+             <associations>   
+            	 <association name="koya:userSharedNodes">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </source>
+                    <target>
+                        <class>koya:container</class>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </target>
+                </association>
+             </associations>
+        </aspect>      
+        
     </aspects>
     
 </model>
