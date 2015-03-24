@@ -1,6 +1,7 @@
 package fr.itldev.koya.alfservice.security;
 
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
@@ -51,11 +52,14 @@ public class SubSpaceConsumersAclService extends SubSpaceAclService {
 
         Invitation invitation = null;
         // If user can't access specified company then invite him even if he
-        // alredy exists in alfresco
+        // already exists in alfresco
         if (userPermissionInCompany == null) {
             logger.debug("Invite " + userMail + " to " + company.getTitle());
             invitation = companyAclService.inviteMember(company, userMail,
-                    SitePermission.CONSUMER);
+                    SitePermission.CONSUMER,(SecuredItem) subSpace);
+            
+            
+            
             userPermissionInCompany = companyAclService.getSitePermission(
                     company, userMail);
         }

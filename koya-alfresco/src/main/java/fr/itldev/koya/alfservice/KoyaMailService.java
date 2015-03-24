@@ -424,7 +424,7 @@ public class KoyaMailService implements InitializingBean {
         KoyaInviteSender koyaInviteSender = new KoyaInviteSender(
                 serviceRegistry, repositoryHelper, messageService, this,
                 koyaNodeService, companyAclService, companyService,
-                companyPropertiesService, koyaClientParams);
+                companyPropertiesService,userService, koyaClientParams);
 
         Map<String, String> properties = new HashMap<>();
 

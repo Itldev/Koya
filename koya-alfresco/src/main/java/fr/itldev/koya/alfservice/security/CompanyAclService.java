@@ -18,21 +18,14 @@
  */
 package fr.itldev.koya.alfservice.security;
 
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.impl.UserRole;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.invitation.InvitationSearchCriteriaImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteDoesNotExistException;
@@ -42,6 +35,12 @@ import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.invitation.InvitationSearchCriteria;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -51,6 +50,18 @@ import org.alfresco.util.collections.CollectionUtils;
 import org.alfresco.util.collections.Filter;
 import org.alfresco.util.collections.Function;
 import org.apache.log4j.Logger;
+
+import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.impl.UserRole;
+import fr.itldev.koya.model.permissions.SitePermission;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 public class CompanyAclService {
 
@@ -62,11 +73,10 @@ public class CompanyAclService {
     protected AuthorityService authorityService;
     protected AuthenticationService authenticationService;
     protected ActionService actionService;
-    protected PermissionService permissionService;
 
-    protected CompanyService companyService;
     protected KoyaNodeService koyaNodeService;
-
+    protected KoyaMailService koyaMailService;
+    
     /*
      * Invitation Url Params     
      */
@@ -90,8 +100,13 @@ public class CompanyAclService {
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
+    
+    
+    public void setKoyaMailService(KoyaMailService koyaMailService) {
+		this.koyaMailService = koyaMailService;
+	}
 
-    public void setUserService(UserService userService) {
+	public void setUserService(UserService userService) {
         this.userService = userService;
     }
 
@@ -99,11 +114,16 @@ public class CompanyAclService {
         this.invitationService = invitationService;
     }
 
-    public void setPermissionService(PermissionService permissionService) {
-        this.permissionService = permissionService;
-    }
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+  		this.koyaNodeService = koyaNodeService;
+  	}
+  	
+    
+    //
 
-    public void setKoyaClientServerPath(String koyaClientServerPath) {
+  
+
+	public void setKoyaClientServerPath(String koyaClientServerPath) {
         this.koyaClientServerPath = koyaClientServerPath;
     }
     
@@ -313,12 +333,13 @@ public class CompanyAclService {
             return SitePermission.valueOf(it.next().getRoleName());
         }
 
-        //if no reults return null;
+        //if no results return null;
         return null;
     }
 
     /**
      * Invite user to company with defined roleName.
+     * sharedItemIs optionnal
      *
      * Returns invitation if processed
      *
@@ -330,7 +351,7 @@ public class CompanyAclService {
      * @throws KoyaServiceException
      */
     public Invitation inviteMember(final Company c, final String userMail,
-            final SitePermission permission) throws KoyaServiceException {
+            final SitePermission permission,SecuredItem sharedItem) throws KoyaServiceException {
 
         User u = userService.getUserByEmailFailOver(userMail);
 
@@ -346,21 +367,31 @@ public class CompanyAclService {
              *
              *
              */
-            return AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Invitation>() {
+        	Invitation invitation= AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Invitation>() {
                 @Override
                 public Invitation doWork() throws Exception {
-                    return invitationService.inviteNominated(null, userMail, userMail,
+							return invitationService.inviteNominated(null, userMail, userMail,
                             Invitation.ResourceType.WEB_SITE, c.getName(),
                             permission.toString(), koyaClientServerPath,
                             koyaClientAcceptUrl, koyaClientRejectUrl);
                 }
             });
-
+        	//Force addSharedNode Before sending invite mail if sharedItem exists
+        	if(sharedItem !=null){
+        		userService.addSharedNode(userMail, sharedItem.getNodeRefasObject());
+        	}
+        	koyaMailService.sendInviteMail(invitation.getInviteId());
+        	return invitation;
+        	
         } else {
             /**
-             *
+             * 
+             * TODO check if this behaviour is compatible with invitation workflow
+             * user should be invited for each company
+             * 
              * User exist so we've to check if he has already a role on company
-             *
+             * 
+             * 
              */
             SitePermission sitePermission = getSitePermission(c, u);
 

@@ -161,7 +161,8 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="companyAclService" ref="companyAclService"/>  
         <property name="companyService" ref="companyService"/>      
-       	<property name="companyPropertiesService" ref="companyPropertiesService"/>                      
+       	<property name="companyPropertiesService" ref="companyPropertiesService"/>           
+       	<property name="userService" ref="userService"/>                      
     </bean>
 
 

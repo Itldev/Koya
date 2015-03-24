@@ -11,6 +11,7 @@ import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVa
 import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarServerPath;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -47,8 +48,10 @@ import fr.itldev.koya.alfservice.CompanyPropertiesService;
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 
 /**
@@ -92,6 +95,7 @@ public class KoyaInviteSender extends InviteSender {
     private final KoyaNodeService koyaNodeService;
     private final CompanyAclService companyAclService;
     private final CompanyService companyService;
+    private final UserService userService;
 
     private final CompanyPropertiesService companyPropertiesService;
     private HashMap<String, Object> koyaClientParams;
@@ -101,7 +105,7 @@ public class KoyaInviteSender extends InviteSender {
             MessageService messageService, KoyaMailService koyaMailService,
             KoyaNodeService koyaNodeService,
             CompanyAclService companyAclService, CompanyService companyService,
-            CompanyPropertiesService companyPropertiesService,
+            CompanyPropertiesService companyPropertiesService,UserService userService,
             HashMap<String, Object> koyaClientParams) {
 
         super(services, repository, messageService);
@@ -127,6 +131,7 @@ public class KoyaInviteSender extends InviteSender {
         this.companyService = companyService;
         this.companyPropertiesService = companyPropertiesService;
         this.koyaClientParams = koyaClientParams;
+        this.userService = userService;
     }
 
     @Override
@@ -166,6 +171,11 @@ public class KoyaInviteSender extends InviteSender {
             mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT,
                     koyaMailService
                             .getI18nSubject(EMAIL_SUBJECT, templateModel));
+            
+            
+           
+            
+            
 
             mail.setParameterValue(
                     MailActionExecuter.PARAM_IGNORE_SEND_FAILURE, true);
@@ -255,6 +265,21 @@ public class KoyaInviteSender extends InviteSender {
                     .get(wfVarResourceName));
             model.put("company", companyPropertiesService.getProperties(c)
                     .toHashMap());
+            
+            /**
+             * Shared Items      
+             */
+            List<Map<String,String>> shares = new ArrayList<Map<String,String>>();
+            for(SecuredItem s:userService.getSharedKoyaNodes(properties.get(wfVarInviteeUserName),c)){
+            	Map<String,String> share = new HashMap<String, String>();            	
+            	share.put("title", s.getTitle());
+            	share.put("type",s.getType());
+            	share.put("nodeRef",s.getNodeRefasObject().toString());            	
+            	shares.add(share);
+            }
+            
+            model.put("userShares",shares.toArray());
+                       
         } catch (Exception e) {
         }
         // All done
