@@ -21,7 +21,7 @@ language governing permissions and limitations under the License. -->
     <parent>
         <groupId>fr.itldev</groupId>
         <artifactId>koya</artifactId>
-        <version>0.7.4</version>
+        <version>0.7.5</version>
     </parent>
 
     <dependencies>
