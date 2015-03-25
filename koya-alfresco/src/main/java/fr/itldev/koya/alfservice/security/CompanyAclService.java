@@ -351,7 +351,7 @@ public class CompanyAclService {
      * @throws KoyaServiceException
      */
     public Invitation inviteMember(final Company c, final String userMail,
-            final SitePermission permission,SecuredItem sharedItem) throws KoyaServiceException {
+            final SitePermission permission,final SecuredItem sharedItem) throws KoyaServiceException {
 
         User u = userService.getUserByEmailFailOver(userMail);
 
@@ -367,20 +367,31 @@ public class CompanyAclService {
              *
              *
              */
-        	Invitation invitation= AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Invitation>() {
-                @Override
-                public Invitation doWork() throws Exception {
-							return invitationService.inviteNominated(null, userMail, userMail,
-                            Invitation.ResourceType.WEB_SITE, c.getName(),
-                            permission.toString(), koyaClientServerPath,
-                            koyaClientAcceptUrl, koyaClientRejectUrl);
-                }
+			Invitation invitation = AuthenticationUtil
+					.runAsSystem(new AuthenticationUtil.RunAsWork<Invitation>() {
+						@Override
+						public Invitation doWork() throws Exception {
+							Invitation invitation = invitationService
+									.inviteNominated(null, userMail, userMail,
+											Invitation.ResourceType.WEB_SITE,
+											c.getName(), permission.toString(),
+											koyaClientServerPath,
+											koyaClientAcceptUrl,
+											koyaClientRejectUrl);
+
+							// Force addSharedNode Before sending invite mail if
+							// sharedItem exists
+							if (sharedItem != null) {
+								userService.addSharedNode(userMail,
+										sharedItem.getNodeRefasObject());
+							}
+							koyaMailService.sendInviteMail(invitation
+									.getInviteId());
+							return invitation;
+
+						}
             });
-        	//Force addSharedNode Before sending invite mail if sharedItem exists
-        	if(sharedItem !=null){
-        		userService.addSharedNode(userMail, sharedItem.getNodeRefasObject());
-        	}
-        	koyaMailService.sendInviteMail(invitation.getInviteId());
+        	
         	return invitation;
         	
         } else {
