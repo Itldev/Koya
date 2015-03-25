@@ -14,12 +14,12 @@
 	</parent>
 
 	<properties>
-
 		<alfresco.groupId>org.alfresco</alfresco.groupId>
 		<alfresco.version>4.2.f</alfresco.version>
 		<app.log.root.level>WARN</app.log.root.level>
 		<alfresco.data.location>alf_data_dev</alfresco.data.location>
 		<env>local</env>
+		<skipTests>true</skipTests>
 	</properties>
 
 	<dependencyManagement>
@@ -177,14 +177,14 @@
 
 	<distributionManagement>
 		<repository>
-			<id>itldev</id>
+			<id>itldev-public-releases</id>
 			<name>itldev artifactory</name>
-			<url>https://private.itldev.fr/artifactory/koya-releases</url>
+			<url>http://private.itldev.fr/artifactory/public-releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>itldev</id>
+			<id>itldev-private-snapshots</id>
 			<name>itldev artifactory</name>
-			<url>https://private.itldev.fr/artifactory/koya-snapshots</url>
+			<url>http://private.itldev.fr/artifactory/private-snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 </project>

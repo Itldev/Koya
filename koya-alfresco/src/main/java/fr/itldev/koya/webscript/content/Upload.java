@@ -82,8 +82,6 @@ public class Upload extends AbstractWebScript {
         } catch (Exception e) {
         }
 
-        logger.error("logo=" + logo);
-
         String fileName = null;
         Content content = null;
         String parentnoderef = null;

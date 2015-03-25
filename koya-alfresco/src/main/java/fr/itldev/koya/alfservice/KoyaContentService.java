@@ -113,30 +113,33 @@ public class KoyaContentService {
     }
 
     // </editor-fold>
-    public Directory createDir(String title, NodeRef parent) throws KoyaServiceException {
+    public Directory createDir(String title, NodeRef parent)
+            throws KoyaServiceException {
 
-        if (!(nodeService.getType(parent).equals(KoyaModel.TYPE_DOSSIER)
-                || nodeService.getType(parent).equals(ContentModel.TYPE_FOLDER))) {
-            throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_INVALID_PARENT_TYPE);
+        if (!(nodeService.getType(parent).equals(KoyaModel.TYPE_DOSSIER) || nodeService
+                .getType(parent).equals(ContentModel.TYPE_FOLDER))) {
+            throw new KoyaServiceException(
+                    KoyaErrorCodes.DIR_CREATION_INVALID_PARENT_TYPE);
         }
 
         String name = koyaNodeService.getUniqueValidFileNameFromTitle(title);
 
-        //build node properties
+        // build node properties
         final Map<QName, Serializable> properties = new HashMap<>();
         properties.put(ContentModel.PROP_NAME, name);
         properties.put(ContentModel.PROP_TITLE, title);
 
         try {
             ChildAssociationRef car = nodeService.createNode(parent,
-                    ContentModel.ASSOC_CONTAINS,
-                    QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
-                    ContentModel.TYPE_FOLDER,
-                    properties);
+                    ContentModel.ASSOC_CONTAINS, QName.createQName(
+                            NamespaceService.CONTENT_MODEL_1_0_URI, name),
+                    ContentModel.TYPE_FOLDER, properties);
 
-            return koyaNodeService.getSecuredItem(car.getChildRef(), Directory.class);
+            return koyaNodeService.getSecuredItem(car.getChildRef(),
+                    Directory.class);
         } catch (DuplicateChildNodeNameException dcne) {
-            throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
+            throw new KoyaServiceException(
+                    KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
         }
 
     }
@@ -149,15 +152,19 @@ public class KoyaContentService {
      * necessarily return file info for the parent node - it might not be a
      * folder node.
      *
-     * @param parentNodeRef the node under which the path will be created
-     * @param pathElements the folder name path to create - may not be empty
+     * @param parentNodeRef
+     *            the node under which the path will be created
+     * @param pathElements
+     *            the folder name path to create - may not be empty
      *
      * @return Returns the info of the last folder in the path.
      */
-    public Directory makeFolders(NodeRef parentNodeRef, List<String> pathElements) throws KoyaServiceException {
-        if (!(nodeService.getType(parentNodeRef).equals(KoyaModel.TYPE_DOSSIER)
-                || nodeService.getType(parentNodeRef).equals(ContentModel.TYPE_FOLDER))) {
-            throw new KoyaServiceException(KoyaErrorCodes.DIR_CREATION_INVALID_PARENT_TYPE);
+    public Directory makeFolders(NodeRef parentNodeRef,
+            List<String> pathElements) throws KoyaServiceException {
+        if (!(nodeService.getType(parentNodeRef).equals(KoyaModel.TYPE_DOSSIER) || nodeService
+                .getType(parentNodeRef).equals(ContentModel.TYPE_FOLDER))) {
+            throw new KoyaServiceException(
+                    KoyaErrorCodes.DIR_CREATION_INVALID_PARENT_TYPE);
         }
 
         if (pathElements != null && pathElements.size() == 0) {
@@ -166,19 +173,27 @@ public class KoyaContentService {
         NodeRef currentParentRef = parentNodeRef;
         // just loop and create if necessary
         for (final String pathElement : pathElements) {
-            //ignoring empty path part
+            // ignoring empty path part
             if (pathElement != null && !pathElement.isEmpty()) {
                 // does it exist?
                 // Navigation should not check permissions
-                NodeRef nodeRef = AuthenticationUtil.runAsSystem(new SearchAsSystem(fileFolderService, currentParentRef, koyaNodeService.getUniqueValidFileNameFromTitle(pathElement)));
+                NodeRef nodeRef = AuthenticationUtil
+                        .runAsSystem(new SearchAsSystem(
+                                fileFolderService,
+                                currentParentRef,
+                                koyaNodeService
+                                        .getUniqueValidFileNameFromTitle(pathElement)));
 
                 if (nodeRef == null) {
                     try {
                         // not present - make it
                         // If this uses the public service it will check create
                         // permissions
-                        Directory directory = createDir(pathElement, currentParentRef);
-                        currentParentRef = currentParentRef = directory.getNodeRefasObject();
+                        Directory directory = createDir(pathElement,
+                                currentParentRef);
+                        currentParentRef = directory.getNodeRefasObject();
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
                     } finally {
 
                     }
@@ -189,10 +204,12 @@ public class KoyaContentService {
             }
         }
 
-        return koyaNodeService.getSecuredItem(currentParentRef, Directory.class);
+        return koyaNodeService
+                .getSecuredItem(currentParentRef, Directory.class);
     }
 
-    private static class SearchAsSystem implements AuthenticationUtil.RunAsWork<NodeRef> {
+    private static class SearchAsSystem implements
+            AuthenticationUtil.RunAsWork<NodeRef> {
 
         FileFolderService service;
         NodeRef node;
@@ -229,7 +246,8 @@ public class KoyaContentService {
         List<Content> contents = new ArrayList<>();
 
         if (depth <= 0) {
-            return contents;//return empty list if max depth < = 0 : ie max depth reached
+            return contents;// return empty list if max depth < = 0 : ie max
+                            // depth reached
         }
 
         List<FileInfo> childList;
@@ -243,7 +261,8 @@ public class KoyaContentService {
             if (koyaNodeService.isKoyaType(fi.getNodeRef(), Directory.class)) {
                 Directory dir = null;
                 try {
-                    dir = koyaNodeService.getSecuredItem(fi.getNodeRef(), Directory.class);
+                    dir = koyaNodeService.getSecuredItem(fi.getNodeRef(),
+                            Directory.class);
                     dir.setChildren(list(fi.getNodeRef(), depth - 1, folderOnly));
                     contents.add(dir);
                 } catch (KoyaServiceException ex) {
@@ -251,7 +270,8 @@ public class KoyaContentService {
 
             } else {
                 try {
-                    contents.add(koyaNodeService.getSecuredItem(fi.getNodeRef(), Document.class));
+                    contents.add(koyaNodeService.getSecuredItem(
+                            fi.getNodeRef(), Document.class));
                 } catch (KoyaServiceException ex) {
                 }
             }
@@ -260,22 +280,31 @@ public class KoyaContentService {
 
     }
 
-    public Map<String, String> createContentNode(NodeRef parent, String fileName,
-            org.springframework.extensions.surf.util.Content content) throws KoyaServiceException {
+    public Map<String, String> createContentNode(NodeRef parent,
+            String fileName,
+            org.springframework.extensions.surf.util.Content content)
+            throws KoyaServiceException {
 
-        return createContentNode(parent, fileName, null, content.getMimetype(), content.getEncoding(), content.getInputStream());
+        return createContentNode(parent, fileName, null, content.getMimetype(),
+                content.getEncoding(), content.getInputStream());
     }
 
-    public Map<String, String> createContentNode(NodeRef parent, String fileName, InputStream contentInputStream) throws KoyaServiceException {
+    public Map<String, String> createContentNode(NodeRef parent,
+            String fileName, InputStream contentInputStream)
+            throws KoyaServiceException {
         return createContentNode(parent, fileName, null, contentInputStream);
     }
 
-    public Map<String, String> createContentNode(NodeRef parent, String fileName, String name, InputStream contentInputStream) throws KoyaServiceException {
-        return createContentNode(parent, fileName, name, null, null, contentInputStream);
+    public Map<String, String> createContentNode(NodeRef parent,
+            String fileName, String name, InputStream contentInputStream)
+            throws KoyaServiceException {
+        return createContentNode(parent, fileName, name, null, null,
+                contentInputStream);
     }
 
-    public Map<String, String> createContentNode(NodeRef parent, String fileName, String name,
-            String mimetype, String encoding, InputStream contentInputStream) throws KoyaServiceException {
+    public Map<String, String> createContentNode(NodeRef parent,
+            String fileName, String name, String mimetype, String encoding,
+            InputStream contentInputStream) throws KoyaServiceException {
         Boolean rename = false;
         if (name == null) {
             name = koyaNodeService.getUniqueValidFileNameFromTitle(fileName);
@@ -292,20 +321,21 @@ public class KoyaContentService {
             properties.put(ContentModel.PROP_NAME, name);
             properties.put(ContentModel.PROP_TITLE, fileName);
             ChildAssociationRef car = nodeService.createNode(parent,
-                    ContentModel.ASSOC_CONTAINS,
-                    QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, name),
-                    ContentModel.TYPE_CONTENT,
-                    properties);
+                    ContentModel.ASSOC_CONTAINS, QName.createQName(
+                            NamespaceService.CONTENT_MODEL_1_0_URI, name),
+                    ContentModel.TYPE_CONTENT, properties);
             createdNode = car.getChildRef();
         } catch (DuplicateChildNodeNameException dcne) {
-            throw new KoyaServiceException(KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS, fileName);
+            throw new KoyaServiceException(
+                    KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS, fileName);
         }
 
         /**
          * ADD CONTENT TO CREATED NODE
          *
          */
-        ContentWriter writer = this.contentService.getWriter(createdNode, ContentModel.PROP_CONTENT, true);
+        ContentWriter writer = this.contentService.getWriter(createdNode,
+                ContentModel.PROP_CONTENT, true);
         if (mimetype != null) {
             writer.setMimetype(mimetype);
         } else {
@@ -343,17 +373,19 @@ public class KoyaContentService {
         try {
             tmpZipFile = TempFileProvider.createTempFile("tmpDL", ".zip");
             FileOutputStream fos = new FileOutputStream(tmpZipFile);
-            CheckedOutputStream checksum = new CheckedOutputStream(fos, new Adler32());
+            CheckedOutputStream checksum = new CheckedOutputStream(fos,
+                    new Adler32());
             BufferedOutputStream buff = new BufferedOutputStream(checksum);
             ZipArchiveOutputStream zipStream = new ZipArchiveOutputStream(buff);
             // NOTE: This encoding allows us to workaround bug...
-            //       http://bugs.sun.com/bugdatabase/view_bug.do;:WuuT?bug_id=4820807
+            // http://bugs.sun.com/bugdatabase/view_bug.do;:WuuT?bug_id=4820807
             zipStream.setEncoding("UTF-8");
 
             zipStream.setMethod(ZipArchiveOutputStream.DEFLATED);
             zipStream.setLevel(Deflater.BEST_COMPRESSION);
 
-            zipStream.setCreateUnicodeExtraFields(ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS);
+            zipStream
+                    .setCreateUnicodeExtraFields(ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS);
             zipStream.setUseLanguageEncodingFlag(true);
             zipStream.setFallbackToUTF8(true);
 
@@ -363,7 +395,8 @@ public class KoyaContentService {
                 }
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
-                throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                throw new WebScriptException(
+                        HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } finally {
                 zipStream.close();
                 buff.close();
@@ -373,32 +406,42 @@ public class KoyaContentService {
             }
         } catch (IOException | WebScriptException e) {
             logger.error(e.getMessage(), e);
-            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST,
+                    e.getMessage());
         }
 
         return tmpZipFile;
     }
 
-    public static final List<String> ZIP_MIMETYPES = Collections.unmodifiableList(new ArrayList() {
-        {
-            add(MimetypeMap.MIMETYPE_ZIP);
-            add("application/x-zip-compressed");
-            add("application/x-zip");
-        }
-    });
+    public static final List<String> ZIP_MIMETYPES = Collections
+            .unmodifiableList(new ArrayList() {
+                {
+                    add(MimetypeMap.MIMETYPE_ZIP);
+                    add("application/x-zip-compressed");
+                    add("application/x-zip");
+                }
+            });
 
-    private void addToZip(NodeRef node, ZipArchiveOutputStream out, String path) throws IOException {
+    private void addToZip(NodeRef node, ZipArchiveOutputStream out, String path)
+            throws IOException {
         QName nodeQnameType = this.nodeService.getType(node);
 
         // Special case : links
-        if (this.dictionaryService.isSubClass(nodeQnameType, ApplicationModel.TYPE_FILELINK)) {
-            NodeRef linkDestinationNode = (NodeRef) nodeService.getProperty(node, ContentModel.PROP_LINK_DESTINATION);
+        if (this.dictionaryService.isSubClass(nodeQnameType,
+                ApplicationModel.TYPE_FILELINK)) {
+            NodeRef linkDestinationNode = (NodeRef) nodeService.getProperty(
+                    node, ContentModel.PROP_LINK_DESTINATION);
             if (linkDestinationNode == null) {
                 return;
             }
 
-            // Duplicate entry: check if link is not in the same space of the link destination
-            if (nodeService.getPrimaryParent(node).getParentRef().equals(nodeService.getPrimaryParent(linkDestinationNode).getParentRef())) {
+            // Duplicate entry: check if link is not in the same space of the
+            // link destination
+            if (nodeService
+                    .getPrimaryParent(node)
+                    .getParentRef()
+                    .equals(nodeService.getPrimaryParent(linkDestinationNode)
+                            .getParentRef())) {
                 return;
             }
 
@@ -409,19 +452,25 @@ public class KoyaContentService {
         /**
          * TODO test name/title export result.
          */
-        String nodeName = (String) nodeService.getProperty(node, ContentModel.PROP_TITLE);
-        nodeName = nodeName.replaceAll("([\\\"\\\\*\\\\\\>\\<\\?\\/\\:\\|]+)", "_");
-//        nodeName = noaccent ? unAccent(nodeName) : nodeName;
+        String nodeName = (String) nodeService.getProperty(node,
+                ContentModel.PROP_TITLE);
+        nodeName = nodeName.replaceAll("([\\\"\\\\*\\\\\\>\\<\\?\\/\\:\\|]+)",
+                "_");
+        // nodeName = noaccent ? unAccent(nodeName) : nodeName;
 
-        if (this.dictionaryService.isSubClass(nodeQnameType, ContentModel.TYPE_CONTENT)) {
-            ContentReader reader = contentService.getReader(node, ContentModel.PROP_CONTENT);
+        if (this.dictionaryService.isSubClass(nodeQnameType,
+                ContentModel.TYPE_CONTENT)) {
+            ContentReader reader = contentService.getReader(node,
+                    ContentModel.PROP_CONTENT);
             if (reader != null) {
                 InputStream is = reader.getContentInputStream();
 
-                String filename = path.isEmpty() ? nodeName : path + '/' + nodeName;
+                String filename = path.isEmpty() ? nodeName : path + '/'
+                        + nodeName;
 
                 ZipArchiveEntry entry = new ZipArchiveEntry(filename);
-                entry.setTime(((Date) nodeService.getProperty(node, ContentModel.PROP_MODIFIED)).getTime());
+                entry.setTime(((Date) nodeService.getProperty(node,
+                        ContentModel.PROP_MODIFIED)).getTime());
 
                 entry.setSize(reader.getSize());
                 out.putArchiveEntry(entry);
@@ -445,19 +494,23 @@ public class KoyaContentService {
             } else {
                 logger.warn("Could not read : " + nodeName + "content");
             }
-        } else if (this.dictionaryService.isSubClass(nodeQnameType, ContentModel.TYPE_FOLDER)
-                && !this.dictionaryService.isSubClass(nodeQnameType, ContentModel.TYPE_SYSTEM_FOLDER)) {
+        } else if (this.dictionaryService.isSubClass(nodeQnameType,
+                ContentModel.TYPE_FOLDER)
+                && !this.dictionaryService.isSubClass(nodeQnameType,
+                        ContentModel.TYPE_SYSTEM_FOLDER)) {
             List<ChildAssociationRef> children = nodeService
                     .getChildAssocs(node);
             if (children.isEmpty()) {
-                String folderPath = path.isEmpty() ? nodeName + '/' : path + '/' + nodeName + '/';
+                String folderPath = path.isEmpty() ? nodeName + '/' : path
+                        + '/' + nodeName + '/';
                 out.putArchiveEntry(new ZipArchiveEntry(folderPath));
                 out.closeArchiveEntry();
             } else {
                 for (ChildAssociationRef childAssoc : children) {
                     NodeRef childNodeRef = childAssoc.getChildRef();
 
-                    addToZip(childNodeRef, out, path.isEmpty() ? nodeName : path + '/' + nodeName);
+                    addToZip(childNodeRef, out, path.isEmpty() ? nodeName
+                            : path + '/' + nodeName);
                 }
             }
         } else {

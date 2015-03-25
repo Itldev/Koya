@@ -31,6 +31,9 @@
         <property name="invitationService" ref="invitationService"/>
         <property name="actionService" ref="ActionService"/>
         <property name="authorityService" ref="AuthorityService"/>
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="koyaMailService" ref="koyaMailService"/>
+         
         
         <property name="koyaClientServerPath" >
             <value>${koya.client.serverPath}</value>

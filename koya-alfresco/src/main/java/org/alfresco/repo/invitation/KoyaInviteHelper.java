@@ -41,6 +41,7 @@ import fr.itldev.koya.alfservice.CompanyPropertiesService;
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 
 /**
@@ -79,6 +80,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
     private WorkflowService workflowService;
     private NodeService nodeService;
     private CompanyPropertiesService companyPropertiesService;
+    private UserService userService;
 
     private InviteSender inviteSender;
 
@@ -111,8 +113,12 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
             CompanyPropertiesService companyPropertiesService) {
         this.companyPropertiesService = companyPropertiesService;
     }
+    
+    public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    @Override
+	@Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
         this.actionService = serviceRegistry.getActionService();
@@ -127,7 +133,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         this.inviteSender = new KoyaInviteSender(serviceRegistry,
                 repositoryHelper, messageService, koyaMailService,
                 koyaNodeService, companyAclService, companyService,
-                companyPropertiesService, koyaMailService.getKoyaClientParams());
+                companyPropertiesService,userService, koyaMailService.getKoyaClientParams());
     }
 
     /**
@@ -196,7 +202,11 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
 
             properties.put(InviteSender.WF_INSTANCE_ID, inviteId);
 
-            inviteSender.sendMail(properties);
+            
+            //DO NOT SEND MAIL AT INVITATION PROCESS START. 
+            //do it in companyAclService.inviteMember after addSharedNode to 
+            //created user
+           // inviteSender.sendMail(properties);
         }
     }
 

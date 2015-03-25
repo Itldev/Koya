@@ -9,7 +9,6 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.SubSpace;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import org.alfresco.service.cmr.invitation.Invitation;
 import org.apache.log4j.Logger;
 
 /**
@@ -32,7 +31,7 @@ public class SubSpaceCollaboratorsAclService extends SubSpaceAclService {
      */
     @Override
     protected void shareSecuredItemImpl(SubSpace subSpace, String userMail, KoyaPermission perm) throws KoyaServiceException {
-
+        
         if (!Dossier.class.isAssignableFrom(subSpace.getClass())) {
             throw new KoyaServiceException(KoyaErrorCodes.SECU_UNSHARABLE_TYPE);
         }

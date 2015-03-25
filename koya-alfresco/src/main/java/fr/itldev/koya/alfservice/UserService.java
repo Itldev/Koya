@@ -26,6 +26,7 @@ import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.cmr.invitation.InvitationService;
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -41,6 +42,8 @@ import org.json.simple.JSONObject;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
@@ -89,6 +92,7 @@ public class UserService {
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
 	}
+	
 
 	// </editor-fold>
 	/**
@@ -414,4 +418,107 @@ public class UserService {
 		return nodeService.getAspects(u.getNodeRefasObject()).contains(
 				ContentModel.ASPECT_PERSON_DISABLED);
 	}
+	
+	/**
+	 * Add Node to user SharedElements List
+	 * 
+	 * @param u
+	 * @param n
+	 */
+	public void addSharedNode(String userMail, NodeRef n) {
+		String name = nodeService.getProperty(n, ContentModel.PROP_NAME)
+				.toString();
+		try {
+			User u = getUser(userMail);
+
+			if (!nodeService.hasAspect(u.getNodeRefasObject(),
+					KoyaModel.ASPECT_USERSHARES)) {
+				nodeService.addAspect(u.getNodeRefasObject(),
+						KoyaModel.ASPECT_USERSHARES, null);
+			}
+
+			// list existing associations
+			List<AssociationRef> sharedNodeAssocs = nodeService
+					.getTargetAssocs(u.getNodeRefasObject(),
+							KoyaModel.ASSOC_USER_SHAREDNODES);
+			Boolean exists = false;
+			for (AssociationRef ar : sharedNodeAssocs) {
+				if (ar.getTargetRef().equals(n)) {
+					exists = true;
+					break;
+				}
+
+			}
+
+			if (!exists) {
+				nodeService.createAssociation(u.getNodeRefasObject(), n,
+						KoyaModel.ASSOC_USER_SHAREDNODES);
+				logger.trace("Add userShares Association between "+userMail + " and "+name);
+			}
+		} catch (Exception e) {
+		}
+	}
+
+	/**
+	 * 
+	 * @param u
+	 * @param n
+	 */
+	public void removeSharedNode(String userMail, NodeRef n) {
+		String name = nodeService.getProperty(n, ContentModel.PROP_NAME)
+				.toString();
+		try {
+			User u = getUser(userMail);
+
+			if (nodeService.hasAspect(u.getNodeRefasObject(),
+					KoyaModel.ASPECT_USERSHARES)) {
+				nodeService.addAspect(u.getNodeRefasObject(),
+						KoyaModel.ASPECT_USERSHARES, null);
+			}		
+			nodeService.removeAssociation(u.getNodeRefasObject(), n,
+					KoyaModel.ASSOC_USER_SHAREDNODES);
+			logger.trace("Removes userShares Association between "+userMail + " and "+name);
+
+		} catch (Exception e) {
+		}
+	}
+
+	/**
+	 * List all User's Koya Nodes. company filter is optionnal
+	 * 
+	 * @param u
+	 * @return
+	 */
+	public List<SecuredItem> getSharedKoyaNodes(String userName, Company c) {
+		List<SecuredItem> sharedKoyaNodes = new ArrayList<SecuredItem>();
+		try {
+			User u = getUser(userName);
+			if (nodeService.hasAspect(u.getNodeRefasObject(),
+					KoyaModel.ASPECT_USERSHARES)) {
+
+				List<AssociationRef> sharedNodeAssocs = nodeService
+						.getTargetAssocs(u.getNodeRefasObject(),
+								KoyaModel.ASSOC_USER_SHAREDNODES);
+
+				for (AssociationRef ar : sharedNodeAssocs) {
+					try {
+						if (c == null
+								|| c.equals(koyaNodeService
+										.getFirstParentOfType(
+												ar.getTargetRef(),
+												Company.class))) {
+							sharedKoyaNodes.add(koyaNodeService
+									.getSecuredItem(ar.getTargetRef()));
+						}
+					} catch (KoyaServiceException e) {
+					}
+				}
+			}
+		} catch (KoyaServiceException kse) {
+			logger.error("error listing user " + userName + " shares "
+					+ kse.getMessage());
+		}
+		return sharedKoyaNodes;
+	}
+	
 }

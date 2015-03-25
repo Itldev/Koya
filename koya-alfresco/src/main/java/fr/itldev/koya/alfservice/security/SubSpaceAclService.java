@@ -18,6 +18,29 @@
  */
 package fr.itldev.koya.alfservice.security;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.alfresco.repo.policy.ClassPolicyDelegate;
+import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.service.cmr.invitation.InvitationService;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
+import org.apache.log4j.Logger;
+
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
@@ -37,43 +60,16 @@ import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.policies.KoyaPermissionsPolicies;
 import fr.itldev.koya.policies.SharePolicies;
-import java.util.ArrayList;
-import java.util.List;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
-import org.alfresco.repo.policy.ClassPolicyDelegate;
-import org.alfresco.repo.policy.PolicyComponent;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
-import org.alfresco.service.cmr.invitation.Invitation;
-import org.alfresco.service.cmr.invitation.InvitationService;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AccessPermission;
-import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.AuthenticationService;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.site.SiteService;
-import org.alfresco.service.namespace.QName;
-import org.alfresco.service.transaction.TransactionService;
-import org.apache.log4j.Logger;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 /**
  * Subspaces Permissions Service
- *
+ * 
  */
 public class SubSpaceAclService {
-    
+
     private final Logger logger = Logger.getLogger(this.getClass());
-    
+
     protected PermissionService permissionService;
     protected KoyaNodeService koyaNodeService;
     protected NodeService nodeService;
@@ -90,14 +86,13 @@ public class SubSpaceAclService {
     protected CompanyAclService companyAclService;
     protected TransactionService transactionService;
 
-
     /*
      * Policy delegates
      */
-    //Grant Permission on node delegate
+    // Grant Permission on node delegate
     private ClassPolicyDelegate<KoyaPermissionsPolicies.AfterGrantKoyaPermissionPolicy> afterGrantKoyaPermissionDelegate;
     private ClassPolicyDelegate<KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy> beforeRevokeKoyaPermissionDelegate;
-    //sharing delegates
+    // sharing delegates
     private ClassPolicyDelegate<SharePolicies.BeforeSharePolicy> beforeShareDelegate;
     private ClassPolicyDelegate<SharePolicies.AfterSharePolicy> afterShareDelegate;
     private ClassPolicyDelegate<SharePolicies.BeforeUnsharePolicy> beforeUnshareDelegate;
@@ -107,224 +102,262 @@ public class SubSpaceAclService {
     public void setPermissionService(PermissionService permissionService) {
         this.permissionService = permissionService;
     }
-    
+
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
     }
-    
+
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-    
-    public void setAuthenticationService(AuthenticationService authenticationService) {
+
+    public void setAuthenticationService(
+            AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
-    
+
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
     }
-    
+
     public void setAuthorityService(AuthorityService authorityService) {
         this.authorityService = authorityService;
     }
-    
+
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
-    
+
     public void setInvitationService(InvitationService invitationService) {
         this.invitationService = invitationService;
     }
-    
+
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
-    
+
     public void setPolicyComponent(PolicyComponent policyComponent) {
         this.policyComponent = policyComponent;
     }
-    
+
     public void setCompanyService(CompanyService companyService) {
         this.companyService = companyService;
     }
-    
+
     public void setSpaceService(SpaceService spaceService) {
         this.spaceService = spaceService;
     }
-    
+
     public void setDossierService(DossierService dossierService) {
         this.dossierService = dossierService;
     }
-    
+
     public void setCompanyAclService(CompanyAclService companyAclService) {
         this.companyAclService = companyAclService;
     }
-    
+
     public void setTransactionService(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
 
-    //</editor-fold>
+    // </editor-fold>
     /**
      * Registers the share policies
      */
     public void init() {
         // Register the various policies
-        afterGrantKoyaPermissionDelegate = policyComponent.registerClassPolicy(KoyaPermissionsPolicies.AfterGrantKoyaPermissionPolicy.class);
-        beforeRevokeKoyaPermissionDelegate = policyComponent.registerClassPolicy(KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy.class);
-        beforeShareDelegate = policyComponent.registerClassPolicy(SharePolicies.BeforeSharePolicy.class);
-        afterShareDelegate = policyComponent.registerClassPolicy(SharePolicies.AfterSharePolicy.class);
-        beforeUnshareDelegate = policyComponent.registerClassPolicy(SharePolicies.BeforeUnsharePolicy.class);
-        afterUnshareDelegate = policyComponent.registerClassPolicy(SharePolicies.AfterUnsharePolicy.class);
-        
+        afterGrantKoyaPermissionDelegate = policyComponent
+                .registerClassPolicy(KoyaPermissionsPolicies.AfterGrantKoyaPermissionPolicy.class);
+        beforeRevokeKoyaPermissionDelegate = policyComponent
+                .registerClassPolicy(KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy.class);
+        beforeShareDelegate = policyComponent
+                .registerClassPolicy(SharePolicies.BeforeSharePolicy.class);
+        afterShareDelegate = policyComponent
+                .registerClassPolicy(SharePolicies.AfterSharePolicy.class);
+        beforeUnshareDelegate = policyComponent
+                .registerClassPolicy(SharePolicies.BeforeUnsharePolicy.class);
+        afterUnshareDelegate = policyComponent
+                .registerClassPolicy(SharePolicies.AfterUnsharePolicy.class);
+
     }
 
     /**
      * Set default subspaces permissions.
-     *
+     * 
      * @param subSpaceItem
      * @throws KoyaServiceException
      */
-    public void initSubSpaceWithDefaultPermissions(SubSpace subSpaceItem) throws KoyaServiceException {
-        
-        Company c = koyaNodeService.getFirstParentOfType(subSpaceItem.getNodeRefasObject(), Company.class);
+    public void initSubSpaceWithDefaultPermissions(SubSpace subSpaceItem)
+            throws KoyaServiceException {
+
+        Company c = koyaNodeService.getFirstParentOfType(
+                subSpaceItem.getNodeRefasObject(), Company.class);
         // Clear the node inherited permissions
-        permissionService.setInheritParentPermissions(subSpaceItem.getNodeRefasObject(), false);
+        permissionService.setInheritParentPermissions(
+                subSpaceItem.getNodeRefasObject(), false);
         /*
-         Setting default permissions on node       
+         * Setting default permissions on node
          */
-        //Sitemanager keeps manager permissions
+        // Sitemanager keeps manager permissions
         permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
-                siteService.getSiteRoleGroup(c.getName(), SitePermission.MANAGER.toString()),
+                siteService.getSiteRoleGroup(c.getName(),
+                        SitePermission.MANAGER.toString()),
                 SitePermission.MANAGER.toString(), true);
 
-        //SiteContributor keeps contributor permissions
+        // SiteContributor keeps contributor permissions
         permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
-                siteService.getSiteRoleGroup(c.getName(), SitePermission.CONTRIBUTOR.toString()),
+                siteService.getSiteRoleGroup(c.getName(),
+                        SitePermission.CONTRIBUTOR.toString()),
                 SitePermission.CONTRIBUTOR.toString(), true);
 
-        /*SiteCollaborator gets contributor permission on Space in order to create
-         Sub Spaces or Dossiers.         
-         SiteCollaborator gets consumer permission on Dossier in order to read content.          
+        /*
+         * SiteCollaborator gets contributor permission on Space in order to
+         * create Sub Spaces or Dossiers. SiteCollaborator gets consumer
+         * permission on Dossier in order to read content.
          */
         if (Space.class.isAssignableFrom(subSpaceItem.getClass())) {
             permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
-                    siteService.getSiteRoleGroup(c.getName(), SitePermission.COLLABORATOR.toString()),
+                    siteService.getSiteRoleGroup(c.getName(),
+                            SitePermission.COLLABORATOR.toString()),
                     SitePermission.CONTRIBUTOR.toString(), true);
         } else {
             permissionService.setPermission(subSpaceItem.getNodeRefasObject(),
-                    siteService.getSiteRoleGroup(c.getName(), SitePermission.COLLABORATOR.toString()),
+                    siteService.getSiteRoleGroup(c.getName(),
+                            SitePermission.COLLABORATOR.toString()),
                     SitePermission.CONSUMER.toString(), true);
         }
 
-        //Consumer has no default permission
+        // Consumer has no default permission
     }
 
     /**
-     *
+     * 
      * @param subSpace
      * @param authority
      * @param permission
      */
-    public void grantSubSpacePermission(final SubSpace subSpace, final String authority, KoyaPermission permission) {
+    public void grantSubSpacePermission(final SubSpace subSpace,
+            final String authority, KoyaPermission permission) {
         logger.debug("Grant permission '" + permission.toString() + "' to '"
-                + authority + "' on '" + subSpace.getTitle() + "' (" + subSpace.getClass().getSimpleName() + ")");
-        
-        permissionService.setPermission(subSpace.getNodeRefasObject(), authority, permission.toString(), true);
-        
+                + authority + "' on '" + subSpace.getTitle() + "' ("
+                + subSpace.getClass().getSimpleName() + ")");
+
+        permissionService.setPermission(subSpace.getNodeRefasObject(),
+                authority, permission.toString(), true);
+
         afterGrantKoyaPermissionDelegate.get(
                 nodeService.getType(subSpace.getNodeRefasObject()))
                 .afterGrantKoyaPermission(subSpace, authority, permission);
-        
+
     }
 
     /**
      * Revoke specified permissions on node.
-     *
+     * 
      * Revoke permission on node and, if parent other childs doesn't have the
      * same permission, do it for the parents
-     *
+     * 
      * @param subSpace
      * @param authority
      * @param permission
-     *
+     * 
      */
-    public void revokeSubSpacePermission(SubSpace subSpace, String authority, KoyaPermission permission) {
+    public void revokeSubSpacePermission(SubSpace subSpace, String authority,
+            KoyaPermission permission) {
         logger.debug("Revoke permission '" + permission.toString() + "' to '"
-                + authority + "' on '" + subSpace.getTitle() + "' (" + subSpace.getClass().getSimpleName() + ")");
+                + authority + "' on '" + subSpace.getTitle() + "' ("
+                + subSpace.getClass().getSimpleName() + ")");
         beforeRevokeKoyaPermissionDelegate.get(
                 nodeService.getType(subSpace.getNodeRefasObject()))
                 .beforeRevokeKoyaPermission(subSpace, authority, permission);
-        
-        permissionService.deletePermission(subSpace.getNodeRefasObject(),
-                authority, permission.toString());//>>> NPE dans les TU ???
 
-        //TODO after hook that check if user needs to stay company member
+        permissionService.deletePermission(subSpace.getNodeRefasObject(),
+                authority, permission.toString());// >>> NPE dans les TU ???
+
+        // TODO after hook that check if user needs to stay company member
     }
 
     /**
-     *
+     * 
      * /**
-     *
+     * 
      * @param subSpace
      * @param userMail
      * @param perm
      * @param sharedByImporter
      * @throws KoyaServiceException
      */
-    public void shareSecuredItem(final SubSpace subSpace, final String userMail,
-            final KoyaPermission perm, final Boolean sharedByImporter) throws KoyaServiceException {
-        
-        User inviter = userService.getUserByUsername(authenticationService.getCurrentUserName());
-        
-        beforeShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .beforeShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
-        
+    public void shareSecuredItem(final SubSpace subSpace,
+            final String userMail, final KoyaPermission perm,
+            final Boolean sharedByImporter) throws KoyaServiceException {
+
+        User inviter = userService.getUserByUsername(authenticationService
+                .getCurrentUserName());
+
+        beforeShareDelegate.get(
+                nodeService.getType(subSpace.getNodeRefasObject()))
+                .beforeShareItem(subSpace.getNodeRefasObject(), userMail,
+                        inviter, sharedByImporter);
+
         shareSecuredItemImpl(subSpace, userMail, perm);
-        
-        afterShareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .afterShareItem(subSpace.getNodeRefasObject(), userMail, inviter, sharedByImporter);
-        
-        logger.info("[Koya] public sharing : user " + inviter.getEmail() + "has shared " + subSpace.toString() + " with user " + userMail);
-        
+
+        afterShareDelegate.get(
+                nodeService.getType(subSpace.getNodeRefasObject()))
+                .afterShareItem(subSpace.getNodeRefasObject(), userMail,
+                        inviter, sharedByImporter);
+
+        logger.info("[Koya] public sharing : user " + inviter.getEmail()
+                + "has shared " + subSpace.toString() + " with user "
+                + userMail);
+
     }
-    
+
     protected void shareSecuredItemImpl(SubSpace subSpace, String userMail,
             KoyaPermission perm) throws KoyaServiceException {
-        throw new KoyaServiceException(0);//TODO errror code - shoulnever be called
+        throw new KoyaServiceException(0);// TODO errror code - shoulnever be
+                                          // called
     }
-    
-    public void unShareSecuredItem(SubSpace subSpace, String userMail, KoyaPermission perm)
-            throws KoyaServiceException {
-        
-        User revoker = userService.getUserByUsername(authenticationService.getCurrentUserName());
-        beforeUnshareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .beforeUnshareItem(subSpace.getNodeRefasObject(), userMail, revoker);
-        logger.debug("Unshare " + subSpace.getName() + " for " + userMail + " permission = " + perm.toString());
 
-        //Gets the user involved in unsharing - throws execption if not found
+    public void unShareSecuredItem(SubSpace subSpace, String userMail,
+            KoyaPermission perm) throws KoyaServiceException {
+
+        User revoker = userService.getUserByUsername(authenticationService
+                .getCurrentUserName());
+        beforeUnshareDelegate.get(
+                nodeService.getType(subSpace.getNodeRefasObject()))
+                .beforeUnshareItem(subSpace.getNodeRefasObject(), userMail,
+                        revoker);
+        logger.debug("Unshare " + subSpace.getName() + " for " + userMail
+                + " permission = " + perm.toString());
+
+        // Gets the user involved in unsharing - throws execption if not found
         User u = userService.getUser(userMail);
-        
+
         if (Dossier.class.isAssignableFrom(subSpace.getClass())) {
             revokeSubSpacePermission(subSpace, u.getUserName(), perm);
         } else {
-            logger.error("Unsupported unsharing type " + subSpace.getClass().getSimpleName());
+            logger.error("Unsupported unsharing type "
+                    + subSpace.getClass().getSimpleName());
         }
-        afterUnshareDelegate.get(nodeService.getType(subSpace.getNodeRefasObject()))
-                .afterUnshareItem(subSpace.getNodeRefasObject(), userMail, revoker);
-        
+        afterUnshareDelegate.get(
+                nodeService.getType(subSpace.getNodeRefasObject()))
+                .afterUnshareItem(subSpace.getNodeRefasObject(), userMail,
+                        revoker);
+
     }
 
     /**
      * Removes all given subspace koya specific permissions
-     *
+     * 
      * @param subSpace
      */
     public void cleanAllKoyaSubSpacePermissions(SubSpace subSpace) {
-        logger.debug("Clean All permissions on '" + subSpace.getTitle() + "' (" + subSpace.getClass().getSimpleName() + ")");
-        
+        logger.debug("Clean All permissions on '" + subSpace.getTitle() + "' ("
+                + subSpace.getClass().getSimpleName() + ")");
+
         for (KoyaPermission p : KoyaPermission.getAll()) {
-            for (AccessPermission ap : permissionService.getAllSetPermissions(subSpace.getNodeRefasObject())) {
+            for (AccessPermission ap : permissionService
+                    .getAllSetPermissions(subSpace.getNodeRefasObject())) {
                 if (p.equals(ap.getPermission())) {
                     revokeSubSpacePermission(subSpace, ap.getAuthority(), p);
                 }
@@ -333,74 +366,87 @@ public class SubSpaceAclService {
     }
 
     /**
-     *
+     * 
      * List Users who have a specific KoyaPermission defined in filter on the
      * node.
-     *
+     * 
      * If no filter or empty, list all KoyaPermissions
-     *
+     * 
      * @param s
      * @param permissions
      * @return
      */
     public List<User> listUsers(SecuredItem s, List<KoyaPermission> permissions) {
         List<User> users = new ArrayList<>();
-        
+
         if (permissions == null || permissions.isEmpty()) {
             permissions = KoyaPermission.getAll();
         }
-        
-        for (AccessPermission ap : permissionService.getAllSetPermissions(s.getNodeRefasObject())) {
-            
+
+        for (AccessPermission ap : permissionService.getAllSetPermissions(s
+                .getNodeRefasObject())) {
+
             try {
-                if (permissions.contains(KoyaPermission.valueOf(ap.getPermission()))) {
+                if (permissions.contains(KoyaPermission.valueOf(ap
+                        .getPermission()))) {
                     User u = userService.getUserByUsername(ap.getAuthority());
                     if (u != null) {
                         users.add(u);
                     }
                 }
             } catch (IllegalArgumentException iex) {
-                
+
             }
         }
         return users;
     }
 
     /**
-     *
+     * 
      * List all secured Items a user has specific KoyaPermission setted in a
      * company context.
-     *
-     *
+     * 
+     * 
      * @param c
      * @param u
      * @param permissions
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public List<SecuredItem> listSecuredItems(Company c, User u, List<KoyaPermission> permissions) throws KoyaServiceException {
+    public List<SecuredItem> listSecuredItems(Company c, User u,
+            List<KoyaPermission> permissions) throws KoyaServiceException {
         if (permissions == null || permissions.isEmpty()) {
             permissions = KoyaPermission.getAll();
         }
-        return listItemSharedRecursive(spaceService.list(c.getName(), Integer.MAX_VALUE), u, permissions);
+        return listItemSharedRecursive(
+                spaceService.list(c.getName(), Integer.MAX_VALUE), u,
+                permissions);
     }
-    
-    private List<SecuredItem> listItemSharedRecursive(List<Space> spaces, User u, List<KoyaPermission> permissions) throws KoyaServiceException {
+
+    private List<SecuredItem> listItemSharedRecursive(List<Space> spaces,
+            User u, List<KoyaPermission> permissions)
+            throws KoyaServiceException {
         List<SecuredItem> items = new ArrayList<>();
-        
+
         for (Space s : spaces) {
-            items.addAll(listItemSharedRecursive(s.getChildSpaces(), u, permissions));
-            //check if current space is shared with user as site consumer
-            for (AccessPermission ap : permissionService.getAllSetPermissions(s.getNodeRefasObject())) {
-                if (ap.getAuthority().equals(u.getUserName()) && permissions.contains(ap.getPermission())) {
+            items.addAll(listItemSharedRecursive(s.getChildSpaces(), u,
+                    permissions));
+            // check if current space is shared with user as site consumer
+            for (AccessPermission ap : permissionService.getAllSetPermissions(s
+                    .getNodeRefasObject())) {
+                if (ap.getAuthority().equals(u.getUserName())
+                        && permissions.contains(ap.getPermission())) {
                     items.add(s);
                 }
             }
 
-            //check if current space children (ie dossiers) are shared with user as site consumer
+            // check if current space children (ie dossiers) are shared with
+            // user as site consumer
             for (Dossier d : dossierService.list(s.getNodeRefasObject())) {
-                for (AccessPermission ap : permissionService.getAllSetPermissions(d.getNodeRefasObject())) {
-                    if (ap.getAuthority().equals(u.getUserName()) && permissions.contains(ap.getPermission())) {
+                for (AccessPermission ap : permissionService
+                        .getAllSetPermissions(d.getNodeRefasObject())) {
+                    if (ap.getAuthority().equals(u.getUserName())
+                            && permissions.contains(ap.getPermission())) {
                         items.add(d);
                     }
                 }
@@ -411,30 +457,33 @@ public class SubSpaceAclService {
 
     /**
      * Builds Koya permissions on given NodeRef for authenticated user.
-     *
+     * 
      * @param n
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
     public Permissions getPermissions(NodeRef n) throws KoyaServiceException {
-        return getPermissions(userService.getUserByUsername(authenticationService.getCurrentUserName()), n);
+        return getPermissions(
+                userService.getUserByUsername(authenticationService
+                        .getCurrentUserName()), n);
     }
 
     /**
      * Builds Koya permissions on given NodeRef for specified user.
-     *
+     * 
      * @param u
      * @param n
      * @return
      * @throws fr.itldev.koya.exception.KoyaServiceException
      */
-    public Permissions getPermissions(User u, NodeRef n) throws KoyaServiceException {
-        
+    public Permissions getPermissions(User u, NodeRef n)
+            throws KoyaServiceException {
+
         Permissions p = new Permissions(u.getUserName(), n);
         /**
          * TODO get permissions method with user and node parameters search in
          * alfresco API
-         *
+         * 
          */
         List<String> userPermissions = new ArrayList<>();
         for (AccessPermission ap : permissionService.getAllSetPermissions(n)) {
@@ -447,42 +496,65 @@ public class SubSpaceAclService {
         }
 
         //
-        p.canReadProperties(permissionService.hasPermission(n, PermissionService.READ_PROPERTIES).equals(AccessStatus.ALLOWED));
-        p.canWriteProperties(permissionService.hasPermission(n, PermissionService.WRITE_PROPERTIES).equals(AccessStatus.ALLOWED));
+        p.canReadProperties(permissionService.hasPermission(n,
+                PermissionService.READ_PROPERTIES).equals(AccessStatus.ALLOWED));
+        p.canWriteProperties(permissionService.hasPermission(n,
+                PermissionService.WRITE_PROPERTIES)
+                .equals(AccessStatus.ALLOWED));
         //
-        p.canCreateChildren(permissionService.hasPermission(n, PermissionService.CREATE_CHILDREN).equals(AccessStatus.ALLOWED));
-        p.canDeleteChildren(permissionService.hasPermission(n, PermissionService.DELETE_CHILDREN).equals(AccessStatus.ALLOWED));
-        p.canReadChildren(permissionService.hasPermission(n, PermissionService.READ_CHILDREN).equals(AccessStatus.ALLOWED));
-        p.canLinkChildren(permissionService.hasPermission(n, PermissionService.LINK_CHILDREN).equals(AccessStatus.ALLOWED));
+        p.canCreateChildren(permissionService.hasPermission(n,
+                PermissionService.CREATE_CHILDREN).equals(AccessStatus.ALLOWED));
+        p.canDeleteChildren(permissionService.hasPermission(n,
+                PermissionService.DELETE_CHILDREN).equals(AccessStatus.ALLOWED));
+        p.canReadChildren(permissionService.hasPermission(n,
+                PermissionService.READ_CHILDREN).equals(AccessStatus.ALLOWED));
+        p.canLinkChildren(permissionService.hasPermission(n,
+                PermissionService.LINK_CHILDREN).equals(AccessStatus.ALLOWED));
         //
-        p.canReadContent(permissionService.hasPermission(n, PermissionService.READ_CONTENT).equals(AccessStatus.ALLOWED));
-        p.canWriteContent(permissionService.hasPermission(n, PermissionService.WRITE_CONTENT).equals(AccessStatus.ALLOWED));
-        p.canExecuteContent(permissionService.hasPermission(n, PermissionService.EXECUTE_CONTENT).equals(AccessStatus.ALLOWED));
+        p.canReadContent(permissionService.hasPermission(n,
+                PermissionService.READ_CONTENT).equals(AccessStatus.ALLOWED));
+        p.canWriteContent(permissionService.hasPermission(n,
+                PermissionService.WRITE_CONTENT).equals(AccessStatus.ALLOWED));
+        p.canExecuteContent(permissionService.hasPermission(n,
+                PermissionService.EXECUTE_CONTENT).equals(AccessStatus.ALLOWED));
         //
-        p.canDeleteNode(permissionService.hasPermission(n, PermissionService.DELETE_NODE).equals(AccessStatus.ALLOWED));
+        p.canDeleteNode(permissionService.hasPermission(n,
+                PermissionService.DELETE_NODE).equals(AccessStatus.ALLOWED));
         //
-        p.canDeleteAssociations(permissionService.hasPermission(n, PermissionService.DELETE_ASSOCIATIONS).equals(AccessStatus.ALLOWED));
-        p.canReadAssociations(permissionService.hasPermission(n, PermissionService.READ_ASSOCIATIONS).equals(AccessStatus.ALLOWED));
-        p.canCreateAssociations(permissionService.hasPermission(n, PermissionService.CREATE_ASSOCIATIONS).equals(AccessStatus.ALLOWED));
+        p.canDeleteAssociations(permissionService.hasPermission(n,
+                PermissionService.DELETE_ASSOCIATIONS).equals(
+                AccessStatus.ALLOWED));
+        p.canReadAssociations(permissionService.hasPermission(n,
+                PermissionService.READ_ASSOCIATIONS).equals(
+                AccessStatus.ALLOWED));
+        p.canCreateAssociations(permissionService.hasPermission(n,
+                PermissionService.CREATE_ASSOCIATIONS).equals(
+                AccessStatus.ALLOWED));
         //
-        p.canReadPermissions(permissionService.hasPermission(n, PermissionService.READ_PERMISSIONS).equals(AccessStatus.ALLOWED));
-        p.canChangePermissions(permissionService.hasPermission(n, PermissionService.CHANGE_PERMISSIONS).equals(AccessStatus.ALLOWED));
+        p.canReadPermissions(permissionService.hasPermission(n,
+                PermissionService.READ_PERMISSIONS)
+                .equals(AccessStatus.ALLOWED));
+        p.canChangePermissions(permissionService.hasPermission(n,
+                PermissionService.CHANGE_PERMISSIONS).equals(
+                AccessStatus.ALLOWED));
         /*
-         ======= Koya specific permissions ========
+         * ======= Koya specific permissions ========
          */
-        p.canShareWithCustomer(p.getCanChangePermissions() || userPermissions.contains(KoyaPermissionCollaborator.MEMBER.toString()));
-        
+        p.canShareWithCustomer(p.getCanChangePermissions()
+                || userPermissions.contains(KoyaPermissionCollaborator.MEMBER
+                        .toString()));
+
         return p;
-        
+
     }
 
     /**
-     *
+     * 
      * Returns user's securedItems filtered by type that have one of
      * KoyaPermission filter item set.
-     *
+     * 
      * This method return application wide nodes. no matter the company.
-     *
+     * 
      * @param u
      * @param typesFilter
      * @param koyaPermisssionFilter
@@ -491,7 +563,7 @@ public class SubSpaceAclService {
     @Deprecated
     public List<SecuredItem> getUsersSecuredItemWithKoyaPermissions(User u,
             List<QName> typesFilter, List<KoyaPermission> koyaPermisssionFilter) {
-        
+
         List<SecuredItem> securedItemsWithKoyaPermissions = new ArrayList<>();
 
         /**
@@ -499,14 +571,14 @@ public class SubSpaceAclService {
          * not, it's hidden.
          */
         String luceneRequest = "";
-        
+
         if (typesFilter == null || typesFilter.isEmpty()) {
             typesFilter = new ArrayList<>();
             typesFilter.add(KoyaModel.TYPE_COMPANY);
             typesFilter.add(KoyaModel.TYPE_SPACE);
             typesFilter.add(KoyaModel.TYPE_DOSSIER);
         }
-        
+
         List<String> koyaPermisssionFilterString = new ArrayList<>();
         if (koyaPermisssionFilter == null || koyaPermisssionFilter.isEmpty()) {
             koyaPermisssionFilterString = KoyaPermission.getAllAsString();
@@ -516,30 +588,33 @@ public class SubSpaceAclService {
             }
         }
 
-        //build lucene request with filter types
+        // build lucene request with filter types
         String orSep = "";
         for (QName t : typesFilter) {
-            luceneRequest += orSep + "TYPE:\"" + KoyaModel.TYPES_SHORT_PREFIX.get(t) + "\"";
+            luceneRequest += orSep + "TYPE:\""
+                    + KoyaModel.TYPES_SHORT_PREFIX.get(t) + "\"";
             orSep = " OR ";
         }
-        
+
         ResultSet rs = null;
         try {
-            rs = searchService.query(
-                    StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+            rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                     SearchService.LANGUAGE_LUCENE, luceneRequest);
             for (ResultSetRow r : rs) {
                 try {
-                    
-                    for (AccessPermission ap : permissionService.getAllSetPermissions(r.getNodeRef())) {
-                        if (koyaPermisssionFilterString.contains(ap.getPermission())
+
+                    for (AccessPermission ap : permissionService
+                            .getAllSetPermissions(r.getNodeRef())) {
+                        if (koyaPermisssionFilterString.contains(ap
+                                .getPermission())
                                 && ap.getAuthority().equals(u.getUserName())) {
-                            securedItemsWithKoyaPermissions.add(koyaNodeService.getSecuredItem(r.getNodeRef()));
+                            securedItemsWithKoyaPermissions.add(koyaNodeService
+                                    .getSecuredItem(r.getNodeRef()));
                             break;
                         }
                     }
                 } catch (KoyaServiceException ex) {
-                    
+
                 }
             }
         } finally {
@@ -547,8 +622,82 @@ public class SubSpaceAclService {
                 rs.close();
             }
         }
-        
+
         return securedItemsWithKoyaPermissions;
     }
-    
+
+    /**
+     * Set or unset confidential flag on Space (ie Space or dossier)
+     * 
+     * puts or removes koyaConfidential aspect on node and change collaborators
+     * permissions.
+     * 
+     * On confidential elements, colloborators don't have any default acces.
+     * 
+     * @param u
+     * @param i
+     * @throws KoyaServiceException
+     */
+    public Boolean toggleConfidential(User u, SecuredItem i,
+            Boolean confidential) throws KoyaServiceException {
+
+        // check input elements (must be Space or Dossier) > later resolved by
+        // inherit Dossier from Space
+
+        if (!(Space.class.isAssignableFrom(i.getClass()) || Dossier.class
+                .isAssignableFrom(i.getClass()))) {
+            throw new KoyaServiceException(
+                    KoyaErrorCodes.SECU_CONFIDENTIAL_FLAG_TYPE_ERROR);
+        }
+
+        Company c = koyaNodeService.getFirstParentOfType(
+                i.getNodeRefasObject(), Company.class);
+
+        // check user permissions
+        // only manager or element responsibles can toggle confidential aspect
+        // on item
+
+        List<User> itemResponsibles = listUsers(i,
+                Collections.unmodifiableList(new ArrayList<KoyaPermission>() {
+                    {
+                        add(KoyaPermissionCollaborator.RESPONSIBLE);
+                    }
+                }));
+
+       
+        if (!itemResponsibles.contains(u)
+                || !companyAclService.isCompanyManager(c.getName())
+                || !authorityService.isAdminAuthority(u.getUserName())) {
+            /**
+             * User must either reponsable of element OR company Manager OR Alfresco Adminitrator
+             */            
+            throw new KoyaServiceException(
+                    KoyaErrorCodes.SECU_CONFIDENTIAL_USER_CANT_TOGGLE_FLAG);
+        }
+
+        // modify permissions
+        if (confidential) {
+            nodeService.addAspect(i.getNodeRefasObject(),
+                    KoyaModel.ASPECT_CONFIDENTIAL, null);
+
+            permissionService.clearPermission(i.getNodeRefasObject(),
+                    siteService.getSiteRoleGroup(c.getName(),
+                            SitePermission.COLLABORATOR.toString()));
+
+        } else {
+            nodeService.removeAspect(i.getNodeRefasObject(),
+                    KoyaModel.ASPECT_CONFIDENTIAL);
+            permissionService.setPermission(i.getNodeRefasObject(), siteService
+                    .getSiteRoleGroup(c.getName(),
+                            SitePermission.COLLABORATOR.toString()),
+                    SitePermission.CONSUMER.toString(), true);
+        }
+        return isConfidential(i);
+    }
+
+    public Boolean isConfidential(SecuredItem i) throws KoyaServiceException {
+        return nodeService.hasAspect(i.getNodeRefasObject(),
+                KoyaModel.ASPECT_CONFIDENTIAL);
+    }
+
 }

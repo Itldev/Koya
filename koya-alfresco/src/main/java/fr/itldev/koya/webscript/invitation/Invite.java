@@ -65,7 +65,7 @@ public class Invite extends AbstractWebScript {
             ObjectMapper mapper = new ObjectMapper();
             InviteWrapper iw = mapper.readValue(req.getContent().getReader(), InviteWrapper.class);
             NominatedInvitation invitation = (NominatedInvitation) companyAclService.inviteMember(koyaNodeService.companyBuilder(iw.getCompanyName()),
-                    iw.getEmail(), SitePermission.valueOf(iw.getRoleName()));
+                    iw.getEmail(), SitePermission.valueOf(iw.getRoleName()),null);
 
             Map<String, String> jsonInvitation = new HashMap<>();
             jsonInvitation.put("inviteId", invitation.getInviteId());

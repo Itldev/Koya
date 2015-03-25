@@ -5,7 +5,7 @@ profiles.xml
 context.xml
 
 nbactions.xml
-
+nb-configuration.xml
 rebel.xml
 
 .metadata

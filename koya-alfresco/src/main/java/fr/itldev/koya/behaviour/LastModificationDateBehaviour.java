@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.transaction.UserTransaction;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies;
 import org.alfresco.repo.node.NodeServicePolicies;
@@ -20,7 +21,9 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.springframework.dao.ConcurrencyFailureException;
 
 /**
  *
@@ -37,6 +40,8 @@ public class LastModificationDateBehaviour implements
     private NodeService nodeService;
     private PolicyComponent policyComponent;
     private KoyaNodeService koyaNodeService;
+    private TransactionService transactionService;
+
     // Behaviours
     private Behaviour onDeleteNode;
     private Behaviour onContentUpdate;
@@ -65,14 +70,23 @@ public class LastModificationDateBehaviour implements
         this.koyaNodeService = koyaNodeService;
     }
 
+    public TransactionService getTransactionService() {
+        return transactionService;
+    }
+
+    public void setTransactionService(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
+
     public void init() {
 
         // Create behaviours
         this.onDeleteNode = new JavaBehaviour(this, "onDeleteNode",
-                NotificationFrequency.FIRST_EVENT);
+                NotificationFrequency.TRANSACTION_COMMIT);
         this.onContentUpdate = new JavaBehaviour(this, "onContentUpdate",
                 NotificationFrequency.TRANSACTION_COMMIT);
-
+        // this.onCreateNode = new JavaBehaviour(this, "onCreateNode",
+        // NotificationFrequency.TRANSACTION_COMMIT);
         // Bind behaviours to node policies
         // Delete behaviour
         this.policyComponent.bindClassBehaviour(
@@ -107,62 +121,64 @@ public class LastModificationDateBehaviour implements
             return;
         }
 
-        Dossier d = null;
-
+        logger.trace("node "
+                + nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE)
+                + "/"
+                + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME)
+                + " of type " + nodeService.getType(nodeRef).getLocalName()
+                + " Modified");
+        for (Map.Entry<QName, Serializable> e : nodeService.getProperties(
+                nodeRef).entrySet()) {
+            logger.trace(e.getKey().getLocalName() + " : "
+                    + e.getValue().toString());
+        }
+        // get dossier
         try {
 
-            logger.debug("node "
-                    + nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE)
-                    + "/"
-                    + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME)
-                    + "of type " + nodeService.getType(nodeRef).getLocalName()
-                    + " Modified");
-            for (Map.Entry<QName, Serializable> e : nodeService.getProperties(
-                    nodeRef).entrySet()) {
-                logger.trace(e.getKey().getLocalName() + " : "
-                        + e.getValue().toString());
-            }
-            // get dossier
-            try {
-
-                d = koyaNodeService
-                        .getFirstParentOfType(nodeRef, Dossier.class);
-            } catch (KoyaServiceException ex) {
-                logger.error("error while determinating nodeRef Koya Typed parents");
-            }
+            final Dossier d = koyaNodeService
+                    .getFirstParentOfType(nodeRef, Dossier.class);
             if (d != null) {
 
-                logger.debug("Updating lastModificationDate of dossier : "
+                logger.trace("Updating lastModificationDate of dossier : "
                         + d.getTitle());
                 final NodeRef n = d.getNodeRefasObject();
                 AuthenticationUtil
                         .runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
                             @Override
                             public Object doWork() throws Exception {
+                                //Quick and Dirty hack to avoid multiple files uploads faillure
+                                UserTransaction transaction = transactionService.getNonPropagatingUserTransaction();
+                                try {
+                                    transaction.begin();
 
-                                // Add lastModified Aspect if not already
-                                // present
-                                if (!nodeService.hasAspect(n,
-                                        KoyaModel.ASPECT_LASTMODIFIED)) {
-                                    Map<QName, Serializable> props = new HashMap<>();
-                                    nodeService.addAspect(n,
-                                            KoyaModel.ASPECT_LASTMODIFIED,
-                                            props);
+                                    // Add lastModified Aspect if not already
+                                    // present
+                                    if (!nodeService.hasAspect(n,
+                                            KoyaModel.ASPECT_LASTMODIFIED)) {
+                                        Map<QName, Serializable> props = new HashMap<>();
+                                        nodeService.addAspect(n,
+                                                KoyaModel.ASPECT_LASTMODIFIED,
+                                                props);
+                                    }
+
+                                    nodeService.setProperty(n,
+                                            KoyaModel.PROP_LASTMODIFICATIONDATE,
+                                            new Date());
+                                    nodeService.setProperty(n,
+                                            KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
+                                    transaction.commit();
+                                } catch (ConcurrencyFailureException cfe) {
+                                    logger.warn("ConcurrencyFailureException on dossier " + d.getTitle());
+                                    transaction.rollback();
                                 }
-
-                                nodeService.setProperty(n,
-                                        KoyaModel.PROP_LASTMODIFICATIONDATE,
-                                        new Date());
-                                nodeService.setProperty(n,
-                                        KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
                                 return null;
                             }
                         });
             }
-        } catch (Exception e) {
-            logger.error("failed to execute LastModificationDateBehaviour : "
-                    + e.toString());
+        } catch (KoyaServiceException ex) {
+            logger.error("error while determinating nodeRef Koya Typed parents", ex);
         }
+
     }
 
 }

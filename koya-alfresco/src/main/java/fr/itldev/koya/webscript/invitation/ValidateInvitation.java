@@ -18,18 +18,12 @@
  */
 package fr.itldev.koya.webscript.invitation;
 
-import fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.action.Action;
@@ -47,6 +41,15 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter;
+import fr.itldev.koya.alfservice.KoyaNotificationService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SubSpaceAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * Validate User invitation.
  *
@@ -63,7 +66,9 @@ public class ValidateInvitation extends AbstractWebScript {
     protected ActivityService activityService;
     protected ActionService actionService;
     protected SiteService siteService;
-
+    protected KoyaNotificationService koyaNotificationService; 
+    
+    
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     public void setUserService(UserService userService) {
         this.userService = userService;
@@ -93,7 +98,12 @@ public class ValidateInvitation extends AbstractWebScript {
         this.siteService = siteService;
     }
 
-    //</editor-fold>
+    public void setKoyaNotificationService(
+			KoyaNotificationService koyaNotificationService) {
+		this.koyaNotificationService = koyaNotificationService;
+	}
+
+	//</editor-fold>
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
@@ -223,11 +233,36 @@ public class ValidateInvitation extends AbstractWebScript {
                     return null;
                 }
             }, invitation.getInviteeUserName());
+            
+            
+            /**
+             * 
+             * Defaultly enable notifications for user
+             * 
+             * TODO modify behaviour : notifications will be set on Spaces or Dossiers in future implementations.
+             * 
+             */        
+    		try {
+    			 AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>() {
+    	                @Override
+    	                public Void doWork() throws Exception {
+    	                	koyaNotificationService.addNotification(
+    	        					userService.getUser(userInvited.getUserName()), null);
+    	                    return null;
+    	                }
+    	            }, invitation.getInviteeUserName());
+    			
+    		} catch (Exception e) {
+    		}
+            
 
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-        logger.info("[Koya] invitation validation : user " + userInvited.getEmail() + "has validated his account");
+        
+       
+        
+        logger.info("[Koya] invitation validation : user " + userInvited.getEmail() + " has validated his account");
         res.setContentType("application/json");
         //TODO return validation status
         res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));

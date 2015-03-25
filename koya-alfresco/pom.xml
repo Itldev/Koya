@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>fr.itldev</groupId>
 			<artifactId>libkoya</artifactId>
-			<version>0.7.4</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
