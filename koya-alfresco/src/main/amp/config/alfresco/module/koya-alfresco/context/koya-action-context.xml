@@ -39,12 +39,18 @@
         <property name="koyaNodeService" ref="koyaNodeService" />
         <property name="koyaContentService" ref="koyaContentService" />
         <property name="authenticationService" ref="authenticationService" />
+         <property name="defaultZipCharset" >
+            <value>${koya.zip.defaultcharset}</value>
+        </property>   
     </bean>
     
     <bean id="koyaUnzip" class="fr.itldev.koya.action.UnzipActionExecuter">
         <property name="nodeService" ref="nodeService" />
         <property name="contentService" ref="contentService" />
         <property name="koyaContentService" ref="koyaContentService" />
+         <property name="defaultZipCharset" >
+            <value>${koya.zip.defaultcharset}</value>
+        </property>   
     </bean>
 
     

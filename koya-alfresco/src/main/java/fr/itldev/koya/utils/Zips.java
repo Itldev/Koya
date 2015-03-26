@@ -1,21 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.itldev.koya.utils;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.primitives.Bytes;
-import com.ibm.icu.text.CharsetDetector;
-import com.ibm.icu.text.CharsetMatch;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -25,19 +11,13 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.log4j.Logger;
 import org.mozilla.universalchardet.UniversalDetector;
 
-/**
- *
- * @author nico
- */
 public class Zips {
 
     static Logger logger = Logger.getLogger(Zips.class);
@@ -52,7 +32,7 @@ public class Zips {
      *            the directory to unzip to
      * @throws IOException
      */
-    public static boolean unzip(String zipPath, String destPath) {
+    public static boolean unzip(String zipPath, String destPath,String defaultCharset) {
         try {
             final Path destDir = Paths.get(destPath);
             // if the destination doesn't exist, create it
@@ -78,12 +58,12 @@ public class Zips {
                     break;
                 }
 
-            } else {
-                zipProperties.put("encoding", "UTF-8");
+            } else {//
+                zipProperties.put("encoding", defaultCharset);
 
             }
-            logger.debug(zipPath + " willl be extracted using "
-                    + zipProperties.get("encoding"));
+            logger.debug(zipPath + " will be extracted using "
+                    + zipProperties.get("encoding")+" - destination="+destPath);
 
             // convert the filename to a URI
             final Path path = Paths.get(zipPath);

@@ -1,25 +1,5 @@
 package fr.itldev.koya.action;
 
-import fr.itldev.koya.alfservice.DossierService;
-import fr.itldev.koya.alfservice.KoyaContentService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.action.importXml.model.ContentXml;
-import fr.itldev.koya.action.importXml.model.ContentsXmlWrapper;
-import fr.itldev.koya.action.importXml.model.DossierXml;
-import fr.itldev.koya.action.importXml.model.DossiersXmlWrapper;
-import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.interfaces.SubSpace;
-import fr.itldev.koya.model.permissions.KoyaPermission;
-import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
-import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import fr.itldev.koya.utils.Zips;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,8 +8,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
@@ -44,9 +26,29 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
-import org.alfresco.util.exec.RuntimeExec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import fr.itldev.koya.action.importXml.model.ContentXml;
+import fr.itldev.koya.action.importXml.model.ContentsXmlWrapper;
+import fr.itldev.koya.action.importXml.model.DossierXml;
+import fr.itldev.koya.action.importXml.model.DossiersXmlWrapper;
+import fr.itldev.koya.alfservice.DossierService;
+import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.interfaces.SubSpace;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
+import fr.itldev.koya.model.permissions.SitePermission;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.utils.Zips;
 
 public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
@@ -63,71 +65,47 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     private KoyaNodeService koyaNodeService;
     private KoyaContentService koyaContentService;
     private AuthenticationService authenticationService;
-
-    private static final String VAR_ZIPFILE = "zipFile";
-    private static final String VAR_DESTDIR = "destDir";
+    
+    private String defaultZipCharset;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
-    public SiteService getSiteService() {
-        return siteService;
-    }
-
+  
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
 
-    public NodeService getNodeService() {
-        return nodeService;
-    }
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
 
-    public ContentService getContentService() {
-        return contentService;
-    }
-
+   
     public void setContentService(ContentService contentService) {
         this.contentService = contentService;
     }
 
-    public DossierService getDossierService() {
-        return dossierService;
-    }
+   
 
     public void setDossierService(DossierService dossierService) {
         this.dossierService = dossierService;
     }
 
-    public UserService getUserService() {
-        return userService;
-    }
+   
 
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
 
-    public SubSpaceCollaboratorsAclService getSubSpaceCollaboratorsAclService() {
-        return subSpaceCollaboratorsAclService;
-    }
+    
 
     public void setSubSpaceCollaboratorsAclService(
             SubSpaceCollaboratorsAclService subSpaceCollaboratorsAclService) {
         this.subSpaceCollaboratorsAclService = subSpaceCollaboratorsAclService;
-    }
-
-    public KoyaNodeService getKoyaNodeService() {
-        return koyaNodeService;
-    }
+    }   
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
-    }
-
-    public KoyaContentService getKoyaContentService() {
-        return koyaContentService;
-    }
+    }   
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
@@ -137,8 +115,13 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
+    
+    
+    public void setDefaultZipCharset(String defaultZipCharset) {
+		this.defaultZipCharset = defaultZipCharset;
+	}
 
-    // </editor-fold>
+	// </editor-fold>
     private static final String TEMP_FILE_PREFIX = "koya";
     private static final String TEMP_FILE_SUFFIX_ZIP = ".zip";
     private static final String FILE_DOSSIERS_XML = "dossiers_import.xml";
@@ -214,7 +197,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                         + " to " + tempDir.getAbsolutePath());
 
                                 Zips.unzip(tempFile.getAbsolutePath(),
-                                        tempDir.getAbsolutePath());
+                                        tempDir.getAbsolutePath(),defaultZipCharset);
 
                                 // Reading the new dossiers to create
                                 File fileDossiersXml = new File(tempDir,
@@ -517,7 +500,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
                                     Zips.unzip(
                                             fileContentZip.getAbsolutePath(),
-                                            contentsDir.getAbsolutePath());
+                                            contentsDir.getAbsolutePath(),defaultZipCharset);
                                     // Reading contents files descriptor
                                     File fileContentXml = new File(
                                             contentsDir.getPath(),
