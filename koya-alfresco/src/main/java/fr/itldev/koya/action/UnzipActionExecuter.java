@@ -38,6 +38,7 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.util.TempFileProvider;
 import org.apache.log4j.Logger;
 
@@ -59,6 +60,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     private NodeService nodeService;
     private ContentService contentService;
+    private NamespaceService namespaceService;
 
     private KoyaContentService koyaContentService;
     
@@ -70,15 +72,21 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     public void setContentService(ContentService contentService) {
         this.contentService = contentService;
-    }
+    }      
 
-    public void setKoyaContentService(KoyaContentService koyaContentService) {
+    public void setNamespaceService(NamespaceService namespaceService) {
+		this.namespaceService = namespaceService;
+	}
+
+	public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
     }
     
     public void setDefaultZipCharset(String defaultZipCharset) {
 		this.defaultZipCharset = defaultZipCharset;
 	}
+    
+    
 
 	/**
      * @see org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
@@ -107,15 +115,21 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                     tempDir = new File(alfTempDir.getPath()
                             + File.separatorChar + actionedUponNodeRef.getId());
 
-                    if (Zips.unzip(tempFile.getAbsolutePath(),
-                            tempDir.getAbsolutePath(),defaultZipCharset)) {
+					logger.debug("Unzip : "
+							+ nodeService.getPath(actionedUponNodeRef)
+									.toPrefixString(namespaceService) + " as "
+							+ tempFile.getAbsolutePath());
+					if (Zips.unzip(tempFile.getAbsolutePath(),
+							tempDir.getAbsolutePath(), defaultZipCharset)) {
 
-                        NodeRef importDest = (NodeRef) ruleAction
-                                .getParameterValue(PARAM_DESTINATION_FOLDER);
+						NodeRef importDest = (NodeRef) ruleAction
+								.getParameterValue(PARAM_DESTINATION_FOLDER);
 
-                        importDirectory(tempDir.getPath(), importDest);
-
-                    }
+						importDirectory(tempDir.getPath(), importDest);
+						logger.debug("Unzip Complete : "
+								+ nodeService.getPath(actionedUponNodeRef)
+										.toPrefixString(namespaceService));
+					}
 
                 } catch (KoyaServiceException | ContentIOException ex) {
                     throw new AlfrescoRuntimeException(

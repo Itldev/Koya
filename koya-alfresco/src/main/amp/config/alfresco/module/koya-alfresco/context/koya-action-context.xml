@@ -48,6 +48,7 @@
         <property name="nodeService" ref="nodeService" />
         <property name="contentService" ref="contentService" />
         <property name="koyaContentService" ref="koyaContentService" />
+        <property name="namespaceService" ref="namespaceService"/>
          <property name="defaultZipCharset" >
             <value>${koya.zip.defaultcharset}</value>
         </property>   

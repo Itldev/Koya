@@ -63,7 +63,7 @@ public class Zips {
 
             }
             logger.debug(zipPath + " will be extracted using "
-                    + zipProperties.get("encoding")+" - destination="+destPath);
+                    + zipProperties.get("encoding"));
 
             // convert the filename to a URI
             final Path path = Paths.get(zipPath);
