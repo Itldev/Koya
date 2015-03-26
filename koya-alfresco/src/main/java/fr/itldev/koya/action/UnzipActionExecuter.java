@@ -18,10 +18,6 @@
  */
 package fr.itldev.koya.action;
 
-import fr.itldev.koya.alfservice.KoyaContentService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.utils.Zips;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -42,8 +38,14 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.util.TempFileProvider;
 import org.apache.log4j.Logger;
+
+import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.utils.Zips;
 
 public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
@@ -58,8 +60,11 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     private NodeService nodeService;
     private ContentService contentService;
+    private NamespaceService namespaceService;
 
     private KoyaContentService koyaContentService;
+    
+    private String defaultZipCharset;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -67,13 +72,23 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     public void setContentService(ContentService contentService) {
         this.contentService = contentService;
-    }
+    }      
 
-    public void setKoyaContentService(KoyaContentService koyaContentService) {
+    public void setNamespaceService(NamespaceService namespaceService) {
+		this.namespaceService = namespaceService;
+	}
+
+	public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
     }
+    
+    public void setDefaultZipCharset(String defaultZipCharset) {
+		this.defaultZipCharset = defaultZipCharset;
+	}
+    
+    
 
-    /**
+	/**
      * @see org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
      *      org.alfresco.repo.ref.NodeRef)
      */
@@ -100,15 +115,21 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                     tempDir = new File(alfTempDir.getPath()
                             + File.separatorChar + actionedUponNodeRef.getId());
 
-                    if (Zips.unzip(tempFile.getAbsolutePath(),
-                            tempDir.getAbsolutePath())) {
+					logger.debug("Unzip : "
+							+ nodeService.getPath(actionedUponNodeRef)
+									.toPrefixString(namespaceService) + " as "
+							+ tempFile.getAbsolutePath());
+					if (Zips.unzip(tempFile.getAbsolutePath(),
+							tempDir.getAbsolutePath(), defaultZipCharset)) {
 
-                        NodeRef importDest = (NodeRef) ruleAction
-                                .getParameterValue(PARAM_DESTINATION_FOLDER);
+						NodeRef importDest = (NodeRef) ruleAction
+								.getParameterValue(PARAM_DESTINATION_FOLDER);
 
-                        importDirectory(tempDir.getPath(), importDest);
-
-                    }
+						importDirectory(tempDir.getPath(), importDest);
+						logger.debug("Unzip Complete : "
+								+ nodeService.getPath(actionedUponNodeRef)
+										.toPrefixString(namespaceService));
+					}
 
                 } catch (KoyaServiceException | ContentIOException ex) {
                     throw new AlfrescoRuntimeException(
@@ -143,12 +164,13 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     private void importDirectory(String directory, NodeRef root)
             throws KoyaServiceException {
         // Path topdir = Paths.get(dir);
-
+    	String currentPath="";
         try (DirectoryStream<Path> directoryStream = Files
                 .newDirectoryStream(Paths.get(directory))) {
             for (Path path : directoryStream) {
                 String fileName = path.getFileName().toString();
-                logger.debug("nex :" + fileName);
+                currentPath = path.toString();
+                logger.trace("nex :" + fileName);
 
                 if (Files.isRegularFile(path)) {
                     koyaContentService.createContentNode(root, fileName,
@@ -159,13 +181,14 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                     Directory d = koyaContentService.createDir(fileName, root);
                     // logger.debug(file.getPath());
 
-                    logger.debug(path);
+                    logger.trace(path);
                     // recurcive call to import folder contents
                     importDirectory(path.toString(), d.getNodeRefasObject());
                 }
 
             }
         } catch (IOException ex) {
+        	logger.error("Import IOException on "+currentPath + " : "+ex.toString() );
         }
     }
 
