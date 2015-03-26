@@ -167,8 +167,8 @@ public class LastModificationDateBehaviour implements
                                     nodeService.setProperty(n,
                                             KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
                                     transaction.commit();
-                                } catch (ConcurrencyFailureException cfe) {
-                                    logger.warn("ConcurrencyFailureException on dossier " + d.getTitle());
+                                } catch (Exception cfe) {
+                                   // logger.warn("ConcurrencyFailureException on dossier " + d.getTitle());
                                     transaction.rollback();
                                 }
                                 return null;
