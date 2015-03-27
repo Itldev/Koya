@@ -66,11 +66,11 @@ public class ListDossier extends AbstractWebScript {
                 throw new KoyaServiceException(KoyaErrorCodes.DOSSIER_INVALID_PARENT_NODE);
             }
 
-            int maxItems = Integer.valueOf(urlParams.get("maxItems"));
-            int skipCount = Integer.valueOf(urlParams.get("skipCount"));
+            Integer maxItems = Integer.valueOf(urlParams.get("maxItems"));
+            Integer skipCount = Integer.valueOf(urlParams.get("skipCount"));
 
             response = KoyaWebscript.getObjectAsJson(
-                    koyaNodeService.listChildrenPaginated(parent, skipCount, maxItems, Boolean.TRUE));
+                    koyaNodeService.listChildrenPaginated(parent, skipCount, maxItems, null, Boolean.TRUE));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

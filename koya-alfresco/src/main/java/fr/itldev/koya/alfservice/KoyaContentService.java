@@ -240,6 +240,8 @@ public class KoyaContentService {
      * @param depth
      * @param folderOnly
      * @return
+     * 
+     * @deprecated Use KoyaNodeService.listChildrenPaginated 
      */
     public List<Content> list(NodeRef parent, Integer depth, Boolean folderOnly) {
 

@@ -100,24 +100,23 @@ public class ListContent extends AbstractWebScript {
             }
             Boolean onlyFolders = ((String) urlParamsMap.get(KoyaWebscript.WSCONST_ONLYFOLDERS)).equals("true");
 
-            /**
-             *
-             */
+            Integer maxItems = null;
+            Integer skipCount = null;
+            Integer depth = null;
             if (mode.equals(MODE_RECURSIVE)) {
-                Integer depth;
+
                 if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
                     depth = new Integer((String) urlParamsMap.get(KoyaWebscript.WSCONST_MAXDEPTH));
                 } else {
                     depth = DEFAULT_MAX_DEPTH;
                 }
-                response = KoyaWebscript.getObjectAsJson(koyaContentService.list(parent, depth, onlyFolders));
 
             } else if (mode.equals(MODE_PAGINATED)) {
-                int maxItems = Integer.valueOf(urlParamsMap.get("maxItems"));
-                int skipCount = Integer.valueOf(urlParamsMap.get("skipCount"));
-                response = KoyaWebscript.getObjectAsJson(koyaNodeService.listChildrenPaginated(parent, skipCount, maxItems, onlyFolders));
-            }
+                maxItems = Integer.valueOf(urlParamsMap.get("maxItems"));
+                skipCount = Integer.valueOf(urlParamsMap.get("skipCount"));
 
+            }
+            response = KoyaWebscript.getObjectAsJson(koyaNodeService.listChildrenPaginated(parent, skipCount, maxItems, depth, onlyFolders));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

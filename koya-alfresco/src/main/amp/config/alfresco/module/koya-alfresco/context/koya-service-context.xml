@@ -217,4 +217,17 @@
     </bean>
 
    
+   <bean name="fileFolderGetChildrenCannedQueryFactory" class="fr.itldev.koya.repo.model.filefolder.KoyaGetChildrenCannedQuerryFactory">
+      <property name="registry" ref="fileFolderCannedQueryRegistry"/>
+      <property name="dictionaryService" ref="dictionaryService"/>
+      <property name="tenantService" ref="tenantService"/>
+      <property name="nodeDAO" ref="nodeDAO"/>
+      <property name="nodeService" ref="nodeService"/>
+      <property name="qnameDAO" ref="qnameDAO"/>
+      <property name="localeDAO" ref="localeDAO"/>
+      <property name="contentDataDAO" ref="contentDataDAO"/>
+      <property name="cannedQueryDAO" ref="cannedQueryDAO"/>
+      <property name="methodSecurity" ref="FileFolderService_security_list"/>
+      <property name="hiddenAspect" ref="hiddenAspect"/>
+   </bean>
 </beans>
