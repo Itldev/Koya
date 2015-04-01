@@ -65,47 +65,38 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     private KoyaNodeService koyaNodeService;
     private KoyaContentService koyaContentService;
     private AuthenticationService authenticationService;
-    
+
     private String defaultZipCharset;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
-  
     public void setSiteService(SiteService siteService) {
         this.siteService = siteService;
     }
-
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
 
-   
     public void setContentService(ContentService contentService) {
         this.contentService = contentService;
     }
-
-   
 
     public void setDossierService(DossierService dossierService) {
         this.dossierService = dossierService;
     }
 
-   
-
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
 
-    
-
     public void setSubSpaceCollaboratorsAclService(
             SubSpaceCollaboratorsAclService subSpaceCollaboratorsAclService) {
         this.subSpaceCollaboratorsAclService = subSpaceCollaboratorsAclService;
-    }   
+    }
 
     public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
         this.koyaNodeService = koyaNodeService;
-    }   
+    }
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
@@ -115,13 +106,12 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
-    
-    
-    public void setDefaultZipCharset(String defaultZipCharset) {
-		this.defaultZipCharset = defaultZipCharset;
-	}
 
-	// </editor-fold>
+    public void setDefaultZipCharset(String defaultZipCharset) {
+        this.defaultZipCharset = defaultZipCharset;
+    }
+
+    // </editor-fold>
     private static final String TEMP_FILE_PREFIX = "koya";
     private static final String TEMP_FILE_SUFFIX_ZIP = ".zip";
     private static final String FILE_DOSSIERS_XML = "dossiers_import.xml";
@@ -197,7 +187,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                         + " to " + tempDir.getAbsolutePath());
 
                                 Zips.unzip(tempFile.getAbsolutePath(),
-                                        tempDir.getAbsolutePath(),defaultZipCharset);
+                                        tempDir.getAbsolutePath(), defaultZipCharset);
 
                                 // Reading the new dossiers to create
                                 File fileDossiersXml = new File(tempDir,
@@ -226,7 +216,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                         throw new AlfrescoRuntimeException(
                                                 getLogPrefix(companyName,
                                                         username)
-                                                        + "Error unmarshalling dossiers metadata.",
+                                                + "Error unmarshalling dossiers metadata.",
                                                 ex);
                                     }
 
@@ -272,17 +262,17 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                 .getDossier(
                                                                         company,
                                                                         dossierXml
-                                                                                .getReference());
+                                                                        .getReference());
                                                         if (!d.getTitle()
                                                                 .equals(dossierTitle)) {
                                                             koyaNodeService
                                                                     .rename(d
                                                                             .getNodeRefasObject(),
                                                                             dossierXml
-                                                                                    .getReference()
-                                                                                    + " - "
-                                                                                    + dossierXml
-                                                                                            .getName());
+                                                                            .getReference()
+                                                                            + " - "
+                                                                            + dossierXml
+                                                                            .getName());
                                                             d = koyaNodeService
                                                                     .getSecuredItem(
                                                                             d.getNodeRefasObject(),
@@ -297,13 +287,13 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                             .getReference()
                                                                             + " - "
                                                                             + dossierXml
-                                                                                    .getName(),
+                                                                            .getName(),
                                                                             spaceNodeRef,
                                                                             new HashMap<QName, String>() {
                                                                                 {
                                                                                     put(KoyaModel.PROP_REFERENCE,
                                                                                             dossierXml
-                                                                                                    .getReference());
+                                                                                            .getReference());
                                                                                 }
                                                                             });
                                                         } else {
@@ -311,13 +301,14 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                     getLogPrefix(
                                                                             companyName,
                                                                             username)
-                                                                            + "Cannot create dossier "
-                                                                            + dossierXml
-                                                                                    .getReference(),
+                                                                    + "Cannot create dossier "
+                                                                    + dossierXml
+                                                                    .getReference(),
                                                                     kse);
                                                             countDossiersError++;
+                                                            continue;
+
                                                         }
-                                                        continue;
                                                     }
                                                     mapCacheDossier
                                                             .put(dossierXml
@@ -333,7 +324,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                 username)
                                                                 + "Dossiers "
                                                                 + dossierXml
-                                                                        .getReference()
+                                                                .getReference()
                                                                 + " already exists.");
                                                         countDossiersDuplicate++;
                                                     } else {
@@ -341,9 +332,9 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                 getLogPrefix(
                                                                         companyName,
                                                                         username)
-                                                                        + "Cannot create dossier "
-                                                                        + dossierXml
-                                                                                .getReference(),
+                                                                + "Cannot create dossier "
+                                                                + dossierXml
+                                                                .getReference(),
                                                                 ex);
                                                         countDossiersError++;
                                                     }
@@ -398,11 +389,11 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                     getLogPrefix(
                                                                             companyName,
                                                                             username)
-                                                                            + "Error adding "
-                                                                            + respMail
-                                                                            + " AS reponsible to dossier "
-                                                                            + dossierXml
-                                                                                    .getReference(),
+                                                                    + "Error adding "
+                                                                    + respMail
+                                                                    + " AS reponsible to dossier "
+                                                                    + dossierXml
+                                                                    .getReference(),
                                                                     ex);
                                                         }
                                                     }
@@ -456,11 +447,11 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                     getLogPrefix(
                                                                             companyName,
                                                                             username)
-                                                                            + "Error adding "
-                                                                            + memberMail
-                                                                            + " AS collaborator to dossier "
-                                                                            + dossierXml
-                                                                                    .getReference(),
+                                                                    + "Error adding "
+                                                                    + memberMail
+                                                                    + " AS collaborator to dossier "
+                                                                    + dossierXml
+                                                                    .getReference(),
                                                                     ex);
                                                         }
                                                     }
@@ -500,7 +491,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
                                     Zips.unzip(
                                             fileContentZip.getAbsolutePath(),
-                                            contentsDir.getAbsolutePath(),defaultZipCharset);
+                                            contentsDir.getAbsolutePath(), defaultZipCharset);
                                     // Reading contents files descriptor
                                     File fileContentXml = new File(
                                             contentsDir.getPath(),
@@ -509,7 +500,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                         throw new AlfrescoRuntimeException(
                                                 getLogPrefix(companyName,
                                                         username)
-                                                        + "No files content metadata file found.");
+                                                + "No files content metadata file found.");
                                     }
                                     // Create new content
                                     List<ContentXml> contentXmls = null;
@@ -534,7 +525,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                         throw new AlfrescoRuntimeException(
                                                 getLogPrefix(companyName,
                                                         username)
-                                                        + "Error unmarshalling dossiers metadata.",
+                                                + "Error unmarshalling dossiers metadata.",
                                                 ex);
                                     }
 
@@ -561,7 +552,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                             .getDossier(
                                                                     company,
                                                                     contentXml
-                                                                            .getDossierReference());
+                                                                    .getDossierReference());
                                                     mapCacheDossier
                                                             .put(contentXml
                                                                     .getDossierReference(),
@@ -588,14 +579,14 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                         .getFilename();
                                                 if (filename != null
                                                         && !filename.trim()
-                                                                .isEmpty()) {
+                                                        .isEmpty()) {
                                                     int extIdx = filename
                                                             .lastIndexOf(".");
                                                     String title = contentXml
                                                             .getName()
                                                             + (extIdx != -1 ? filename
-                                                                    .substring(extIdx)
-                                                                    : "");
+                                                            .substring(extIdx)
+                                                            : "");
                                                     try {
                                                         logger.debug(getLogPrefix(
                                                                 companyName,
@@ -652,7 +643,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                     getLogPrefix(
                                                                             companyName,
                                                                             username)
-                                                                            + ex.getMessage(),
+                                                                    + ex.getMessage(),
                                                                     ex);
                                                             countContentError++;
                                                         }
@@ -667,7 +658,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                         getLogPrefix(
                                                                 companyName,
                                                                 username)
-                                                                + ex.getMessage(),
+                                                        + ex.getMessage(),
                                                         ex);
                                                 countContentDossierNotFound++;
                                             }
@@ -734,7 +725,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             subSpaceCollaboratorsAclService.shareSecuredItem(
                     (SubSpace) koyaNodeService.getSecuredItem(d
                             .getNodeRefasObject()), userService
-                            .getUserByUsername(u.getUserName()).getEmail(),
+                    .getUserByUsername(u.getUserName()).getEmail(),
                     permissionCollaborator, true);
         }
     }
@@ -746,8 +737,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Recursively delete a dir of files and directories
      *
-     * @param dir
-     *            directory to delete
+     * @param dir directory to delete
      */
     private void deleteDir(File dir) {
         if (dir != null) {
