@@ -31,8 +31,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import javax.transaction.UserTransaction;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.LuceneUtils;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -186,7 +188,8 @@ public class DossierService {
         }
     }
 
-    public List<Dossier> getInactiveDossier(final Space space, final Date inactiveFrom, final boolean notNotifiedOnly) throws KoyaServiceException {
+    public List<Dossier> getInactiveDossier(final Space space,
+            final Date inactiveFrom, final boolean notNotifiedOnly) throws KoyaServiceException {
         String luceneRequest = "+PATH:\"" + nodeService.getPath(space.getNodeRefasObject()).toPrefixString(prefixResolver) + "/*\" +TYPE:\"koya:dossier\" +@koya\\:lastModificationDate:[MIN TO \"" + LuceneUtils.getLuceneDateString(inactiveFrom) + "\"]";
         if (notNotifiedOnly) {
             luceneRequest += " +@koya\\:notified:false";
@@ -209,4 +212,79 @@ public class DossierService {
             }
         }
     }
+
+    public void addOrUpdateLastModifiedDate(NodeRef nodeRef) {
+        QName type = nodeService.getType(nodeRef);
+        if (!type.equals(ContentModel.TYPE_CONTENT)
+                && !type.equals(KoyaModel.TYPE_DOSSIER)) {
+            // We want to update the lastModified Aspect only for content, not
+            // for thumbnail or whatever
+            return;
+        }
+
+        logger.debug("node "
+                + nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE)
+                + "/"
+                + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME)
+                + " of type " + nodeService.getType(nodeRef).getLocalName()
+                + " Modified");
+        for (Map.Entry<QName, Serializable> e : nodeService.getProperties(
+                nodeRef).entrySet()) {
+            logger.trace(e.getKey().getLocalName() + " : "
+                    + e.getValue().toString());
+        }
+        // get dossier
+        try {
+            NodeRef n = null;
+            Dossier d = koyaNodeService
+                    .getFirstParentOfType(nodeRef, Dossier.class);
+            if (d != null) {
+
+                logger.trace("Updating lastModificationDate of dossier : "
+                        + d.getTitle());
+                n = d.getNodeRefasObject();
+            } else if (type.equals(KoyaModel.TYPE_DOSSIER)) {
+                n = nodeRef;
+            }
+            if (n != null) {
+                final NodeRef dossierNodeRef = n;
+                AuthenticationUtil
+                        .runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
+                            @Override
+                            public Object doWork() throws Exception {
+                                //Quick and Dirty hack to avoid multiple files uploads faillure
+//                                UserTransaction transaction = transactionService.getNonPropagatingUserTransaction();
+                                try {
+//                                    transaction.begin();
+
+                                    // Add lastModified Aspect if not already
+                                    // present
+                                    if (!nodeService.hasAspect(dossierNodeRef,
+                                            KoyaModel.ASPECT_LASTMODIFIED)) {
+                                        Map<QName, Serializable> props = new HashMap<>();
+                                        nodeService.addAspect(dossierNodeRef,
+                                                KoyaModel.ASPECT_LASTMODIFIED,
+                                                props);
+                                    }
+
+                                    nodeService.setProperty(dossierNodeRef,
+                                            KoyaModel.PROP_LASTMODIFICATIONDATE,
+                                            new Date());
+                                    nodeService.setProperty(dossierNodeRef,
+                                            KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
+//                                    transaction.commit();
+                                } catch (Exception cfe) {
+                                    // logger.warn("ConcurrencyFailureException on dossier " + d.getTitle());
+//                                    transaction.rollback();
+                                }
+                                return null;
+                            }
+                        });
+            }
+        } catch (KoyaServiceException ex) {
+            logger.error("error while determinating nodeRef Koya Typed parents", ex);
+        }
+
+    }
+
 }
