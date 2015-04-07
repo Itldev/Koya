@@ -132,6 +132,6 @@
         <property name="policyComponent" ref="policyComponent" />       
         <property name="nodeService" ref="NodeService" />
         <property name="koyaNodeService" ref="koyaNodeService" />       
-        <property name="transactionService" ref="transactionService" />
+        <property name="dossierService" ref="dossierService" />
     </bean>
 </beans>

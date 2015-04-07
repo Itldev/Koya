@@ -39,9 +39,11 @@
         <property name="koyaNodeService" ref="koyaNodeService" />
         <property name="koyaContentService" ref="koyaContentService" />
         <property name="authenticationService" ref="authenticationService" />
-         <property name="defaultZipCharset" >
+        <property name="defaultZipCharset" >
             <value>${koya.zip.defaultcharset}</value>
         </property>   
+        <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
+
     </bean>
     
     <bean id="koyaUnzip" class="fr.itldev.koya.action.UnzipActionExecuter">
@@ -49,9 +51,11 @@
         <property name="contentService" ref="contentService" />
         <property name="koyaContentService" ref="koyaContentService" />
         <property name="namespaceService" ref="namespaceService"/>
-         <property name="defaultZipCharset" >
+        <property name="defaultZipCharset" >
             <value>${koya.zip.defaultcharset}</value>
         </property>   
+        <property name="dossierService" ref="dossierService" />
+        <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
     </bean>
 
     

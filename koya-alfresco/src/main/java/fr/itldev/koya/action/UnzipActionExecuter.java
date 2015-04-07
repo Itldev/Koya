@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.action;
 
+import fr.itldev.koya.alfservice.DossierService;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -46,6 +47,7 @@ import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.utils.Zips;
+import org.alfresco.repo.policy.BehaviourFilter;
 
 public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
@@ -61,8 +63,10 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     private NodeService nodeService;
     private ContentService contentService;
     private NamespaceService namespaceService;
+    private BehaviourFilter policyBehaviourFilter;
 
     private KoyaContentService koyaContentService;
+    private DossierService dossierService;
     
     private String defaultZipCharset;
 
@@ -72,25 +76,32 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     public void setContentService(ContentService contentService) {
         this.contentService = contentService;
-    }      
+    }
 
     public void setNamespaceService(NamespaceService namespaceService) {
-		this.namespaceService = namespaceService;
-	}
+        this.namespaceService = namespaceService;
+    }
 
-	public void setKoyaContentService(KoyaContentService koyaContentService) {
+    public void setPolicyBehaviourFilter(BehaviourFilter policyBehaviourFilter) {
+        this.policyBehaviourFilter = policyBehaviourFilter;
+    }
+
+    public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
     }
-    
-    public void setDefaultZipCharset(String defaultZipCharset) {
-		this.defaultZipCharset = defaultZipCharset;
-	}
-    
-    
 
-	/**
-     * @see org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
-     *      org.alfresco.repo.ref.NodeRef)
+    public void setDossierService(DossierService dossierService) {
+        this.dossierService = dossierService;
+    }
+
+    public void setDefaultZipCharset(String defaultZipCharset) {
+        this.defaultZipCharset = defaultZipCharset;
+    }
+
+    /**
+     * @see
+     * org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
+     * org.alfresco.repo.ref.NodeRef)
      */
     @Override
     public void executeImpl(Action ruleAction, NodeRef actionedUponNodeRef) {
@@ -115,21 +126,27 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                     tempDir = new File(alfTempDir.getPath()
                             + File.separatorChar + actionedUponNodeRef.getId());
 
-					logger.debug("Unzip : "
-							+ nodeService.getPath(actionedUponNodeRef)
-									.toPrefixString(namespaceService) + " as "
-							+ tempFile.getAbsolutePath());
-					if (Zips.unzip(tempFile.getAbsolutePath(),
-							tempDir.getAbsolutePath(), defaultZipCharset)) {
+                    logger.debug("Unzip : "
+                            + nodeService.getPath(actionedUponNodeRef)
+                            .toPrefixString(namespaceService) + " as "
+                            + tempFile.getAbsolutePath());
+                    if (Zips.unzip(tempFile.getAbsolutePath(),
+                            tempDir.getAbsolutePath(), defaultZipCharset)) {
 
-						NodeRef importDest = (NodeRef) ruleAction
-								.getParameterValue(PARAM_DESTINATION_FOLDER);
+                        NodeRef importDest = (NodeRef) ruleAction
+                                .getParameterValue(PARAM_DESTINATION_FOLDER);
 
-						importDirectory(tempDir.getPath(), importDest);
-						logger.debug("Unzip Complete : "
-								+ nodeService.getPath(actionedUponNodeRef)
-										.toPrefixString(namespaceService));
-					}
+                        //Disabled policy on ASPECT_AUDITABLE (LastModificationDateBehaviour)
+                        policyBehaviourFilter.disableBehaviour(ContentModel.ASPECT_AUDITABLE);
+                        importDirectory(tempDir.getPath(), importDest);
+                        
+                        logger.debug("Unzip Complete : "
+                                + nodeService.getPath(actionedUponNodeRef)
+                                .toPrefixString(namespaceService));
+                        
+                        //Update the modification date on the dossier
+                        dossierService.addOrUpdateLastModifiedDate(actionedUponNodeRef);
+                    }
 
                 } catch (KoyaServiceException | ContentIOException ex) {
                     throw new AlfrescoRuntimeException(
@@ -156,17 +173,16 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Recursively import a directory structure into the specified root node
      *
-     * @param dir
-     *            The directory of files and folders to import
-     * @param root
-     *            The root node to import into
+     * @param dir The directory of files and folders to import
+     * @param root The root node to import into
      */
     private void importDirectory(String directory, NodeRef root)
             throws KoyaServiceException {
         // Path topdir = Paths.get(dir);
-    	String currentPath="";
+        String currentPath = "";
         try (DirectoryStream<Path> directoryStream = Files
                 .newDirectoryStream(Paths.get(directory))) {
+
             for (Path path : directoryStream) {
                 String fileName = path.getFileName().toString();
                 currentPath = path.toString();
@@ -188,7 +204,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
             }
         } catch (IOException ex) {
-        	logger.error("Import IOException on "+currentPath + " : "+ex.toString() );
+            logger.error("Import IOException on " + currentPath + " : " + ex.toString());
         }
     }
 
@@ -202,8 +218,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Recursively delete a dir of files and directories
      *
-     * @param dir
-     *            directory to delete
+     * @param dir directory to delete
      */
     private static void deleteDir(File dir) {
         if (dir != null) {

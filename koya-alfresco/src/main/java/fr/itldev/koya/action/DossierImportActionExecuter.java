@@ -49,6 +49,9 @@ import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.utils.Zips;
+import java.util.HashSet;
+import java.util.Set;
+import org.alfresco.repo.policy.BehaviourFilter;
 
 public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
@@ -65,6 +68,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     private KoyaNodeService koyaNodeService;
     private KoyaContentService koyaContentService;
     private AuthenticationService authenticationService;
+    private BehaviourFilter policyBehaviourFilter;
 
     private String defaultZipCharset;
 
@@ -107,6 +111,10 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
         this.authenticationService = authenticationService;
     }
 
+    public void setPolicyBehaviourFilter(BehaviourFilter policyBehaviourFilter) {
+        this.policyBehaviourFilter = policyBehaviourFilter;
+    }
+
     public void setDefaultZipCharset(String defaultZipCharset) {
         this.defaultZipCharset = defaultZipCharset;
     }
@@ -132,10 +140,13 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
         try {
             String username = authenticationService.getCurrentUserName();
             if (this.nodeService.exists(actionedUponNodeRef) == true) {
+                policyBehaviourFilter.disableBehaviour(ContentModel.ASPECT_AUDITABLE);
+                
                 SiteInfo siteInfo = siteService.getSite(actionedUponNodeRef);
                 NodeRef documentLibrary = siteService.getContainer(
                         siteInfo.getShortName(), SiteService.DOCUMENT_LIBRARY);
                 Map<String, Dossier> mapCacheDossier = new HashMap<String, Dossier>();
+                Set<Dossier> modifiedDossiers = new HashSet<>();
                 try {
                     Company company = koyaNodeService.getSecuredItem(
                             siteInfo.getNodeRef(), Company.class);
@@ -296,6 +307,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                                             .getReference());
                                                                                 }
                                                                             });
+                                                            modifiedDossiers.add(d);
                                                         } else {
                                                             logger.error(
                                                                     getLogPrefix(
@@ -310,6 +322,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
                                                         }
                                                     }
+
                                                     mapCacheDossier
                                                             .put(dossierXml
                                                                     .getReference(),
@@ -355,11 +368,14 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                         add(KoyaPermissionCollaborator.RESPONSIBLE);
                                                                     }
                                                                 });
+                                                String creator = (String) nodeService.getProperty(d.getNodeRefasObject(), ContentModel.PROP_CREATOR);
+
                                                 for (User u : responsibles) {
                                                     if (!dossierXml
                                                             .getResponsibles()
                                                             .contains(
-                                                                    u.getEmail())) {
+                                                                    u.getEmail())
+                                                            && !u.getUserName().equals(creator)) {
                                                         subSpaceCollaboratorsAclService
                                                                 .unShareSecuredItem(
                                                                         d,
@@ -611,6 +627,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                                     new File(
                                                                                             contentsDir,
                                                                                             filename)));
+                                                            modifiedDossiers.add(dossier);
                                                         }
                                                         countContentAdded++;
                                                     } catch (FileNotFoundException ex) {
@@ -709,7 +726,9 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                     throw new AlfrescoRuntimeException(getLogPrefix(null,
                             username) + " " + ex.getMessage(), ex);
                 }
-
+                for (Dossier d : modifiedDossiers) {
+                    dossierService.addOrUpdateLastModifiedDate(d.getNodeRefasObject());
+                }
             }
         } catch (Throwable t) {
             logger.error(t.getMessage(), t);
