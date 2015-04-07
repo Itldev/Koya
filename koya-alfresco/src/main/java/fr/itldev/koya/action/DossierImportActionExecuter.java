@@ -141,7 +141,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             String username = authenticationService.getCurrentUserName();
             if (this.nodeService.exists(actionedUponNodeRef) == true) {
                 policyBehaviourFilter.disableBehaviour(ContentModel.ASPECT_AUDITABLE);
-                
+
                 SiteInfo siteInfo = siteService.getSite(actionedUponNodeRef);
                 NodeRef documentLibrary = siteService.getContainer(
                         siteInfo.getShortName(), SiteService.DOCUMENT_LIBRARY);
@@ -267,6 +267,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                         + spaceNodeRef);
 
                                                 Dossier d = null;
+                                                boolean newDossier = false;
                                                 try {
                                                     try {
                                                         d = dossierService
@@ -307,6 +308,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                                                             .getReference());
                                                                                 }
                                                                             });
+                                                            newDossier = true;
                                                             modifiedDossiers.add(d);
                                                         } else {
                                                             logger.error(
@@ -358,31 +360,34 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                         companyName, username)
                                                         + "Get dossier responsibles");
 
-                                                // Removing not responsible
-                                                // anymore
-                                                List<User> responsibles = subSpaceCollaboratorsAclService
-                                                        .listUsers(
-                                                                d,
-                                                                new ArrayList<KoyaPermission>() {
-                                                                    {
-                                                                        add(KoyaPermissionCollaborator.RESPONSIBLE);
-                                                                    }
-                                                                });
-                                                String creator = (String) nodeService.getProperty(d.getNodeRefasObject(), ContentModel.PROP_CREATOR);
+                                                if (!newDossier) {
+                                                    // Removing not responsible
+                                                    // anymore
+                                                    List<User> responsibles = subSpaceCollaboratorsAclService
+                                                            .listUsers(
+                                                                    d,
+                                                                    new ArrayList<KoyaPermission>() {
+                                                                        {
+                                                                            add(KoyaPermissionCollaborator.RESPONSIBLE);
+                                                                        }
+                                                                    });
+                                                    String creator = (String) nodeService.getProperty(d.getNodeRefasObject(), ContentModel.PROP_CREATOR);
 
-                                                for (User u : responsibles) {
-                                                    if (!dossierXml
-                                                            .getResponsibles()
-                                                            .contains(
-                                                                    u.getEmail())
-                                                            && !u.getUserName().equals(creator)) {
-                                                        subSpaceCollaboratorsAclService
-                                                                .unShareSecuredItem(
-                                                                        d,
-                                                                        u.getEmail(),
-                                                                        KoyaPermissionCollaborator.RESPONSIBLE);
+                                                    for (User u : responsibles) {
+                                                        if (!dossierXml
+                                                                .getResponsibles()
+                                                                .contains(
+                                                                        u.getEmail())
+                                                                && !u.getUserName().equals(creator)) {
+                                                            subSpaceCollaboratorsAclService
+                                                                    .unShareSecuredItem(
+                                                                            d,
+                                                                            u.getEmail(),
+                                                                            KoyaPermissionCollaborator.RESPONSIBLE);
+                                                        }
                                                     }
                                                 }
+                                                
                                                 for (String respMail : dossierXml
                                                         .getResponsibles()) {
                                                     User respUser = userService
@@ -604,7 +609,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                             .substring(extIdx)
                                                             : "");
                                                     try {
-                                                        logger.debug(getLogPrefix(
+                                                        logger.trace(getLogPrefix(
                                                                 companyName,
                                                                 username)
                                                                 + "Adding "
@@ -675,8 +680,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                                         getLogPrefix(
                                                                 companyName,
                                                                 username)
-                                                        + ex.getMessage(),
-                                                        ex);
+                                                        + ex.getMessage());
                                                 countContentDossierNotFound++;
                                             }
                                         }
