@@ -3,6 +3,8 @@ package fr.itldev.koya.behaviour;
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,9 +44,16 @@ public class ShareUpdateUserSharesListBehaviour implements
 	}
 
 	@Override
-	public void afterShareItem(NodeRef nodeRef, String userMail, User inviter,
-			Boolean sharedByImporter) {
-		userService.addSharedNode(userMail, nodeRef);
+	public void afterShareItem(final NodeRef nodeRef,final String userMail, User inviter,
+			Boolean sharedByImporter) {	
+		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
+            @Override
+            public Object doWork() throws Exception {
+        		userService.addSharedNode(userMail, nodeRef);
+        		return null;
+            }
+        });
+		
 	}
 
 	@Override
