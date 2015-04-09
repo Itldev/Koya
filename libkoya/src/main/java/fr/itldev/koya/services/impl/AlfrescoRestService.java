@@ -53,6 +53,15 @@ public class AlfrescoRestService implements AlfrescoService {
     private static final String REST_GET_LIBVERSION = "/s/fr/itldev/koya/meta/libversion";
     protected static final String REST_POST_UPLOAD = "/s/api/upload";
     private static final String REST_GET_XPATH2NODEREF = "/s/fr/itldev/koya/global/xpath2noderef/{xPath}";
+    
+    protected static final String REST_GET_LISTCHILD_PAGINATED = 
+    		"/s/fr/itldev/koya/content/list/paginated/{nodeRef}" +
+    		"?skipCount={skipCount}" +
+    		"&maxItems={maxItems}" +
+    		"&onlyFolders={onlyFolders}" +
+    		"&filterExpr={filterExpr}" +
+    		"&sortExpr={sortExpr}" +    		
+    		"&typeFilter={typeFilter}";
 
     private static final String REST_POST_COUNTCHILDREN = "/s/fr/itldev/koya/global/countchildren/{parentNodeRef}";
 
@@ -191,7 +200,7 @@ public class AlfrescoRestService implements AlfrescoService {
      */
     protected Map<String, String> explodeNodeRef(String nodeRef) {
 
-        Map exploded = new HashMap<>();
+        Map<String, String> exploded = new HashMap<>();
 
         Pattern p = Pattern.compile("(\\w+):\\/\\/(\\w+)\\/(.*)");
         Matcher m = p.matcher(nodeRef);

@@ -18,17 +18,6 @@
  */
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.interfaces.Content;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.AlfrescoUploadReturn;
-import fr.itldev.koya.model.json.DiskSizeWrapper;
-import fr.itldev.koya.services.KoyaContentService;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
@@ -55,6 +45,16 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.interfaces.Content;
+import fr.itldev.koya.model.json.AlfrescoUploadReturn;
+import fr.itldev.koya.model.json.DiskSizeWrapper;
+import fr.itldev.koya.services.KoyaContentService;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+
 public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService {
 
     private static final String REST_GET_CREATEDIR = "/s/fr/itldev/koya/content/createdir/{parentNodeRef}?title={title}";
@@ -63,8 +63,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
     //
     private static final String REST_GET_LISTCONTENT = "/s/fr/itldev/koya/content/list/recursive/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}";
-    private static final String REST_GET_LISTCONTENT_PAGINATED = "/s/fr/itldev/koya/content/list/paginated/{nodeRef}?skipCount={skipCount}&maxItems={maxItems}&onlyFolders={onlyFolders}";
-
+ 
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
     private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
     private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
@@ -160,8 +159,8 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         @SuppressWarnings("rawtypes")
 		List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
         }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_LISTCONTENT_PAGINATED,
-                String.class, containerToList, skipCount, maxItems, onlyFolders));
+                getAlfrescoServerUrl() + AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
+                String.class, containerToList, skipCount, maxItems, onlyFolders,"","",""));
 
         //tranform SecuredItems to contents
         CollectionUtils.transform(contents, TRANSFORM_TO_CONTENTS);

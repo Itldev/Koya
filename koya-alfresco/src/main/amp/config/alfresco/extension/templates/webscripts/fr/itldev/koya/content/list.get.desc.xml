@@ -27,7 +27,7 @@
         * paginated : paginated direct child (depth = 1)
         * recursive : non paginated recursive child 
     </description>
-    <url>/fr/itldev/koya/content/list/{mode}/{nodeRef}?onlyFolders={onlyFolders}&amp;maxdepth={maxdepth}&amp;skipCount={skipCount}&amp;maxItems={maxItems}";</url>
+    <url>/fr/itldev/koya/content/list/{mode}/{nodeRef}?onlyFolders={onlyFolders}&amp;maxdepth={maxdepth}&amp;skipCount={skipCount}&amp;maxItems={maxItems}&amp;filterExpr={filterExpr}&amp;sortExpr={sortExpr}&amp;typeFilter={typeFilter}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

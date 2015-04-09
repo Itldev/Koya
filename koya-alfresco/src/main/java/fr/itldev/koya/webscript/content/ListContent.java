@@ -28,6 +28,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import magick.FilterType;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -39,89 +42,119 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
- *
+ * 
  * Content Listing Webscript
- *
- *
- *
+ * 
+ * 
+ * 
  */
 public class ListContent extends AbstractWebScript {
 
-    private static final Integer DEFAULT_MAX_DEPTH = 50;
+	private static final Integer DEFAULT_MAX_DEPTH = 50;
 
-    private KoyaContentService koyaContentService;
-    private KoyaNodeService koyaNodeService;
-    private NodeService nodeService;
+	private KoyaContentService koyaContentService;
+	private KoyaNodeService koyaNodeService;
+	private NodeService nodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setKoyaContentService(KoyaContentService koyaContentService) {
-        this.koyaContentService = koyaContentService;
-    }
+	public void setKoyaContentService(KoyaContentService koyaContentService) {
+		this.koyaContentService = koyaContentService;
+	}
 
-    public void setNodeService(NodeService nodeService) {
-        this.nodeService = nodeService;
-    }
+	public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
 
-    private static final String MODE_RECURSIVE = "recursive";
-    private static final String MODE_PAGINATED = "paginated";
-    private static final List<String> AllowedModes = new ArrayList() {
-        {
-            add(MODE_RECURSIVE);
-            add(MODE_PAGINATED);
-        }
-    };
+	private static final String MODE_RECURSIVE = "recursive";
+	private static final String MODE_PAGINATED = "paginated";
+	private static final List<String> AllowedModes = new ArrayList<String>() {
+		private static final long serialVersionUID = 7029599703520077938L;
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		{
+			add(MODE_RECURSIVE);
+			add(MODE_PAGINATED);
+		}
+	};
+	private Logger logger = Logger.getLogger(this.getClass());
 
-        Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
-        String response = "";
-        try {
-            NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_NODEREF));
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
 
-            /**
-             * Prevents bad parent type
-             */
-            QName parentType = nodeService.getType(parent);
-            if (!(parentType.equals(KoyaModel.TYPE_DOSSIER)
-                    || parentType.equals(ContentModel.TYPE_FOLDER))) {
-                throw new KoyaServiceException(KoyaErrorCodes.CONTENT_INVALID_PARENT_NODE);
-            }
+		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
+		String response = "";
 
-            String mode = urlParamsMap.get("mode");
-            /**
-             * Check mode
-             */
-            if (!AllowedModes.contains(mode)) {
-                throw new KoyaServiceException(KoyaErrorCodes.CONTENT_UNKNOWN_WEBSCRIPT_LISTING_MODE);
-            }
-            Boolean onlyFolders = ((String) urlParamsMap.get(KoyaWebscript.WSCONST_ONLYFOLDERS)).equals("true");
+		try {
+			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap
+					.get(KoyaWebscript.WSCONST_NODEREF));
 
-            Integer maxItems = null;
-            Integer skipCount = null;
-            Integer depth = null;
-            if (mode.equals(MODE_RECURSIVE)) {
+			String mode = urlParamsMap.get("mode");			
+			String filterExpr = processPatternFilter(urlParamsMap.get("filterExpr"));
+			
+			/**
+			 * 
+			 * TODO parameters not processed
+			 * 
+			 */
+			String sortExpr = urlParamsMap.get("sortExpr");
+			String typeFilter = urlParamsMap.get("typeFilter");
 
-                if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
-                    depth = new Integer((String) urlParamsMap.get(KoyaWebscript.WSCONST_MAXDEPTH));
-                } else {
-                    depth = DEFAULT_MAX_DEPTH;
-                }
+			/**
+			 * Check mode
+			 */
+			if (!AllowedModes.contains(mode)) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.CONTENT_UNKNOWN_WEBSCRIPT_LISTING_MODE);
+			}
+			Boolean onlyFolders = ((String) urlParamsMap
+					.get(KoyaWebscript.WSCONST_ONLYFOLDERS)).equals("true");
 
-            } else if (mode.equals(MODE_PAGINATED)) {
-                maxItems = Integer.valueOf(urlParamsMap.get("maxItems"));
-                skipCount = Integer.valueOf(urlParamsMap.get("skipCount"));
+			Integer maxItems = null;
+			Integer skipCount = null;
+			Integer depth = null;
+			if (mode.equals(MODE_RECURSIVE)) {
 
-            }
-            response = KoyaWebscript.getObjectAsJson(koyaNodeService.listChildrenPaginated(parent, skipCount, maxItems, depth, onlyFolders));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+				if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
+					depth = new Integer(
+							(String) urlParamsMap
+									.get(KoyaWebscript.WSCONST_MAXDEPTH));
+				} else {
+					depth = DEFAULT_MAX_DEPTH;
+				}
+
+			} else if (mode.equals(MODE_PAGINATED)) {
+				maxItems = Integer.valueOf(urlParamsMap.get("maxItems"));
+				skipCount = Integer.valueOf(urlParamsMap.get("skipCount"));
+
+			}
+
+			logger.error("skipcount=" + skipCount + ";maxItems=" + maxItems
+					+ ";depth=" + depth + ";onlyFolders=" + onlyFolders
+					+ ";filterExpr=" + filterExpr + ";sortExpr=" + sortExpr
+					+ ";typeFilter=" + typeFilter);
+
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService
+					.listChildrenPaginated(parent, skipCount, maxItems, depth,
+							onlyFolders,filterExpr));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
+	
+	private String processPatternFilter(String paramFilterExpr){		
+		if(paramFilterExpr == null || paramFilterExpr.isEmpty()){
+			return null;
+		}		
+		if(!paramFilterExpr.endsWith("*")){
+			paramFilterExpr+="*";
+		}		
+		return paramFilterExpr;		
+	}
 
 }

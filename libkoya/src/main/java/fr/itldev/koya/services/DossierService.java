@@ -63,8 +63,22 @@ public interface DossierService extends AlfrescoService {
      */
     Dossier edit(User user, Dossier dossier) throws AlfrescoServiceException;
 
+    
     /**
      * List all Space Dossiers
+     * 
+     * @param user
+     * @param space
+     * @param skipCount
+     * @param maxItems
+     * @return
+     * @throws AlfrescoServiceException
+     */
+    List<Dossier> list(User user, Space space, int skipCount, int maxItems) throws AlfrescoServiceException;
+    
+    /**
+     * List all Space Dossiers
+     * with filter and sort options
      * 
      * @param user
      * @param space
@@ -75,7 +89,7 @@ public interface DossierService extends AlfrescoService {
      * @throws AlfrescoServiceException
      */
     List<Dossier> list(User user, Space space, int skipCount, int maxItems,
-            String... filter) throws AlfrescoServiceException;
+            String filter,String sort) throws AlfrescoServiceException;
 
     /**
      * Count all Space Dossiers

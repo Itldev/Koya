@@ -162,7 +162,7 @@ public class KoyaGetChildrenCannedQuery extends GetChildrenCannedQuery {
         if (pattern != null) {
             // TODO, check that we should be tied to the content model in this way. Perhaps a configurable property
             // name against which compare the pattern?
-            Pair<Long, QName> nameQName = qnameDAO.getQName(ContentModel.PROP_NAME);
+            Pair<Long, QName> nameQName = qnameDAO.getQName(ContentModel.PROP_TITLE); //apply pattern on title field instead or name
             if (nameQName == null) {
                 throw new AlfrescoRuntimeException("Unable to determine qname id of name property");
             }

@@ -41,8 +41,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 
     private static final String REST_GET_CREATEDOSSIER = "/s/fr/itldev/koya/dossier/create/{parentNodeRef}?title={title}";
 
-    private static final String REST_GET_LISTCHILD = "/s/fr/itldev/koya/dossier/list/{parentNodeRef}?skipCount={skipCount}&maxItems={maxItems}&filter={filter}";
-
+   
     private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
 
     private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/dossier/member/list/{nodeRef}";
@@ -126,20 +125,30 @@ public class DossierServiceImpl extends AlfrescoRestService implements
      */
     @Override
     public List<Dossier> list(User user, Space space, int skipCount,
-            int maxItems, String... filter) throws AlfrescoServiceException {
-        String filterStr = "";
-        if (filter.length == 1) {
-            filterStr = filter[0];
-        }
+            int maxItems) throws AlfrescoServiceException {     
+    	return list(user, space, skipCount, maxItems,"","");
+    }
+    
+    /**
+     * List all Space Dossiers
+     * TODO sort parameter not process in this version
+     * 
+     * 
+     * @param user
+     * @param space
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public List<Dossier> list(User user, Space space, int skipCount,
+            int maxItems, String filter,String sort) throws AlfrescoServiceException {     
+            
 
         return fromJSON(
                 new TypeReference<List<Dossier>>() {
                 },
                 user.getRestTemplate().getForObject(
-                        getAlfrescoServerUrl() + REST_GET_LISTCHILD,
-                        String.class, space.getNodeRef(), skipCount, maxItems,
-                        filterStr));
-
+                        getAlfrescoServerUrl() + AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
+                        String.class, space.getNodeRef(), skipCount, maxItems,true,filter,sort, ""));
     }
 
     /**
@@ -150,7 +159,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements
      * @return
      * @throws AlfrescoServiceException
      */
-    @Override
+    @SuppressWarnings("serial")
+	@Override
     public Integer countChildren(User user, Space space)
             throws AlfrescoServiceException {
         return countChildren(user, space, new HashSet<QName>() {

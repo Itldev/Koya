@@ -600,7 +600,7 @@ public class KoyaNodeService {
      */
     public List<SecuredItem> listChildrenPaginated(NodeRef parent,
             final Integer skipCount, final Integer maxItems, final Integer depth,
-            final boolean onlyFolders)
+            final boolean onlyFolders,final String namePattern)
             throws KoyaServiceException {
 
         Integer skip = skipCount;
@@ -611,8 +611,10 @@ public class KoyaNodeService {
         if (maxItems == null) {
             max = Integer.MAX_VALUE;
         }
-        List<Pair<QName, Boolean>> sortProps = new ArrayList() {
-            {
+        List<Pair<QName, Boolean>> sortProps = new ArrayList() {           
+			private static final long serialVersionUID = 1L;
+
+			{
                 add(new Pair<>(
                         GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER, false));
                 add(new Pair<>(ContentModel.PROP_TITLE, true));
@@ -620,7 +622,7 @@ public class KoyaNodeService {
         };
 
         PagingResults<FileInfo> results = fileFolderService.list(parent,
-                !onlyFolders, true, null, sortProps,
+                !onlyFolders, true,namePattern, null, sortProps,
                 new PagingRequest(skip, max)
         );
 
@@ -638,7 +640,7 @@ public class KoyaNodeService {
                     try {
                         if (depth != null && depth > 0) {
                             Directory dir = (Directory) si;
-                            List children = listChildrenPaginated(fi.getNodeRef(), skipCount, maxItems, depth - 1, onlyFolders);
+                            List children = listChildrenPaginated(fi.getNodeRef(), skipCount, maxItems, depth - 1, onlyFolders,namePattern);
 
                             dir.setChildren(children);
                         }

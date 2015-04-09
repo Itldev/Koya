@@ -220,62 +220,6 @@ public class KoyaContentService {
         public NodeRef doWork() throws Exception {
             return service.searchSimple(node, name);
         }
-
-    }
-
-    /**
-     * List Content recursive from parent noderef.
-     *
-     * depth limit
-     *
-     * - 0 : no limit
-     *
-     * - n : limit to n levels
-     *
-     * @param parent
-     * @param depth
-     * @param folderOnly
-     * @return
-     * 
-     * @deprecated Use KoyaNodeService.listChildrenPaginated 
-     */
-    public List<Content> list(NodeRef parent, Integer depth, Boolean folderOnly) {
-
-        List<Content> contents = new ArrayList<>();
-
-        if (depth <= 0) {
-            return contents;// return empty list if max depth < = 0 : ie max
-                            // depth reached
-        }
-
-        List<FileInfo> childList;
-        if (folderOnly) {
-            childList = fileFolderService.listFolders(parent);
-        } else {
-            childList = fileFolderService.list(parent);
-        }
-
-        for (final FileInfo fi : childList) {
-            if (koyaNodeService.isKoyaType(fi.getNodeRef(), Directory.class)) {
-                Directory dir = null;
-                try {
-                    dir = koyaNodeService.getSecuredItem(fi.getNodeRef(),
-                            Directory.class);
-                    dir.setChildren(list(fi.getNodeRef(), depth - 1, folderOnly));
-                    contents.add(dir);
-                } catch (KoyaServiceException ex) {
-                }
-
-            } else {
-                try {
-                    contents.add(koyaNodeService.getSecuredItem(
-                            fi.getNodeRef(), Document.class));
-                } catch (KoyaServiceException ex) {
-                }
-            }
-        }
-        return contents;
-
     }
 
     public Map<String, String> createContentNode(NodeRef parent,
