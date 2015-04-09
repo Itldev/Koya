@@ -72,7 +72,7 @@ public class DossierServiceImplTest extends TestCase {
     public void init() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
         companyTests = companyService.create(admin,
-                "company" + new Random().nextInt(1000), companyService
+                "company" + new Random().nextInt(1000000), companyService
                         .listSalesOffer(admin).get(0).getName(), "default");
         spaceTests = spaceService.create(admin, new Space("testSpace"),
                 companyTests);
@@ -84,7 +84,7 @@ public class DossierServiceImplTest extends TestCase {
 
             try {
                 String randomPart = Integer
-                        .toString(new Random().nextInt(1000));
+                        .toString(new Random().nextInt(1000000));
                 String mail = "userdossiertest" + randomPart + "@test.com";
                 String userName = "userdossiertest" + randomPart + "_test_com";
 

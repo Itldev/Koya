@@ -18,19 +18,11 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.interfaces.Content;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.util.List;
 import java.util.Random;
+
 import junit.framework.TestCase;
+
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -42,6 +34,17 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestClientException;
+
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.interfaces.Content;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
@@ -78,7 +81,7 @@ public class KoyaContentServiceImplTest extends TestCase {
     @Before
     public void createSpace() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, "company" + new Random().nextInt(1000),
+        companyTests = companyService.create(admin, "company" + new Random().nextInt(1000000),
                 companyService.listSalesOffer(admin).get(0).getName(), "default");
         spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
         dossierTests = dossierService.create(admin, spaceTests, "doss1");
@@ -88,8 +91,9 @@ public class KoyaContentServiceImplTest extends TestCase {
     public void deleteCompany() throws RestClientException {
         try {
             companyService.delete(admin, companyTests);
-        } catch (AlfrescoServiceException aex) {
-            System.err.println("error deleting company '" + companyTests.getTitle() + "' : " + aex.getKoyaErrorCode() + " - " + aex.getMessage());
+        } catch (Exception aex) {
+            System.err.println("error deleting company '" + companyTests.getTitle() + "' : " 
+        +  " - " + aex.getMessage());
         }
     }
 

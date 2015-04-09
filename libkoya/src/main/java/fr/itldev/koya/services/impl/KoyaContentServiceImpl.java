@@ -82,12 +82,12 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
 
     @Override
     public Document upload(User user, NodeRef parent, File f) throws AlfrescoServiceException {
-       return upload(user, parent, f);
+       return upload(user, parent,(Object) f);
     }
 
     @Override
     public Document upload(User user, NodeRef parent, Resource r) throws AlfrescoServiceException {
-        return upload(user, parent, r);
+        return upload(user, parent,(Object) r);
     }
 
     private Document upload(User user, NodeRef parent, Object o) throws AlfrescoServiceException {
@@ -126,10 +126,12 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
         }
     };
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer depth) throws AlfrescoServiceException {
 
-        List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
+        @SuppressWarnings("rawtypes")
+		List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
         }, user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_LISTCONTENT,
                 String.class, containerToList, onlyFolders, depth));
@@ -150,11 +152,13 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
      * @return
      * @throws AlfrescoServiceException
      */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public List<Content> listPaginatedDirectChild(User user, NodeRef containerToList,
             Integer skipCount, Integer maxItems, Boolean onlyFolders) throws AlfrescoServiceException {
 
-        List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
+        @SuppressWarnings("rawtypes")
+		List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
         }, user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_LISTCONTENT_PAGINATED,
                 String.class, containerToList, skipCount, maxItems, onlyFolders));
