@@ -30,7 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -43,10 +42,8 @@ import java.util.zip.Deflater;
 import javax.servlet.http.HttpServletResponse;
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.action.executer.ImporterActionExecuter;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -56,7 +53,6 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
@@ -327,9 +323,12 @@ public class KoyaContentService {
                             NamespaceService.CONTENT_MODEL_1_0_URI, name),
                     ContentModel.TYPE_CONTENT, properties);
             createdNode = car.getChildRef();
-        } catch (DuplicateChildNodeNameException dcne) {
+        } catch (DuplicateChildNodeNameException ex) {
             throw new KoyaServiceException(
                     KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS, fileName);
+        } catch (IllegalArgumentException ex) {
+            logger.error(fileName);
+            throw ex;
         }
 
         /**

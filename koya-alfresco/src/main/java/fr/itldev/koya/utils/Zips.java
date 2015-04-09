@@ -26,13 +26,11 @@ public class Zips {
      * Unzips the specified zip file to the specified destination directory.
      * Replaces any files in the destination, if they already exist.
      *
-     * @param zipPath
-     *            the name of the zip file to extract
-     * @param destPath
-     *            the directory to unzip to
-     * @throws IOException
+     * @param zipPath the name of the zip file to extract
+     * @param destPath the directory to unzip to
      */
-    public static boolean unzip(String zipPath, String destPath,String defaultCharset) {
+    public static boolean unzip(String zipPath, String destPath,
+            String defaultCharset) {
         try {
             final Path destDir = Paths.get(destPath);
             // if the destination doesn't exist, create it
@@ -46,22 +44,16 @@ public class Zips {
             /* We want to read an existing ZIP File, so we set this to False */
             zipProperties.put("create", "false");
             String charset = determineCharset(zipPath);
-            if (charset != null) {
-                switch (charset.toLowerCase()) {
-                case "windows-1252":
-                    // cp437 (winzip?), is detected as windows-1252)
-                    zipProperties.put("encoding", "ibm850");
-
-                    break;
-                default:
-                    zipProperties.put("encoding", charset);
-                    break;
-                }
-
-            } else {//
-                zipProperties.put("encoding", defaultCharset);
-
+            if (charset != null
+                    && charset.toLowerCase().equals("windows-1252")) {
+                // ibm850 (winzip?), is detected as windows-1252)
+                charset = "ibm850";
+            } else {
+                charset = defaultCharset;
             }
+            final String finalCharset = charset;
+
+            zipProperties.put("encoding", finalCharset);
             logger.debug(zipPath + " will be extracted using "
                     + zipProperties.get("encoding"));
 

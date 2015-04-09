@@ -56,7 +56,6 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
@@ -707,6 +706,6 @@ public class KoyaNodeService {
             title = title.replaceAll("([\\.]+$)|([ ]+$)", "");
         } while (!oldTitle.equals(title));
 
-        return ISO9075.encode(title);
+        return title;
     }
 }

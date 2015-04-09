@@ -82,7 +82,7 @@ public class ImportZip extends AbstractWebScript {
 			importZip(zipNodeRef);
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+					+ ex.getErrorCode().toString(), ex);
 		}
 		res.setContentType("application/json");
 		res.getWriter().write("");
