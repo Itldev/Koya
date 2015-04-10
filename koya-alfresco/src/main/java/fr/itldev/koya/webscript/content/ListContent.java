@@ -131,7 +131,7 @@ public class ListContent extends AbstractWebScript {
 
 			}
 
-			logger.error("skipcount=" + skipCount + ";maxItems=" + maxItems
+			logger.trace("listContent arguments skipcount=" + skipCount + ";maxItems=" + maxItems
 					+ ";depth=" + depth + ";onlyFolders=" + onlyFolders
 					+ ";filterExpr=" + filterExpr + ";sortExpr=" + sortExpr
 					+ ";typeFilter=" + typeFilter);
