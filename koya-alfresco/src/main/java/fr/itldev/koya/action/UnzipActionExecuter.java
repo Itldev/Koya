@@ -47,6 +47,8 @@ import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.utils.Zips;
+import java.util.HashSet;
+import java.util.Set;
 import org.alfresco.repo.policy.BehaviourFilter;
 
 public class UnzipActionExecuter extends ActionExecuterAbstractBase {
@@ -67,7 +69,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     private KoyaContentService koyaContentService;
     private DossierService dossierService;
-    
+
     private String defaultZipCharset;
 
     public void setNodeService(NodeService nodeService) {
@@ -99,9 +101,8 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     }
 
     /**
-     * @see
-     * org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
-     * org.alfresco.repo.ref.NodeRef)
+     * @see org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
+     *      org.alfresco.repo.ref.NodeRef)
      */
     @Override
     public void executeImpl(Action ruleAction, NodeRef actionedUponNodeRef) {
@@ -128,7 +129,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
                     logger.debug("Unzip : "
                             + nodeService.getPath(actionedUponNodeRef)
-                            .toPrefixString(namespaceService) + " as "
+                                    .toPrefixString(namespaceService) + " as "
                             + tempFile.getAbsolutePath());
                     if (Zips.unzip(tempFile.getAbsolutePath(),
                             tempDir.getAbsolutePath(), defaultZipCharset)) {
@@ -178,38 +179,61 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Recursively import a directory structure into the specified root node
      *
-     * @param dir The directory of files and folders to import
-     * @param root The root node to import into
+     * @param dir
+     *            The directory of files and folders to import
+     * @param root
+     *            The root node to import into
      */
     private void importDirectory(String directory, NodeRef root)
             throws KoyaServiceException {
         // Path topdir = Paths.get(dir);
         String currentPath = "";
+        Set<String> filenames = new HashSet<>();
+
         try (DirectoryStream<Path> directoryStream = Files
                 .newDirectoryStream(Paths.get(directory))) {
 
             for (Path path : directoryStream) {
                 String fileName = path.getFileName().toString();
+                String uniqueFileName = fileName;
+
                 currentPath = path.toString();
                 logger.trace("nex :" + fileName);
 
                 if (Files.isRegularFile(path)) {
-                    koyaContentService.createContentNode(root, fileName,
+                    int i = 1;
+                    int dotIdx = fileName.lastIndexOf(".");
+                    final String name = (dotIdx != -1) ? fileName.substring(0,
+                            dotIdx) : fileName;
+                    final String ext = (dotIdx != -1) ? fileName
+                            .substring(dotIdx) : "";
+                    while (filenames.contains(uniqueFileName.toLowerCase())) {
+                        uniqueFileName = name + " (" + (++i) + ")" + ext;
+                    }
+                    koyaContentService.createContentNode(root, uniqueFileName,
                             Files.newInputStream(path));
 
                 } else {
+                    int i = 0;
+
+                    while (filenames.contains(uniqueFileName.toLowerCase())) {
+                        uniqueFileName = fileName + "-" + i;
+                        i++;
+                    }
                     // create a folder node
-                    Directory d = koyaContentService.createDir(fileName, root);
+                    Directory d = koyaContentService.createDir(uniqueFileName,
+                            root);
                     // logger.debug(file.getPath());
 
                     logger.trace(path);
                     // recurcive call to import folder contents
                     importDirectory(path.toString(), d.getNodeRefasObject());
                 }
-
+                filenames.add(uniqueFileName.toLowerCase());
             }
         } catch (IOException ex) {
-            logger.error("Import IOException on " + currentPath + " : " + ex.toString());
+            logger.error("Import IOException on " + currentPath + " : "
+                    + ex.toString());
         }
     }
 
@@ -223,7 +247,8 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Recursively delete a dir of files and directories
      *
-     * @param dir directory to delete
+     * @param dir
+     *            directory to delete
      */
     private static void deleteDir(File dir) {
         if (dir != null) {
