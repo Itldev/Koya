@@ -1,5 +1,7 @@
 package fr.itldev.koya.utils;
 
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;
@@ -13,6 +15,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipError;
 
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.log4j.Logger;
@@ -26,8 +29,10 @@ public class Zips {
      * Unzips the specified zip file to the specified destination directory.
      * Replaces any files in the destination, if they already exist.
      *
-     * @param zipPath the name of the zip file to extract
-     * @param destPath the directory to unzip to
+     * @param zipPath
+     *            the name of the zip file to extract
+     * @param destPath
+     *            the directory to unzip to
      */
     public static boolean unzip(String zipPath, String destPath,
             String defaultCharset) {
@@ -97,6 +102,8 @@ public class Zips {
         } catch (IOException ioe) {
             logger.error(ioe.getMessage(), ioe);
             return false;
+        } catch (ZipError ze) {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_ZIP_ARCHIVE, ze);
         }
     }
 
