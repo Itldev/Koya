@@ -40,6 +40,7 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.KoyaContentService;
+import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public class DossierServiceImpl extends AlfrescoRestService implements
@@ -60,10 +61,16 @@ public class DossierServiceImpl extends AlfrescoRestService implements
     private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}";
 
     private KoyaContentService KoyaContentService;
+	private CacheManager cacheManager;
+
 
     public void setKoyaContentService(KoyaContentService KoyaContentService) {
         this.KoyaContentService = KoyaContentService;
     }
+
+	public void setCacheManager(CacheManager cacheManager) {
+		this.cacheManager = cacheManager;
+	}
 
     @Override
     public Dossier create(User user, Space parentSpace, String title)
@@ -229,6 +236,10 @@ public class DossierServiceImpl extends AlfrescoRestService implements
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDRESP, String.class,
                 responsible.getUserName(), dossier.getNodeRef());
+        
+        //invalidate user cache
+        cacheManager.revokePermission(responsible, dossier.getNodeRefasObject());
+        
     }
 
     @Override
@@ -237,6 +248,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDMEMBER, String.class,
                 responsible.getUserName(), dossier.getNodeRef());
+        
+        //invalidate user cache
+        cacheManager.revokePermission(responsible, dossier.getNodeRefasObject());      
     }
 
     /**
@@ -269,7 +283,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
                 dossier.getNodeRef(), collaborator.getUserName());
-
+        cacheManager.revokePermission(collaborator, dossier.getNodeRefasObject());
     }
 
     /**
@@ -285,7 +299,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements
             User memberOrResp) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
-                memberOrResp.getUserName(), dossier.getNodeRef());
+                memberOrResp.getUserName(), dossier.getNodeRef());               
+        cacheManager.revokePermission(memberOrResp, dossier.getNodeRefasObject());
+
     }
 
     /**

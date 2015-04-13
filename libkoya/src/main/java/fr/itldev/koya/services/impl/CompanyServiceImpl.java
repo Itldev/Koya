@@ -18,25 +18,23 @@
  */
 package fr.itldev.koya.services.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.codehaus.jackson.type.TypeReference;
+import org.springframework.web.client.RestClientException;
+
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.CompanyService;
+import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import fr.itldev.koya.services.impl.util.CacheConfig;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import org.codehaus.jackson.type.TypeReference;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.web.client.RestClientException;
 
-public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService, InitializingBean {
+public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService {
 
     private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add";
     private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
@@ -53,31 +51,14 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     private static final String REST_GET_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
     private static final String REST_POST_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
 
-    private Cache<Company, Preferences> companyPreferencesCache;
-    private CacheConfig companyPreferencesCacheConfig;
+    private CacheManager cacheManager;
+    
+    
+    public void setCacheManager(CacheManager cacheManager) {
+		this.cacheManager = cacheManager;
+	}
 
-    public void setCompanyPreferencesCacheConfig(CacheConfig companyPreferencesCacheConfig) {
-        this.companyPreferencesCacheConfig = companyPreferencesCacheConfig;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-        if (companyPreferencesCacheConfig == null) {
-            companyPreferencesCacheConfig = CacheConfig.noCache();
-        }
-        companyPreferencesCacheConfig.debugLogConfig("companyPreferencesCache");
-
-        if (companyPreferencesCacheConfig.getEnabled()) {
-            companyPreferencesCache = CacheBuilder.newBuilder()
-                    .maximumSize(companyPreferencesCacheConfig.getMaxSize())
-                    .expireAfterWrite(companyPreferencesCacheConfig.getExpireAfterWriteSeconds(),
-                            TimeUnit.SECONDS)
-                    .build();
-        }
-    }
-
-    /**
+	/**
      * Company creation
      *
      * @param admin
@@ -196,21 +177,15 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
         if (c == null) {
             return null;
         }
-        Preferences p;
+        Preferences p = cacheManager.getCompanyPreferences(c);           
+		if (p != null) {
+			return p;
+		}
 
-        if (companyPreferencesCacheConfig.getEnabled()) {
-            p = companyPreferencesCache.getIfPresent(c);
-            if (p != null) {
-                return p;
-            }
-        }
         p = fromJSON(new TypeReference<Preferences>() {
         }, user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, String.class, c.getName()));
-        if (companyPreferencesCacheConfig.getEnabled()) {
-
-            companyPreferencesCache.put(c, p);
-        }
+        cacheManager.setCompanyPreferences(c, p);
         return p;
     }
 

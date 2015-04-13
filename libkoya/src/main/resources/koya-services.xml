@@ -1,160 +1,188 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Koya is an alfresco module that provides a corporate orientated dataroom.
-
-    Copyright (C) Itl Developpement 2014
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation, either version 3 of the
-    License, or (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
-
--->
+<!-- Koya is an alfresco module that provides a corporate orientated dataroom. 
+	Copyright (C) Itl Developpement 2014 This program is free software: you can 
+	redistribute it and/or modify it under the terms of the GNU Affero General 
+	Public License as published by the Free Software Foundation, either version 
+	3 of the License, or (at your option) any later version. This program is 
+	distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+	PURPOSE. See the GNU Affero General Public License for more details. You 
+	should have received a copy of the GNU Affero General Public License along 
+	with this program. If not, see `<http://www.gnu.org/licenses/>`. -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 	http://www.springframework.org/schema/context
 	http://www.springframework.org/schema/context/spring-context-3.1.xsd">
-    
-    
-    <bean id="propertyPlaceholderConfigurer"   
-          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
-        <property name="locations">  
-            <list>  
-                <value>classpath:koya.properties</value>  
-                <value>classpath:koya-caches.properties</value>  
-            </list>  
-        </property>  
-    </bean>  
-          
-    <bean id="anonymousRestTemplate" class="org.springframework.web.client.RestTemplate">
-        <constructor-arg>
-            <bean class="org.springframework.http.client.CommonsClientHttpRequestFactory">
-                <constructor-arg> 
-                    <bean id="httpClient" class="org.apache.commons.httpclient.HttpClient">
-                        <constructor-arg>
-                            <bean id="httpClientParams" class="org.apache.commons.httpclient.params.HttpClientParams">
-                                <property name="authenticationPreemptive" value="false"/>
-                                <property name="connectionManagerClass"
-                                          value="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager"/>
-                            </bean>
-                        </constructor-arg>
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </constructor-arg>
-        <property name="messageConverters">
-            <list>
-                <ref bean="stringHttpMessageConverter"/>
-                <ref bean="jsonHttpMessageConverter"/>               
-            </list>
-        </property>
-        <property name="errorHandler" ref="alfrescoRestErrorHandler"/>
-    </bean>
-    
 
-    <bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter"/>
-    <bean id="jsonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
-        <property name="supportedMediaTypes">
-            <list>
-                <bean id="jsonMediaTypeApplicationJson" class="org.springframework.http.MediaType">
-                    <constructor-arg value="application"/>
-                    <constructor-arg value="json"/>
-                </bean>
-            </list>
-        </property>
-    </bean>       
-    <bean id="formHttpMessageConverter" class="org.springframework.http.converter.FormHttpMessageConverter"/>
-    <bean id="alfrescoRestErrorHandler" class="fr.itldev.koya.services.impl.util.AlfrescoRestErrorHandler"/>                 
-    
-    <!--================== Declaration des services ===============================-->
-    
-    
-    <!--================== service parent abstrait - gere l'héritage de propriétés ==-->
-    <bean id="abstractRestService" abstract="true">
-        <property name="alfrescoServerUrl" value="${alfresco.server.url}"/>
-        <property name="template" ref="anonymousRestTemplate"/>       
-    </bean>
-    
-    <bean id="alfrescoService" class="fr.itldev.koya.services.impl.AlfrescoRestService" parent="abstractRestService"/>
-    
-    <bean id="securedItemService" class="fr.itldev.koya.services.impl.SecuredItemServiceImpl" parent="abstractRestService">
-        <property name="favouriteService" ref="favouriteService"/>
-    </bean>
-   
-    <bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl" parent="abstractRestService"/>
-        
-    <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService">
-        <property name="companyPreferencesCacheConfig">
-            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
-                <property name="enabled" value="${companyPreferencesCache.enabled}" />
-                <property name="maxSize" value="${companyPreferencesCache.maxSize}"/>
-                <property name="expireAfterWriteSeconds" value="${companyPreferencesCache.expireAfterWriteSeconds}"/>
-            </bean>
-        </property>       
-    </bean>
-    
-    <bean id="spaceService" class="fr.itldev.koya.services.impl.SpaceServiceImpl" parent="abstractRestService"/>
-    
-    <bean id="dossierService" class="fr.itldev.koya.services.impl.DossierServiceImpl" parent="abstractRestService">
-        <property name="koyaContentService" ref="koyaContentService"/>
-    </bean>
-    
-    <bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl" parent="abstractRestService"/>
-    
-    <bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl" parent="abstractRestService">
-        <property name="userFavouritesCacheConfig">
-            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
-                <property name="enabled" value="${userFavouritesCache.enabled}" />
-                <property name="maxSize" value="${userFavouritesCache.maxSize}"/>
-                <property name="expireAfterWriteSeconds" value="${userFavouritesCache.expireAfterWriteSeconds}"/>
-            </bean>
-        </property>   
-    </bean>
-    
-    <bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl" parent="abstractRestService">
-        <property name="nodeSharedWithConsumerCacheConfig">
-            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
-                <property name="enabled" value="${nodeSharedWithConsumerCache.enabled}" />
-                <property name="maxSize" value="${nodeSharedWithConsumerCache.maxSize}"/>
-                <property name="expireAfterWriteSeconds" value="${nodeSharedWithConsumerCache.expireAfterWriteSeconds}"/>
-            </bean>
-        </property>       
-    </bean>
-    
-    <bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl" parent="abstractRestService">
-        <property name="permissionsCacheConfig">
-            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
-                <property name="enabled" value="${permissionsCache.enabled}" />
-                <property name="maxSize" value="${permissionsCache.maxSize}"/>
-                <property name="expireAfterWriteSeconds" value="${permissionsCache.expireAfterWriteSeconds}"/>
-            </bean>
-        </property>  
-    </bean>
-    
-    <bean id="searchService" class="fr.itldev.koya.services.impl.SearchServiceImpl" parent="abstractRestService"/>
 
-    <bean id="notificationService" class="fr.itldev.koya.services.impl.NotificationServiceImpl" parent="abstractRestService"/>
-    
-    <bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl" parent="abstractRestService">
-         <property name="invitationsCacheConfig">
-            <bean class="fr.itldev.koya.services.impl.util.CacheConfig">
-                <property name="enabled" value="${invitationsCache.enabled}" />
-                <property name="maxSize" value="${invitationsCache.maxSize}"/>
-                <property name="expireAfterWriteSeconds" value="${invitationsCache.expireAfterWriteSeconds}"/>
-            </bean>
-        </property>  
-    </bean>
+	<bean id="propertyPlaceholderConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:koya.properties</value>
+				<value>classpath:koya-caches.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="anonymousRestTemplate" class="org.springframework.web.client.RestTemplate">
+		<constructor-arg>
+			<bean
+				class="org.springframework.http.client.CommonsClientHttpRequestFactory">
+				<constructor-arg>
+					<bean id="httpClient" class="org.apache.commons.httpclient.HttpClient">
+						<constructor-arg>
+							<bean id="httpClientParams"
+								class="org.apache.commons.httpclient.params.HttpClientParams">
+								<property name="authenticationPreemptive" value="false" />
+								<property name="connectionManagerClass"
+									value="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager" />
+							</bean>
+						</constructor-arg>
+					</bean>
+				</constructor-arg>
+			</bean>
+		</constructor-arg>
+		<property name="messageConverters">
+			<list>
+				<ref bean="stringHttpMessageConverter" />
+				<ref bean="jsonHttpMessageConverter" />
+			</list>
+		</property>
+		<property name="errorHandler" ref="alfrescoRestErrorHandler" />
+	</bean>
+
+
+	<bean id="stringHttpMessageConverter"
+		class="org.springframework.http.converter.StringHttpMessageConverter" />
+	<bean id="jsonHttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<bean id="jsonMediaTypeApplicationJson" class="org.springframework.http.MediaType">
+					<constructor-arg value="application" />
+					<constructor-arg value="json" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<bean id="formHttpMessageConverter"
+		class="org.springframework.http.converter.FormHttpMessageConverter" />
+	<bean id="alfrescoRestErrorHandler"
+		class="fr.itldev.koya.services.impl.util.AlfrescoRestErrorHandler" />
+
+	<!--================== Services =============================== -->
+
+	<bean id="cacheManager" class="fr.itldev.koya.services.cache.CacheManager">
+		<property name="permissionsCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${permissionsCache.enabled}" />
+				<property name="maxSize" value="${permissionsCache.maxSize}" />
+				<property name="expireAfterWriteSeconds"
+					value="${permissionsCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+
+		<property name="companyPreferencesCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${companyPreferencesCache.enabled}" />
+				<property name="maxSize" value="${companyPreferencesCache.maxSize}" />
+				<property name="expireAfterWriteSeconds"
+					value="${companyPreferencesCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+
+		<property name="userFavouritesCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${userFavouritesCache.enabled}" />
+				<property name="maxSize" value="${userFavouritesCache.maxSize}" />
+				<property name="expireAfterWriteSeconds"
+					value="${userFavouritesCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+
+		<property name="nodeSharedWithConsumerCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${nodeSharedWithConsumerCache.enabled}" />
+				<property name="maxSize" value="${nodeSharedWithConsumerCache.maxSize}" />
+				<property name="expireAfterWriteSeconds"
+					value="${nodeSharedWithConsumerCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+
+		<property name="invitationsCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${invitationsCache.enabled}" />
+				<property name="maxSize" value="${invitationsCache.maxSize}" />
+				<property name="expireAfterWriteSeconds"
+					value="${invitationsCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+
+	</bean>
+
+
+	<!--================== service parent abstrait - gere l'héritage de propriétés 
+		== -->
+	<bean id="abstractRestService" abstract="true">
+		<property name="alfrescoServerUrl" value="${alfresco.server.url}" />
+		<property name="template" ref="anonymousRestTemplate" />
+	</bean>
+
+	<bean id="alfrescoService" class="fr.itldev.koya.services.impl.AlfrescoRestService"
+		parent="abstractRestService" />
+
+	<bean id="securedItemService" class="fr.itldev.koya.services.impl.SecuredItemServiceImpl"
+		parent="abstractRestService">
+		<property name="favouriteService" ref="favouriteService" />
+	</bean>
+
+	<bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl"
+		parent="abstractRestService" />
+
+	<bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl"
+		parent="abstractRestService">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+	<bean id="spaceService" class="fr.itldev.koya.services.impl.SpaceServiceImpl"
+		parent="abstractRestService" />
+
+	<bean id="dossierService" class="fr.itldev.koya.services.impl.DossierServiceImpl"
+		parent="abstractRestService">
+		<property name="koyaContentService" ref="koyaContentService" />
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+	<bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl"
+		parent="abstractRestService" />
+
+	<bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl"
+		parent="abstractRestService">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+	<bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl"
+		parent="abstractRestService">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+	<bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl"
+		parent="abstractRestService">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+	<bean id="searchService" class="fr.itldev.koya.services.impl.SearchServiceImpl"
+		parent="abstractRestService" />
+
+	<bean id="notificationService" class="fr.itldev.koya.services.impl.NotificationServiceImpl"
+		parent="abstractRestService" />
+
+	<bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl"
+		parent="abstractRestService">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
 </beans>

@@ -18,33 +18,26 @@
  */
 package fr.itldev.koya.services.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.codehaus.jackson.type.TypeReference;
+
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.SubSpace;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.ShareService;
+import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
-import fr.itldev.koya.services.impl.util.CacheConfig;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import org.codehaus.jackson.type.TypeReference;
-import org.json.simple.JSONObject;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 /**
  *
  *
  */
-public class ShareServiceImpl extends AlfrescoRestService implements ShareService, InitializingBean {
+public class ShareServiceImpl extends AlfrescoRestService implements ShareService {
 
     protected static final String REST_GET_SHAREDUSERS = "/s/fr/itldev/koya/share/sharedusers/{noderef}";
     protected static final String REST_GET_SHAREDITEMS = "/s/fr/itldev/koya/share/listusershares/{userName}/{companyName}";
@@ -55,37 +48,19 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
 
     protected static final String REST_POST_UNSHARESINGLE = "/s/fr/itldev/koya/share/undo";
 
-    private Cache<SubSpace, Boolean> nodeSharedWithConsumerCache;
-    private CacheConfig nodeSharedWithConsumerCacheConfig;
+    private CacheManager cacheManager;
+    
 
-    public void setNodeSharedWithConsumerCacheConfig(
-            CacheConfig nodeSharedWithConsumerCacheConfig) {
-        this.nodeSharedWithConsumerCacheConfig = nodeSharedWithConsumerCacheConfig;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-        if (nodeSharedWithConsumerCacheConfig == null) {
-            nodeSharedWithConsumerCacheConfig = CacheConfig.noCache();
-        }
-        nodeSharedWithConsumerCacheConfig.debugLogConfig("nodeSharedWithConsumerCache");
-
-        if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-            nodeSharedWithConsumerCache = CacheBuilder.newBuilder()
-                    .maximumSize(nodeSharedWithConsumerCacheConfig.getMaxSize())
-                    .expireAfterWrite(nodeSharedWithConsumerCacheConfig.getExpireAfterWriteSeconds(),
-                            TimeUnit.SECONDS)
-                    .build();
-        }
-    }
+    public void setCacheManager(CacheManager cacheManager) {
+		this.cacheManager = cacheManager;
+	}
+    
 
     @Override
     public void shareItem(User user, SecuredItem itemToShare,
-            String sharedUserMail) throws AlfrescoServiceException {
-        if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-            nodeSharedWithConsumerCache.invalidate(itemToShare);
-        }
+            String sharedUserMail) throws AlfrescoServiceException {        
+    	cacheManager.revokeNodeSharedWithConsumer(itemToShare);
+
 
         Map<String, String> shareParams = new HashMap<>();
         shareParams.put("email", sharedUserMail);
@@ -103,9 +78,7 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
     @Override
     public void unShareItem(User user, SecuredItem itemToUnShare,
             String unsharedUserMail) throws AlfrescoServiceException {
-        if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-            nodeSharedWithConsumerCache.invalidate(itemToUnShare);
-        }
+    	cacheManager.revokeNodeSharedWithConsumer(itemToUnShare);
 
         Map<String, String> unshareParams = new HashMap<>();
         unshareParams.put("email", unsharedUserMail);
@@ -166,19 +139,15 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
         if (item == null) {
             return Boolean.FALSE;
         }
-        Boolean shared;
-        if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-            shared = nodeSharedWithConsumerCache.getIfPresent(item);
+        Boolean shared = cacheManager.getNodeSharedWithConsumer((SecuredItem) item);
+        
             if (shared != null) {
                 return shared;
             }
-        }
         shared = getTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ISSHAREDWITHCONSUMER,
                 Boolean.class, item.getNodeRef());
-        if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-            nodeSharedWithConsumerCache.put(item, shared);
-        }
+        cacheManager.setNodeSharedWithConsumer((SecuredItem) item, shared);
         return shared;
 
     }
