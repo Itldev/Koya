@@ -136,19 +136,24 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                         NodeRef importDest = (NodeRef) ruleAction
                                 .getParameterValue(PARAM_DESTINATION_FOLDER);
 
-                        //Disabled policy on ASPECT_AUDITABLE (LastModificationDateBehaviour)
-                        policyBehaviourFilter.disableBehaviour(ContentModel.ASPECT_AUDITABLE);
+                        // Disabled policy on ASPECT_AUDITABLE
+                        // (LastModificationDateBehaviour)
+                        policyBehaviourFilter
+                                .disableBehaviour(ContentModel.ASPECT_AUDITABLE);
                         importDirectory(tempDir.getPath(), importDest);
-                        
+
                         logger.debug("Unzip Complete : "
                                 + nodeService.getPath(actionedUponNodeRef)
-                                .toPrefixString(namespaceService));
-                        
-                        //Update the modification date on the dossier
-                        dossierService.addOrUpdateLastModifiedDate(actionedUponNodeRef);
+                                        .toPrefixString(namespaceService));
+
+                        // Update the modification date on the dossier
+                        dossierService
+                                .addOrUpdateLastModifiedDate(actionedUponNodeRef);
                     }
 
-                } catch (KoyaServiceException | ContentIOException ex) {
+                } catch (KoyaServiceException kse) {
+                    throw kse;
+                } catch (ContentIOException ex) {
                     throw new AlfrescoRuntimeException(
                             "Failed to import ZIP file. " + ex.getMessage(), ex);
                 } finally {

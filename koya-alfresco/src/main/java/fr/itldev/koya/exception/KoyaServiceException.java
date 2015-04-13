@@ -21,7 +21,7 @@ package fr.itldev.koya.exception;
 /**
  *
  */
-public class KoyaServiceException extends Exception {
+public class KoyaServiceException extends RuntimeException {
 
     private Integer errorCode;
 
@@ -38,7 +38,8 @@ public class KoyaServiceException extends Exception {
         this.errorCode = errorCode;
     }
 
-    public KoyaServiceException(Integer errorCode, String message, Throwable cause) {
+    public KoyaServiceException(Integer errorCode, String message,
+            Throwable cause) {
         super(message, cause);
         this.errorCode = errorCode;
     }
@@ -48,7 +49,9 @@ public class KoyaServiceException extends Exception {
         this.errorCode = errorCode;
     }
 
-    public KoyaServiceException(Integer errorCode, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public KoyaServiceException(Integer errorCode, String message,
+            Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.errorCode = errorCode;
     }

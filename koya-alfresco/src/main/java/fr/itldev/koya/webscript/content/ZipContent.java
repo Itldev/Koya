@@ -54,7 +54,8 @@ public class ZipContent extends AbstractWebScript {
     }
 
     @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+    public void execute(WebScriptRequest req, WebScriptResponse res)
+            throws IOException {
         Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 
         ArrayList<String> nodeRefs = new ArrayList<>();
@@ -71,7 +72,8 @@ public class ZipContent extends AbstractWebScript {
             res.setHeader("Content-Transfer-Encoding", "binary");
             res.addHeader("Content-Disposition", "attachment");
 
-            res.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+            res.setHeader("Cache-Control",
+                    "must-revalidate, post-check=0, pre-check=0");
             res.setHeader("Pragma", "public");
             res.setHeader("Expires", "0");
 
@@ -91,13 +93,15 @@ public class ZipContent extends AbstractWebScript {
                     IOUtils.closeQuietly(in);
                 }
             }
+        } catch (KoyaServiceException ex) {
+            throw new WebScriptException("KoyaError : "
+                    + ex.getErrorCode().toString());
         } catch (RuntimeException e) {
             /**
              * TODO koya specific exception
              */
-            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST, "Erreur lors de la génération de l'archive.", e);
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST,
+                    "Erreur lors de la génération de l'archive.", e);
         }
 
     }
