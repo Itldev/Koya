@@ -55,7 +55,7 @@ public class AlfrescoRestService implements AlfrescoService {
     private static final String REST_GET_XPATH2NODEREF = "/s/fr/itldev/koya/global/xpath2noderef/{xPath}";
     
     protected static final String REST_GET_LISTCHILD_PAGINATED = 
-    		"/s/fr/itldev/koya/content/list/paginated/{nodeRef}" +
+    		"/s/fr/itldev/koya/content/list/{nodeRef}" +
     		"?skipCount={skipCount}" +
     		"&maxItems={maxItems}" +
     		"&onlyFolders={onlyFolders}" +

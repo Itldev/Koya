@@ -588,6 +588,56 @@ public class KoyaNodeService {
             return nodeService.getChildAssocs(parent).size();
         }
     }
+    
+    
+    public List<SecuredItem> listChildrenAsTree(NodeRef parent,
+             final Integer depth,final boolean onlyFolders)
+            throws KoyaServiceException {
+       
+            List<Pair<QName, Boolean>> sortProps = new ArrayList() {           
+			private static final long serialVersionUID = 1L;
+
+			{
+                add(new Pair<>(
+                        GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER, false));
+                add(new Pair<>(ContentModel.PROP_TITLE, true));
+            }
+        };
+
+        PagingResults<FileInfo> results = fileFolderService.list(parent,
+                !onlyFolders, true, null, sortProps,
+                new PagingRequest(Integer.valueOf(0), Integer.MAX_VALUE)
+        );
+
+        List children = results.getPage();
+
+        /**
+         * Transform List<FileInfo> as List<SecuredItem>
+         */
+        CollectionUtils.transform(children, new Transformer() {
+            @Override
+            public Object transform(Object input) {
+                try {
+                    FileInfo fi = (FileInfo) input;
+                    SecuredItem si = getSecuredItem(fi.getNodeRef());
+                    try {
+                        if (depth != null && depth > 0) {
+                            Directory dir = (Directory) si;
+                            List children = listChildrenAsTree(fi.getNodeRef(), depth - 1, onlyFolders);
+                            dir.setChildren(children);
+                        }
+                    } catch (ClassCastException cce) {
+                        //Faster than instanceOf
+                    }
+                    return si;
+                } catch (KoyaServiceException ex) {
+                    return null;
+                }
+            }
+        });
+        return children;
+    }
+    
 
     /**
      *
@@ -598,8 +648,8 @@ public class KoyaNodeService {
      * @return
      * @throws KoyaServiceException
      */
-    public List<SecuredItem> listChildrenPaginated(NodeRef parent,
-            final Integer skipCount, final Integer maxItems, final Integer depth,
+    public Pair<List<SecuredItem>,Pair<Integer,Integer>> listChildrenPaginated(NodeRef parent,
+            final Integer skipCount, final Integer maxItems,
             final boolean onlyFolders,final String namePattern)
             throws KoyaServiceException {
 
@@ -620,10 +670,12 @@ public class KoyaNodeService {
                 add(new Pair<>(ContentModel.PROP_TITLE, true));
             }
         };
+        
+        PagingRequest pr = new PagingRequest(skip, max);
+        pr.setRequestTotalCountMax(Integer.MAX_VALUE);
 
         PagingResults<FileInfo> results = fileFolderService.list(parent,
-                !onlyFolders, true,namePattern, null, sortProps,
-                new PagingRequest(skip, max)
+                !onlyFolders, true,namePattern, null, sortProps,pr
         );
 
         List children = results.getPage();
@@ -634,26 +686,15 @@ public class KoyaNodeService {
         CollectionUtils.transform(children, new Transformer() {
             @Override
             public Object transform(Object input) {
-                try {
-                    FileInfo fi = (FileInfo) input;
-                    SecuredItem si = getSecuredItem(fi.getNodeRef());
-                    try {
-                        if (depth != null && depth > 0) {
-                            Directory dir = (Directory) si;
-                            List children = listChildrenPaginated(fi.getNodeRef(), skipCount, maxItems, depth - 1, onlyFolders,namePattern);
-
-                            dir.setChildren(children);
-                        }
-                    } catch (ClassCastException cce) {
-                        //Faster than instanceOf
-                    }
-                    return si;
+                try {                    
+                    return getSecuredItem(((FileInfo) input).getNodeRef());
                 } catch (KoyaServiceException ex) {
                     return null;
                 }
             }
         });
-        return children;
+         
+        return  new Pair<List<SecuredItem>, Pair<Integer,Integer>>(children, results.getTotalResultCount());
     }
 
     public Properties readPropertiesFileContent(NodeRef fileNr) {

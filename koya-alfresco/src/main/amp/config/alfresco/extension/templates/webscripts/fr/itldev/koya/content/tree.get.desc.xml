@@ -20,9 +20,9 @@
 -->
 
 <webscript>
-    <shortname>List Content Paginated</shortname>
-    <family>Itldev</family>    
-    <url>/fr/itldev/koya/content/list/{nodeRef}?onlyFolders={onlyFolders}&amp;skipCount={skipCount}&amp;maxItems={maxItems}&amp;filterExpr={filterExpr}&amp;sortExpr={sortExpr}&amp;typeFilter={typeFilter}</url>
+    <shortname>List Content as tree</shortname>
+    <family>Itldev</family>
+    <url>/fr/itldev/koya/content/tree/{nodeRef}?onlyFolders={onlyFolders}&amp;maxdepth={maxdepth}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

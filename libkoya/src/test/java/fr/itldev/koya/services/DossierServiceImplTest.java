@@ -129,7 +129,7 @@ public class DossierServiceImplTest extends TestCase {
         dossierService.create(admin, spaceTests, "doss2");
         dossierService.create(admin, spaceTests, "doss3");
         dossierService.create(admin, spaceTests, "doss4");
-        assertEquals(4, dossierService.list(admin, spaceTests, 0, 10).size());
+        assertEquals(4, dossierService.list(admin, spaceTests, 0, 10).getChildren().size());
     }
 
      @Test

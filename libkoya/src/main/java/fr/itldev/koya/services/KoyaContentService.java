@@ -18,18 +18,20 @@
  */
 package fr.itldev.koya.services;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.List;
+
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.core.io.Resource;
+
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.interfaces.Container;
 import fr.itldev.koya.model.interfaces.Content;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.io.File;
-import java.io.InputStream;
-import java.util.List;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.springframework.core.io.Resource;
 
 public interface KoyaContentService extends AlfrescoService {
 
@@ -45,7 +47,7 @@ public interface KoyaContentService extends AlfrescoService {
 
     List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer depth) throws AlfrescoServiceException;
 
-    List<Content> listPaginatedDirectChild(User user, NodeRef containerToList,
+    PaginatedContentList listPaginatedDirectChild(User user, NodeRef containerToList,
             Integer skipCount, Integer maxItems, Boolean onlyFolders) throws AlfrescoServiceException;
 
     Integer countChildren(User user, SecuredItem parent, Boolean onlyFolders) throws AlfrescoServiceException;

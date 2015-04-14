@@ -18,12 +18,17 @@
  */
 package fr.itldev.koya.services.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.Pair;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.core.io.Resource;
 
@@ -32,6 +37,7 @@ import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -124,7 +130,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<Dossier> list(User user, Space space, int skipCount,
+    public PaginatedContentList list(User user, Space space, int skipCount,
             int maxItems) throws AlfrescoServiceException {     
     	return list(user, space, skipCount, maxItems,"","");
     }
@@ -139,16 +145,17 @@ public class DossierServiceImpl extends AlfrescoRestService implements
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<Dossier> list(User user, Space space, int skipCount,
+    public PaginatedContentList list(User user, Space space, int skipCount,
             int maxItems, String filter,String sort) throws AlfrescoServiceException {     
-            
-
-        return fromJSON(
-                new TypeReference<List<Dossier>>() {
-                },
-                user.getRestTemplate().getForObject(
-                        getAlfrescoServerUrl() + AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
-                        String.class, space.getNodeRef(), skipCount, maxItems,true,filter,sort, ""));
+    	
+		PaginatedContentList pcl = 
+				user.getRestTemplate()
+						.getForObject(
+								getAlfrescoServerUrl()
+										+ AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
+										PaginatedContentList.class, space.getNodeRef(), skipCount,
+								maxItems, true, filter, sort, "");    	
+    	return pcl; 
     }
 
     /**

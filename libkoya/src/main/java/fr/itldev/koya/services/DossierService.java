@@ -25,6 +25,7 @@ import org.springframework.core.io.Resource;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public interface DossierService extends AlfrescoService {
@@ -74,7 +75,7 @@ public interface DossierService extends AlfrescoService {
      * @return
      * @throws AlfrescoServiceException
      */
-    List<Dossier> list(User user, Space space, int skipCount, int maxItems) throws AlfrescoServiceException;
+    PaginatedContentList list(User user, Space space, int skipCount, int maxItems) throws AlfrescoServiceException;
     
     /**
      * List all Space Dossiers
@@ -88,7 +89,7 @@ public interface DossierService extends AlfrescoService {
      * @return
      * @throws AlfrescoServiceException
      */
-    List<Dossier> list(User user, Space space, int skipCount, int maxItems,
+    PaginatedContentList list(User user, Space space, int skipCount, int maxItems,
             String filter,String sort) throws AlfrescoServiceException;
 
     /**

@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,8 +35,10 @@ import java.util.Set;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.Pair;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.json.simple.JSONObject;
 import org.springframework.core.io.Resource;
@@ -48,182 +51,212 @@ import org.springframework.util.MultiValueMap;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.DiskSizeWrapper;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService {
+public class KoyaContentServiceImpl extends AlfrescoRestService implements
+		KoyaContentService {
 
-    private static final String REST_GET_CREATEDIR = "/s/fr/itldev/koya/content/createdir/{parentNodeRef}?title={title}";
-    private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}";
-    private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}";
+	private static final String REST_GET_CREATEDIR = "/s/fr/itldev/koya/content/createdir/{parentNodeRef}?title={title}";
+	private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}";
+	private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}";
 
-    //
-    private static final String REST_GET_LISTCONTENT = "/s/fr/itldev/koya/content/list/recursive/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}";
- 
-    private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
-    private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
-    private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
+	//
+	private static final String REST_GET_LISTCONTENTTREE = "/s/fr/itldev/koya/content/tree/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}";
 
-    @Override
-    public Directory createDir(User user, NodeRef parent, String title) throws AlfrescoServiceException {
-        if (parent == null) {
-            throw new AlfrescoServiceException("parent noderef must be set", 0);
-        }
-        return fromJSON(new TypeReference<Directory>() {
-        }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_CREATEDIR,
-                String.class, parent.toString(), title));
-    }
+	private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
+	private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
+	private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
 
-    @Override
-    public Document upload(User user, NodeRef parent, File f) throws AlfrescoServiceException {
-       return upload(user, parent,(Object) f);
-    }
-
-    @Override
-    public Document upload(User user, NodeRef parent, Resource r) throws AlfrescoServiceException {
-        return upload(user, parent,(Object) r);
-    }
-
-    private Document upload(User user, NodeRef parent, Object o) throws AlfrescoServiceException {
-        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-        parts.add("filedata", o);
-        parts.add("destination", parent.toString());
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(parts, headers);
-        AlfrescoUploadReturn upReturn = fromJSON(new TypeReference<AlfrescoUploadReturn>() {
-        }, user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_UPLOAD, request, String.class));
-
-        return (Document) getSecuredItem(user, upReturn.getNodeRef());
-
-    }
-
-    @Override
-    public Content move(User user, NodeRef contentToMove, NodeRef destination) throws AlfrescoServiceException {
-        return (Content) fromJSON(new TypeReference<SecuredItem>() {
-        }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_MOVECONTENT, String.class, contentToMove, destination));
-    }
-
-    @Override
-    public Content copy(User user, NodeRef contentToCopy, NodeRef destination) throws AlfrescoServiceException {
-        return (Content) fromJSON(new TypeReference<SecuredItem>() {
-        }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_COPYCONTENT, String.class, contentToCopy, destination));
-    }
-
-    private static final Transformer TRANSFORM_TO_CONTENTS = new Transformer() {
-        @Override
-        public Object transform(Object input) {
-            return (Content) input;
-        }
-    };
-
-    @SuppressWarnings("unchecked")
 	@Override
-    public List<Content> list(User user, NodeRef containerToList, Boolean onlyFolders, Integer depth) throws AlfrescoServiceException {
+	public Directory createDir(User user, NodeRef parent, String title)
+			throws AlfrescoServiceException {
+		if (parent == null) {
+			throw new AlfrescoServiceException("parent noderef must be set", 0);
+		}
+		return fromJSON(
+				new TypeReference<Directory>() {
+				},
+				user.getRestTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_CREATEDIR,
+						String.class, parent.toString(), title));
+	}
 
-        @SuppressWarnings("rawtypes")
-		List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
-        }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_LISTCONTENT,
-                String.class, containerToList, onlyFolders, depth));
-
-        //tranform SecuredItems to contents
-        CollectionUtils.transform(contents, TRANSFORM_TO_CONTENTS);
-
-        return contents;
-    }
-
-    /**
-     *
-     * @param user
-     * @param containerToList
-     * @param skipCount
-     * @param maxItems
-     * @param onlyFolders
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    @SuppressWarnings("unchecked")
 	@Override
-    public List<Content> listPaginatedDirectChild(User user, NodeRef containerToList,
-            Integer skipCount, Integer maxItems, Boolean onlyFolders) throws AlfrescoServiceException {
+	public Document upload(User user, NodeRef parent, File f)
+			throws AlfrescoServiceException {
+		return upload(user, parent, (Object) f);
+	}
 
-        @SuppressWarnings("rawtypes")
-		List contents = fromJSON(new TypeReference<List<SecuredItem>>() {
-        }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
-                String.class, containerToList, skipCount, maxItems, onlyFolders,"","",""));
+	@Override
+	public Document upload(User user, NodeRef parent, Resource r)
+			throws AlfrescoServiceException {
+		return upload(user, parent, (Object) r);
+	}
 
-        //tranform SecuredItems to contents
-        CollectionUtils.transform(contents, TRANSFORM_TO_CONTENTS);
-        return contents;
+	private Document upload(User user, NodeRef parent, Object o)
+			throws AlfrescoServiceException {
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+		parts.add("filedata", o);
+		parts.add("destination", parent.toString());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+		HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(
+				parts, headers);
+		AlfrescoUploadReturn upReturn = fromJSON(
+				new TypeReference<AlfrescoUploadReturn>() {
+				},
+				user.getRestTemplate().postForObject(
+						getAlfrescoServerUrl() + REST_POST_UPLOAD, request,
+						String.class));
 
-    }
+		return (Document) getSecuredItem(user, upReturn.getNodeRef());
 
-    @Override
-    public Integer countChildren(User user, SecuredItem parent, Boolean onlyFolders) throws AlfrescoServiceException {
+	}
 
-        Set<QName> typeFilter = new HashSet<>();
+	@Override
+	public Content move(User user, NodeRef contentToMove, NodeRef destination)
+			throws AlfrescoServiceException {
+		return (Content) fromJSON(
+				new TypeReference<SecuredItem>() {
+				},
+				user.getRestTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_MOVECONTENT,
+						String.class, contentToMove, destination));
+	}
 
-        if (onlyFolders) {
-            typeFilter.add(ContentModel.TYPE_FOLDER);
-        }
+	@Override
+	public Content copy(User user, NodeRef contentToCopy, NodeRef destination)
+			throws AlfrescoServiceException {
+		return (Content) fromJSON(
+				new TypeReference<SecuredItem>() {
+				},
+				user.getRestTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_COPYCONTENT,
+						String.class, contentToCopy, destination));
+	}
 
-        return countChildren(user, parent, typeFilter);
-    }
+	private static final Transformer TRANSFORM_TO_CONTENTS = new Transformer() {
+		@Override
+		public Object transform(Object input) {
+			return (Content) input;
+		}
+	};
 
-    @Override
-    public Long getDiskSize(User user, SecuredItem securedItem) throws AlfrescoServiceException {
-        DiskSizeWrapper ret = fromJSON(new TypeReference<DiskSizeWrapper>() {
-        }, user.getRestTemplate().getForObject(getAlfrescoServerUrl()
-                + REST_GET_DISKSIZE, String.class, securedItem.getNodeRef()));
-        return ret.getSize();
-    }
+	// TODO merge with a generic listing service
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Content> list(User user, NodeRef containerToList,
+			Boolean onlyFolders, Integer depth) throws AlfrescoServiceException {
 
-    @Override
-    public InputStream getZipInputStream(User user, List<SecuredItem> securedItems) throws AlfrescoServiceException {
-        HttpURLConnection con;
+		@SuppressWarnings("rawtypes")
+		List contents = fromJSON(
+				new TypeReference<List<SecuredItem>>() {
+				},
+				user.getRestTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_LISTCONTENTTREE,
+						String.class, containerToList, onlyFolders, depth));
 
-        try {
-            String urlDownload = getAlfrescoServerUrl() + DOWNLOAD_ZIP_WS_URI + user.getTicketAlfresco();
+		// tranform SecuredItems to contents
+		CollectionUtils.transform(contents, TRANSFORM_TO_CONTENTS);
 
-            Map<String, Serializable> params = new HashMap<>();
-            ArrayList<String> selected = new ArrayList<>();
-            params.put("nodeRefs", selected);
-            for (SecuredItem item : securedItems) {
-                selected.add(item.getNodeRef());
-            }
+		return contents;
+	}
 
-            JSONObject postParams = new JSONObject(params);
+	/**
+	 * 
+	 * @param user
+	 * @param containerToList
+	 * @param skipCount
+	 * @param maxItems
+	 * @param onlyFolders
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public PaginatedContentList listPaginatedDirectChild(User user,
+			NodeRef containerToList, Integer skipCount, Integer maxItems,
+			Boolean onlyFolders) throws AlfrescoServiceException {
 
-            con = (HttpURLConnection) new URL(urlDownload).openConnection();
-            con.setRequestMethod("POST");
-            con.setDoOutput(true);
-            con.setDoInput(true);
-            con.setRequestProperty("Content-Type", "application/json");
+		PaginatedContentList pcl = user.getRestTemplate().getForObject(
+				getAlfrescoServerUrl()
+						+ AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
+				PaginatedContentList.class, containerToList, skipCount,
+				maxItems, onlyFolders, "", "", "");
+		return pcl;
+	}
 
-            con.getOutputStream().write(postParams.toString().getBytes());
+	@Override
+	public Integer countChildren(User user, SecuredItem parent,
+			Boolean onlyFolders) throws AlfrescoServiceException {
 
-            return con.getInputStream();
+		Set<QName> typeFilter = new HashSet<>();
 
-        } catch (IOException e) {
-            throw new AlfrescoServiceException(e.getMessage(), e);
-        }
-    }
+		if (onlyFolders) {
+			typeFilter.add(ContentModel.TYPE_FOLDER);
+		}
 
-    @Override
-    public void importZipedContent(User user, Document zipFile) throws AlfrescoServiceException {
-        user.getRestTemplate()
-                .getForObject(getAlfrescoServerUrl() + REST_GET_IMPORTZIP,
-                        String.class, zipFile.getNodeRef());
-    }
+		return countChildren(user, parent, typeFilter);
+	}
+
+	@Override
+	public Long getDiskSize(User user, SecuredItem securedItem)
+			throws AlfrescoServiceException {
+		DiskSizeWrapper ret = fromJSON(
+				new TypeReference<DiskSizeWrapper>() {
+				},
+				user.getRestTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_DISKSIZE,
+						String.class, securedItem.getNodeRef()));
+		return ret.getSize();
+	}
+
+	@Override
+	public InputStream getZipInputStream(User user,
+			List<SecuredItem> securedItems) throws AlfrescoServiceException {
+		HttpURLConnection con;
+
+		try {
+			String urlDownload = getAlfrescoServerUrl() + DOWNLOAD_ZIP_WS_URI
+					+ user.getTicketAlfresco();
+
+			Map<String, Serializable> params = new HashMap<>();
+			ArrayList<String> selected = new ArrayList<>();
+			params.put("nodeRefs", selected);
+			for (SecuredItem item : securedItems) {
+				selected.add(item.getNodeRef());
+			}
+
+			JSONObject postParams = new JSONObject(params);
+
+			con = (HttpURLConnection) new URL(urlDownload).openConnection();
+			con.setRequestMethod("POST");
+			con.setDoOutput(true);
+			con.setDoInput(true);
+			con.setRequestProperty("Content-Type", "application/json");
+
+			con.getOutputStream().write(postParams.toString().getBytes());
+
+			return con.getInputStream();
+
+		} catch (IOException e) {
+			throw new AlfrescoServiceException(e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public void importZipedContent(User user, Document zipFile)
+			throws AlfrescoServiceException {
+		user.getRestTemplate().getForObject(
+				getAlfrescoServerUrl() + REST_GET_IMPORTZIP, String.class,
+				zipFile.getNodeRef());
+	}
 
 }
