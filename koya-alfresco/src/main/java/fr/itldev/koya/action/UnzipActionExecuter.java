@@ -71,6 +71,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     private DossierService dossierService;
 
     private String defaultZipCharset;
+    private String failoverZipCharset;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -98,6 +99,10 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     public void setDefaultZipCharset(String defaultZipCharset) {
         this.defaultZipCharset = defaultZipCharset;
+    }
+
+    public void setFailoverZipCharset(String failoverZipCharset) {
+        this.failoverZipCharset = failoverZipCharset;
     }
 
     /**
@@ -132,7 +137,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                                     .toPrefixString(namespaceService) + " as "
                             + tempFile.getAbsolutePath());
                     if (Zips.unzip(tempFile.getAbsolutePath(),
-                            tempDir.getAbsolutePath(), defaultZipCharset)) {
+                            tempDir.getAbsolutePath(), defaultZipCharset, failoverZipCharset)) {
 
                         NodeRef importDest = (NodeRef) ruleAction
                                 .getParameterValue(PARAM_DESTINATION_FOLDER);
