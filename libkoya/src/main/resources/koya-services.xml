@@ -74,7 +74,7 @@
 	<bean id="alfrescoRestErrorHandler"
 		class="fr.itldev.koya.services.impl.util.AlfrescoRestErrorHandler" />
 
-	<!--================== Services =============================== -->
+	<!--================== Cache Manager =============================== -->
 
 	<bean id="cacheManager" class="fr.itldev.koya.services.cache.CacheManager">
 		<property name="permissionsCacheConfig">
@@ -124,6 +124,33 @@
 
 	</bean>
 
+
+
+	<bean id="cacheStatsDumperJob"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="cacheManager" />
+		<property name="targetMethod" value="dumpCacheStatistics" />
+	</bean>
+
+	<bean id="cacheStatsDumpCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="cacheStatsDumperJob" />
+		<property name="cronExpression" value="${cacheManager.dumpStats.cron}" />
+	</bean>
+
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="jobDetails">
+			<list>
+				<ref bean="cacheStatsDumperJob" />
+			</list>
+		</property>
+
+		<property name="triggers">
+			<list>
+				<ref bean="cacheStatsDumpCronTrigger" />
+			</list>
+		</property>
+	</bean>
 
 	<!--================== service parent abstrait - gere l'héritage de propriétés 
 		== -->

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.cache.Cache;
@@ -18,6 +19,8 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.impl.util.CacheConfig;
 
 public class CacheManager implements InitializingBean {
+
+	private Logger logger = Logger.getLogger(this.getClass());
 
 	private Cache<String, Permissions> permissionsCache;
 	private CacheConfig permissionsCacheConfig;
@@ -282,6 +285,26 @@ public class CacheManager implements InitializingBean {
 		if (invitationsCacheConfig.getEnabled()) {
 			invitationsCache.invalidate(userEmail);
 		}
+	}
+
+	/**
+	 * 
+	 * =================== Cache Dump =======================
+	 * 
+	 */
+
+	public void dumpCacheStatistics() {
+		logger.info("[permissionsCache Stats] "
+				+ permissionsCache.stats().toString());
+		logger.info("[companyPreferencesCache Stats] "
+				+ companyPreferencesCache.stats().toString());
+		logger.info("[userFavouritesCache Stats] "
+				+ userFavouritesCache.stats().toString());
+		logger.info("[nodeSharedWithConsumerCache Stats] "
+				+ nodeSharedWithConsumerCache.stats().toString());
+		logger.info("[invitationsCache Stats] "
+				+ invitationsCache.stats().toString());
+
 	}
 
 }
