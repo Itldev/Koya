@@ -18,12 +18,17 @@
  */
 package fr.itldev.koya.services.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.Pair;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.core.io.Resource;
 
@@ -32,8 +37,10 @@ import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.KoyaContentService;
+import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public class DossierServiceImpl extends AlfrescoRestService implements
@@ -41,8 +48,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 
     private static final String REST_GET_CREATEDOSSIER = "/s/fr/itldev/koya/dossier/create/{parentNodeRef}?title={title}";
 
-    private static final String REST_GET_LISTCHILD = "/s/fr/itldev/koya/dossier/list/{parentNodeRef}?skipCount={skipCount}&maxItems={maxItems}&filter={filter}";
-
+   
     private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
 
     private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/dossier/member/list/{nodeRef}";
@@ -55,10 +61,16 @@ public class DossierServiceImpl extends AlfrescoRestService implements
     private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}";
 
     private KoyaContentService KoyaContentService;
+	private CacheManager cacheManager;
+
 
     public void setKoyaContentService(KoyaContentService KoyaContentService) {
         this.KoyaContentService = KoyaContentService;
     }
+
+	public void setCacheManager(CacheManager cacheManager) {
+		this.cacheManager = cacheManager;
+	}
 
     @Override
     public Dossier create(User user, Space parentSpace, String title)
@@ -125,21 +137,32 @@ public class DossierServiceImpl extends AlfrescoRestService implements
      * @throws AlfrescoServiceException
      */
     @Override
-    public List<Dossier> list(User user, Space space, int skipCount,
-            int maxItems, String... filter) throws AlfrescoServiceException {
-        String filterStr = "";
-        if (filter.length == 1) {
-            filterStr = filter[0];
-        }
-
-        return fromJSON(
-                new TypeReference<List<Dossier>>() {
-                },
-                user.getRestTemplate().getForObject(
-                        getAlfrescoServerUrl() + REST_GET_LISTCHILD,
-                        String.class, space.getNodeRef(), skipCount, maxItems,
-                        filterStr));
-
+    public PaginatedContentList list(User user, Space space, int skipCount,
+            int maxItems) throws AlfrescoServiceException {     
+    	return list(user, space, skipCount, maxItems,"","");
+    }
+    
+    /**
+     * List all Space Dossiers
+     * TODO sort parameter not process in this version
+     * 
+     * 
+     * @param user
+     * @param space
+     * @throws AlfrescoServiceException
+     */
+    @Override
+    public PaginatedContentList list(User user, Space space, int skipCount,
+            int maxItems, String filter,String sort) throws AlfrescoServiceException {     
+    	
+		PaginatedContentList pcl = 
+				user.getRestTemplate()
+						.getForObject(
+								getAlfrescoServerUrl()
+										+ AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
+										PaginatedContentList.class, space.getNodeRef(), skipCount,
+								maxItems, true, filter, sort, "");    	
+    	return pcl; 
     }
 
     /**
@@ -150,7 +173,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements
      * @return
      * @throws AlfrescoServiceException
      */
-    @Override
+    @SuppressWarnings("serial")
+	@Override
     public Integer countChildren(User user, Space space)
             throws AlfrescoServiceException {
         return countChildren(user, space, new HashSet<QName>() {
@@ -212,6 +236,10 @@ public class DossierServiceImpl extends AlfrescoRestService implements
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDRESP, String.class,
                 responsible.getUserName(), dossier.getNodeRef());
+        
+        //invalidate user cache
+        cacheManager.revokePermission(responsible, dossier.getNodeRefasObject());
+        
     }
 
     @Override
@@ -220,6 +248,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDMEMBER, String.class,
                 responsible.getUserName(), dossier.getNodeRef());
+        
+        //invalidate user cache
+        cacheManager.revokePermission(responsible, dossier.getNodeRefasObject());      
     }
 
     /**
@@ -252,7 +283,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
                 dossier.getNodeRef(), collaborator.getUserName());
-
+        cacheManager.revokePermission(collaborator, dossier.getNodeRefasObject());
     }
 
     /**
@@ -268,7 +299,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements
             User memberOrResp) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
-                memberOrResp.getUserName(), dossier.getNodeRef());
+                memberOrResp.getUserName(), dossier.getNodeRef());               
+        cacheManager.revokePermission(memberOrResp, dossier.getNodeRefasObject());
+
     }
 
     /**

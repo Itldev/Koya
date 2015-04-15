@@ -20,14 +20,9 @@
 -->
 
 <webscript>
-    <shortname>List Content</shortname>
-    <family>Itldev</family>
-    <description>
-        2 modes : 
-        * paginated : paginated direct child (depth = 1)
-        * recursive : non paginated recursive child 
-    </description>
-    <url>/fr/itldev/koya/content/list/{mode}/{nodeRef}?onlyFolders={onlyFolders}&amp;maxdepth={maxdepth}&amp;skipCount={skipCount}&amp;maxItems={maxItems}";</url>
+    <shortname>List Content Paginated</shortname>
+    <family>Itldev</family>    
+    <url>/fr/itldev/koya/content/list/{nodeRef}?onlyFolders={onlyFolders}&amp;skipCount={skipCount}&amp;maxItems={maxItems}&amp;filterExpr={filterExpr}&amp;sortExpr={sortExpr}&amp;typeFilter={typeFilter}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

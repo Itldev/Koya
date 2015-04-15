@@ -47,6 +47,8 @@ import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.utils.Zips;
+import java.util.HashSet;
+import java.util.Set;
 import org.alfresco.repo.policy.BehaviourFilter;
 
 public class UnzipActionExecuter extends ActionExecuterAbstractBase {
@@ -67,8 +69,9 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     private KoyaContentService koyaContentService;
     private DossierService dossierService;
-    
+
     private String defaultZipCharset;
+    private String failoverZipCharset;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -98,10 +101,14 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
         this.defaultZipCharset = defaultZipCharset;
     }
 
+
+    public void setFailoverZipCharset(String failoverZipCharset) {
+        this.failoverZipCharset = failoverZipCharset;
+    }
+
     /**
-     * @see
-     * org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
-     * org.alfresco.repo.ref.NodeRef)
+     * @see org.alfresco.repo.action.executer.ActionExecuter#execute(org.alfresco.repo.ref.NodeRef,
+     *      org.alfresco.repo.ref.NodeRef)
      */
     @Override
     public void executeImpl(Action ruleAction, NodeRef actionedUponNodeRef) {
@@ -128,27 +135,32 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
                     logger.debug("Unzip : "
                             + nodeService.getPath(actionedUponNodeRef)
-                            .toPrefixString(namespaceService) + " as "
+                                    .toPrefixString(namespaceService) + " as "
                             + tempFile.getAbsolutePath());
                     if (Zips.unzip(tempFile.getAbsolutePath(),
-                            tempDir.getAbsolutePath(), defaultZipCharset)) {
+                            tempDir.getAbsolutePath(), defaultZipCharset, failoverZipCharset)) {
 
                         NodeRef importDest = (NodeRef) ruleAction
                                 .getParameterValue(PARAM_DESTINATION_FOLDER);
 
-                        //Disabled policy on ASPECT_AUDITABLE (LastModificationDateBehaviour)
-                        policyBehaviourFilter.disableBehaviour(ContentModel.ASPECT_AUDITABLE);
+                        // Disabled policy on ASPECT_AUDITABLE
+                        // (LastModificationDateBehaviour)
+                        policyBehaviourFilter
+                                .disableBehaviour(ContentModel.ASPECT_AUDITABLE);
                         importDirectory(tempDir.getPath(), importDest);
-                        
+
                         logger.debug("Unzip Complete : "
                                 + nodeService.getPath(actionedUponNodeRef)
-                                .toPrefixString(namespaceService));
-                        
-                        //Update the modification date on the dossier
-                        dossierService.addOrUpdateLastModifiedDate(actionedUponNodeRef);
+                                        .toPrefixString(namespaceService));
+
+                        // Update the modification date on the dossier
+                        dossierService
+                                .addOrUpdateLastModifiedDate(actionedUponNodeRef);
                     }
 
-                } catch (KoyaServiceException | ContentIOException ex) {
+                } catch (KoyaServiceException kse) {
+                    throw kse;
+                } catch (ContentIOException ex) {
                     throw new AlfrescoRuntimeException(
                             "Failed to import ZIP file. " + ex.getMessage(), ex);
                 } finally {
@@ -180,31 +192,52 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
             throws KoyaServiceException {
         // Path topdir = Paths.get(dir);
         String currentPath = "";
+        Set<String> filenames = new HashSet<>();
+
         try (DirectoryStream<Path> directoryStream = Files
                 .newDirectoryStream(Paths.get(directory))) {
 
             for (Path path : directoryStream) {
                 String fileName = path.getFileName().toString();
+                String uniqueFileName = fileName;
+
                 currentPath = path.toString();
                 logger.trace("nex :" + fileName);
 
                 if (Files.isRegularFile(path)) {
-                    koyaContentService.createContentNode(root, fileName,
+                    int i = 1;
+                    int dotIdx = fileName.lastIndexOf(".");
+                    final String name = (dotIdx != -1) ? fileName.substring(0,
+                            dotIdx) : fileName;
+                    final String ext = (dotIdx != -1) ? fileName
+                            .substring(dotIdx) : "";
+                    while (filenames.contains(uniqueFileName.toLowerCase())) {
+                        uniqueFileName = name + " (" + (++i) + ")" + ext;
+                    }
+                    koyaContentService.createContentNode(root, uniqueFileName,
                             Files.newInputStream(path));
 
                 } else {
+                    int i = 0;
+
+                    while (filenames.contains(uniqueFileName.toLowerCase())) {
+                        uniqueFileName = fileName + "-" + i;
+                        i++;
+                    }
                     // create a folder node
-                    Directory d = koyaContentService.createDir(fileName, root);
+                    Directory d = koyaContentService.createDir(uniqueFileName,
+                            root);
                     // logger.debug(file.getPath());
 
                     logger.trace(path);
                     // recurcive call to import folder contents
                     importDirectory(path.toString(), d.getNodeRefasObject());
                 }
-
+                filenames.add(uniqueFileName.toLowerCase());
             }
         } catch (IOException ex) {
-            logger.error("Import IOException on " + currentPath + " : " + ex.toString());
+            logger.error("Import IOException on " + currentPath + " : "
+                    + ex.toString());
         }
     }
 

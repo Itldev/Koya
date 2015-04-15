@@ -41,7 +41,8 @@
         <property name="authenticationService" ref="authenticationService" />
         <property name="defaultZipCharset" >
             <value>${koya.zip.defaultcharset}</value>
-        </property>   
+        </property>
+        <property name="failoverZipCharset" value="${koya.zip.failovercharset}" />
         <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
 
     </bean>
@@ -54,6 +55,7 @@
         <property name="defaultZipCharset" >
             <value>${koya.zip.defaultcharset}</value>
         </property>   
+        <property name="failoverZipCharset" value="${koya.zip.failovercharset}" />
         <property name="dossierService" ref="dossierService" />
         <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
     </bean>

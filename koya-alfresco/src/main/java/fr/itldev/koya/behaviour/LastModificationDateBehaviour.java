@@ -1,8 +1,5 @@
 package fr.itldev.koya.behaviour;
 
-import fr.itldev.koya.alfservice.DossierService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.model.KoyaModel;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies;
 import org.alfresco.repo.node.NodeServicePolicies;
@@ -15,6 +12,12 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+
+
+import fr.itldev.koya.alfservice.DossierService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.model.KoyaModel;
+
 
 /**
  *
@@ -33,7 +36,7 @@ public class LastModificationDateBehaviour implements
     private PolicyComponent policyComponent;
     private KoyaNodeService koyaNodeService;
     private DossierService dossierService;
-//    private TransactionService transactionService;
+
 
     // Behaviours
     private Behaviour onDeleteNode;
@@ -72,13 +75,6 @@ public class LastModificationDateBehaviour implements
         this.dossierService = dossierService;
     }
 
-//    public TransactionService getTransactionService() {
-//        return transactionService;
-//    }
-//
-//    public void setTransactionService(TransactionService transactionService) {
-//        this.transactionService = transactionService;
-//    }
     public void init() {
 
         // Create behaviours
@@ -111,7 +107,7 @@ public class LastModificationDateBehaviour implements
     @Override
     public void onDeleteNode(ChildAssociationRef childAssocRef,
             boolean isNodeArchived) {
-        logger.debug("deleted");
+
         if (nodeService.exists(childAssocRef.getChildRef())) {
             dossierService.addOrUpdateLastModifiedDate(childAssocRef.getChildRef());
         }
@@ -119,7 +115,7 @@ public class LastModificationDateBehaviour implements
 
     @Override
     public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
-        logger.debug("updated");
+
         if (nodeService.exists(nodeRef)) {
             dossierService.addOrUpdateLastModifiedDate(nodeRef);
         }
@@ -127,7 +123,7 @@ public class LastModificationDateBehaviour implements
 
     @Override
     public void onAddAspect(NodeRef nodeRef, QName aspectTypeQName) {
-        logger.debug("add aspect");
+
         if (nodeService.getType(nodeRef).equals(KoyaModel.TYPE_DOSSIER)) {
             dossierService.addOrUpdateLastModifiedDate(nodeRef);
         }

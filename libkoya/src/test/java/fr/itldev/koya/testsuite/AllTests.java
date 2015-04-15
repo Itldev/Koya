@@ -19,15 +19,16 @@
 
 package fr.itldev.koya.testsuite;
 
-import fr.itldev.koya.services.DossierServiceImplTest;
-import fr.itldev.koya.services.CompanyServiceImplTest;
-import fr.itldev.koya.services.KoyaContentServiceImplTest;
-import fr.itldev.koya.services.SpaceServiceImplTest;
-import fr.itldev.koya.services.UserServiceImplTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.test.context.ContextConfiguration;
+
+import fr.itldev.koya.services.CompanyServiceImplTest;
+import fr.itldev.koya.services.DossierServiceImplTest;
+import fr.itldev.koya.services.KoyaContentServiceImplTest;
+import fr.itldev.koya.services.SpaceServiceImplTest;
+import fr.itldev.koya.services.UserServiceImplTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({UserServiceImplTest.class, CompanyServiceImplTest.class,

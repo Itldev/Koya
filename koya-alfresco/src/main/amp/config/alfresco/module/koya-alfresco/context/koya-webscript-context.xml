@@ -180,16 +180,7 @@
         <property name="dossierService" ref="dossierService" />
         <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
-    <!--list Dossiers-->
-    <bean id="webscript.fr.itldev.koya.dossier.list.get" 
-          class="fr.itldev.koya.webscript.dossier.ListDossier"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-        <property name="nodeService" ref="NodeService" />   
-        
-    </bean>
-    
-        
+               
     <!--list dossier responsibles-->
     <bean id="webscript.fr.itldev.koya.dossier.listresponsible.get" 
           class="fr.itldev.koya.webscript.dossier.ListResponsible"
@@ -274,9 +265,14 @@
     <bean id="webscript.fr.itldev.koya.content.list.get" 
           class="fr.itldev.koya.webscript.content.ListContent"
           parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />  
         <property name="koyaNodeService" ref="koyaNodeService" />     
-        <property name="nodeService" ref="NodeService" />      
+    </bean>
+    
+       <!--content listing-->
+    <bean id="webscript.fr.itldev.koya.content.tree.get" 
+          class="fr.itldev.koya.webscript.content.ListContentTree"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService" />     
     </bean>
     
     <!--content move-->

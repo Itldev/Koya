@@ -20,11 +20,10 @@
 -->
 
 <webscript>
-    <shortname>List Dossiers</shortname>
-    <description>List available Dossiers in Space</description>
+    <shortname>List Content as tree</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/dossier/list/{parentNodeRef}?skipCount={skipCount}&amp;maxItems={maxItems}&amp;filter={filter}</url>
-    <authentication>user</authentication>
+    <url>/fr/itldev/koya/content/tree/{nodeRef}?onlyFolders={onlyFolders}&amp;maxdepth={maxdepth}</url>
+    <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
 

@@ -64,8 +64,7 @@ public class IsConfidential extends AbstractWebScript {
             isConfidential = SubSpaceAclService.isConfidential(item);
 
         } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : "
-                    + ex.getErrorCode().toString());
+        	//silently ignore exception 
         }
         res.setContentType("application/json");
         res.getWriter().write(isConfidential.toString());

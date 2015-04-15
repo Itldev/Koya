@@ -1,5 +1,7 @@
 package fr.itldev.koya.utils;
 
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;
@@ -13,6 +15,8 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.zip.ZipError;
 
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.log4j.Logger;
@@ -26,13 +30,11 @@ public class Zips {
      * Unzips the specified zip file to the specified destination directory.
      * Replaces any files in the destination, if they already exist.
      *
-     * @param zipPath
-     *            the name of the zip file to extract
-     * @param destPath
-     *            the directory to unzip to
-     * @throws IOException
+     * @param zipPath the name of the zip file to extract
+     * @param destPath the directory to unzip to
      */
-    public static boolean unzip(String zipPath, String destPath,String defaultCharset) {
+    public static boolean unzip(String zipPath, String destPath,
+            String defaultCharset, final String failoverCharset) {
         try {
             final Path destDir = Paths.get(destPath);
             // if the destination doesn't exist, create it
@@ -46,22 +48,16 @@ public class Zips {
             /* We want to read an existing ZIP File, so we set this to False */
             zipProperties.put("create", "false");
             String charset = determineCharset(zipPath);
-            if (charset != null) {
-                switch (charset.toLowerCase()) {
-                case "windows-1252":
-                    // cp437 (winzip?), is detected as windows-1252)
-                    zipProperties.put("encoding", "ibm850");
-
-                    break;
-                default:
-                    zipProperties.put("encoding", charset);
-                    break;
-                }
-
-            } else {//
-                zipProperties.put("encoding", defaultCharset);
-
+            if (charset != null
+                    && charset.toLowerCase().equals("windows-1252")) {
+                // ibm850 (winzip?), is detected as windows-1252)
+                charset = "ibm850";
+            } else {
+                charset = defaultCharset;
             }
+            final String finalCharset = charset;
+
+            zipProperties.put("encoding", finalCharset);
             logger.debug(zipPath + " will be extracted using "
                     + zipProperties.get("encoding"));
 
@@ -77,10 +73,21 @@ public class Zips {
                     @Override
                     public FileVisitResult visitFile(Path file,
                             BasicFileAttributes attrs) throws IOException {
+                        String filename = null;
+                        try {
+                            filename = file.toString();
+                        } catch (IllegalArgumentException iae) {
+                            logger.error(finalCharset+" failed using "+failoverCharset+" as last chance");
+                            try {
+                                filename = new String(getPathBytes(file),failoverCharset );
+                            } catch (IllegalAccessException ex) {
+                                logger.error(ex.getMessage(), ex);
+                            }
+                        }
 
                         final Path destFile = Paths.get(destDir.toString(),
-                                file.toString());
-                        logger.trace("Extracting file " + file + " to "
+                                filename);
+                        logger.trace("Extracting file " + filename + " to "
                                 + destFile);
                         Files.copy(file, destFile,
                                 StandardCopyOption.REPLACE_EXISTING);
@@ -105,6 +112,8 @@ public class Zips {
         } catch (IOException ioe) {
             logger.error(ioe.getMessage(), ioe);
             return false;
+        } catch (ZipError ze) {
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_ZIP_ARCHIVE, ze);
         }
     }
 
@@ -139,13 +148,6 @@ public class Zips {
                     return FileVisitResult.CONTINUE;
                 }
 
-                private byte[] getPathBytes(Path p)
-                        throws IllegalAccessException {
-                    return (byte[]) FieldUtils.readDeclaredField(p, "path",
-                            true);
-
-                }
-
                 private void handleData(Path p) throws IllegalAccessException {
                     if (p.getFileName() != null) {
                         byte[] b = getPathBytes(p.getFileName());
@@ -162,4 +164,12 @@ public class Zips {
             return charsetDetectedName;
         }
     }
+
+    private static byte[] getPathBytes(Path p)
+            throws IllegalAccessException {
+        return (byte[]) FieldUtils.readDeclaredField(p, "path",
+                true);
+
+    }
+
 }

@@ -79,7 +79,7 @@ public class SearchServiceImplTest extends TestCase {
     @Before
     public void createEnv() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, "company" + new Random().nextInt(1000),
+        companyTests = companyService.create(admin, "company" + new Random().nextInt(1000000),
                 companyService.listSalesOffer(admin).get(0).getName(), "default");
         spaceFinancial = spaceService.create(admin, new Space("financial"), companyTests);
         dossierTestsOne = dossierService.create(admin, spaceFinancial, "one doss");
@@ -110,19 +110,21 @@ public class SearchServiceImplTest extends TestCase {
          Space financial, Document test financial report.txt
          Dossier three financial and Dossier first test
          */
-        assertEquals(searchService.search(admin, companyTests, searchTerm).size(), 4);
+        assertEquals(4, searchService.search(admin, companyTests, searchTerm).size());
 
         /* 
          in Space 'financial' Scope : should return 2 elements : 
          Document test financial report.txt and Dossier three financial 
          */
-        assertEquals(searchService.search(admin, spaceFinancial, searchTerm).size(), 2);
+        //TODO results returned out of search context
+        assertEquals(2,searchService.search(admin, spaceFinancial, searchTerm).size());
 
         /* 
          in Space 'financial' Scope : should return 2 elements : 
          Document test financial report.txt and Dossier three financial 
          */
-        assertEquals(searchService.search(admin, dossierTestsOne, searchTerm).size(), 1);
+        //TODO results returned out of search context
+        assertEquals(1, searchService.search(admin, dossierTestsOne, searchTerm).size());
     }
 
     @Test
@@ -132,13 +134,14 @@ public class SearchServiceImplTest extends TestCase {
          in Company Scope : should return 2 elements : 
          Document test financial report.txt and Dossier first test
          */
-        assertEquals(searchService.search(admin, companyTests, searchTerm).size(), 2);
+        assertEquals(2,searchService.search(admin, companyTests, searchTerm).size());
 
         /* 
          in Space 'financial' Scope : should return 1 elements : 
          Document financial report.txt 
          */
-        assertEquals(searchService.search(admin, spaceFinancial, searchTerm).size(), 1);
+        //TODO out of context results 
+        assertEquals(1,searchService.search(admin, spaceFinancial, searchTerm).size());
 
     }
 

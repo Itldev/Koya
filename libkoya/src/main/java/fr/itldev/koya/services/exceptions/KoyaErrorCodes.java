@@ -66,6 +66,7 @@ public interface KoyaErrorCodes {
     public static final Integer CONTENT_INVALID_PARENT_NODE = 410;
     public static final Integer CONTENT_UNKNOWN_WEBSCRIPT_LISTING_MODE = 411;
     public static final Integer MOVE_CYCLIC_RELATIONSHIP_DETECTED = 412;
+    public static final Integer INVALID_ZIP_ARCHIVE = 413;
 
     //500 -> User errors
     public static final Integer UNKNOWN_USER = 500;

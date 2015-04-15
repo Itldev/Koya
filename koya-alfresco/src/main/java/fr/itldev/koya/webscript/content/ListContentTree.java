@@ -19,12 +19,9 @@
 package fr.itldev.koya.webscript.content;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.util.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
@@ -33,7 +30,6 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -43,7 +39,9 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  * 
  * 
  */
-public class ListContent extends AbstractWebScript {
+public class ListContentTree extends AbstractWebScript {
+
+	private static final Integer DEFAULT_MAX_DEPTH = 50;
 
 	private KoyaNodeService koyaNodeService;
 
@@ -64,50 +62,25 @@ public class ListContent extends AbstractWebScript {
 			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap
 					.get(KoyaWebscript.WSCONST_NODEREF));
 
-			String filterExpr = processPatternFilter(urlParamsMap
-					.get("filterExpr"));
-
-			/**
-			 * 
-			 * TODO parameters not processed
-			 * 
-			 */
-			String sortExpr = urlParamsMap.get("sortExpr");
-			String typeFilter = urlParamsMap.get("typeFilter");
-
-			/**
-			 * Check mode
-			 */
-
 			Boolean onlyFolders = ((String) urlParamsMap
 					.get(KoyaWebscript.WSCONST_ONLYFOLDERS)).equals("true");
 
-			Integer maxItems = null;
-			Integer skipCount = null;
+			Integer depth = null;
 
-			maxItems = Integer.valueOf(urlParamsMap.get("maxItems"));
-			skipCount = Integer.valueOf(urlParamsMap.get("skipCount"));
-
-			logger.trace("listContent arguments skipcount=" + skipCount
-					+ ";maxItems=" + maxItems + ";onlyFolders=" + onlyFolders
-					+ ";filterExpr=" + filterExpr + ";sortExpr=" + sortExpr
-					+ ";typeFilter=" + typeFilter);
-
-			Pair<List<SecuredItem>, Pair<Integer, Integer>> listChildren = koyaNodeService
-					.listChildrenPaginated(parent, skipCount, maxItems,
-							onlyFolders, filterExpr);
-
-			Map<String, Object> result = new HashMap<String, Object>();
-			result.put("children", listChildren.getFirst());
-			result.put("totalValues", listChildren.getSecond());
-
-			response = KoyaWebscript.getObjectAsJson(result);
+			if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
+				depth = new Integer(
+						(String) urlParamsMap
+								.get(KoyaWebscript.WSCONST_MAXDEPTH));
+			} else {
+				depth = DEFAULT_MAX_DEPTH;
+			}
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService
+					.listChildrenAsTree(parent, depth, onlyFolders));
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
 					+ ex.getErrorCode().toString());
 		}
-		res.setContentEncoding("UTF-8");
 		res.setContentType("application/json");
 		res.getWriter().write(response);
 	}

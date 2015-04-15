@@ -74,7 +74,7 @@ public class FavouriteServiceImplTest extends TestCase {
     public void createSpace() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
         companyTests = companyService.create(admin,
-                "company" + new Random().nextInt(1000),
+                "company" + new Random().nextInt(1000000),
                 companyService.listSalesOffer(admin).get(0).getName(), "default");
         spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
         dossierTests = dossierService.create(admin, spaceTests, "doss1");

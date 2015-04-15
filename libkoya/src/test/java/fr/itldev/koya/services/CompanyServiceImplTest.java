@@ -89,7 +89,7 @@ public class CompanyServiceImplTest extends TestCase {
         SalesOffer sel = offresCom.get(0);
 
         Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000), sel.getName(), "default");
+                + new Random().nextInt(1000000), sel.getName(), "default");
         assertNotNull(created);
     }
 
@@ -102,7 +102,7 @@ public class CompanyServiceImplTest extends TestCase {
 
         Random r = new Random();
         Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000), sel.getName(), "default");
+                + new Random().nextInt(1000000), sel.getName(), "default");
 
         List<Company> lst = companyService.list(admin);
         assertTrue(lst.size() > 0);
@@ -125,7 +125,7 @@ public class CompanyServiceImplTest extends TestCase {
         SalesOffer sel = offresCom.get(0);
 
         Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000), sel.getName(), "default");
+                + new Random().nextInt(1000000), sel.getName(), "default");
 
         System.out.println("comp = " + created);
 
@@ -142,7 +142,7 @@ public class CompanyServiceImplTest extends TestCase {
         SalesOffer sel = offresCom.get(0);
 
         Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000), sel.getName(), "default");
+                + new Random().nextInt(1000000), sel.getName(), "default");
         Preferences p = companyService.getPreferences(admin, created);
         String testKey = "fr.itldev.test";
 
@@ -171,7 +171,7 @@ public class CompanyServiceImplTest extends TestCase {
         SalesOffer sel = offresCom.get(0);
 
         Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000), sel.getName(), "default");
+                + new Random().nextInt(1000000), sel.getName(), "default");
 
         
         CompanyProperties cp = companyService.getProperties(admin, created);

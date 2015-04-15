@@ -18,8 +18,10 @@
  */
 package fr.itldev.koya.services.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import java.util.List;
+
+import org.codehaus.jackson.type.TypeReference;
+
 import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
@@ -27,15 +29,10 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.model.impl.UserRole;
 import fr.itldev.koya.services.SecuService;
+import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
-import fr.itldev.koya.services.impl.util.CacheConfig;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import org.codehaus.jackson.type.TypeReference;
-import org.springframework.beans.factory.InitializingBean;
 
-public class SecuServiceImpl extends AlfrescoRestService implements SecuService, InitializingBean {
+public class SecuServiceImpl extends AlfrescoRestService implements SecuService {
 
     private static final String REST_GET_AVAILABLEROLES = "/s/fr/itldev/koya/company/roles/{companyName}";
     private static final String REST_GET_USERROLE = "/s/fr/itldev/koya/user/role/{companyName}/{userName}";
@@ -46,31 +43,13 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService,
     private static final String REST_GET_ISCOMPANYMANAGER = "/s/fr/itldev/koya/company/ismanager/{companyName}";
     private static final String REST_GET_PERMISSIONS = "/s/fr/itldev/koya/global/secu/permissions/{nodeRef}";
 
-    private Cache<String, Permissions> permissionsCache;
-    private CacheConfig permissionsCacheConfig;
+	private CacheManager cacheManager;
 
-    public void setPermissionsCacheConfig(CacheConfig permissionsCacheConfig) {
-        this.permissionsCacheConfig = permissionsCacheConfig;
-    }
+	public void setCacheManager(CacheManager cacheManager) {
+		this.cacheManager = cacheManager;
+	}
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-        if (permissionsCacheConfig == null) {
-            permissionsCacheConfig = CacheConfig.noCache();
-        }
-        permissionsCacheConfig.debugLogConfig("permissionsCache");
-
-        if (permissionsCacheConfig.getEnabled()) {
-            permissionsCache = CacheBuilder.newBuilder()
-                    .maximumSize(permissionsCacheConfig.getMaxSize())
-                    .expireAfterWrite(permissionsCacheConfig.getExpireAfterWriteSeconds(),
-                            TimeUnit.SECONDS)
-                    .build();
-        }
-    }
-
-    @Override
+	@Override
     public List<UserRole> listAvailableRoles(User userLogged, Company c) throws AlfrescoServiceException {
         return fromJSON(new TypeReference<List<UserRole>>() {
         }, userLogged.getRestTemplate().getForObject(
@@ -175,22 +154,17 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService,
             return null;
         }
 
-        String key = user.getUserName() + "-" + s.getNodeRef();
-        Permissions p;
-        if (permissionsCacheConfig.getEnabled()) {
-            p = permissionsCache.getIfPresent(key);
-            if (p != null) {
-                return p;
-            }
-        }
+        Permissions p = cacheManager.getPermission(user, s.getNodeRefasObject());        
+		if (p != null) {
+			return p;
+		}
 
         p = fromJSON(new TypeReference<Permissions>() {
         }, user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_PERMISSIONS,
                         String.class, s.getNodeRef()));
-        if (permissionsCacheConfig.getEnabled()) {
-            permissionsCache.put(key, p);
-        }
+        
+        cacheManager.setPermission(user, s.getNodeRefasObject(),p);
         return p;
     }
 

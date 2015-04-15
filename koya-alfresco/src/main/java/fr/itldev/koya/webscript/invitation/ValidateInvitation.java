@@ -157,6 +157,7 @@ public class ValidateInvitation extends AbstractWebScript {
              */
             List<WorkflowTask> tasks = workflowService.getTasksForWorkflowPath(startTask.getPath().getId());
             if (tasks.size() != 1) {
+            	logger.warn("invitation validation error : "+tasks.size() + " tasks found for (id="+invitationId + ";ticket="+inviteTicket);
                 throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
             }
 
@@ -164,7 +165,8 @@ public class ValidateInvitation extends AbstractWebScript {
             if (!taskTypeMatches(task,
                     WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING,
                     WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING)) {
-                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
+            	logger.warn("invitation validation error : taskType="+task.getDefinition().getMetadata().getName()+" for (id="+invitationId + ";ticket="+inviteTicket);
+            	throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
             }
 
             /**
@@ -262,7 +264,7 @@ public class ValidateInvitation extends AbstractWebScript {
         
        
         
-        logger.info("[Koya] invitation validation : user " + userInvited.getEmail() + " has validated his account");
+        logger.info("invitation validation : user " + userInvited.getEmail() + " has validated his account");
         res.setContentType("application/json");
         //TODO return validation status
         res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));

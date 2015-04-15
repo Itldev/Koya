@@ -71,6 +71,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     private BehaviourFilter policyBehaviourFilter;
 
     private String defaultZipCharset;
+    private String failoverZipCharset;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setSiteService(SiteService siteService) {
@@ -117,6 +118,10 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
     public void setDefaultZipCharset(String defaultZipCharset) {
         this.defaultZipCharset = defaultZipCharset;
+    }
+
+    public void setFailoverZipCharset(String failoverZipCharset) {
+        this.failoverZipCharset = failoverZipCharset;
     }
 
     // </editor-fold>
@@ -198,7 +203,8 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                         + " to " + tempDir.getAbsolutePath());
 
                                 Zips.unzip(tempFile.getAbsolutePath(),
-                                        tempDir.getAbsolutePath(), defaultZipCharset);
+                                        tempDir.getAbsolutePath(), defaultZipCharset, failoverZipCharset);
+
 
                                 // Reading the new dossiers to create
                                 File fileDossiersXml = new File(tempDir,
@@ -512,7 +518,8 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
                                     Zips.unzip(
                                             fileContentZip.getAbsolutePath(),
-                                            contentsDir.getAbsolutePath(), defaultZipCharset);
+
+                                            contentsDir.getAbsolutePath(), defaultZipCharset, failoverZipCharset);
                                     // Reading contents files descriptor
                                     File fileContentXml = new File(
                                             contentsDir.getPath(),
