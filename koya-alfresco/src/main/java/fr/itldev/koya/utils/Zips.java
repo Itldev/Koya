@@ -15,7 +15,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.zip.ZipError;
 
 import org.apache.commons.lang.reflect.FieldUtils;
@@ -30,11 +29,20 @@ public class Zips {
      * Unzips the specified zip file to the specified destination directory.
      * Replaces any files in the destination, if they already exist.
      *
-     * @param zipPath the name of the zip file to extract
-     * @param destPath the directory to unzip to
+     * @param zipPath
+     *            the name of the zip file to extract
+     * @param destPath
+     *            the directory to unzip to
+     * @param defaultCharset
+     * @param failoverCharset
+     * @param sbLog
+     *            In repository logger
+     * 
+     * @return true if extract goes right
      */
     public static boolean unzip(String zipPath, String destPath,
-            String defaultCharset, final String failoverCharset) {
+            String defaultCharset, final String failoverCharset,
+            final StringBuffer sbLog) {
         try {
             final Path destDir = Paths.get(destPath);
             // if the destination doesn't exist, create it
@@ -48,8 +56,7 @@ public class Zips {
             /* We want to read an existing ZIP File, so we set this to False */
             zipProperties.put("create", "false");
             String charset = determineCharset(zipPath);
-            if (charset != null
-                    && charset.toLowerCase().equals("windows-1252")) {
+            if (charset != null && charset.toLowerCase().equals("windows-1252")) {
                 // ibm850 (winzip?), is detected as windows-1252)
                 charset = "ibm850";
             } else {
@@ -60,7 +67,8 @@ public class Zips {
             zipProperties.put("encoding", finalCharset);
             logger.debug(zipPath + " will be extracted using "
                     + zipProperties.get("encoding"));
-
+            sbLog.append("\n[unzip] "+zipPath + " will be extracted using "
+                    + zipProperties.get("encoding"));
             // convert the filename to a URI
             final Path path = Paths.get(zipPath);
             final URI uri = URI.create("jar:file:" + path.toUri().getPath());
@@ -77,9 +85,13 @@ public class Zips {
                         try {
                             filename = file.toString();
                         } catch (IllegalArgumentException iae) {
-                            logger.error(finalCharset+" failed using "+failoverCharset+" as last chance");
+                            logger.error(finalCharset + " failed using "
+                                    + failoverCharset + " as last chance");
+                            sbLog.append("\n[unzip] "+finalCharset + " failed using "
+                                    + failoverCharset + " as last chance");
                             try {
-                                filename = new String(getPathBytes(file),failoverCharset );
+                                filename = new String(getPathBytes(file),
+                                        failoverCharset);
                             } catch (IllegalAccessException ex) {
                                 logger.error(ex.getMessage(), ex);
                             }
@@ -89,6 +101,7 @@ public class Zips {
                                 filename);
                         logger.trace("Extracting file " + filename + " to "
                                 + destFile);
+                        sbLog.append("\n[unzip] Extracting file " + filename);
                         Files.copy(file, destFile,
                                 StandardCopyOption.REPLACE_EXISTING);
                         return FileVisitResult.CONTINUE;
@@ -101,6 +114,7 @@ public class Zips {
                                 dir.toString());
                         if (Files.notExists(dirToCreate)) {
                             logger.trace("Creating directory " + dirToCreate);
+                            sbLog.append("\n[unzip] Creating directory " + dirToCreate);
                             Files.createDirectory(dirToCreate);
                         }
                         return FileVisitResult.CONTINUE;
@@ -113,7 +127,8 @@ public class Zips {
             logger.error(ioe.getMessage(), ioe);
             return false;
         } catch (ZipError ze) {
-            throw new KoyaServiceException(KoyaErrorCodes.INVALID_ZIP_ARCHIVE, ze);
+            throw new KoyaServiceException(KoyaErrorCodes.INVALID_ZIP_ARCHIVE,
+                    ze);
         }
     }
 
@@ -165,10 +180,8 @@ public class Zips {
         }
     }
 
-    private static byte[] getPathBytes(Path p)
-            throws IllegalAccessException {
-        return (byte[]) FieldUtils.readDeclaredField(p, "path",
-                true);
+    private static byte[] getPathBytes(Path p) throws IllegalAccessException {
+        return (byte[]) FieldUtils.readDeclaredField(p, "path", true);
 
     }
 

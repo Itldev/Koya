@@ -50,6 +50,9 @@ import fr.itldev.koya.utils.Zips;
 import java.util.HashSet;
 import java.util.Set;
 import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.repository.ContentWriter;
 
 public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
@@ -66,6 +69,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     private ContentService contentService;
     private NamespaceService namespaceService;
     private BehaviourFilter policyBehaviourFilter;
+    private FileFolderService fileFolderService;
 
     private KoyaContentService koyaContentService;
     private DossierService dossierService;
@@ -87,6 +91,10 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
     public void setPolicyBehaviourFilter(BehaviourFilter policyBehaviourFilter) {
         this.policyBehaviourFilter = policyBehaviourFilter;
+    }
+
+    public void setFileFolderService(FileFolderService fileFolderService) {
+        this.fileFolderService = fileFolderService;
     }
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
@@ -116,6 +124,15 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
             ContentReader reader = this.contentService.getReader(
                     actionedUponNodeRef, ContentModel.PROP_CONTENT);
             if (reader != null) {
+                // Disabled policy on ASPECT_AUDITABLE
+                // (LastModificationDateBehaviour)
+                policyBehaviourFilter
+                        .disableBehaviour(ContentModel.ASPECT_AUDITABLE);
+                String zipName = (String) nodeService.getProperty(
+                        actionedUponNodeRef, ContentModel.PROP_NAME);
+
+                StringBuffer sbLog = new StringBuffer();
+
                 File tempFile = null;
                 File tempDir = null;
                 try {
@@ -136,17 +153,15 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                             + nodeService.getPath(actionedUponNodeRef)
                                     .toPrefixString(namespaceService) + " as "
                             + tempFile.getAbsolutePath());
+
                     if (Zips.unzip(tempFile.getAbsolutePath(),
-                            tempDir.getAbsolutePath(), defaultZipCharset, failoverZipCharset)) {
+                            tempDir.getAbsolutePath(), defaultZipCharset,
+                            failoverZipCharset, sbLog)) {
 
                         NodeRef importDest = (NodeRef) ruleAction
                                 .getParameterValue(PARAM_DESTINATION_FOLDER);
 
-                        // Disabled policy on ASPECT_AUDITABLE
-                        // (LastModificationDateBehaviour)
-                        policyBehaviourFilter
-                                .disableBehaviour(ContentModel.ASPECT_AUDITABLE);
-                        importDirectory(tempDir.getPath(), importDest);
+                        importDirectory(tempDir.getPath(), importDest, sbLog);
 
                         logger.debug("Unzip Complete : "
                                 + nodeService.getPath(actionedUponNodeRef)
@@ -163,6 +178,17 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                     throw new AlfrescoRuntimeException(
                             "Failed to import ZIP file. " + ex.getMessage(), ex);
                 } finally {
+
+//                    FileInfo logInfo = fileFolderService.create(
+//                            nodeService.getPrimaryParent(actionedUponNodeRef)
+//                                    .getParentRef(),
+//                            nodeService.getProperty(actionedUponNodeRef,
+//                                    ContentModel.PROP_NAME) + ".log",
+//                            ContentModel.TYPE_CONTENT);
+//                    ContentWriter logWriter = fileFolderService
+//                            .getWriter(logInfo.getNodeRef());
+//
+//                    logWriter.putContent(sbLog.toString());
                     // now the import is done, delete the temporary file
                     if (tempDir != null) {
                         deleteDir(tempDir);
@@ -189,8 +215,8 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
      * @param root
      *            The root node to import into
      */
-    private void importDirectory(String directory, NodeRef root)
-            throws KoyaServiceException {
+    private void importDirectory(String directory, NodeRef root,
+            StringBuffer sbLog) {
         // Path topdir = Paths.get(dir);
         String currentPath = "";
         Set<String> filenames = new HashSet<>();
@@ -215,6 +241,15 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                     while (filenames.contains(uniqueFileName.toLowerCase())) {
                         uniqueFileName = name + " (" + (++i) + ")" + ext;
                     }
+                    sbLog.append("\nImporting " + fileName);
+                    if (!uniqueFileName.equals(fileName)) {
+                        sbLog.append("\nRenaming "
+                                + fileName
+                                + " to "
+                                + uniqueFileName
+                                + " due to duplicate filename in zip archive for path "
+                                + path);
+                    }
                     koyaContentService.createContentNode(root, uniqueFileName,
                             Files.newInputStream(path));
 
@@ -226,19 +261,24 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                         i++;
                     }
                     // create a folder node
+                    sbLog.append("\nDirectory " + uniqueFileName);
                     Directory d = koyaContentService.createDir(uniqueFileName,
                             root);
                     // logger.debug(file.getPath());
 
                     logger.trace(path);
                     // recurcive call to import folder contents
-                    importDirectory(path.toString(), d.getNodeRefasObject());
+                    importDirectory(path.toString(), d.getNodeRefasObject(),
+                            sbLog);
                 }
                 filenames.add(uniqueFileName.toLowerCase());
             }
         } catch (IOException ex) {
-            logger.error("Import IOException on " + currentPath + " : "
-                    + ex.toString());
+            sbLog.append("\nImport IOException on " + currentPath + " : "
+                    + ex.getMessage());
+            logger.error(
+                    "Import IOException on " + currentPath + " : "
+                            + ex.toString(), ex);
         }
     }
 
