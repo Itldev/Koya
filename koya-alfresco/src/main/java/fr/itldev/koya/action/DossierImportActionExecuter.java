@@ -60,6 +60,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.cmr.dictionary.InvalidTypeException;
+import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ContentIOException;
@@ -150,6 +151,8 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
     private static final String FILE_CONTENT_ZIP = "Documents.zip";
     private static final String FILE_CONTENT_XML = "documents_import.xml";
     private static final String FOLDER_CONTENTS = "contents";
+
+    private static final String PROCESSED_ARCHIVE_DIRECTORY = "processed";
 
     private static final List<SitePermission> societePermissions = new ArrayList<SitePermission>() {
         {
@@ -250,8 +253,45 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
         } finally {
             NodeRef importDirNodeRef = nodeService.getPrimaryParent(
                     actionedUponNodeRef).getParentRef();
-            String logFilename = zipName + ".log";
 
+            // moving imported zip archive
+            NodeRef processedNodeRef = fileFolderService.searchSimple(
+                    importDirNodeRef, PROCESSED_ARCHIVE_DIRECTORY);
+            if (processedNodeRef == null) {
+                processedNodeRef = fileFolderService.create(importDirNodeRef,
+                        PROCESSED_ARCHIVE_DIRECTORY, ContentModel.TYPE_FOLDER)
+                        .getNodeRef();
+            }
+            try {
+                fileFolderService.move(actionedUponNodeRef, processedNodeRef,
+                        null);
+            } catch (FileExistsException ex) {
+                int i = 0;
+                String zipFileName = zipName.substring(0,
+                        zipName.indexOf(".zip"));
+
+                while (fileFolderService.searchSimple(processedNodeRef,
+                        zipFileName + "-" + (++i) + ".zip") != null) {
+                }
+                try {
+                    fileFolderService.move(actionedUponNodeRef,
+                            processedNodeRef, zipFileName + "-" + i + ".zip");
+                } catch (FileExistsException | org.alfresco.service.cmr.model.FileNotFoundException ex1) {
+                    sbLog.append("\nCan't move zip archive to "
+                            + PROCESSED_ARCHIVE_DIRECTORY);
+                    sbLog.append(ex.getMessage());
+                    logger.error(ex.getMessage(), ex);
+                }
+
+            } catch (org.alfresco.service.cmr.model.FileNotFoundException ex) {
+                sbLog.append("\nCan't move zip archive to "
+                        + PROCESSED_ARCHIVE_DIRECTORY);
+                sbLog.append(ex.getMessage());
+                logger.error(ex.getMessage(), ex);
+            }
+
+            // Writing down the log file
+            String logFilename = zipName + ".log";
             NodeRef logNodeRef = fileFolderService.searchSimple(
                     importDirNodeRef, logFilename);
 
@@ -265,11 +305,10 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                 logWriter = fileFolderService.getWriter(logInfo.getNodeRef());
             }
 
-            logWriter.putContent(sbLog.toString());
-
+            // logWriter.putContent(sbLog.toString());
             FileChannel fileChannel = logWriter.getFileChannel(false);
             ByteBuffer bf = ByteBuffer
-                    .wrap(("\n\n=======================\n" + sbLog.toString())
+                    .wrap(("=======================\n\n\n" + sbLog.toString())
                             .getBytes());
             try {
                 fileChannel.position(logWriter.getSize());
@@ -281,6 +320,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             } catch (IOException ex) {
                 logger.error(ex.getMessage(), ex);
             }
+
             deleteDir(tempDir);
 
             // now the import is done, delete the temporary file
