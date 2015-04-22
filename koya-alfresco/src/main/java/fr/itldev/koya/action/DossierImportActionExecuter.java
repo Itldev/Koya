@@ -179,7 +179,8 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
         }
 
         StringBuffer sbLog = new StringBuffer();
-
+        ImportDossierStat dossierStat = new ImportDossierStat();
+        ImportContentStat contentStat = new ImportContentStat();
         SiteInfo siteInfo = siteService.getSite(actionedUponNodeRef);
         NodeRef documentLibrary = siteService.getContainer(
                 siteInfo.getShortName(), SiteService.DOCUMENT_LIBRARY);
@@ -225,7 +226,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                         tempDir.getAbsolutePath(), defaultZipCharset,
                         failoverZipCharset, sbLog);
 
-                importDossier(tempDir, company, documentLibrary,
+                dossierStat = importDossier(tempDir, company, documentLibrary,
                         mapCacheDossier, modifiedDossiers, sbLog);
 
                 // Importing new content into the dossiers
@@ -242,7 +243,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                             contentsDir.getAbsolutePath(), defaultZipCharset,
                             failoverZipCharset, sbLog);
 
-                    importContent(contentsDir, company, mapCacheDossier,
+                    contentStat = importContent(contentsDir, company, mapCacheDossier,
                             modifiedDossiers, sbLog);
                 }
             }
@@ -276,7 +277,8 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                 try {
                     fileFolderService.move(actionedUponNodeRef,
                             processedNodeRef, zipFileName + "-" + i + ".zip");
-                } catch (FileExistsException | org.alfresco.service.cmr.model.FileNotFoundException ex1) {
+                } catch (FileExistsException
+                        | org.alfresco.service.cmr.model.FileNotFoundException ex1) {
                     sbLog.append("\nCan't move zip archive to "
                             + PROCESSED_ARCHIVE_DIRECTORY);
                     sbLog.append(ex.getMessage());
@@ -327,6 +329,8 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             if (tempFile != null) {
                 tempFile.delete();
             }
+            
+            logger.info("importZipArchive="+zipName+", "+dossierStat+", "+contentStat);
         }
 
         for (Dossier d : modifiedDossiers) {
@@ -335,11 +339,13 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
     }
 
-    private void importDossier(File tempDir, Company company,
+    private ImportDossierStat importDossier(File tempDir, Company company,
             NodeRef documentLibrary, Map<String, Dossier> mapCacheDossier,
             Set<Dossier> modifiedDossiers, final StringBuffer sbLog) {
         String userName = authenticationService.getCurrentUserName();
         String companyName = company.getName();
+
+        ImportDossierStat dossierStat = new ImportDossierStat();
 
         // Reading the new dossiers to create
         File fileDossiersXml = new File(tempDir, FILE_DOSSIERS_XML);
@@ -368,12 +374,12 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
             }
 
             if (dossierXmls != null) {
+                dossierStat.countDossier = dossierXmls.size();
                 logger.debug(getLogPrefix(companyName, userName)
                         + dossierXmls.size() + " dossiers found");
-                sbLog.append("\n" + dossierXmls.size() + " dossiers found");
-                int countDossiersCreated = 0;
-                int countDossiersDuplicate = 0;
-                int countDossiersError = 0;
+                sbLog.append("\n" + dossierStat.countDossier
+                        + " dossiers found");
+
                 for (final DossierXml dossierXml : dossierXmls) {
 
                     if (dossierXml.getReference() == null) {
@@ -437,14 +443,14 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                             sbLog.append("\nCannot create dossier "
                                     + dossierXml.getReference() + " : "
                                     + kse.getMessage());
-                            countDossiersError++;
+                            dossierStat.countDossiersError++;
                             continue;
 
                         }
                     }
 
                     mapCacheDossier.put(dossierXml.getReference(), d);
-                    countDossiersCreated++;
+                    dossierStat.countDossiersCreated++;
 
                     logger.trace(getLogPrefix(companyName, userName)
                             + "Get dossier responsibles");
@@ -462,26 +468,46 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
                 }
                 logger.debug(getLogPrefix(companyName, userName)
-                        + countDossiersCreated + " dossiers created");
-                sbLog.append("\n\n" + countDossiersCreated
+                        + dossierStat.countDossiersCreated
+                        + " dossiers created");
+                sbLog.append("\n\n" + dossierStat.countDossiersCreated
                         + " dossiers created");
                 logger.debug(getLogPrefix(companyName, userName)
-                        + countDossiersDuplicate
+                        + dossierStat.countDossiersDuplicate
                         + " dossiers allready existing");
-                sbLog.append("\n" + countDossiersDuplicate
+                sbLog.append("\n" + dossierStat.countDossiersDuplicate
                         + " dossiers allready existing");
                 logger.debug(getLogPrefix(companyName, userName)
-                        + countDossiersError + " dossiers not created (error)");
-                sbLog.append("\n" + countDossiersError
+                        + dossierStat.countDossiersError
+                        + " dossiers not created (error)");
+                sbLog.append("\n" + dossierStat.countDossiersError
                         + " dossiers not created (error)");
 
             }
         }
+        return dossierStat;
+
     }
 
-    private void importContent(File contentsDir, Company company,
+    private class ImportDossierStat {
+        int countDossier = 0;
+        int countDossiersCreated = 0;
+        int countDossiersDuplicate = 0;
+        int countDossiersError = 0;
+
+        @Override
+        public String toString() {
+            return "ImportDossierStat{" + "countDossier=" + countDossier
+                    + ", countDossiersCreated=" + countDossiersCreated
+                    + ", countDossiersDuplicate=" + countDossiersDuplicate
+                    + ", countDossiersError=" + countDossiersError + '}';
+        }
+    }
+
+    private ImportContentStat importContent(File contentsDir, Company company,
             Map<String, Dossier> mapCacheDossier,
             Set<Dossier> modifiedDossiers, final StringBuffer sbLog) {
+        ImportContentStat contentStat = new ImportContentStat();
 
         String userName = authenticationService.getCurrentUserName();
         String companyName = company.getName();
@@ -517,17 +543,13 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
         }
 
         if (contentXmls == null) {
-            return;
+            return contentStat;
         }
+
+        contentStat.countContent = contentXmls.size();
         logger.debug(getLogPrefix(companyName, userName) + contentXmls.size()
                 + " contents found");
-        sbLog.append("\n\n" + contentXmls.size() + " contents found");
-        int countContentAdded = 0;
-        int countContentDuplicate = 0;
-        int countContentError = 0;
-        int countContentFileNotFound = 0;
-        int countContentDossierNotFound = 0;
-        int countPathCreation = 0;
+        sbLog.append("\n\n" + contentStat.countContent + " contents found");
 
         for (ContentXml contentXml : contentXmls) {
             String filename = null;
@@ -572,7 +594,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                         contentsDir, filename)));
                         modifiedDossiers.add(dossier);
 
-                        countContentAdded++;
+                        contentStat.countContentAdded++;
                     } else {
                         logger.error(getLogPrefix(companyName, userName)
                                 + "File " + filename + " - " + title
@@ -582,15 +604,15 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                 + " already exist in /" + dossier.getTitle()
                                 + "/" + path);
 
-                        countContentError++;
+                        contentStat.countContentError++;
                     }
                 } else if (pathCreated) {
-                    countPathCreation++;
+                    contentStat.countPathCreation++;
                 }
             } catch (FileNotFoundException ex) {
                 logger.error(ex.getMessage(), ex);
                 sbLog.append("\n" + filename + " not found");
-                countContentFileNotFound++;
+                contentStat.countContentFileNotFound++;
             } catch (KoyaServiceException ex) {
                 // TODO Dossier not found or
                 // multiple dossiers found
@@ -604,39 +626,69 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                 .equals(KoyaErrorCodes.MANY_DOSSIERS_REFERENCE)) {
                     sbLog.append("\nDossier "
                             + contentXml.getDossierReference() + " not found");
-                    countContentDossierNotFound++;
+                    contentStat.countContentDossierNotFound++;
                 } else if (errorCode
                         .equals(KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS)) {
                     logger.error(getLogPrefix(companyName, userName) + "File "
                             + filename + " - " + title + " already exist");
                     sbLog.append("\nFile " + filename + " - " + title
                             + " already exist in dossier");
-                    countContentDuplicate++;
+                    contentStat.countContentDuplicate++;
                 } else {
 
                 }
             }
         }
 
-        logger.debug(getLogPrefix(companyName, userName) + countContentAdded
-                + " contents added");
-        sbLog.append("\n" + countContentAdded + " contents added");
         logger.debug(getLogPrefix(companyName, userName)
-                + countContentDuplicate + " contents duplicates name");
-        sbLog.append("\n" + countContentDuplicate + " contents duplicates name");
+                + contentStat.countContentAdded + " contents added");
+        sbLog.append("\n" + contentStat.countContentAdded + " contents added");
         logger.debug(getLogPrefix(companyName, userName)
-                + countContentFileNotFound + " files not found");
-        sbLog.append("\n" + countContentFileNotFound + " files not found");
+                + contentStat.countContentDuplicate
+                + " contents duplicates name");
+        sbLog.append("\n" + contentStat.countContentDuplicate
+                + " contents duplicates name");
         logger.debug(getLogPrefix(companyName, userName)
-                + countContentDossierNotFound + "contents' dossiers not found");
-        sbLog.append("\n" + countContentDossierNotFound
+                + contentStat.countContentFileNotFound + " files not found");
+        sbLog.append("\n" + contentStat.countContentFileNotFound
+                + " files not found");
+        logger.debug(getLogPrefix(companyName, userName)
+                + contentStat.countContentDossierNotFound
                 + "contents' dossiers not found");
-        logger.debug(getLogPrefix(companyName, userName) + countContentError
+        sbLog.append("\n" + contentStat.countContentDossierNotFound
+                + "contents' dossiers not found");
+        logger.debug(getLogPrefix(companyName, userName)
+                + contentStat.countContentError + " contents not added (error)");
+        sbLog.append("\n" + contentStat.countContentError
                 + " contents not added (error)");
-        sbLog.append("\n" + countContentError + " contents not added (error)");
-        logger.debug(getLogPrefix(companyName, userName) + countPathCreation
-                + " empty path");
-        sbLog.append("\n" + countPathCreation + " empty path");
+        logger.debug(getLogPrefix(companyName, userName)
+                + contentStat.countPathCreation + " empty path");
+        sbLog.append("\n" + contentStat.countPathCreation + " empty path");
+
+        return contentStat;
+
+    }
+
+    private class ImportContentStat {
+        int countContent = 0;
+        int countContentAdded = 0;
+        int countContentDuplicate = 0;
+        int countContentError = 0;
+        int countContentFileNotFound = 0;
+        int countContentDossierNotFound = 0;
+        int countPathCreation = 0;
+
+        @Override
+        public String toString() {
+            return "ImportContentStat{" + "countContent=" + countContent
+                    + ", countContentAdded=" + countContentAdded
+                    + ", countContentDuplicate=" + countContentDuplicate
+                    + ", countContentError=" + countContentError
+                    + ", countContentFileNotFound=" + countContentFileNotFound
+                    + ", countContentDossierNotFound="
+                    + countContentDossierNotFound + ", countPathCreation="
+                    + countPathCreation + '}';
+        }
 
     }
 
