@@ -26,8 +26,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.core.io.Resource;
@@ -59,6 +61,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements
     private static final String REST_GET_DELRESP = "/s/fr/itldev/koya/dossier/resp/del/{userName}/{nodeRef}";
 
     private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}";
+    
+    private static final String REST_SUMMARY = "/s/fr/itldev/koya/dossier/summary/{nodeRef}?documentName={documentName}";
 
     private KoyaContentService KoyaContentService;
 	private CacheManager cacheManager;
@@ -337,4 +341,18 @@ public class DossierServiceImpl extends AlfrescoRestService implements
                 getAlfrescoServerUrl() + REST_CONFIDENTIAL, params,
                 String.class,dossier.getNodeRef()));
     }
+    
+	public Map<String, NodeRef> createSummary(User user, Dossier dossier,
+			String summaryFileName) throws AlfrescoServiceException {
+		// extract map
+		Map<String, String> returnValues = user.getRestTemplate().getForObject(
+				getAlfrescoServerUrl() + REST_SUMMARY, Map.class,
+				dossier.getNodeRef(), summaryFileName);
+
+		Map<String, NodeRef> nodes = new HashMap<String, NodeRef>();
+		for (String k : returnValues.keySet()) {
+			nodes.put(k, new NodeRef(returnValues.get(k)));
+		}
+		return nodes;
+	}
 }

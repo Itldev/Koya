@@ -19,7 +19,9 @@
 package fr.itldev.koya.services;
 
 import java.util.List;
+import java.util.Map;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.core.io.Resource;
 
 import fr.itldev.koya.model.impl.Dossier;
@@ -201,5 +203,19 @@ public interface DossierService extends AlfrescoService {
      */
     Boolean setConfidentiality(User user, Dossier dossier, Boolean confidential)
             throws AlfrescoServiceException;
+    
+	/**
+	 * Creates dossier summary descriptors files.
+	 * 
+	 * prints dossier tree in files returns generated files nodeRefs in a map
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @param summaryFileName
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Map<String, NodeRef> createSummary(User user, Dossier dossier,
+			String summaryFileName) throws AlfrescoServiceException;
 
 }

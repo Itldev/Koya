@@ -165,7 +165,24 @@
 									</cm:description>
 								</view:properties>
 							</cm:folder>
-						</cm:contains>
+							<cm:content view:childName="cm:dossier-summary.html.ftl">
+								<view:aspects>
+									<cm:titled />
+									<cm:author />
+									<app:inlineeditable />
+								</view:aspects>
+								<view:properties>
+									<sys:node-uuid>5e43d1bd-b2cd-4ffd-ae81-84f0aa9a2154</sys:node-uuid>
+									<app:editInline>true</app:editInline>
+									<cm:description></cm:description>
+									<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/dossier-summary.html.ftl|mimetype=text/html|size=882|encoding=UTF-8</cm:content>
+									<cm:title>Dossier Summary Template</cm:title>
+									<cm:author>Me</cm:author>
+									<cm:name>dossier-summary.html.ftl</cm:name>
+								</view:properties>
+								<view:associations></view:associations>
+							</cm:content>
+						</cm:contains>						
 					</view:associations>
 				</cm:folder>
 			</cm:contains>

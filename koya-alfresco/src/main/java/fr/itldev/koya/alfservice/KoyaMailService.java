@@ -324,8 +324,13 @@ public class KoyaMailService implements InitializingBean {
 
         templateModel.put("document", new HashMap() {
             {
-                put("name", nodeService.getProperty(sharedItem,
-                        ContentModel.PROP_TITLE));
+            	String name  =  (String) nodeService.getProperty(sharedItem,
+                        ContentModel.PROP_TITLE);
+            	if(name == null){
+            		name  =  (String) nodeService.getProperty(sharedItem,
+                            ContentModel.PROP_NAME);
+            	}
+                put("name", name);
                 put("siteShortName", compTitle);
                 put("directLinkUrl", getDirectLinkUrl(sharedItem));
             }

@@ -79,7 +79,8 @@ public class NewContentNotifierActionExecuter extends KoyaNotifierActionExecuter
             if (nodeService.hasAspect(u.getNodeRefasObject(), KoyaModel.ASPECT_USERNOTIFIED)
                     && subSpaceAclService.listUsers(d, null).contains(u)
                     && !u.getUserName().equals(modifierUserName)) {
-                try {
+                try {                
+                	logger.trace("send to "+u.getEmail()+"for node "+actionedUponNodeRef);
                     koyaMailService.sendNewContentNotificationMail(u, actionedUponNodeRef);
                 } catch (KoyaServiceException ex) {
                     logger.debug("Notification : Sending new content mail to " + u.getEmail() + " - " + ex.toString());

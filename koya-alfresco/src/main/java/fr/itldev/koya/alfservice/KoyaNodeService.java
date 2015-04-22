@@ -74,681 +74,683 @@ import fr.itldev.koya.utils.SecuredItemBuilder;
  */
 public class KoyaNodeService {
 
-    private static final String FAVOURITES_PREF_FOLDERS = "org.alfresco.share.folders.favourites";
-    private static final String FAVOURITES_PREF_DOCS = "org.alfresco.share.documents.favourites";
-    private static final String FAVOURITES_PREF_COMPANIES = "org.alfresco.share.sites.favourites";
-    public static final String DOCLIB_NAME = "documentLibrary";
-    private Logger logger = Logger.getLogger(KoyaNodeService.class);
-    private NodeService nodeService;
-    private NodeService unsecuredNodeService;
-    private FavouritesService favouritesService;
-    private PreferenceService preferenceService;
-    private FileFolderService fileFolderService;
-    private AuthenticationService authenticationService;
-    private ActivityService activityService;
-    private SiteService siteService;// TODO remove this dependancy
-    private AncestorNodeLocator ancestorNodeLocator;
-    protected SearchService searchService;
-    protected NamespaceService namespaceService;
+	private static final String FAVOURITES_PREF_FOLDERS = "org.alfresco.share.folders.favourites";
+	private static final String FAVOURITES_PREF_DOCS = "org.alfresco.share.documents.favourites";
+	private static final String FAVOURITES_PREF_COMPANIES = "org.alfresco.share.sites.favourites";
+	public static final String DOCLIB_NAME = "documentLibrary";
+	private Logger logger = Logger.getLogger(KoyaNodeService.class);
+	private NodeService nodeService;
+	private NodeService unsecuredNodeService;
+	private FavouritesService favouritesService;
+	private PreferenceService preferenceService;
+	private FileFolderService fileFolderService;
+	private AuthenticationService authenticationService;
+	private ActivityService activityService;
+	private SiteService siteService;// TODO remove this dependancy
+	private AncestorNodeLocator ancestorNodeLocator;
+	protected SearchService searchService;
+	protected NamespaceService namespaceService;
 
-    // <editor-fold defaultstate="collapsed" desc="getters/setters">
-    public void setNodeService(NodeService nodeService) {
-        this.nodeService = nodeService;
-    }
+	// <editor-fold defaultstate="collapsed" desc="getters/setters">
+	public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
 
-    public void setUnsecuredNodeService(NodeService unsecuredNodeService) {
-        this.unsecuredNodeService = unsecuredNodeService;
-    }
+	public void setUnsecuredNodeService(NodeService unsecuredNodeService) {
+		this.unsecuredNodeService = unsecuredNodeService;
+	}
 
-    public void setFavouritesService(FavouritesService favouritesService) {
-        this.favouritesService = favouritesService;
-    }
+	public void setFavouritesService(FavouritesService favouritesService) {
+		this.favouritesService = favouritesService;
+	}
 
-    public void setPreferenceService(PreferenceService preferenceService) {
-        this.preferenceService = preferenceService;
-    }
+	public void setPreferenceService(PreferenceService preferenceService) {
+		this.preferenceService = preferenceService;
+	}
 
-    public void setFileFolderService(FileFolderService fileFolderService) {
-        this.fileFolderService = fileFolderService;
-    }
+	public void setFileFolderService(FileFolderService fileFolderService) {
+		this.fileFolderService = fileFolderService;
+	}
 
-    public void setAuthenticationService(
-            AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+	public void setAuthenticationService(
+			AuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
+	}
 
-    public void setActivityService(ActivityService activityService) {
-        this.activityService = activityService;
-    }
+	public void setActivityService(ActivityService activityService) {
+		this.activityService = activityService;
+	}
 
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
-    }
+	public void setSiteService(SiteService siteService) {
+		this.siteService = siteService;
+	}
 
-    public void setAncestorNodeLocator(AncestorNodeLocator ancestorNodeLocator) {
-        this.ancestorNodeLocator = ancestorNodeLocator;
-    }
+	public void setAncestorNodeLocator(AncestorNodeLocator ancestorNodeLocator) {
+		this.ancestorNodeLocator = ancestorNodeLocator;
+	}
 
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
-    }
+	public void setSearchService(SearchService searchService) {
+		this.searchService = searchService;
+	}
 
-    public void setNamespaceService(NamespaceService namespaceService) {
-        this.namespaceService = namespaceService;
-    }
+	public void setNamespaceService(NamespaceService namespaceService) {
+		this.namespaceService = namespaceService;
+	}
 
-    // </editor-fold>
-    private SecuredItemBuilder builder;
+	// </editor-fold>
+	private SecuredItemBuilder builder;
 
-    public void init() {
-        builder = new SecuredItemBuilder(nodeService, this);
-    }
+	public void init() {
+		builder = new SecuredItemBuilder(nodeService, this);
+	}
 
-    /**
-     * ====== Favourites Handling methods ======.
-     *
-     */
-    /**
-     *
-     * @return
-     */
-    public List<SecuredItem> getFavourites() {
+	/**
+	 * ====== Favourites Handling methods ======.
+	 * 
+	 */
+	/**
+	 * 
+	 * @return
+	 */
+	public List<SecuredItem> getFavourites() {
 
-        List<SecuredItem> favourites = new ArrayList<>();
+		List<SecuredItem> favourites = new ArrayList<>();
 
-        Map<String, Serializable> prefs = preferenceService
-                .getPreferences(authenticationService.getCurrentUserName());
+		Map<String, Serializable> prefs = preferenceService
+				.getPreferences(authenticationService.getCurrentUserName());
 
-        // favourites folders
-        String foldersFavourites = (String) prefs.get(FAVOURITES_PREF_FOLDERS);
+		// favourites folders
+		String foldersFavourites = (String) prefs.get(FAVOURITES_PREF_FOLDERS);
 
-        if (foldersFavourites != null && !foldersFavourites.isEmpty()) {
-            for (String favStr : foldersFavourites.split(",")) {
-                try {
-                    NodeRef n = getNodeRef(favStr);
-                    favourites.add(getSecuredItem(n));
-                } catch (KoyaServiceException | NullPointerException e) {
-                    logger.trace("Ignored Favourite nodeRef (FOLDERS) "
-                            + favStr + " : " + e.getMessage());
-                }
-            }
-        }
-        // favourites documents
-        String docsFavourites = (String) prefs.get(FAVOURITES_PREF_DOCS);
-        if (docsFavourites != null && !docsFavourites.isEmpty()) {
-            for (String favStr : docsFavourites.split(",")) {
-                try {
-                    NodeRef n = getNodeRef(favStr);
-                    favourites.add(getSecuredItem(n));
-                } catch (KoyaServiceException | NullPointerException e) {
-                    logger.trace("Ignored Favourite nodeRef (DOCS) " + favStr
-                            + " : " + e.getMessage());
-                }
-            }
-        }
+		if (foldersFavourites != null && !foldersFavourites.isEmpty()) {
+			for (String favStr : foldersFavourites.split(",")) {
+				try {
+					NodeRef n = getNodeRef(favStr);
+					favourites.add(getSecuredItem(n));
+				} catch (KoyaServiceException | NullPointerException e) {
+					logger.trace("Ignored Favourite nodeRef (FOLDERS) "
+							+ favStr + " : " + e.getMessage());
+				}
+			}
+		}
+		// favourites documents
+		String docsFavourites = (String) prefs.get(FAVOURITES_PREF_DOCS);
+		if (docsFavourites != null && !docsFavourites.isEmpty()) {
+			for (String favStr : docsFavourites.split(",")) {
+				try {
+					NodeRef n = getNodeRef(favStr);
+					favourites.add(getSecuredItem(n));
+				} catch (KoyaServiceException | NullPointerException e) {
+					logger.trace("Ignored Favourite nodeRef (DOCS) " + favStr
+							+ " : " + e.getMessage());
+				}
+			}
+		}
 
-        // favourites companies
-        for (String k : prefs.keySet()) {
-            if (k.startsWith(FAVOURITES_PREF_COMPANIES)
-                    && ((Boolean) prefs.get(k)).equals(Boolean.TRUE)) {
+		// favourites companies
+		for (String k : prefs.keySet()) {
+			if (k.startsWith(FAVOURITES_PREF_COMPANIES)
+					&& ((Boolean) prefs.get(k)).equals(Boolean.TRUE)) {
 
-                String compName = k.substring(FAVOURITES_PREF_COMPANIES
-                        .length() + 1);
-                try {
-                    favourites.add(companyBuilder(compName));
-                } catch (KoyaServiceException | NullPointerException e) {
-                    logger.trace("Ignored Favourite nodeRef (COMPANY) " + k
-                            + " : " + e.getMessage());
-                }
+				String compName = k.substring(FAVOURITES_PREF_COMPANIES
+						.length() + 1);
+				try {
+					favourites.add(companyBuilder(compName));
+				} catch (KoyaServiceException | NullPointerException e) {
+					logger.trace("Ignored Favourite nodeRef (COMPANY) " + k
+							+ " : " + e.getMessage());
+				}
 
-            }
-        }
+			}
+		}
 
-        // TODO do it with favourites service ?
-        // PagingResults<PersonFavourite> favsPaged =
-        // favouritesService.getPagedFavourites(userName, null, null, null);
-        return favourites;
-    }
+		// TODO do it with favourites service ?
+		// PagingResults<PersonFavourite> favsPaged =
+		// favouritesService.getPagedFavourites(userName, null, null, null);
+		return favourites;
+	}
 
-    /**
-     * Change users favourite status for a node.
-     *
-     * @param item
-     * @param status
-     */
-    public void setFavouriteStatus(NodeRef item, Boolean status) {
-        if (status) {
-            favouritesService.addFavourite(
-                    authenticationService.getCurrentUserName(), item);
-        } else {
-            favouritesService.removeFavourite(
-                    authenticationService.getCurrentUserName(), item);
-        }
-    }
+	/**
+	 * Change users favourite status for a node.
+	 * 
+	 * @param item
+	 * @param status
+	 */
+	public void setFavouriteStatus(NodeRef item, Boolean status) {
+		if (status) {
+			favouritesService.addFavourite(
+					authenticationService.getCurrentUserName(), item);
+		} else {
+			favouritesService.removeFavourite(
+					authenticationService.getCurrentUserName(), item);
+		}
+	}
 
-    /**
-     * Checks if node n is a favourite for current user
-     *
-     * @param n
-     * @return
-     */
-    public Boolean isFavourite(NodeRef n) {
-        return favouritesService.isFavourite(
-                authenticationService.getCurrentUserName(), n);
-    }
+	/**
+	 * Checks if node n is a favourite for current user
+	 * 
+	 * @param n
+	 * @return
+	 */
+	public Boolean isFavourite(NodeRef n) {
+		return favouritesService.isFavourite(
+				authenticationService.getCurrentUserName(), n);
+	}
 
-    /**
-     *
-     * ===== byte size methods =====.
-     *
-     */
-    /**
-     * Byte size getting method.
-     *
-     * returns Element size for Object.
-     *
-     * return recursive size for Containers Objects.
-     *
-     * @param n
-     * @return
-     */
-    public Long getByteSize(NodeRef n) {
+	/**
+	 * 
+	 * ===== byte size methods =====.
+	 * 
+	 */
+	/**
+	 * Byte size getting method.
+	 * 
+	 * returns Element size for Object.
+	 * 
+	 * return recursive size for Containers Objects.
+	 * 
+	 * @param n
+	 * @return
+	 */
+	public Long getByteSize(NodeRef n) {
 
-        try {
-            FileInfo fi = fileFolderService.getFileInfo(n);
+		try {
+			FileInfo fi = fileFolderService.getFileInfo(n);
 
-            if (!fi.isFolder()) {
-                return fi.getContentData().getSize();
-            } else {// return recursive size
-                long size = 0;
-                for (ChildAssociationRef car : nodeService.getChildAssocs(n)) {
-                    size += getByteSize(car.getChildRef());
-                }
-                return size;
-            }
-        } catch (InvalidNodeRefException | NullPointerException e) {
-            return (long) 0;
-        }
-    }
+			if (!fi.isFolder()) {
+				return fi.getContentData().getSize();
+			} else {// return recursive size
+				long size = 0;
+				for (ChildAssociationRef car : nodeService.getChildAssocs(n)) {
+					size += getByteSize(car.getChildRef());
+				}
+				return size;
+			}
+		} catch (InvalidNodeRefException | NullPointerException e) {
+			return (long) 0;
+		}
+	}
 
-    /**
-     *
-     * ==== Objects Builder Methods =====.
-     *
-     */
-    /**
-     * NodeRef builder : should be used instead of NodeRef instanciation.
-     *
-     * @param strNodeRef
-     * @return
-     * @throws KoyaServiceException
-     */
-    public NodeRef getNodeRef(String strNodeRef) throws KoyaServiceException {
-        try {
-            return new NodeRef(strNodeRef);
-        } catch (InvalidNodeRefException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF);
-        }
-    }
+	/**
+	 * 
+	 * ==== Objects Builder Methods =====.
+	 * 
+	 */
+	/**
+	 * NodeRef builder : should be used instead of NodeRef instanciation.
+	 * 
+	 * @param strNodeRef
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	public NodeRef getNodeRef(String strNodeRef) throws KoyaServiceException {
+		try {
+			return new NodeRef(strNodeRef);
+		} catch (InvalidNodeRefException ex) {
+			throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF);
+		}
+	}
 
-    /**
-     *
-     * Get typed SecuredItem from Noderef
-     *
-     * @param nodeRef
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public SecuredItem getSecuredItem(NodeRef nodeRef)
-            throws KoyaServiceException {
+	/**
+	 * 
+	 * Get typed SecuredItem from Noderef
+	 * 
+	 * @param nodeRef
+	 * @return
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public SecuredItem getSecuredItem(NodeRef nodeRef)
+			throws KoyaServiceException {
 
-        SecuredItem si;
-        if (nodeService.exists(nodeRef)) {
-            si = builder.build(nodeRef);
-        } else {
-            throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF,
-                    nodeRef.toString());
-        }
-        return si;
-    }
+		SecuredItem si;
+		if (nodeService.exists(nodeRef)) {
+			si = builder.build(nodeRef);
+		} else {
+			throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF,
+					nodeRef.toString());
+		}
+		return si;
+	}
 
-    /**
-     * Get typed Secured Item.
-     *
-     * @param <T>
-     * @param nodeRef
-     * @param type
-     * @return
-     * @throws KoyaServiceException
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getSecuredItem(NodeRef nodeRef, Class<T> type)
-            throws KoyaServiceException {
-        SecuredItem s = getSecuredItem(nodeRef);
-        assert type.isAssignableFrom(s.getClass());
-        return (T) s;
-    }
+	/**
+	 * Get typed Secured Item.
+	 * 
+	 * @param <T>
+	 * @param nodeRef
+	 * @param type
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getSecuredItem(NodeRef nodeRef, Class<T> type)
+			throws KoyaServiceException {
 
-    /**
-     * Used for compatibility
-     *
-     * @param companyName
-     * @return
-     * @throws KoyaServiceException
-     * @deprecated
-     */
-    @Deprecated
-    public Company companyBuilder(String companyName)
-            throws KoyaServiceException {
-        return getSecuredItem(siteService.getSite(companyName).getNodeRef(),
-                Company.class);
-    }
+		SecuredItem s = getSecuredItem(nodeRef);
 
-    /**
-     *
-     * ==== Global secured item methods =====.
-     *
-     */
-    /**
-     *
-     * @param n
-     * @param newTitle
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public SecuredItem rename(NodeRef n, String newTitle)
-            throws KoyaServiceException {
-        // todo check new name validity
+		if (!type.isAssignableFrom(s.getClass())) {
+			throw new KoyaServiceException(KoyaErrorCodes.INVALID_NODEREF_TYPE_CAST);
+		}
+		return (T) s;
+	}
 
-        try {
-            String name = getUniqueValidFileNameFromTitle(newTitle);
+	/**
+	 * Used for compatibility
+	 * 
+	 * @param companyName
+	 * @return
+	 * @throws KoyaServiceException
+	 * @deprecated
+	 */
+	@Deprecated
+	public Company companyBuilder(String companyName)
+			throws KoyaServiceException {
+		return getSecuredItem(siteService.getSite(companyName).getNodeRef(),
+				Company.class);
+	}
 
-            nodeService.setProperty(n, ContentModel.PROP_NAME, name);
-            nodeService.setProperty(n, ContentModel.PROP_TITLE, newTitle);
+	/**
+	 * 
+	 * ==== Global secured item methods =====.
+	 * 
+	 */
+	/**
+	 * 
+	 * @param n
+	 * @param newTitle
+	 * @return
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public SecuredItem rename(NodeRef n, String newTitle)
+			throws KoyaServiceException {
+		// todo check new name validity
 
-        } catch (DuplicateChildNodeNameException dex) {
-            throw new KoyaServiceException(
-                    KoyaErrorCodes.DUPLICATE_CHILD_RENAME, dex);
-        }
-        return getSecuredItem(n);
-    }
+		try {
+			String name = getUniqueValidFileNameFromTitle(newTitle);
 
-    /**
-     *
-     * @param n
-     * @throws KoyaServiceException
-     */
-    public void delete(NodeRef n) throws KoyaServiceException {
-        NodeRef parentNodeRef = nodeService.getPrimaryParent(n).getParentRef();
-        QName nodeRefType = nodeService.getType(n);
-        String siteId = siteService.getSiteShortName(n);
-        String title = (String) nodeService.getProperty(n,
-                ContentModel.PROP_NAME);
+			nodeService.setProperty(n, ContentModel.PROP_NAME, name);
+			nodeService.setProperty(n, ContentModel.PROP_TITLE, newTitle);
 
-        /**
-         * Delete from favourites
-         *
-         * TODO asynchronous process
-         */
-        if (isFavourite(n)) {
-            setFavouriteStatus(n, Boolean.FALSE);
-        }
+		} catch (DuplicateChildNodeNameException dex) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.DUPLICATE_CHILD_RENAME, dex);
+		}
+		return getSecuredItem(n);
+	}
 
-        nodeService.deleteNode(n);
-        if (nodeRefType.equals(ContentModel.TYPE_CONTENT)) {
-            activityService.postActivity(ActivityType.FILE_DELETED, siteId,
-                    "koya", n, title, nodeRefType, parentNodeRef);
-        }
-    }
+	/**
+	 * 
+	 * @param n
+	 * @throws KoyaServiceException
+	 */
+	public void delete(NodeRef n) throws KoyaServiceException {
+		NodeRef parentNodeRef = nodeService.getPrimaryParent(n).getParentRef();
+		QName nodeRefType = nodeService.getType(n);
+		String siteId = siteService.getSiteShortName(n);
+		String title = (String) nodeService.getProperty(n,
+				ContentModel.PROP_NAME);
 
-    /**
-     * @param toMove
-     * @param dest
-     * @return
-     * @throws KoyaServiceException
-     */
-    public SecuredItem move(NodeRef toMove, NodeRef dest)
-            throws KoyaServiceException {
-        FileInfo fInfo;
-        try {
-            fInfo = fileFolderService.move(toMove, dest, (String) nodeService
-                    .getProperty(toMove, ContentModel.PROP_NAME));
-        } catch (FileExistsException fex) {
-            throw new KoyaServiceException(
-                    KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
-        } catch (FileNotFoundException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
-        } catch (CyclicChildRelationshipException ccre) {
-            throw new KoyaServiceException(
-                    KoyaErrorCodes.MOVE_CYCLIC_RELATIONSHIP_DETECTED);
-        }
-        // TODO update KoyaNodes cache
-        return getSecuredItem(fInfo.getNodeRef());
-    }
+		/**
+		 * Delete from favourites
+		 * 
+		 * TODO asynchronous process
+		 */
+		if (isFavourite(n)) {
+			setFavouriteStatus(n, Boolean.FALSE);
+		}
 
-    /**
-     *
-     * @param toCopy
-     * @param dest
-     * @return
-     * @throws KoyaServiceException
-     */
-    public SecuredItem copy(NodeRef toCopy, NodeRef dest)
-            throws KoyaServiceException {
-        FileInfo fInfo;
-        try {
-            fInfo = fileFolderService.copy(toCopy, dest, (String) nodeService
-                    .getProperty(toCopy, ContentModel.PROP_NAME));
-        } catch (FileExistsException fex) {
-            /**
-             * change errors
-             */
-            throw new KoyaServiceException(
-                    KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
-        } catch (FileNotFoundException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
-        }
-        return getSecuredItem(fInfo.getNodeRef());
-    }
+		nodeService.deleteNode(n);
+		if (nodeRefType.equals(ContentModel.TYPE_CONTENT)) {
+			activityService.postActivity(ActivityType.FILE_DELETED, siteId,
+					"koya", n, title, nodeRefType, parentNodeRef);
+		}
+	}
 
-    /**
-     *
-     * ===== Type checking methods ======
-     *
-     */
-    /**
-     *
-     * @param n
-     * @param type
-     * @return
-     */
-    public Boolean isKoyaType(NodeRef n, Class<? extends SecuredItem> type) {
-        try {
-            return type.isAssignableFrom(getSecuredItem(n).getClass());
-        } catch (KoyaServiceException kex) {
-            return false;
-        }
-    }
+	/**
+	 * @param toMove
+	 * @param dest
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	public SecuredItem move(NodeRef toMove, NodeRef dest)
+			throws KoyaServiceException {
+		FileInfo fInfo;
+		try {
+			fInfo = fileFolderService.move(toMove, dest, (String) nodeService
+					.getProperty(toMove, ContentModel.PROP_NAME));
+		} catch (FileExistsException fex) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
+		} catch (FileNotFoundException ex) {
+			throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
+		} catch (CyclicChildRelationshipException ccre) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.MOVE_CYCLIC_RELATIONSHIP_DETECTED);
+		}
+		// TODO update KoyaNodes cache
+		return getSecuredItem(fInfo.getNodeRef());
+	}
 
-    @SuppressWarnings("unchecked")
-    public <T extends SecuredItem> T getFirstParentOfType(NodeRef n,
-            Class<? extends SecuredItem> type) throws KoyaServiceException {
-        if (n == null) {
-            return null;
-        }
-        QName qName = KoyaModel.CLASS_TO_QNAME.get(type);
+	/**
+	 * 
+	 * @param toCopy
+	 * @param dest
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	public SecuredItem copy(NodeRef toCopy, NodeRef dest)
+			throws KoyaServiceException {
+		FileInfo fInfo;
+		try {
+			fInfo = fileFolderService.copy(toCopy, dest, (String) nodeService
+					.getProperty(toCopy, ContentModel.PROP_NAME));
+		} catch (FileExistsException fex) {
+			/**
+			 * change errors
+			 */
+			throw new KoyaServiceException(
+					KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
+		} catch (FileNotFoundException ex) {
+			throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
+		}
+		return getSecuredItem(fInfo.getNodeRef());
+	}
 
-        if (qName == null) {
-            /**
-             * TODO throw KoyaError
-             */
-            logger.error("Unsupported type class (" + type.getSimpleName()
-                    + ") for Qname conversion");
-        }
+	/**
+	 * 
+	 * ===== Type checking methods ======
+	 * 
+	 */
+	/**
+	 * 
+	 * @param n
+	 * @param type
+	 * @return
+	 */
+	public Boolean isKoyaType(NodeRef n, Class<? extends SecuredItem> type) {
+		try {
+			return type.isAssignableFrom(getSecuredItem(n).getClass());
+		} catch (KoyaServiceException kex) {
+			return false;
+		}
+	}
 
-        Map<String, Serializable> params = new HashMap<>(1);
-        params.put(AncestorNodeLocator.TYPE_KEY,
-                KoyaModel.TYPES_SHORT_PREFIX.get(qName));
+	@SuppressWarnings("unchecked")
+	public <T extends SecuredItem> T getFirstParentOfType(NodeRef n,
+			Class<? extends SecuredItem> type) throws KoyaServiceException {
+		if (n == null) {
+			return null;
+		}
+		QName qName = KoyaModel.CLASS_TO_QNAME.get(type);
 
-        NodeRef nTyped = ancestorNodeLocator.getNode(n, params);
+		if (qName == null) {
+			/**
+			 * TODO throw KoyaError
+			 */
+			logger.error("Unsupported type class (" + type.getSimpleName()
+					+ ") for Qname conversion");
+		}
 
-        if (nTyped != null) {
-            return (T) getSecuredItem(nTyped, type);
-        }
-        return null;
-    }
+		Map<String, Serializable> params = new HashMap<>(1);
+		params.put(AncestorNodeLocator.TYPE_KEY,
+				KoyaModel.TYPES_SHORT_PREFIX.get(qName));
 
-    /**
-     * Returns node parent if exists.
-     *
-     * unsecured method
-     *
-     * @param currentNode
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public SecuredItem getParent(NodeRef currentNode)
-            throws KoyaServiceException {
+		NodeRef nTyped = ancestorNodeLocator.getNode(n, params);
 
-        if (isKoyaType(currentNode, Company.class)) {
-            return null;// can't get company parent
-        }
+		if (nTyped != null) {
+			return (T) getSecuredItem(nTyped, type);
+		}
+		return null;
+	}
 
-        NodeRef parentNr = unsecuredNodeService.getPrimaryParent(currentNode)
-                .getParentRef();
+	/**
+	 * Returns node parent if exists.
+	 * 
+	 * unsecured method
+	 * 
+	 * @param currentNode
+	 * @return
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public SecuredItem getParent(NodeRef currentNode)
+			throws KoyaServiceException {
 
-        try {
-            return getSecuredItem(parentNr);
-        } catch (KoyaServiceException e) {
+		if (isKoyaType(currentNode, Company.class)) {
+			return null;// can't get company parent
+		}
 
-            if (unsecuredNodeService.getProperty(parentNr,
-                    ContentModel.PROP_NAME).equals(DOCLIB_NAME)) {
-                try {
-                    return getSecuredItem(unsecuredNodeService
-                            .getPrimaryParent(parentNr).getParentRef());
-                } catch (KoyaServiceException e2) {
-                    throw new KoyaServiceException(
-                            KoyaErrorCodes.INVALID_NODE_HIERACHY);
-                }
-            } else {
-                throw new KoyaServiceException(
-                        KoyaErrorCodes.INVALID_NODE_HIERACHY);
-            }
-        }
-    }
+		NodeRef parentNr = unsecuredNodeService.getPrimaryParent(currentNode)
+				.getParentRef();
 
-    public static final Integer NB_ANCESTOR_INFINTE = -1;
+		try {
+			return getSecuredItem(parentNr);
+		} catch (KoyaServiceException e) {
 
-    /**
-     * Return parent nodes list with maximum nbAncestor elements.
-     *
-     * if NbAncestor
-     *
-     * @param n
-     * @param nbAncestor
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public List<SecuredItem> getParentsList(NodeRef n, Integer nbAncestor)
-            throws KoyaServiceException {
-        List<SecuredItem> parents = new ArrayList<>();
-        SecuredItem parent = getParent(n);
+			if (unsecuredNodeService.getProperty(parentNr,
+					ContentModel.PROP_NAME).equals(DOCLIB_NAME)) {
+				try {
+					return getSecuredItem(unsecuredNodeService
+							.getPrimaryParent(parentNr).getParentRef());
+				} catch (KoyaServiceException e2) {
+					throw new KoyaServiceException(
+							KoyaErrorCodes.INVALID_NODE_HIERACHY);
+				}
+			} else {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVALID_NODE_HIERACHY);
+			}
+		}
+	}
 
-        if (parent == null) {
-            /**
-             * End condition
-             */
-            return new ArrayList<>();
-        } else {
-            parents.add(parent);
-            if (nbAncestor > 1 || nbAncestor <= NB_ANCESTOR_INFINTE) {
-                parents.addAll(getParentsList(parent.getNodeRefasObject(),
-                        --nbAncestor));
-            }
-        }
+	public static final Integer NB_ANCESTOR_INFINTE = -1;
 
-        return parents;
-    }
+	/**
+	 * Return parent nodes list with maximum nbAncestor elements.
+	 * 
+	 * if NbAncestor
+	 * 
+	 * @param n
+	 * @param nbAncestor
+	 * @return
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public List<SecuredItem> getParentsList(NodeRef n, Integer nbAncestor)
+			throws KoyaServiceException {
+		List<SecuredItem> parents = new ArrayList<>();
+		SecuredItem parent = getParent(n);
 
-    /**
-     * count direct children of given type
-     *
-     *
-     * @param parent
-     * @param qNameFilter
-     * @return
-     * @throws KoyaServiceException
-     */
-    public Integer countChildren(NodeRef parent, Set<QName> qNameFilter)
-            throws KoyaServiceException {
+		if (parent == null) {
+			/**
+			 * End condition
+			 */
+			return new ArrayList<>();
+		} else {
+			parents.add(parent);
+			if (nbAncestor > 1 || nbAncestor <= NB_ANCESTOR_INFINTE) {
+				parents.addAll(getParentsList(parent.getNodeRefasObject(),
+						--nbAncestor));
+			}
+		}
 
-        if (qNameFilter != null && !qNameFilter.isEmpty()) {
-            return nodeService.getChildAssocs(parent, qNameFilter).size();
-        } else {
-            return nodeService.getChildAssocs(parent).size();
-        }
-    }
-    
-    
-    public List<SecuredItem> listChildrenAsTree(NodeRef parent,
-             final Integer depth,final boolean onlyFolders)
-            throws KoyaServiceException {
-       
-            List<Pair<QName, Boolean>> sortProps = new ArrayList() {           
+		return parents;
+	}
+
+	/**
+	 * count direct children of given type
+	 * 
+	 * 
+	 * @param parent
+	 * @param qNameFilter
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	public Integer countChildren(NodeRef parent, Set<QName> qNameFilter)
+			throws KoyaServiceException {
+
+		if (qNameFilter != null && !qNameFilter.isEmpty()) {
+			return nodeService.getChildAssocs(parent, qNameFilter).size();
+		} else {
+			return nodeService.getChildAssocs(parent).size();
+		}
+	}
+
+	public List<SecuredItem> listChildrenAsTree(NodeRef parent,
+			final Integer depth, final boolean onlyFolders)
+			throws KoyaServiceException {
+
+		List<Pair<QName, Boolean>> sortProps = new ArrayList() {
 			private static final long serialVersionUID = 1L;
 
 			{
-                add(new Pair<>(
-                        GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER, false));
-                add(new Pair<>(ContentModel.PROP_TITLE, true));
-            }
-        };
+				add(new Pair<>(
+						GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER, false));
+				add(new Pair<>(ContentModel.PROP_TITLE, true));
+			}
+		};
 
-        PagingResults<FileInfo> results = fileFolderService.list(parent,
-                !onlyFolders, true, null, sortProps,
-                new PagingRequest(Integer.valueOf(0), Integer.MAX_VALUE)
-        );
+		PagingResults<FileInfo> results = fileFolderService.list(parent,
+				!onlyFolders, true, null, sortProps,
+				new PagingRequest(Integer.valueOf(0), Integer.MAX_VALUE));
 
-        List children = results.getPage();
+		List children = results.getPage();
 
-        /**
-         * Transform List<FileInfo> as List<SecuredItem>
-         */
-        CollectionUtils.transform(children, new Transformer() {
-            @Override
-            public Object transform(Object input) {
-                try {
-                    FileInfo fi = (FileInfo) input;
-                    SecuredItem si = getSecuredItem(fi.getNodeRef());
-                    try {
-                        if (depth != null && depth > 0) {
-                            Directory dir = (Directory) si;
-                            List children = listChildrenAsTree(fi.getNodeRef(), depth - 1, onlyFolders);
-                            dir.setChildren(children);
-                        }
-                    } catch (ClassCastException cce) {
-                        //Faster than instanceOf
-                    }
-                    return si;
-                } catch (KoyaServiceException ex) {
-                    return null;
-                }
-            }
-        });
-        return children;
-    }
-    
+		/**
+		 * Transform List<FileInfo> as List<SecuredItem>
+		 */
+		CollectionUtils.transform(children, new Transformer() {
+			@Override
+			public Object transform(Object input) {
+				try {
+					FileInfo fi = (FileInfo) input;
+					SecuredItem si = getSecuredItem(fi.getNodeRef());
+					try {
+						if (depth != null && depth > 0) {
+							Directory dir = (Directory) si;
+							List children = listChildrenAsTree(fi.getNodeRef(),
+									depth - 1, onlyFolders);
+							dir.setChildren(children);
+						}
+					} catch (ClassCastException cce) {
+						// Faster than instanceOf
+					}
+					return si;
+				} catch (KoyaServiceException ex) {
+					return null;
+				}
+			}
+		});
+		return children;
+	}
 
-    /**
-     *
-     * @param parent
-     * @param skipCount
-     * @param maxItems
-     * @param onlyFolders
-     * @return
-     * @throws KoyaServiceException
-     */
-    public Pair<List<SecuredItem>,Pair<Integer,Integer>> listChildrenPaginated(NodeRef parent,
-            final Integer skipCount, final Integer maxItems,
-            final boolean onlyFolders,final String namePattern)
-            throws KoyaServiceException {
+	/**
+	 * 
+	 * @param parent
+	 * @param skipCount
+	 * @param maxItems
+	 * @param onlyFolders
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	public Pair<List<SecuredItem>, Pair<Integer, Integer>> listChildrenPaginated(
+			NodeRef parent, final Integer skipCount, final Integer maxItems,
+			final boolean onlyFolders, final String namePattern)
+			throws KoyaServiceException {
 
-        Integer skip = skipCount;
-        Integer max = maxItems;
-        if (skipCount == null) {
-            skip = Integer.valueOf(0);
-        }
-        if (maxItems == null) {
-            max = Integer.MAX_VALUE;
-        }
-        List<Pair<QName, Boolean>> sortProps = new ArrayList() {           
+		Integer skip = skipCount;
+		Integer max = maxItems;
+		if (skipCount == null) {
+			skip = Integer.valueOf(0);
+		}
+		if (maxItems == null) {
+			max = Integer.MAX_VALUE;
+		}
+		List<Pair<QName, Boolean>> sortProps = new ArrayList() {
 			private static final long serialVersionUID = 1L;
 
 			{
-                add(new Pair<>(
-                        GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER, false));
-                add(new Pair<>(ContentModel.PROP_TITLE, true));
-            }
-        };
-        
-        PagingRequest pr = new PagingRequest(skip, max);
-        pr.setRequestTotalCountMax(Integer.MAX_VALUE);
+				add(new Pair<>(
+						GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER, false));
+				add(new Pair<>(ContentModel.PROP_TITLE, true));
+			}
+		};
 
-        PagingResults<FileInfo> results = fileFolderService.list(parent,
-                !onlyFolders, true,namePattern, null, sortProps,pr
-        );
+		PagingRequest pr = new PagingRequest(skip, max);
+		pr.setRequestTotalCountMax(Integer.MAX_VALUE);
 
-        List children = results.getPage();
+		PagingResults<FileInfo> results = fileFolderService.list(parent,
+				!onlyFolders, true, namePattern, null, sortProps, pr);
 
-        /**
-         * Transform List<FileInfo> as List<SecuredItem>
-         */
-        CollectionUtils.transform(children, new Transformer() {
-            @Override
-            public Object transform(Object input) {
-                try {                    
-                    return getSecuredItem(((FileInfo) input).getNodeRef());
-                } catch (KoyaServiceException ex) {
-                    return null;
-                }
-            }
-        });
-         
-        return  new Pair<List<SecuredItem>, Pair<Integer,Integer>>(children, results.getTotalResultCount());
-    }
+		List children = results.getPage();
 
-    public Properties readPropertiesFileContent(NodeRef fileNr) {
-        Properties props = new Properties();
-        if (fileNr != null) {
-            ContentReader contentReader = fileFolderService.getReader(fileNr);
-            try {
-                props.load(contentReader.getContentInputStream());
-            } catch (IOException | ContentIOException ex) {
-                // silent exception catching
-            }
-        }
-        return props;
-    }
+		/**
+		 * Transform List<FileInfo> as List<SecuredItem>
+		 */
+		CollectionUtils.transform(children, new Transformer() {
+			@Override
+			public Object transform(Object input) {
+				try {
+					return getSecuredItem(((FileInfo) input).getNodeRef());
+				} catch (KoyaServiceException ex) {
+					return null;
+				}
+			}
+		});
 
-    public NodeRef xPath2NodeRef(String xpath) throws KoyaServiceException {
+		return new Pair<List<SecuredItem>, Pair<Integer, Integer>>(children,
+				results.getTotalResultCount());
+	}
 
-        RepositoryLocation templateLoc = new RepositoryLocation();// defaultQuery
-        // language
-        // = xpath
-        templateLoc.setPath(xpath);
-        StoreRef store = templateLoc.getStoreRef();
+	public Properties readPropertiesFileContent(NodeRef fileNr) {
+		Properties props = new Properties();
+		if (fileNr != null) {
+			ContentReader contentReader = fileFolderService.getReader(fileNr);
+			try {
+				props.load(contentReader.getContentInputStream());
+			} catch (IOException | ContentIOException ex) {
+				// silent exception catching
+			}
+		}
+		return props;
+	}
 
-        try {
-            List<NodeRef> nodeRefs = searchService.selectNodes(
-                    nodeService.getRootNode(store), xpath, null,
-                    namespaceService, false);
-            if (nodeRefs.size() != 1) {
-                throw new KoyaServiceException(
-                        KoyaErrorCodes.INVALID_XPATH_NODE, nodeRefs.size()
-                        + " nodes match search");
-            }
-            return nodeRefs.get(0);
-        } catch (SearcherException e) {
-            throw new KoyaServiceException(
-                    KoyaErrorCodes.CANNOT_FIND_XPATH_NODE, e);
-        }
-    }
+	public NodeRef xPath2NodeRef(String xpath) throws KoyaServiceException {
 
-    /**
-     * Name encoding method from title String.
-     *
-     * @param title
-     * @return
-     */
-    public String getUniqueValidFileNameFromTitle(String title) {
+		RepositoryLocation templateLoc = new RepositoryLocation();// defaultQuery
+		// language
+		// = xpath
+		templateLoc.setPath(xpath);
+		StoreRef store = templateLoc.getStoreRef();
 
-        title = title.replaceAll("([\\\"\\\\*\\\\\\>\\<\\?\\/\\:\\|]+)", "");
-        String oldTitle;
-        do {
-            oldTitle = title;
-            title = title.replaceAll("([\\.]+$)|([ ]+$)", "");
-        } while (!oldTitle.equals(title));
+		try {
+			List<NodeRef> nodeRefs = searchService.selectNodes(
+					nodeService.getRootNode(store), xpath, null,
+					namespaceService, false);
+			if (nodeRefs.size() != 1) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVALID_XPATH_NODE, nodeRefs.size()
+								+ " nodes match search");
+			}
+			return nodeRefs.get(0);
+		} catch (SearcherException e) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.CANNOT_FIND_XPATH_NODE, e);
+		}
+	}
 
-        return title;
-    }
+	/**
+	 * Name encoding method from title String.
+	 * 
+	 * @param title
+	 * @return
+	 */
+	public String getUniqueValidFileNameFromTitle(String title) {
+
+		title = title.replaceAll("([\\\"\\\\*\\\\\\>\\<\\?\\/\\:\\|]+)", "");
+		String oldTitle;
+		do {
+			oldTitle = title;
+			title = title.replaceAll("([\\.]+$)|([ ]+$)", "");
+		} while (!oldTitle.equals(title));
+
+		return title;
+	}
 }

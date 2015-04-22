@@ -18,25 +18,28 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
 import junit.framework.TestCase;
+
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestClientException;
+
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
@@ -191,6 +194,18 @@ public class DossierServiceImplTest extends TestCase {
         assertFalse(dossierService.setConfidentiality(admin, d, false));   
         assertFalse(dossierService.isConfidential(admin, d));
 
+    }
+    
+    @Test
+    public void testCreateSummary()throws AlfrescoServiceException {
+    	Dossier d = dossierService.create(admin, spaceTests,
+                "testSummary");    	
+    	Map<String,NodeRef> ret = dossierService.createSummary(admin, d, "test");
+    	
+    	assertTrue(ret.get("htmlSummaryNodeRef") != null);
+    	assertTrue(ret.get("pdfSummaryNodeRef") != null);
+    	
+    	
     }
 
 }

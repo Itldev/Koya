@@ -247,6 +247,22 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="SubSpaceAclService" ref="SubSpaceCollaboratorsAclService"/>        
     </bean>
+    
+    <!--generate summary document -->
+    <bean id="webscript.fr.itldev.koya.dossier.summary.get" 
+          class="fr.itldev.koya.webscript.dossier.GenerateSummary"
+          parent="webscript">                
+        <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="templateService" ref="templateService"/>
+        <property name="namespaceService" ref="namespaceService"/>
+        <property name="fileFolderService" ref="fileFolderService"/>
+        <property name="searchService" ref="searchService"/>
+        <property name="nodeService" ref="nodeService"/>
+        <property name="serviceRegistry" ref="ServiceRegistry"/>  
+        <property name="contentService" ref="contentService" />  
+        <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
+        <property name="versionService" ref="versionService" />    
+    </bean>
        
     <!--
     ==================================================================
