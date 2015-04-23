@@ -426,8 +426,8 @@ public class KoyaNodeService {
             throw new KoyaServiceException(
                     KoyaErrorCodes.MOVE_CYCLIC_RELATIONSHIP_DETECTED);
         }
-        activityPoster.postFileFolderUpdated(fileFolderService.getFileInfo(n)
-                .isFolder(), fInfo.getNodeRef());
+        activityPoster.postFileFolderUpdated(fileFolderService.getFileInfo(dest)
+                .isFolder(), dest);
         // TODO update KoyaNodes cache
         return getSecuredItem(fInfo.getNodeRef());
     }
