@@ -36,7 +36,6 @@
         <property name="preferenceService" ref="preferenceService"/>
         <property name="fileFolderService" ref="FileFolderService" />
         <property name="authenticationService" ref="AuthenticationService" />
-        <property name="activityService" ref="activityService"/>
         <property name="siteService" ref="SiteService"/>
         <property name="ancestorNodeLocator" ref="ancestorNodeLocator"/>
         <property name="activityPoster" ref="cmisActivityPoster" />
