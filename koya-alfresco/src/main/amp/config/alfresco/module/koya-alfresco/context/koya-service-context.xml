@@ -150,6 +150,7 @@
             <ref bean="policyComponent" />
         </property>
         <property name="sysAdminParams" ref="sysAdminParams"/>
+        <property name="searchService" ref="searchService" />
         
     </bean>
 

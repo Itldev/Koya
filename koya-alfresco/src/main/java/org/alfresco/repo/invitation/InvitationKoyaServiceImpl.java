@@ -18,17 +18,17 @@
  */
 package org.alfresco.repo.invitation;
 
-import fr.itldev.koya.model.permissions.SitePermission;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.site.SiteModel;
 import org.alfresco.repo.transaction.TransactionalResourceHelper;
 import org.alfresco.repo.workflow.WorkflowModel;
 import org.alfresco.repo.workflow.activiti.ActivitiConstants;
@@ -41,7 +41,11 @@ import org.alfresco.service.cmr.invitation.InvitationExceptionUserError;
 import org.alfresco.service.cmr.invitation.ModeratedInvitation;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.workflow.WorkflowAdminService;
@@ -53,6 +57,8 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.GUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import fr.itldev.koya.model.permissions.SitePermission;
 
 /**
  * @see org.alfresco.repo.invitation.InvitationServiceImpl
@@ -75,8 +81,16 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
     private static final Log logger = LogFactory.getLog(InvitationServiceImpl.class);
 
     private WorkflowAdminService workflowAdminService;
+    
+    private SearchService searchService;
+    
+    
 
-    private final int maxUserNameGenRetries = MAX_NUM_INVITEE_USER_NAME_GEN_TRIES;
+    public void setSearchService(SearchService searchService) {
+		this.searchService = searchService;
+	}
+
+	private final int maxUserNameGenRetries = MAX_NUM_INVITEE_USER_NAME_GEN_TRIES;
 
     /**
      * Start the invitation process for a NominatedInvitation
@@ -328,8 +342,8 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
         checkManagerRole(inviterUserName, resourceType, siteShortName);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("startInvite() inviterUserName=" + inviterUserName + " inviteeUserName=" + inviteeUserName
+        if (logger.isInfoEnabled()) {
+            logger.info("startInvite() inviterUserName=" + inviterUserName + " inviteeUserName=" + inviteeUserName
                     + " inviteeFirstName=" + inviteeFirstName + " inviteeLastName=" + inviteeLastName
                     + " inviteeEmail=" + inviteeEmail + " siteShortName=" + siteShortName + " inviteeSiteRole="
                     + inviteeSiteRole);
@@ -350,8 +364,43 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
             inviteeUserName = null;
 
-            Set<NodeRef> peopleWithInviteeEmail = getPersonService().getPeopleFilteredByProperty(ContentModel.PROP_EMAIL, inviteeEmail, 1);
+			/**
+			 * ITL : replace
+			 * getPersonService().getPeopleFilteredByProperty(ContentModel
+			 * .PROP_EMAIL, inviteeEmail, 100); 
+			 * 
+			 * by user email field search to
+			 * avoid PersonService Warn log message : 
+			 * 
+			 * "PersonService.getPeopleFilteredByProperty() is being called to
+			 * find people by {http://www.alfresco.org/model/content/1.0}email.
+			 * Only PROP_FIRSTNAME, PROP_LASTNAME, PROP_USERNAME are now used in
+			 * the search, so fewer nodes may be returned than expected of there
+			 * are more than 100 users in total"
+			 * 
+			 */
 
+			String luceneQuery = "TYPE:\"cm:person\" AND @koya\\:mail:\""
+					+ inviteeEmail + "\"";
+			Set<NodeRef> peopleWithInviteeEmail = new HashSet<NodeRef>();
+
+			ResultSet rs = null;
+			try {
+				rs = searchService.query(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						SearchService.LANGUAGE_LUCENE, luceneQuery);
+				for (ResultSetRow r : rs) {
+					peopleWithInviteeEmail.add(r.getNodeRef());
+				}
+			} finally {
+				if (rs != null) {
+					rs.close();
+				}
+			}
+            
+            //search 
+            //Set<NodeRef> peopleWithInviteeEmail = getPersonService().getPeopleFilteredByProperty(ContentModel.PROP_EMAIL, inviteeEmail, 100);
+            
             if (peopleWithInviteeEmail.size() > 0) {
                 // get person already existing who has the given
                 // invitee email address
