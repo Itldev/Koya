@@ -28,7 +28,7 @@
 		</property>
 	</bean>
 
-	<bean id="anonymousRestTemplate" class="org.springframework.web.client.RestTemplate">
+	<bean id="anonymousRestTemplate" class="fr.itldev.koya.services.impl.util.AlfrescoRestTemplate">
 		<constructor-arg>
 			<bean
 				class="org.springframework.http.client.CommonsClientHttpRequestFactory">

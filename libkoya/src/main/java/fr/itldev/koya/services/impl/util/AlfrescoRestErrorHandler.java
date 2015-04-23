@@ -76,13 +76,22 @@ public class AlfrescoRestErrorHandler implements ResponseErrorHandler {
         }
     }
 
-    @Override
-    public boolean hasError(ClientHttpResponse clienthttpresponse) throws IOException {
-        if (clienthttpresponse.getStatusCode() != HttpStatus.OK) {
-            logger.warn("Status code: " + clienthttpresponse.getStatusCode() + " - " + clienthttpresponse.getBody());
-            return true;
-        }
-        return false;
-    }
+	@Override
+	public boolean hasError(ClientHttpResponse clienthttpresponse)
+			throws IOException {
+		HttpStatus responseStatus = clienthttpresponse.getStatusCode();
+
+		if (responseStatus == HttpStatus.OK) {
+			return false;
+		}
+		
+		if (responseStatus == HttpStatus.FORBIDDEN) {		
+			return true;
+		}
+
+		logger.warn("Status code: " + clienthttpresponse.getStatusCode()
+				+ " - " + clienthttpresponse.getBody());
+		return true;
+	}
 
 }
