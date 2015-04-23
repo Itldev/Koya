@@ -21,8 +21,6 @@ package fr.itldev.koya.alfservice;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.interfaces.Content;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -42,12 +40,12 @@ import java.util.zip.Deflater;
 import javax.servlet.http.HttpServletResponse;
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
+import org.alfresco.opencmis.ActivityPoster;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.model.FileFolderService;
-import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
@@ -78,6 +76,7 @@ public class KoyaContentService {
     protected NamespaceService namespaceService;
     protected FileFolderService fileFolderService;
     protected ActionService actionService;
+    private ActivityPoster activityPoster;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -108,6 +107,10 @@ public class KoyaContentService {
         this.actionService = actionService;
     }
 
+    public void setActivityPoster(ActivityPoster activityPoster) {
+        this.activityPoster = activityPoster;
+    }
+
     // </editor-fold>
     public Directory createDir(String title, NodeRef parent)
             throws KoyaServiceException {
@@ -131,8 +134,11 @@ public class KoyaContentService {
                             NamespaceService.CONTENT_MODEL_1_0_URI, name),
                     ContentModel.TYPE_FOLDER, properties);
 
-            return koyaNodeService.getSecuredItem(car.getChildRef(),
-                    Directory.class);
+            NodeRef dirNodeRef = car.getChildRef();
+
+            activityPoster.postFileFolderAdded(dirNodeRef);
+
+            return koyaNodeService.getSecuredItem(dirNodeRef, Directory.class);
         } catch (DuplicateChildNodeNameException dcne) {
             throw new KoyaServiceException(
                     KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
@@ -266,7 +272,10 @@ public class KoyaContentService {
                     ContentModel.ASSOC_CONTAINS, QName.createQName(
                             NamespaceService.CONTENT_MODEL_1_0_URI, name),
                     ContentModel.TYPE_CONTENT, properties);
+
             createdNode = car.getChildRef();
+
+            activityPoster.postFileFolderAdded(createdNode);
         } catch (DuplicateChildNodeNameException ex) {
             throw new KoyaServiceException(
                     KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS, fileName);
