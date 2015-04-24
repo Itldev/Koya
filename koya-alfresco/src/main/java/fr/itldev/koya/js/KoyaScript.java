@@ -102,7 +102,7 @@ public class KoyaScript extends BaseProcessorExtension {
         List<ScriptNode> users = new ArrayList<>();
         SecuredItem s = koyaNodeService.getSecuredItem(n.getNodeRef());
         for (User u : subSpaceAclService.listUsers(s, KoyaPermissionConsumer.getAll())) {
-            users.add(new ScriptNode(u.getNodeRefasObject(), serviceRegistry));
+            users.add(new ScriptNode(u.getNodeRef(), serviceRegistry));
         }
 
         return users;
@@ -121,7 +121,7 @@ public class KoyaScript extends BaseProcessorExtension {
             for (SecuredItem s : subSpaceAclService.listSecuredItems(c,
                     userService.buildUser(n.getNodeRef()),
                     KoyaPermission.getAll())) {
-                sharedElements.add(new ScriptNode(s.getNodeRefasObject(), serviceRegistry));
+                sharedElements.add(new ScriptNode(s.getNodeRef(), serviceRegistry));
             }
         }
         return sharedElements;
@@ -139,7 +139,7 @@ public class KoyaScript extends BaseProcessorExtension {
 
         //checks if company rule exists.
         final NodeRef docLibNodeRef = nodeService.getChildByName(
-                c.getNodeRefasObject(), ContentModel.ASSOC_CONTAINS, "documentLibrary");
+                c.getNodeRef(), ContentModel.ASSOC_CONTAINS, "documentLibrary");
 
         List<Rule> rules = ruleService.getRules(docLibNodeRef, true, RuleType.INBOUND);
 

@@ -174,7 +174,7 @@ public class GenerateSummary extends AbstractWebScript implements
 			String htmlText = null;
 			Map<String, Serializable> paramsTemplate = new HashMap<>();
 			paramsTemplate.put("dossier",
-					new TemplateNode(d.getNodeRefasObject(), serviceRegistry,
+					new TemplateNode(d.getNodeRef(), serviceRegistry,
 							null));
 			try {
 				htmlText = templateService.processTemplate("freemarker",
@@ -213,12 +213,12 @@ public class GenerateSummary extends AbstractWebScript implements
 			 */
 
 			htmlSummaryNodeRef = nodeService.getChildByName(
-					d.getNodeRefasObject(), ContentModel.ASSOC_CONTAINS,
+					d.getNodeRef(), ContentModel.ASSOC_CONTAINS,
 					documentName + ".html");
 
 			if (htmlSummaryNodeRef == null) {
 				htmlSummaryNodeRef = fileFolderService.create(
-						d.getNodeRefasObject(), documentName + ".html",
+						d.getNodeRef(), documentName + ".html",
 						ContentModel.TYPE_CONTENT).getNodeRef();
 			}
 
@@ -236,12 +236,12 @@ public class GenerateSummary extends AbstractWebScript implements
 			 */
 
 			pdfSummaryNodeRef = nodeService.getChildByName(
-					d.getNodeRefasObject(), ContentModel.ASSOC_CONTAINS,
+					d.getNodeRef(), ContentModel.ASSOC_CONTAINS,
 					documentName + ".pdf");
 
 			if (pdfSummaryNodeRef == null) {
 				pdfSummaryNodeRef = fileFolderService.create(
-						d.getNodeRefasObject(), documentName + ".pdf",
+						d.getNodeRef(), documentName + ".pdf",
 						ContentModel.TYPE_CONTENT).getNodeRef();
 			}
 

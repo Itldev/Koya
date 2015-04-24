@@ -106,7 +106,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
             Resource zipFile) throws AlfrescoServiceException {
         Dossier d = create(user, parentSpace, title);
         Document zipDoc = KoyaContentService.upload(user,
-                d.getNodeRefasObject(), zipFile);
+                d.getNodeRef(), zipFile);
         KoyaContentService.importZipedContent(user, zipDoc);
         return d;
     }
@@ -242,7 +242,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
                 responsible.getUserName(), dossier.getNodeRef());
         
         //invalidate user cache
-        cacheManager.revokePermission(responsible, dossier.getNodeRefasObject());
+        cacheManager.revokePermission(responsible, dossier.getNodeRef());
         
     }
 
@@ -254,7 +254,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
                 responsible.getUserName(), dossier.getNodeRef());
         
         //invalidate user cache
-        cacheManager.revokePermission(responsible, dossier.getNodeRefasObject());      
+        cacheManager.revokePermission(responsible, dossier.getNodeRef());      
     }
 
     /**
@@ -287,7 +287,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
                 dossier.getNodeRef(), collaborator.getUserName());
-        cacheManager.revokePermission(collaborator, dossier.getNodeRefasObject());
+        cacheManager.revokePermission(collaborator, dossier.getNodeRef());
     }
 
     /**
@@ -304,7 +304,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
                 memberOrResp.getUserName(), dossier.getNodeRef());               
-        cacheManager.revokePermission(memberOrResp, dossier.getNodeRefasObject());
+        cacheManager.revokePermission(memberOrResp, dossier.getNodeRef());
 
     }
 

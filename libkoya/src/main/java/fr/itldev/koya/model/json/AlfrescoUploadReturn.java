@@ -19,17 +19,19 @@
 
 package fr.itldev.koya.model.json;
 
+import org.alfresco.service.cmr.repository.NodeRef;
+
 public class AlfrescoUploadReturn {
 
-    private String nodeRef;
+    private NodeRef nodeRef;
     private String fileName;
     private Status status;
 
-    public String getNodeRef() {
+    public NodeRef getNodeRef() {
         return nodeRef;
     }
 
-    public void setNodeRef(String nodeRef) {
+    public void setNodeRef(NodeRef nodeRef) {
         this.nodeRef = nodeRef;
     }
 

@@ -18,12 +18,16 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.interfaces.Container;
-import fr.itldev.koya.model.SecuredItem;
 import java.util.ArrayList;
 import java.util.List;
-import org.alfresco.service.cmr.site.SiteInfo;
+
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.interfaces.Container;
+import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 
 /**
  *
@@ -36,7 +40,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 public final class Company extends SecuredItem implements Container {
 
     // private String title;//displayed title
-    private String currentSaleOfferNodeRef;
+    private NodeRef currentSaleOfferNodeRef;
     @JsonIgnore
     private SalesOffer currentSaleOffer;
     @JsonIgnore
@@ -45,11 +49,12 @@ public final class Company extends SecuredItem implements Container {
     private List<Space> children = new ArrayList<>();
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public String getCurrentSaleOfferNodeRef() {
+    @JsonDeserialize(using = NodeRefDeserializer.class)
+    public NodeRef getCurrentSaleOfferNodeRef() {
         return currentSaleOfferNodeRef;
     }
 
-    public void setCurrentSaleOfferNodeRef(String currentSaleOfferNodeRef) {
+    public void setCurrentSaleOfferNodeRef(NodeRef currentSaleOfferNodeRef) {
         this.currentSaleOfferNodeRef = currentSaleOfferNodeRef;
     }
 

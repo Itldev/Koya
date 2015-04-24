@@ -231,7 +231,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
 			ArrayList<String> selected = new ArrayList<>();
 			params.put("nodeRefs", selected);
 			for (SecuredItem item : securedItems) {
-				selected.add(item.getNodeRef());
+				selected.add(item.getNodeRef().toString());
 			}
 
 			JSONObject postParams = new JSONObject(params);

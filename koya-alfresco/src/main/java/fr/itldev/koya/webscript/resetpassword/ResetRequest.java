@@ -123,7 +123,7 @@ public class ResetRequest extends AbstractWebScript {
             Map<QName, Serializable> workflowProps = new HashMap<>();
             workflowProps.put(WorkflowModel.PROP_WORKFLOW_DESCRIPTION, userEmail + " reset password request");
 
-            workflowProps.put(WorkflowModel.ASSOC_ASSIGNEE, u.getNodeRefasObject());
+            workflowProps.put(WorkflowModel.ASSOC_ASSIGNEE, u.getNodeRef());
             workflowProps.put(ResetPasswordModel.PROP_RESETURL, resetUrl);
             workflowProps.put(ResetPasswordModel.PROP_RESETTICKET, GUID.generate());
 

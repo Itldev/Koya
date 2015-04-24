@@ -76,7 +76,7 @@ public class UpdateParentNodesAfterGrantKoyaPermission implements
     @Override
     public void afterGrantKoyaPermission(SubSpace subSpace, final String authority, KoyaPermission permission) {
 
-        NodeRef pNode = nodeService.getPrimaryParent(subSpace.getNodeRefasObject()).getParentRef();
+        NodeRef pNode = nodeService.getPrimaryParent(subSpace.getNodeRef()).getParentRef();
         SecuredItem sNode;
         try {
             sNode = koyaNodeService.getSecuredItem(pNode);
@@ -94,7 +94,7 @@ public class UpdateParentNodesAfterGrantKoyaPermission implements
                 @Override
                 public Boolean doWork() throws Exception {
                     return permissionService.hasPermission(
-                            parent.getNodeRefasObject(), KoyaPermissionConsumer.CLIENT.toString())
+                            parent.getNodeRef(), KoyaPermissionConsumer.CLIENT.toString())
                             .equals(AccessStatus.ALLOWED);
                 }
             }, authority);

@@ -50,12 +50,12 @@ public class ListOffer extends AbstractWebScript {
         Map<String, String> dataOffre2 = new HashMap<>();
 
         dataOffre1.put("template", "tpl");
-        dataOffre1.put("nodeRef", "xxxxnr1");
+        dataOffre1.put("nodeRef", null);
         dataOffre1.put("name", "offre1");
         dataOffre1.put("active", "true");
 
         dataOffre2.put("template", "tpl2");
-        dataOffre2.put("nodeRef", "xxxxnr2");
+        dataOffre2.put("nodeRef", null);
         dataOffre2.put("name", "offre2");
         dataOffre2.put("active", "true");
 

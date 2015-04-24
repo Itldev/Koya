@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.service.cmr.repository.NodeRef;
+
 /**
  * 
  * This object wraps an email to send.
@@ -44,7 +46,7 @@ public class MailWrapper {
 	private List<String> templateKoyaSubjectParams = new ArrayList<>();
 
 	// Company context
-	private String companyNodeRef;
+	private NodeRef companyNodeRef;
 
 	public List<String> getTo() {
 		return to;
@@ -112,11 +114,11 @@ public class MailWrapper {
 	}
 
 	
-	public String getCompanyNodeRef() {
+	public NodeRef getCompanyNodeRef() {
 		return companyNodeRef;
 	}
 
-	public void setCompanyNodeRef(String companyNodeRef) {
+	public void setCompanyNodeRef(NodeRef companyNodeRef) {
 		this.companyNodeRef = companyNodeRef;
 	}
 

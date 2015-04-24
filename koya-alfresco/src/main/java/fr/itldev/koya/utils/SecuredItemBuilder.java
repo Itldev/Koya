@@ -62,14 +62,14 @@ public class SecuredItemBuilder {
         Company c = Company.newInstance();
         c.setName((String) nodeService.getProperty(n, ContentModel.PROP_NAME));
         c.setTitle((String) nodeService.getProperty(n, ContentModel.PROP_TITLE));
-        c.setNodeRefasObject(n);
+        c.setNodeRef(n);
         return c;
     }
 
     private Space nodeSpaceBuilder(final NodeRef spaceNodeRef)
             throws KoyaServiceException {
         Space s = Space.newInstance();
-        s.setNodeRef(spaceNodeRef.toString());
+        s.setNodeRef(spaceNodeRef);
         s.setName((String) nodeService.getProperty(spaceNodeRef,
                 ContentModel.PROP_NAME));
         s.setTitle((String) nodeService.getProperty(spaceNodeRef,
@@ -79,7 +79,7 @@ public class SecuredItemBuilder {
 
     private Dossier nodeDossierBuilder(final NodeRef dossierNodeRef) {
         Dossier d = Dossier.newInstance();
-        d.setNodeRef(dossierNodeRef.toString());
+        d.setNodeRef(dossierNodeRef);
         d.setName((String) nodeService.getProperty(dossierNodeRef,
                 ContentModel.PROP_NAME));
         if (nodeService.getProperty(dossierNodeRef,
@@ -98,7 +98,7 @@ public class SecuredItemBuilder {
 
     private Directory nodeDirBuilder(NodeRef dirNodeRef) {
         Directory dir = Directory.newInstance();
-        dir.setNodeRef(dirNodeRef.toString());
+        dir.setNodeRef(dirNodeRef);
         dir.setName((String) nodeService.getProperty(dirNodeRef,
                 ContentModel.PROP_NAME));
         dir.setTitle((String) nodeService.getProperty(dirNodeRef,
@@ -108,7 +108,7 @@ public class SecuredItemBuilder {
 
     private Document nodeDocumentBuilder(final NodeRef docNodeRef) {
         Document doc = Document.newInsance();
-        doc.setNodeRef(docNodeRef.toString());
+        doc.setNodeRef(docNodeRef);
         doc.setName((String) nodeService.getProperty(docNodeRef,
                 ContentModel.PROP_NAME));
         doc.setTitle((String) nodeService.getProperty(docNodeRef,

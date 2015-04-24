@@ -70,12 +70,12 @@ public class AfterValidateInvitePostActivityActionExecuter extends KoyaNotifierA
             Company c = koyaNodeService.getSecuredItem(actionedUponNodeRef, Company.class);
 
             for (Space s : spaceService.list(c.getName(), Integer.MAX_VALUE)) {
-                for (Dossier d : dossierService.list(s.getNodeRefasObject())) {
+                for (Dossier d : dossierService.list(s.getNodeRef())) {
                     activityService.postActivity(
                             NotificationType.KOYA_SHARED,
                             c.getName(),
                             "koya",
-                            getActivityData(user, d.getNodeRefasObject()), user.getUserName());
+                            getActivityData(user, d.getNodeRef()), user.getUserName());
                 }
             }
         } catch (KoyaServiceException ex) {

@@ -571,7 +571,7 @@ public class KoyaNodeService {
         } else {
             parents.add(parent);
             if (nbAncestor > 1 || nbAncestor <= NB_ANCESTOR_INFINTE) {
-                parents.addAll(getParentsList(parent.getNodeRefasObject(),
+                parents.addAll(getParentsList(parent.getNodeRef(),
                         --nbAncestor));
             }
         }

@@ -72,7 +72,8 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements Favouri
         cacheManager.revokeUserFavourites(user);
        
         Map<String, Object> postParams = new HashMap<>();
-        postParams.put("nodeRef", item.getNodeRef());
+        //TODO write directly nodeRef Object instead of toString() value
+        postParams.put("nodeRef", item.getNodeRef().toString());
         postParams.put("status", favouriteValue);
 
         Boolean status = fromJSON(new TypeReference<Boolean>() {

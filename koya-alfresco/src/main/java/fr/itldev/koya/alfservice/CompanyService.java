@@ -156,7 +156,7 @@ public class CompanyService {
         // put companySite Aspect with default company.properties reference.
         Map<QName, Serializable> props = new HashMap<>();
         props.put(KoyaModel.PROP_COMPANYHOME, companyPropertiesNode);
-        nodeService.addAspect(created.getNodeRefasObject(),
+        nodeService.addAspect(created.getNodeRef(),
                 KoyaModel.ASPECT_COMPANYSITE, props);
 
         modelService.companyInitTemplate(shortName, spaceTemplate);
@@ -297,7 +297,7 @@ public class CompanyService {
         }
 
         // create preferences file
-        NodeRef koyaConfigNr = getKoyaConfigNodeRef(c.getNodeRefasObject(),
+        NodeRef koyaConfigNr = getKoyaConfigNodeRef(c.getNodeRef(),
                 false);
         prefFileNodeRef = fileFolderService.create(koyaConfigNr,
                 PREFS_FILE_NAME, ContentModel.TYPE_CONTENT).getNodeRef();
@@ -377,7 +377,7 @@ public class CompanyService {
         try {
 
             prefFileNodeRef = nodeService.getChildByName(
-                    getKoyaConfigNodeRef(c.getNodeRefasObject(), false),
+                    getKoyaConfigNodeRef(c.getNodeRef(), false),
                     ContentModel.ASSOC_CONTAINS, fileName);
         } catch (Exception ex) {
         }

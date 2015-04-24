@@ -334,7 +334,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
         }
 
         for (Dossier d : modifiedDossiers) {
-            dossierService.addOrUpdateLastModifiedDate(d.getNodeRefasObject());
+            dossierService.addOrUpdateLastModifiedDate(d.getNodeRef());
         }
 
     }
@@ -409,11 +409,11 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                         if (!d.getTitle().equals(dossierTitle)) {
                             sbLog.append("\nUpdating dossier " + d.getTitle()
                                     + " to " + dossierTitle);
-                            koyaNodeService.rename(d.getNodeRefasObject(),
+                            koyaNodeService.rename(d.getNodeRef(),
                                     dossierXml.getReference() + " - "
                                             + dossierXml.getName());
                             d = koyaNodeService.getSecuredItem(
-                                    d.getNodeRefasObject(), Dossier.class);
+                                    d.getNodeRef(), Dossier.class);
 
                         } else {
                             sbLog.append("\nFound dossier " + d.getTitle());
@@ -568,12 +568,12 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                 boolean pathCreated = false;
                 NodeRef dirNodeRef;
                 if (path == null || path.isEmpty()) {
-                    dirNodeRef = dossier.getNodeRefasObject();
+                    dirNodeRef = dossier.getNodeRef();
                 } else {
                     dirNodeRef = koyaContentService.makeFolders(
-                            dossier.getNodeRefasObject(),
+                            dossier.getNodeRef(),
                             Arrays.asList(path.split(File.separator)))
-                            .getNodeRefasObject();
+                            .getNodeRef();
                     pathCreated = true;
                 }
 
@@ -728,7 +728,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
                                 + permissionCollaborator);
                         subSpaceCollaboratorsAclService.shareSecuredItem(
                                 (SubSpace) koyaNodeService.getSecuredItem(d
-                                        .getNodeRefasObject()), userService
+                                        .getNodeRef()), userService
                                         .getUserByUsername(u.getUserName())
                                         .getEmail(), permissionCollaborator,
                                 true);

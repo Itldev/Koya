@@ -107,7 +107,7 @@ public class CompanyPropertiesService {
         // search in company koya-config dir a logo
 
         NodeRef companyPropertiesNodeRef = (NodeRef) nodeService.getProperty(
-                c.getNodeRefasObject(), KoyaModel.PROP_COMPANYHOME);
+                c.getNodeRef(), KoyaModel.PROP_COMPANYHOME);
 
         List<AssociationRef> logos = nodeService.getTargetAssocs(
                 companyPropertiesNodeRef, KoyaModel.ASSOC_LOGO_COMPANY);
@@ -246,7 +246,7 @@ public class CompanyPropertiesService {
             throws KoyaServiceException {
 
         NodeRef companyPropertiesNodeRef = (NodeRef) nodeService.getProperty(
-                c.getNodeRefasObject(), KoyaModel.PROP_COMPANYHOME);
+                c.getNodeRef(), KoyaModel.PROP_COMPANYHOME);
 
         CompanyProperties cp = new CompanyProperties(c.getName(),
                 companyPropertiesNodeRef);
@@ -367,10 +367,10 @@ public class CompanyPropertiesService {
         Company c = koyaNodeService.companyBuilder(companyName);
 
         NodeRef companyPropertiesNodeRef = (NodeRef) nodeService.getProperty(
-                c.getNodeRefasObject(), KoyaModel.PROP_COMPANYHOME);
+                c.getNodeRef(), KoyaModel.PROP_COMPANYHOME);
 
         // Modify company Title
-        nodeService.setProperty(c.getNodeRefasObject(),
+        nodeService.setProperty(c.getNodeRef(),
                 ContentModel.PROP_TITLE, cp.getTitle());
 
         /**
@@ -466,7 +466,7 @@ public class CompanyPropertiesService {
 
             // associated user
             String personName = (String) nodeService.getProperty(c.getUser()
-                    .getNodeRefasObject(), ContentModel.PROP_USERNAME);
+                    .getNodeRef(), ContentModel.PROP_USERNAME);
 
             // update existing node
             if (c.getNodeRef() != null) {
@@ -479,7 +479,7 @@ public class CompanyPropertiesService {
                     // create association
                     nodeService
                             .createAssociation(c.getNodeRef(), c.getUser()
-                                    .getNodeRefasObject(),
+                                    .getNodeRef(),
                                     KoyaModel.ASSOC_CONTACT_USER);
                 } else if (assocRefs.size() == 1) {
                     // update association
@@ -487,7 +487,7 @@ public class CompanyPropertiesService {
                             KoyaModel.ASSOC_CONTACT_USER,
                             new ArrayList<NodeRef>() {
                                 {
-                                    add(c.getUser().getNodeRefasObject());
+                                    add(c.getUser().getNodeRef());
                                 }
                             });
                 } else {
@@ -503,7 +503,7 @@ public class CompanyPropertiesService {
 
                 Map<QName, Serializable> props = new HashMap<QName, Serializable>();
                 props.put(ContentModel.PROP_TITLE, (String) nodeService
-                        .getProperty(c.getUser().getNodeRefasObject(),
+                        .getProperty(c.getUser().getNodeRef(),
                                 ContentModel.PROP_EMAIL));
 
                 // create new contact
@@ -515,7 +515,7 @@ public class CompanyPropertiesService {
                                 personName), KoyaModel.TYPE_CONTACT, props)
                         .getChildRef();
                 nodeService.createAssociation(contactCreated, c.getUser()
-                        .getNodeRefasObject(), KoyaModel.ASSOC_CONTACT_USER);
+                        .getNodeRef(), KoyaModel.ASSOC_CONTACT_USER);
                 // update contact items values
                 mergeContactItems(contactCreated, c.getContactItems());
             }
@@ -532,7 +532,7 @@ public class CompanyPropertiesService {
     public NodeRef createCompanyConfigFile(Company c) {
         // TODO Read From company Home variable
         FileInfo fi = fileFolderService.create(
-                getKoyaConfigNodeRef(c.getNodeRefasObject(), true),
+                getKoyaConfigNodeRef(c.getNodeRef(), true),
                 COMPANYPROPERTIES_FILE_NAME, KoyaModel.TYPE_COMPANYPROPERTIES);
         return fi.getNodeRef();
     }

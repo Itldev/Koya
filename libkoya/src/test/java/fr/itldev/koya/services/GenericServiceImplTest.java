@@ -96,24 +96,24 @@ public class GenericServiceImplTest extends TestCase {
 
     @Test
     public void testgetParent() throws AlfrescoServiceException {
-        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRefasObject(), "dir");
+        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRef(), "dir");
         System.err.println(dir);
         assertTrue(securedItemService.getParent(admin, (SecuredItem) dir).getName().equals("doss1"));
     }
 
     @Test
     public void testgetParents1() throws AlfrescoServiceException {
-        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRefasObject(), "dir2");
+        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRef(), "dir2");
         assertEquals(securedItemService.getParents(admin, (SecuredItem) dir).size(), 3);
     }
 
     @Test
     public void testgetParents2() throws AlfrescoServiceException {
-        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRefasObject(), "dir");
-        Directory subDir = koyaContentService.createDir(admin, dir.getNodeRefasObject(), "subdir");
+        Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRef(), "dir");
+        Directory subDir = koyaContentService.createDir(admin, dir.getNodeRef(), "subdir");
 
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
-        Document doc = koyaContentService.upload(admin, subDir.getNodeRefasObject(), toUpload);
+        Document doc = koyaContentService.upload(admin, subDir.getNodeRef(), toUpload);
 
         assertEquals(securedItemService.getParents(admin, doc).size(), 5);
     }

@@ -1,6 +1,10 @@
 package fr.itldev.koya.model.impl;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+
+import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationDetails {
@@ -11,7 +15,7 @@ public class NotificationDetails {
     private String name;
     private String title;
     private String typeQName;
-    private String nodeRef;
+    private NodeRef nodeRef;
     private String displayPath;
 
     public String getParentNodeRef() {
@@ -62,11 +66,12 @@ public class NotificationDetails {
         this.typeQName = typeQName;
     }
 
-    public String getNodeRef() {
+    @JsonDeserialize(using = NodeRefDeserializer.class)
+    public NodeRef getNodeRef() {
         return nodeRef;
     }
 
-    public void setNodeRef(String nodeRef) {
+    public void setNodeRef(NodeRef nodeRef) {
         this.nodeRef = nodeRef;
     }
 

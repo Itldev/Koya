@@ -96,12 +96,12 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
         logger.debug("Chained permissions deletion user=" + authority + ": ref =  " + subSpace.getName() + "(" + subSpace.getClass().getSimpleName() + ")");
 
         try {
-            Company c = koyaNodeService.getFirstParentOfType(subSpace.getNodeRefasObject(),Company.class);
+            Company c = koyaNodeService.getFirstParentOfType(subSpace.getNodeRef(),Company.class);
             if (!SitePermission.CONSUMER.equals(siteService.getMembersRole(c.getName(), authority))) {
                 return;
             }
 
-            final NodeRef parentNode = nodeService.getPrimaryParent(subSpace.getNodeRefasObject()).getParentRef();
+            final NodeRef parentNode = nodeService.getPrimaryParent(subSpace.getNodeRef()).getParentRef();
             boolean userCanReadParentNode = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork< Boolean>() {
                 @Override
                 public Boolean doWork() throws Exception {
@@ -119,7 +119,7 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
                 final SubSpace parent = (SubSpace) koyaNodeService.getSecuredItem(parentNode);
 
                 //loop through current node parent childs
-                for (final ChildAssociationRef car : nodeService.getChildAssocs(parent.getNodeRefasObject())) {
+                for (final ChildAssociationRef car : nodeService.getChildAssocs(parent.getNodeRef())) {
 
                     boolean userCanReadChild = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork< Boolean>() {
                         @Override

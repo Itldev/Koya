@@ -268,7 +268,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
                     logger.trace(path);
                     // recurcive call to import folder contents
-                    importDirectory(path.toString(), d.getNodeRefasObject(),
+                    importDirectory(path.toString(), d.getNodeRef(),
                             sbLog);
                 }
                 filenames.add(uniqueFileName.toLowerCase());

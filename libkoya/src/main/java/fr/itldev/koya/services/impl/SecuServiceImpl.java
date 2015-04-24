@@ -154,7 +154,7 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
             return null;
         }
 
-        Permissions p = cacheManager.getPermission(user, s.getNodeRefasObject());        
+        Permissions p = cacheManager.getPermission(user, s.getNodeRef());        
 		if (p != null) {
 			return p;
 		}
@@ -164,7 +164,7 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
                 getForObject(getAlfrescoServerUrl() + REST_GET_PERMISSIONS,
                         String.class, s.getNodeRef()));
         
-        cacheManager.setPermission(user, s.getNodeRefasObject(),p);
+        cacheManager.setPermission(user, s.getNodeRef(),p);
         return p;
     }
 

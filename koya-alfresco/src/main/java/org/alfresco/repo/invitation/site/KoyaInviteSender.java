@@ -274,7 +274,7 @@ public class KoyaInviteSender extends InviteSender {
             	Map<String,String> share = new HashMap<String, String>();            	
             	share.put("title", s.getTitle());
             	share.put("type",s.getType());
-            	share.put("nodeRef",s.getNodeRefasObject().toString());            	
+            	share.put("nodeRef",s.getNodeRef().toString());            	
             	shares.add(share);
             }
             

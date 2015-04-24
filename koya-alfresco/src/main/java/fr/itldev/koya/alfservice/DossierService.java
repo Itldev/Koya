@@ -190,7 +190,7 @@ public class DossierService {
 
     public List<Dossier> getInactiveDossier(final Space space,
             final Date inactiveFrom, final boolean notNotifiedOnly) throws KoyaServiceException {
-        String luceneRequest = "+PATH:\"" + nodeService.getPath(space.getNodeRefasObject()).toPrefixString(prefixResolver) + "/*\" +TYPE:\"koya:dossier\" +@koya\\:lastModificationDate:[MIN TO \"" + LuceneUtils.getLuceneDateString(inactiveFrom) + "\"]";
+        String luceneRequest = "+PATH:\"" + nodeService.getPath(space.getNodeRef()).toPrefixString(prefixResolver) + "/*\" +TYPE:\"koya:dossier\" +@koya\\:lastModificationDate:[MIN TO \"" + LuceneUtils.getLuceneDateString(inactiveFrom) + "\"]";
         if (notNotifiedOnly) {
             luceneRequest += " +@koya\\:notified:false";
         }
@@ -242,7 +242,7 @@ public class DossierService {
 
                 logger.trace("Updating lastModificationDate of dossier : "
                         + d.getTitle());
-                n = d.getNodeRefasObject();
+                n = d.getNodeRef();
             } else if (type.equals(KoyaModel.TYPE_DOSSIER)) {
                 n = nodeRef;
             }

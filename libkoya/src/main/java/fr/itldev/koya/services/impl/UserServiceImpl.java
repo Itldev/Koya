@@ -108,8 +108,8 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService,
     @Override
     public User login(String authKey, String password) throws RestClientException, AlfrescoServiceException {
 
-        //call rest ticket
         AuthTicket ticket = fromJSON(new TypeReference<AuthTicket>() {
+        	//call rest ticket
         }, getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LOGIN, String.class, authKey, password));
         //Get User Object
         Map emailPostWrapper = new HashMap();

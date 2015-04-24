@@ -46,7 +46,7 @@ public class SubSpaceConsumersAclService extends SubSpaceAclService {
 
         // Get company the shared Node belongs To
         Company company = koyaNodeService.getFirstParentOfType(
-                subSpace.getNodeRefasObject(), Company.class);
+                subSpace.getNodeRef(), Company.class);
         SitePermission userPermissionInCompany = companyAclService
                 .getSitePermission(company, userMail);
 

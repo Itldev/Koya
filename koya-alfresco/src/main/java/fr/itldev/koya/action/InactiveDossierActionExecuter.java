@@ -135,17 +135,17 @@ public class InactiveDossierActionExecuter extends ActionExecuterAbstractBase {
                 List<User> responsibles = subSpaceCollaboratorsAclService
                         .listUsers(d, permissions);
                 for (User u : responsibles) {
-                    m.get(u).add(d.getNodeRefasObject());
+                    m.get(u).add(d.getNodeRef());
                 }
 
-                 nodeService.setProperty(d.getNodeRefasObject(),
+                 nodeService.setProperty(d.getNodeRef(),
                  KoyaModel.PROP_NOTIFIED, Boolean.TRUE);
 
             }
 
             for (Map.Entry<User, List<NodeRef>> e : m.entrySet()) {
                 koyaMailService.sendInactiveDossierNotification(e.getKey(),
-                        space.getNodeRefasObject(), e.getValue(),c);
+                        space.getNodeRef(), e.getValue(),c);
             }
 
         }

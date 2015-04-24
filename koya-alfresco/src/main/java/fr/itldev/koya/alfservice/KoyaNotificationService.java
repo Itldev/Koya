@@ -122,7 +122,7 @@ public class KoyaNotificationService {
         /**
          * check for global notification setting TODO remove
          */
-        if (!nodeService.hasAspect(u.getNodeRefasObject(), KoyaModel.ASPECT_USERNOTIFIED)) {
+        if (!nodeService.hasAspect(u.getNodeRef(), KoyaModel.ASPECT_USERNOTIFIED)) {
             return false;
         }
 
@@ -134,11 +134,11 @@ public class KoyaNotificationService {
     }
 
     public void addNotification(User u, SecuredItem s) {
-        nodeService.addAspect(u.getNodeRefasObject(), KoyaModel.ASPECT_USERNOTIFIED, null);
+        nodeService.addAspect(u.getNodeRef(), KoyaModel.ASPECT_USERNOTIFIED, null);
     }
 
     public void removeNotification(User u, SecuredItem s) {
-        nodeService.removeAspect(u.getNodeRefasObject(), KoyaModel.ASPECT_USERNOTIFIED);
+        nodeService.removeAspect(u.getNodeRef(), KoyaModel.ASPECT_USERNOTIFIED);
     }
 
     /**
@@ -152,7 +152,7 @@ public class KoyaNotificationService {
          * Action applies on company documentLibrary node.
          */
         final NodeRef docLibNodeRef = nodeService.getChildByName(
-                c.getNodeRefasObject(), ContentModel.ASSOC_CONTAINS, "documentLibrary");
+                c.getNodeRef(), ContentModel.ASSOC_CONTAINS, "documentLibrary");
 
         final Rule rule = new Rule();
         rule.setRuleType(RuleType.INBOUND);

@@ -383,7 +383,7 @@ public class CompanyAclService {
 							// sharedItem exists
 							if (sharedItem != null) {
 								userService.addSharedNode(userMail,
-										sharedItem.getNodeRefasObject());
+										sharedItem.getNodeRef());
 							}
 							koyaMailService.sendInviteMail(invitation
 									.getInviteId());

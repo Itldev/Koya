@@ -18,9 +18,10 @@
  */
 package fr.itldev.koya.model.json;
 
-import fr.itldev.koya.model.SecuredItem;
 import java.util.ArrayList;
 import java.util.List;
+
+import fr.itldev.koya.model.SecuredItem;
 
 /**
  *
@@ -110,7 +111,7 @@ public class SharingWrapper {
     public SharingWrapper(List<SecuredItem> sharedItems, List<String> usersMails, Boolean resetSharings, String serverPath, String acceptUrl, String rejectUrl, String directAccessUrl) {
 
         for (SecuredItem s : sharedItems) {
-            sharedNodeRefs.add(s.getNodeRef());
+            sharedNodeRefs.add(s.getNodeRef().toString());
         }
         sharingUsersMails = usersMails;
 

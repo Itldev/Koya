@@ -193,7 +193,7 @@ public class KoyaContentService {
                         // permissions
                         Directory directory = createDir(pathElement,
                                 currentParentRef);
-                        currentParentRef = directory.getNodeRefasObject();
+                        currentParentRef = directory.getNodeRef();
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                     } finally {

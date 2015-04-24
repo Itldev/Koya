@@ -18,16 +18,18 @@
  */
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.interfaces.Container;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.SearchService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.type.TypeReference;
-import org.springframework.util.Assert;
 import org.springframework.web.client.RestClientException;
+
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.interfaces.Container;
+import fr.itldev.koya.services.SearchService;
 
 /**
  * Search service.
@@ -68,7 +70,7 @@ public class SearchServiceImpl extends AlfrescoRestService implements SearchServ
         String baseNodeRef = "";
 
         if (base != null) {
-            baseNodeRef = base.getNodeRef();
+            baseNodeRef = base.getNodeRef().toString();
         }
 
         List<SecuredItem> itemsFound = new ArrayList<>();
@@ -81,7 +83,7 @@ public class SearchServiceImpl extends AlfrescoRestService implements SearchServ
         for (Map itemMap : (List<Map>) result.get(SEARCHRESULTKEY_ITEMS)) {
 
             try {
-                String nodeRef = itemMap.get(SEARCHRESULTKEY_NODEREF).toString();
+                NodeRef nodeRef = new NodeRef(itemMap.get(SEARCHRESULTKEY_NODEREF).toString());
                 SecuredItem item = getSecuredItem(user, nodeRef);
                 if (item != null) {
                     itemsFound.add(item);

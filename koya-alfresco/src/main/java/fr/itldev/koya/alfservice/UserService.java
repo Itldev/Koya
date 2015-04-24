@@ -289,7 +289,7 @@ public class UserService {
 				ContentModel.PROP_EMAIL_FEED_DISABLED));
 		u.setEnabled(!(Boolean) nodeService.hasAspect(userNodeRef,
 				ContentModel.ASPECT_PERSON_DISABLED));
-		u.setNodeRef(userNodeRef.toString());
+		u.setNodeRef(userNodeRef);
 		u.setCivilTitle((String) nodeService.getProperty(userNodeRef,
 				KoyaModel.PROP_CIVILTITLE));
 
@@ -415,7 +415,7 @@ public class UserService {
 	 * @return
 	 */
 	public Boolean isDisabled(User u) {
-		return nodeService.getAspects(u.getNodeRefasObject()).contains(
+		return nodeService.getAspects(u.getNodeRef()).contains(
 				ContentModel.ASPECT_PERSON_DISABLED);
 	}
 	
@@ -431,15 +431,15 @@ public class UserService {
 		try {
 			User u = getUser(userMail);
 
-			if (!nodeService.hasAspect(u.getNodeRefasObject(),
+			if (!nodeService.hasAspect(u.getNodeRef(),
 					KoyaModel.ASPECT_USERSHARES)) {
-				nodeService.addAspect(u.getNodeRefasObject(),
+				nodeService.addAspect(u.getNodeRef(),
 						KoyaModel.ASPECT_USERSHARES, null);
 			}
 
 			// list existing associations
 			List<AssociationRef> sharedNodeAssocs = nodeService
-					.getTargetAssocs(u.getNodeRefasObject(),
+					.getTargetAssocs(u.getNodeRef(),
 							KoyaModel.ASSOC_USER_SHAREDNODES);
 			Boolean exists = false;
 			for (AssociationRef ar : sharedNodeAssocs) {
@@ -451,7 +451,7 @@ public class UserService {
 			}
 
 			if (!exists) {
-				nodeService.createAssociation(u.getNodeRefasObject(), n,
+				nodeService.createAssociation(u.getNodeRef(), n,
 						KoyaModel.ASSOC_USER_SHAREDNODES);
 				logger.trace("Add userShares Association between "+userMail + " and "+name);
 			}
@@ -470,12 +470,12 @@ public class UserService {
 		try {
 			User u = getUser(userMail);
 
-			if (nodeService.hasAspect(u.getNodeRefasObject(),
+			if (nodeService.hasAspect(u.getNodeRef(),
 					KoyaModel.ASPECT_USERSHARES)) {
-				nodeService.addAspect(u.getNodeRefasObject(),
+				nodeService.addAspect(u.getNodeRef(),
 						KoyaModel.ASPECT_USERSHARES, null);
 			}		
-			nodeService.removeAssociation(u.getNodeRefasObject(), n,
+			nodeService.removeAssociation(u.getNodeRef(), n,
 					KoyaModel.ASSOC_USER_SHAREDNODES);
 			logger.trace("Removes userShares Association between "+userMail + " and "+name);
 
@@ -493,11 +493,11 @@ public class UserService {
 		List<SecuredItem> sharedKoyaNodes = new ArrayList<SecuredItem>();
 		try {
 			User u = getUser(userName);
-			if (nodeService.hasAspect(u.getNodeRefasObject(),
+			if (nodeService.hasAspect(u.getNodeRef(),
 					KoyaModel.ASPECT_USERSHARES)) {
 
 				List<AssociationRef> sharedNodeAssocs = nodeService
-						.getTargetAssocs(u.getNodeRefasObject(),
+						.getTargetAssocs(u.getNodeRef(),
 								KoyaModel.ASSOC_USER_SHAREDNODES);
 
 				for (AssociationRef ar : sharedNodeAssocs) {

@@ -26,6 +26,8 @@ import fr.itldev.koya.services.SpaceService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import static fr.itldev.koya.services.impl.AlfrescoRestService.fromJSON;
 import java.util.List;
+
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.NotImplementedException;
 import org.codehaus.jackson.type.TypeReference;
 
@@ -87,11 +89,11 @@ public class SpaceServiceImpl extends AlfrescoRestService implements SpaceServic
         return movePrivate(user, toMove, destination.getNodeRef());
     }
 
-    private Space movePrivate(User user, Space toMove, String newParentNodeRef) throws AlfrescoServiceException {
+    private Space movePrivate(User user, Space toMove, NodeRef newParentNodeRef) throws AlfrescoServiceException {
         return fromJSON(new TypeReference<Space>() {
         }, user.getRestTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_MOVESPACE,
-                toMove, String.class, newParentNodeRef));
+                toMove, String.class, newParentNodeRef.toString()));
     }
 
 }

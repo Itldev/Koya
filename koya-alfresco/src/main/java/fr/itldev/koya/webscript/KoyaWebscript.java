@@ -19,12 +19,13 @@
 package fr.itldev.koya.webscript;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -119,6 +120,23 @@ public abstract class KoyaWebscript {
         return params;
     }
 
+    
+    public static <T> T fromJSON(final TypeReference<T> type,
+            final String jsonPacket) {
+        T data = null;
+
+        if (jsonPacket == null) {
+            return null;
+        }
+
+        try {
+            data = new ObjectMapper().readValue(jsonPacket, type);
+        } catch (Exception e) {
+           
+        }
+        return data;
+    }
+    
     public static String getObjectAsJson(Object o) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(o);

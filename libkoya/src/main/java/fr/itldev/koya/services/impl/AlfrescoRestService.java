@@ -18,19 +18,13 @@
  */
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.MetaInfos;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.AlfrescoUploadReturn;
-import fr.itldev.koya.model.json.MailWrapper;
-import fr.itldev.koya.services.AlfrescoService;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import fr.itldev.koya.services.impl.util.KoyaUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -42,6 +36,15 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.impl.MetaInfos;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.AlfrescoUploadReturn;
+import fr.itldev.koya.model.json.MailWrapper;
+import fr.itldev.koya.services.AlfrescoService;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.impl.util.KoyaUtil;
 
 public class AlfrescoRestService implements AlfrescoService {
 
@@ -144,11 +147,11 @@ public class AlfrescoRestService implements AlfrescoService {
      * @throws AlfrescoServiceException
      */
     @Override
-    public SecuredItem getSecuredItem(User user, String nodeRef) throws AlfrescoServiceException {
+    public SecuredItem getSecuredItem(User user, NodeRef nodeRef) throws AlfrescoServiceException {
         return fromJSON(new TypeReference<SecuredItem>() {
         }, user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_SECUREDITEM,
-                        String.class, nodeRef));
+                        String.class, nodeRef.toString()));
     }
 
     /**

@@ -64,7 +64,7 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
 
         Map<String, String> shareParams = new HashMap<>();
         shareParams.put("email", sharedUserMail);
-        shareParams.put("nodeRef", itemToShare.getNodeRef());
+        shareParams.put("nodeRef", itemToShare.getNodeRef().toString());
         shareParams.put("koyaPermission", KoyaPermissionConsumer.CLIENT.toString());
 
         user.getRestTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_SHARESINGLE, shareParams, String.class);
@@ -82,7 +82,7 @@ public class ShareServiceImpl extends AlfrescoRestService implements ShareServic
 
         Map<String, String> unshareParams = new HashMap<>();
         unshareParams.put("email", unsharedUserMail);
-        unshareParams.put("nodeRef", itemToUnShare.getNodeRef());
+        unshareParams.put("nodeRef", itemToUnShare.getNodeRef().toString());
         unshareParams.put("koyaPermission", KoyaPermissionConsumer.CLIENT.toString());
 
         user.getRestTemplate().postForObject(

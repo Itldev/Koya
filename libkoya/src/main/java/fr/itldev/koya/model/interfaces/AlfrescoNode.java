@@ -26,12 +26,10 @@ import org.alfresco.service.cmr.repository.NodeRef;
  */
 public interface AlfrescoNode {
 
-    String getNodeRef();
+	NodeRef getNodeRef();
 
     String getName();
 
     String getTitle();
-
-    NodeRef getNodeRefasObject();
 
 }

@@ -239,7 +239,7 @@ public class KoyaMailService implements InitializingBean {
         templateModel.put("koyaClient", koyaClientParams);
 
         templateModel.put("inviter", new ScriptNode(
-                sender.getNodeRefasObject(), serviceRegistry));
+                sender.getNodeRef(), serviceRegistry));
         templateModel.put(TemplateService.KEY_COMPANY_HOME,
                 repositoryHelper.getCompanyHome());
         templateModel.put("company", companyPropertiesService.getProperties(c)
@@ -309,7 +309,7 @@ public class KoyaMailService implements InitializingBean {
                 new ScriptNode(userService.getUserByUsername(
                         (String) nodeService.getProperty(sharedItem,
                                 ContentModel.PROP_MODIFIER))
-                        .getNodeRefasObject(), serviceRegistry));
+                        .getNodeRef(), serviceRegistry));
 
         templateModel.put("date",
                 nodeService.getProperty(sharedItem, ContentModel.PROP_UPDATED));
@@ -525,8 +525,7 @@ public class KoyaMailService implements InitializingBean {
                     (Serializable) wrapper.getTemplateParams());
             templateModel.put("koyaClient", koyaClientParams);
 
-            Company c = koyaNodeService.getSecuredItem(
-                    koyaNodeService.getNodeRef(wrapper.getCompanyNodeRef()),
+            Company c = koyaNodeService.getSecuredItem(wrapper.getCompanyNodeRef(),
                     Company.class);
             templateModel.put("company", companyPropertiesService
                     .getProperties(c).toHashMap());

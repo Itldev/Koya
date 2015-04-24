@@ -18,13 +18,17 @@
  */
 package fr.itldev.koya.model.impl;
 
+import static java.util.Arrays.asList;
+
+import java.util.List;
+import java.util.Map;
+
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import static java.util.Arrays.asList;
-import java.util.List;
-import java.util.Map;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * Template attribute exists to determinate Offer available for Sale and Offers
@@ -93,7 +97,11 @@ public final class SalesOffer extends SecuredItem {
                         "Invalid Sale Offer - Mandatory property not found : '" + prop + "'", KoyaErrorCodes.SALES_OFFER_LACK_MANDATORY_PROPERTY);
             }
         }
-        this.setNodeRef(data.get("nodeRef"));
+		try {
+			// TODO sales offer returns defined deserialized object
+			this.setNodeRef(new NodeRef(data.get("nodeRef")));
+		} catch (Exception e) {
+		}
         this.data = data;
     }
 

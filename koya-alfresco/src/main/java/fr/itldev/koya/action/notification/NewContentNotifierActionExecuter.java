@@ -76,7 +76,7 @@ public class NewContentNotifierActionExecuter extends KoyaNotifierActionExecuter
              *
              */
 
-            if (nodeService.hasAspect(u.getNodeRefasObject(), KoyaModel.ASPECT_USERNOTIFIED)
+            if (nodeService.hasAspect(u.getNodeRef(), KoyaModel.ASPECT_USERNOTIFIED)
                     && subSpaceAclService.listUsers(d, null).contains(u)
                     && !u.getUserName().equals(modifierUserName)) {
                 try {                

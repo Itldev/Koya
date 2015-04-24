@@ -25,6 +25,8 @@ import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.Set;
+
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.springframework.core.io.Resource;
 
@@ -62,7 +64,7 @@ public interface AlfrescoService {
      * @return
      * @throws AlfrescoServiceException
      */
-    SecuredItem getSecuredItem(User user, String nodeRef) throws AlfrescoServiceException;
+    SecuredItem getSecuredItem(User user, NodeRef nodeRef) throws AlfrescoServiceException;
 
     /**
      * Get NodeRef reference from xpath expression.

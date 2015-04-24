@@ -76,6 +76,24 @@ public class SearchServiceImplTest extends TestCase {
 
     private User admin;
 
+    /**
+     * Creates structure
+     *  
+     * * financial (Space)
+     * 		* one doss (Dossier)
+     * 			* test financial report.txt
+     * 		* two doss (Dossier)
+     * 		* three financial (Dossier)
+     * 
+     * * buildings (Space)
+     * 		* first test (Dossier)
+     * 		* second test (Dossier)
+     * 		* third (Dossier)
+     * 
+     * 
+     * @throws RestClientException
+     * @throws AlfrescoServiceException
+     */
     @Before
     public void createEnv() throws RestClientException, AlfrescoServiceException {
         admin = userService.login("admin", "admin");
@@ -85,7 +103,7 @@ public class SearchServiceImplTest extends TestCase {
         dossierTestsOne = dossierService.create(admin, spaceFinancial, "one doss");
 
         Resource toUpload = applicationContext.getResource("classpath:docs/test financial report.txt");
-        koyaContentService.upload(admin, dossierTestsOne.getNodeRefasObject(), toUpload);
+        koyaContentService.upload(admin, dossierTestsOne.getNodeRef(), toUpload);
 
         dossierTestsTwo = dossierService.create(admin, spaceFinancial, "two doss");
         dossierTestsThree = dossierService.create(admin, spaceFinancial, "three financial");
@@ -99,7 +117,7 @@ public class SearchServiceImplTest extends TestCase {
 
     @After
     public void deleteCompany() throws RestClientException, AlfrescoServiceException {
-        companyService.delete(admin, companyTests);
+        //companyService.delete(admin, companyTests);
     }
 
     @Test

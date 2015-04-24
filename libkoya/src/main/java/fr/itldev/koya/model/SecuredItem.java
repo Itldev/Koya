@@ -18,6 +18,16 @@
  */
 package fr.itldev.koya.model;
 
+import java.io.IOException;
+
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonSubTypes;
+import org.codehaus.jackson.annotate.JsonSubTypes.Type;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
@@ -27,13 +37,7 @@ import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Template;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.AlfrescoNode;
-import java.io.IOException;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.codehaus.jackson.annotate.JsonSubTypes.Type;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.map.ObjectMapper;
+import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -52,22 +56,19 @@ public abstract class SecuredItem implements AlfrescoNode{
 
     //fields that should be escpaed before serialization
     // public final static String[] ESCAPED_FIELDS_NAMES = {"name", "title"};
-    private String nodeRef;
+    private NodeRef nodeRef;
     private String name;
     private String title;
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     @Override
-    public String getNodeRef() {
+    @JsonDeserialize(using = NodeRefDeserializer.class)
+    public NodeRef getNodeRef() {
         return nodeRef;
     }
 
-    public void setNodeRef(String nodeRef) {
+    public void setNodeRef(NodeRef nodeRef) {
         this.nodeRef = nodeRef;
-    }
-
-    public void setNodeRefasObject(NodeRef nodeRef) {
-        this.nodeRef = nodeRef.toString();
     }
 
     @Override
@@ -95,15 +96,9 @@ public abstract class SecuredItem implements AlfrescoNode{
     public SecuredItem() {
     }
 
-    public SecuredItem(String nodeRef, String name) {
+    public SecuredItem(NodeRef nodeRef, String name) {
         this.nodeRef = nodeRef;
         this.name = name;
-    }
-
-    @JsonIgnore
-    @Override
-    public NodeRef getNodeRefasObject() {
-        return new NodeRef(this.nodeRef);
     }
 
     private static final Integer HASHCONST1 = 3;

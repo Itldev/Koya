@@ -100,14 +100,14 @@ public class DebuggerService {
         logWithIndent("=== " + root.getTitle() + " (" + root.getClass().getSimpleName() + ")" + " = " + root.getNodeRef(), identation);
 
         //for each available types, list autorities
-        for (AccessPermission perm : permissionService.getAllSetPermissions(root.getNodeRefasObject())) {
+        for (AccessPermission perm : permissionService.getAllSetPermissions(root.getNodeRef())) {
             logWithIndent(" + " + perm.getAuthority() + " => " + perm.getPermission(), identation);
         }
 
         /**
          * GO TO CHILD
          */
-        for (ChildAssociationRef car : nodeService.getChildAssocs(root.getNodeRefasObject(), SUBSPACES_TYPES)) {
+        for (ChildAssociationRef car : nodeService.getChildAssocs(root.getNodeRef(), SUBSPACES_TYPES)) {
             dumpSubSpacesPermissions(
                     (SubSpace) koyaNodeService.getSecuredItem(car.getChildRef()), identation + "   ");
         }

@@ -18,16 +18,21 @@
  */
 package fr.itldev.koya.webscript.space;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  *
@@ -42,14 +47,15 @@ public class MoveSpace extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
         String response;
         try {
-            NodeRef node = koyaNodeService.getNodeRef((String) jsonPostMap.get(KoyaWebscript.WSCONST_NODEREF));
+        	Space toMove = KoyaWebscript.fromJSON(new TypeReference<Space>() {
+            }, req.getContent().getContent().toString());
+        	
             NodeRef parent = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_PARENTNODEREF));
-            response = KoyaWebscript.getObjectAsJson(koyaNodeService.move(node, parent));
+            response = KoyaWebscript.getObjectAsJson(koyaNodeService.move(toMove.getNodeRef(), parent));
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }

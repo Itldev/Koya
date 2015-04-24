@@ -20,18 +20,21 @@ package fr.itldev.koya.model.impl;
 
 import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.interfaces.AlfrescoNode;
+import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
+
 import java.util.Objects;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.springframework.web.client.RestTemplate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class User extends SecuredItem implements AlfrescoNode {
 
     @JsonProperty("nodeRef")
-    private String nodeRef;
+    private NodeRef nodeRef;
     @JsonProperty("userName")
     private String userName;
     @JsonProperty("firstName")
@@ -57,12 +60,13 @@ public final class User extends SecuredItem implements AlfrescoNode {
     private RestTemplate restTemplate;
 
     @Override
-    public String getNodeRef() {
+    @JsonDeserialize(using = NodeRefDeserializer.class)
+    public NodeRef getNodeRef() {
         return nodeRef;
     }
 
     @Override
-    public void setNodeRef(String nodeRef) {
+    public void setNodeRef(NodeRef nodeRef) {
         this.nodeRef = nodeRef;
     }
 
@@ -170,13 +174,7 @@ public final class User extends SecuredItem implements AlfrescoNode {
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-
-    @JsonIgnore
-    @Override
-    public NodeRef getNodeRefasObject() {
-        return new NodeRef(this.nodeRef);
-    }
-
+   
     @Override
     public String toString() {
         return userName + "(" + email + ")";
