@@ -49,7 +49,7 @@
         <dependency>
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-data-model</artifactId>
-            <version>4.2.e</version>
+            <version>${alfresco.version}</version>
         </dependency>  
               
         <!-- =======tests =====================-->
