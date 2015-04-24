@@ -84,7 +84,7 @@
     
     
     <!--================== Declaration des services ===============================-->
-    
+    <bean id="cacheManager" class="fr.itldev.koya.services.cache.CacheManager"/>
     
     <!--================== service parent abstrait - gere l'héritage de propriétés ==-->
     <bean id="abstractRestService" abstract="true">
@@ -100,26 +100,38 @@
 
     <bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl" parent="abstractRestService"/>
         
-    <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService"/>
+    <bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl" parent="abstractRestService">
+    <property name="cacheManager" ref="cacheManager" />
+    </bean>
+    
     
     <bean id="spaceService" class="fr.itldev.koya.services.impl.SpaceServiceImpl" parent="abstractRestService"/>
     
     <bean id="dossierService" class="fr.itldev.koya.services.impl.DossierServiceImpl" parent="abstractRestService">
         <property name="koyaContentService" ref="koyaContentService"/>
+        <property name="cacheManager" ref="cacheManager" />
     </bean>
     
     
     <bean id="koyaContentService" class="fr.itldev.koya.services.impl.KoyaContentServiceImpl" parent="abstractRestService"/>
         
-    <bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl" parent="abstractRestService"/>
+    <bean id="favouriteService" class="fr.itldev.koya.services.impl.FavouriteServiceImpl" parent="abstractRestService">
+    <property name="cacheManager" ref="cacheManager" />
+    </bean>
     
-    <bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl" parent="abstractRestService"/>
-    <bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl" parent="abstractRestService"/>
+    <bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl" parent="abstractRestService">
+    <property name="cacheManager" ref="cacheManager" />
+    </bean>
+    <bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl" parent="abstractRestService">
+    <property name="cacheManager" ref="cacheManager" />
+    </bean>
     
     
     <bean id="searchService" class="fr.itldev.koya.services.impl.SearchServiceImpl" parent="abstractRestService"/>
     <bean id="notificationService" class="fr.itldev.koya.services.impl.NotificationServiceImpl" parent="abstractRestService"/>
     
-    <bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl" parent="abstractRestService"/>
+    <bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl" parent="abstractRestService">
+    <property name="cacheManager" ref="cacheManager" />
+    </bean>
 
 </beans>
