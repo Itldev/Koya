@@ -37,7 +37,7 @@ public class NotificationServiceTest extends TestCase {
     public void testList() {
         System.out.println("list");
 
-        List<Notification> result = notificationService.list(admin);
+        List<Notification> result = notificationService.list(admin, null, null, null, null, null);
 
     }
 

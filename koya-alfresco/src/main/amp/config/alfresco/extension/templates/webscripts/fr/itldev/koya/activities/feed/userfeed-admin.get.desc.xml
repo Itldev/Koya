@@ -1,0 +1,16 @@
+<webscript>
+  <shortname>Activities admin user feed</shortname>
+  <description>Allow admin to get the feed for a specified user.</description>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}</url>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}?format=atomfeed</url>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}?format=json</url>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}?s={siteId}</url>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}?s={siteId}&amp;format=atomfeed</url>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}?s={siteId}&amp;format=json</url>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}?s={siteId?}&amp;exclUser={false?}&amp;exclOthers={false?}&amp;minFeedId={minFeedId?}&amp;activityFilter={activityFilter}</url>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}?s={siteId?}&amp;exclUser={false?}&amp;exclOthers={false?}&amp;minFeedId={minFeedId?}&amp;activityFilter={activityFilter}&amp;format=atomfeed</url>
+  <url>/fr/itldev/koya/activities/feed/user/{userId}?s={siteId?}&amp;exclUser={false?}&amp;exclOthers={false?}&amp;minFeedId={minFeedId?}&amp;activityFilter={activityFilter}&amp;format=json</url>
+  <format default="atomfeed">argument</format>
+  <authentication>admin</authentication>
+  <transaction allow="readonly">required</transaction>
+</webscript>
