@@ -9,7 +9,7 @@ import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationDetails {
 
-    private String parentNodeRef;
+    private NodeRef parentNodeRef;
     private String firstName;
     private String lastName;
     private String name;
@@ -18,11 +18,11 @@ public class NotificationDetails {
     private NodeRef nodeRef;
     private String displayPath;
 
-    public String getParentNodeRef() {
+    public NodeRef getParentNodeRef() {
         return parentNodeRef;
     }
 
-    public void setParentNodeRef(String parentNodeRef) {
+    public void setParentNodeRef(NodeRef parentNodeRef) {
         this.parentNodeRef = parentNodeRef;
     }
 
@@ -66,7 +66,7 @@ public class NotificationDetails {
         this.typeQName = typeQName;
     }
 
-    @JsonDeserialize(using = NodeRefDeserializer.class)
+//    @JsonDeserialize(using = NodeRefDeserializer.class)
     public NodeRef getNodeRef() {
         return nodeRef;
     }

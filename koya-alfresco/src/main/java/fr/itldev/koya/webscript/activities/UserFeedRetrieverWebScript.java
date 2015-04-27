@@ -132,10 +132,10 @@ public class UserFeedRetrieverWebScript extends DeclarativeWebScript {
             feedUserId = AuthenticationUtil.getFullyAuthenticatedUser();
         }
 
-        Integer minFeedId = Integer.valueOf(-1);
+        Long minFeedId = Long.valueOf(-1);
         if (minFeedIdStr != null && !minFeedIdStr.trim().isEmpty()) {
             try {
-                minFeedId = Integer.valueOf(minFeedIdStr);
+                minFeedId = Long.valueOf(minFeedIdStr);
             } catch (NumberFormatException nfe) {
             }
         }

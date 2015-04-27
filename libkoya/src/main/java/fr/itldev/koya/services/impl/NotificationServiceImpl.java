@@ -5,25 +5,28 @@ import fr.itldev.koya.services.NotificationService;
 import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.type.TypeReference;
 
 public class NotificationServiceImpl extends AlfrescoRestService implements NotificationService {
 
-    private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?s={siteId?}"
-            + "&exclUser={false?}"
-            + "&exclOthers={false?}"
-            + "&minFeedId={minFeedId?}"
-            + "&activityFilter={activityFilter?}"
+    private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?s={siteId}"
+            + "&exclUser={excludeUser}"
+            + "&exclOthers={excludeOthers}"
+            + "&minFeedId={minFeedId}"
+            + "&activityFilter={activityFilter}"
             + "&format=json";
 
 
     @Override
     public List<Notification> list(User user, Company company,
             final Boolean excludeUser,
-            Boolean excludeOthers, Integer minFeedId,
+            Boolean excludeOthers, Long minFeedId,
             List<String> activityFilter) throws AlfrescoServiceException {
 
         Map<String, Object> urlVariable = new HashMap<>();
@@ -39,8 +42,8 @@ public class NotificationServiceImpl extends AlfrescoRestService implements Noti
         if (minFeedId != null) {
             urlVariable.put("minFeedId", minFeedId);
         }
-        if (activityFilter != null) {
-            urlVariable.put("activityFilter", activityFilter);
+        if (activityFilter != null && !activityFilter.isEmpty()) {
+            urlVariable.put("activityFilter", StringUtils.join(activityFilter,","));
         }
 
         return fromJSON(new TypeReference<List<Notification>>() {

@@ -23,7 +23,7 @@ public interface NotificationService {
      * @throws AlfrescoServiceException
      */
     List<Notification> list(User user, Company company, Boolean excludeUser,
-            Boolean excludeOthers, Integer minFeedId,
+            Boolean excludeOthers, Long minFeedId,
             List<String> activityFilter) throws AlfrescoServiceException;
 
 }
