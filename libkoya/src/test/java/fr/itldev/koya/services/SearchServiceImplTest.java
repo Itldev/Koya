@@ -46,7 +46,8 @@ import org.springframework.web.client.RestClientException;
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class SearchServiceImplTest extends TestCase {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+    @SuppressWarnings("unused")
+	private Logger logger = Logger.getLogger(this.getClass());
 
     @Autowired
     UserService userService;

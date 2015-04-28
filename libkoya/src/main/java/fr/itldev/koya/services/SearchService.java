@@ -19,21 +19,21 @@
 
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.interfaces.Container;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.User;
 import java.util.List;
+
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.User;
 
 public interface SearchService {
 
-    /**
-     * Execute basic search for all securedItems from securedItem defined as base.
-     *
-     * @param user
-     * @param base
-     * @param searchexpr
-     * @return
-     */
-    List<SecuredItem> search(User user, Container base, String searchexpr);
+	/**
+	 * Execute basic search for all Koyanodes from KoyaNode defined as base.
+	 * 
+	 * @param user
+	 * @param base
+	 * @param searchexpr
+	 * @return
+	 */
+	List<KoyaNode> search(User user, KoyaNode base, String searchexpr);
 
 }

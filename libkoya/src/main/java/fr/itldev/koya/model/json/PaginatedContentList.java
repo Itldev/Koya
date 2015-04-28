@@ -5,20 +5,20 @@ import java.util.List;
 import org.alfresco.util.Pair;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.interfaces.KoyaContent;
 import fr.itldev.koya.services.impl.util.PaginatedContentListDeserializer;
 
 @JsonDeserialize(using = PaginatedContentListDeserializer.class)
 public class PaginatedContentList {
 
-	private List<SecuredItem> children;
+	private List<KoyaContent> children;
 	private Pair<Integer, Integer> totalValues;
 
-	public List<SecuredItem> getChildren() {
+	public List<KoyaContent> getChildren() {
 		return children;
 	}
 
-	public void setChildren(List<SecuredItem> children) {
+	public void setChildren(List<KoyaContent> children) {
 		this.children = children;
 	}
 

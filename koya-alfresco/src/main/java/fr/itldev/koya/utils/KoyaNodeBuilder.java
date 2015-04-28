@@ -1,16 +1,7 @@
 package fr.itldev.koya.utils;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.util.Date;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ContentData;
@@ -18,25 +9,36 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+
 /**
  *
  *
  */
-public class SecuredItemBuilder {
+public class KoyaNodeBuilder {
 
     private final NodeService nodeService;
     private final KoyaNodeService koyaNodeService;
 
-    public SecuredItemBuilder(NodeService nodeService,
+    public KoyaNodeBuilder(NodeService nodeService,
             KoyaNodeService koyaNodeService) {
         this.nodeService = nodeService;
         this.koyaNodeService = koyaNodeService;
     }
 
-    public SecuredItem build(NodeRef nodeRef) throws KoyaServiceException {
+    public KoyaNode build(NodeRef nodeRef) throws KoyaServiceException {
 
         QName type = nodeService.getType(nodeRef);
-        SecuredItem si;
+        KoyaNode si;
         if (type.equals(KoyaModel.TYPE_COMPANY)) {
             si = companyBuilder(nodeRef);
         } else if (type.equals(KoyaModel.TYPE_SPACE)) {
@@ -53,7 +55,7 @@ public class SecuredItemBuilder {
             si = nodeDocumentBuilder(nodeRef);
         } else {
             throw new KoyaServiceException(
-                    KoyaErrorCodes.INVALID_SECUREDITEM_NODEREF);
+                    KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
         }
         return si;
     }

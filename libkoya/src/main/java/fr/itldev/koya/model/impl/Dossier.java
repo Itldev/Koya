@@ -18,85 +18,79 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.interfaces.Container;
-import fr.itldev.koya.model.interfaces.Content;
-import fr.itldev.koya.model.interfaces.SubSpace;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public final class Dossier extends SecuredItem implements Container, SubSpace {
+import fr.itldev.koya.model.KoyaNode;
 
+public final class Dossier extends Space {
 
-    @JsonProperty("childdir")
-    private List<Directory> childDir = new ArrayList<>();
+	@JsonProperty("childdir")
+	private List<Directory> childDir = new ArrayList<>();
 
-    @JsonProperty("childdoc")
-    private List<Document> childDoc = new ArrayList<>();
+	@JsonProperty("childdoc")
+	private List<Document> childDoc = new ArrayList<>();
 
-    private Date lastModifiedDate;
+	private Date lastModifiedDate;
 
-    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    @JsonIgnore
-    public List<Content> getChildren() {
-        List<Content> content = new ArrayList<>();
-        content.addAll(childDir);
-        content.addAll(childDoc);
-        return content;
-    }
+	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+	@JsonIgnore
+	public List<KoyaNode> getChildren() {
+		List<KoyaNode> content = new ArrayList<>();
+		content.addAll(childDir);
+		content.addAll(childDoc);
+		return content;
+	}
 
-    public void setChildren(List<? extends SecuredItem> children) {
-        for (SecuredItem s : children) {
-            if (Directory.class.isAssignableFrom(s.getClass())) {
-                childDir.add((Directory) s);
-            } else if (Document.class.isAssignableFrom(s.getClass())) {
-                childDoc.add((Document) s);
-            }
-        }
-    }
+	public void setChildren(List<? extends KoyaNode> children) {
+		for (KoyaNode s : children) {
+			if (Directory.class.isAssignableFrom(s.getClass())) {
+				childDir.add((Directory) s);
+			} else if (Document.class.isAssignableFrom(s.getClass())) {
+				childDoc.add((Document) s);
+			}
+		}
+	}
 
-    public List<Directory> getChildDir() {
-        return childDir;
-    }
+	public List<Directory> getChildDir() {
+		return childDir;
+	}
 
-    public void setChildDir(List<Directory> childDir) {
-        this.childDir = childDir;
-    }
+	public void setChildDir(List<Directory> childDir) {
+		this.childDir = childDir;
+	}
 
-    public List<Document> getChildDoc() {
-        return childDoc;
-    }
+	public List<Document> getChildDoc() {
+		return childDoc;
+	}
 
-    public void setChildDoc(List<Document> childDoc) {
-        this.childDoc = childDoc;
-    }
+	public void setChildDoc(List<Document> childDoc) {
+		this.childDoc = childDoc;
+	}
 
-    public Date getLastModifiedDate() {
-        return lastModifiedDate;
-    }
+	public Date getLastModifiedDate() {
+		return lastModifiedDate;
+	}
 
-    public void setLastModifiedDate(Date lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
+	public void setLastModifiedDate(Date lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
 
-    // </editor-fold>
-    public Dossier(String name) {
-        setName(name);
-    }
+	// </editor-fold>
+	public Dossier(String name) {
+		super(name);
+	}
 
-    private Dossier() {
-    }
+	private Dossier() {
+		super();
+	}
 
-    @Override
-    public String getType() {
-        return "dossier";
-    }
-
-    public static Dossier newInstance() {
-        return new Dossier();
-    }
+	public static Dossier newInstance() {
+		return new Dossier();
+	}
 
 }

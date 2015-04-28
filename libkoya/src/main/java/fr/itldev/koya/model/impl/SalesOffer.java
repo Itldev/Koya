@@ -18,95 +18,122 @@
  */
 package fr.itldev.koya.model.impl;
 
-import static java.util.Arrays.asList;
-
-import java.util.List;
-import java.util.Map;
-
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 
 /**
  * Template attribute exists to determinate Offer available for Sale and Offers
  * already attributed to a company.
- *
+ * 
  */
-public final class SalesOffer extends SecuredItem {
+public final class SalesOffer {
 
-    private static List<String> mandatoryProperties = asList("template", "nodeRef", "name", "active");
+	private String template = "";
+	private Boolean multiSpaces = Boolean.FALSE;
+	private Boolean active = Boolean.TRUE;
+	private Long quotaMb = Long.valueOf(0);
+	private Integer limitDossiers = Integer.valueOf(0);
+	private Integer limitSpaces = Integer.valueOf(0);
+	private String expiration = "";
+	
+	
+	protected NodeRef nodeRef;
 
-    private Map<String, String> data;
+	protected String name;
+	protected String title;
 
-    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public Map<String, String> getDonnees() {
-        return data;
-    }
 
-    public void setDonnees(Map<String, String> donnees) {
-        this.data = donnees;
-    }
+	/*
+	 * ======== Attributes Getters/Setters
+	 */
 
-    @Override
-    @JsonIgnore
-    public String getName() {
-        return data.get("name");
-    }
+	@JsonDeserialize(using = NodeRefDeserializer.class)
+	public NodeRef getNodeRef() {
+		return nodeRef;
+	}
 
-    @JsonIgnore
-    public Boolean getTemplate() {
-        return Boolean.getBoolean(data.get("template"));
-    }
+	public void setNodeRef(NodeRef nodeRef) {
+		this.nodeRef = nodeRef;
+	}
 
-    @JsonIgnore
-    public Boolean getMultiSpaces() {
-        return Boolean.getBoolean(data.get("multiSpaces"));
-    }
+	public String getName() {
+		return name;
+	}
 
-    @JsonIgnore
-    public Long getQuotaMb() {
-        return Long.valueOf(data.get("quotaMb"));
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    @JsonIgnore
-    public Integer getLimitDossiers() {
-        return Integer.valueOf(data.get("limitDossiers"));
-    }
-
-    @JsonIgnore
-    public Integer getLimitSpaces() {
-        return Integer.valueOf(data.get("limitSpaces"));
-    }
-
-    @JsonIgnore
-    public String getExpiration() {
-        return data.get("expiration");
-    }
-
-    // </editor-fold>
-    private SalesOffer() {
-    }
-
-    public SalesOffer(Map<String, String> data) throws AlfrescoServiceException {
-        for (String prop : mandatoryProperties) {
-            if (!data.keySet().contains(prop)) {
-                throw new AlfrescoServiceException(
-                        "Invalid Sale Offer - Mandatory property not found : '" + prop + "'", KoyaErrorCodes.SALES_OFFER_LACK_MANDATORY_PROPERTY);
-            }
-        }
-		try {
-			// TODO sales offer returns defined deserialized object
-			this.setNodeRef(new NodeRef(data.get("nodeRef")));
-		} catch (Exception e) {
+	public String getTitle() {
+		if (title == null || title.isEmpty()) {
+			return name;
 		}
-        this.data = data;
-    }
+		return title;
+	}
 
-    @Override
-    public String getType() {
-        return "salesoffer";
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+
+	public SalesOffer() {
+	}
+
+	public String getTemplate() {
+		return template;
+	}
+
+	public void setTemplate(String template) {
+		this.template = template;
+	}
+
+	public Boolean getMultiSpaces() {
+		return multiSpaces;
+	}
+
+	public void setMultiSpaces(Boolean multiSpaces) {
+		this.multiSpaces = multiSpaces;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public Long getQuotaMb() {
+		return quotaMb;
+	}
+
+	public void setQuotaMb(Long quotaMb) {
+		this.quotaMb = quotaMb;
+	}
+
+	public Integer getLimitDossiers() {
+		return limitDossiers;
+	}
+
+	public void setLimitDossiers(Integer limitDossiers) {
+		this.limitDossiers = limitDossiers;
+	}
+
+	public Integer getLimitSpaces() {
+		return limitSpaces;
+	}
+
+	public void setLimitSpaces(Integer limitSpaces) {
+		this.limitSpaces = limitSpaces;
+	}
+
+	public String getExpiration() {
+		return expiration;
+	}
+
+	public void setExpiration(String expiration) {
+		this.expiration = expiration;
+	}	
 }

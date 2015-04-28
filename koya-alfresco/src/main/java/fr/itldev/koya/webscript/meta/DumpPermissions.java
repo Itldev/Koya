@@ -19,7 +19,7 @@
 package fr.itldev.koya.webscript.meta;
 
 import fr.itldev.koya.alfservice.DebuggerService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Space;
@@ -62,7 +62,7 @@ public class DumpPermissions extends AbstractWebScript {
             
             debuggerService.dumpUsersPermissions(companyName);
             for (Space s : spaceService.list(companyName, Integer.MAX_VALUE)) {
-                debuggerService.dumpSubSpacesPermissions(s);
+                debuggerService.dumpSpacesPermissions(s);
                 logger.debug("---------------------------------------------------");
             }
         } catch (KoyaServiceException ex) {

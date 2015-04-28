@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+
+import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 
 /**
  * 
@@ -113,7 +116,7 @@ public class MailWrapper {
 		this.templateKoyaSubjectParams = templateKoyaSubjectParams;
 	}
 
-	
+	@JsonDeserialize(using = NodeRefDeserializer.class)
 	public NodeRef getCompanyNodeRef() {
 		return companyNodeRef;
 	}

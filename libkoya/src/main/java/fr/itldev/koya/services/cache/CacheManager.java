@@ -11,8 +11,8 @@ import org.springframework.beans.factory.InitializingBean;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.Permissions;
-import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
@@ -26,9 +26,9 @@ public class CacheManager implements InitializingBean {
 	private CacheConfig permissionsCacheConfig;
 	private Cache<Company, Preferences> companyPreferencesCache;
 	private CacheConfig companyPreferencesCacheConfig;
-	private Cache<User, List<SecuredItem>> userFavouritesCache;
+	private Cache<User, List<KoyaNode>> userFavouritesCache;
 	private CacheConfig userFavouritesCacheConfig;
-	private Cache<SecuredItem, Boolean> nodeSharedWithConsumerCache;
+	private Cache<KoyaNode, Boolean> nodeSharedWithConsumerCache;
 	private CacheConfig nodeSharedWithConsumerCacheConfig;
 	private Cache<String, Map<String, String>> invitationsCache;
 	private CacheConfig invitationsCacheConfig;
@@ -207,8 +207,8 @@ public class CacheManager implements InitializingBean {
 	 * ======= User Favourites ==========
 	 * 
 	 */
-	public List<SecuredItem> getUserFavourites(User u) {
-		List<SecuredItem> f;
+	public List<KoyaNode> getUserFavourites(User u) {
+		List<KoyaNode> f;
 
 		if (userFavouritesCacheConfig.getEnabled()) {
 			f = userFavouritesCache.getIfPresent(u);
@@ -219,7 +219,7 @@ public class CacheManager implements InitializingBean {
 		return null;
 	}
 
-	public void setUserFavourites(User u, List<SecuredItem> favourites) {
+	public void setUserFavourites(User u, List<KoyaNode> favourites) {
 		if (userFavouritesCacheConfig.getEnabled()) {
 			userFavouritesCache.put(u, favourites);
 		}
@@ -235,7 +235,7 @@ public class CacheManager implements InitializingBean {
 	 * ======= Node Shared With Consumer ==========
 	 * 
 	 */
-	public Boolean getNodeSharedWithConsumer(SecuredItem i) {
+	public Boolean getNodeSharedWithConsumer(KoyaNode i) {
 		Boolean s;
 
 		if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
@@ -247,13 +247,13 @@ public class CacheManager implements InitializingBean {
 		return null;
 	}
 
-	public void setNodeSharedWithConsumer(SecuredItem i, Boolean s) {
+	public void setNodeSharedWithConsumer(KoyaNode i, Boolean s) {
 		if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
 			nodeSharedWithConsumerCache.put(i, s);
 		}
 	}
 
-	public void revokeNodeSharedWithConsumer(SecuredItem i) {
+	public void revokeNodeSharedWithConsumer(KoyaNode i) {
 		if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
 			nodeSharedWithConsumerCache.invalidate(i);
 		}

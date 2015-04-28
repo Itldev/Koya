@@ -18,58 +18,63 @@
  */
 package fr.itldev.koya.webscript.global;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
- *
+ * 
  * Get Secured Item parents webscript.
- *
+ * 
  */
 public class GetParent extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        NodeRef node = null;
-        try {
-            node = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-        } catch (Exception ex) {
-            throw new WebScriptException("KoyaError cannot build noderef: " + ex.toString());
+		NodeRef node = null;
+		try {
+			node = koyaNodeService.getNodeRef((String) urlParams
+					.get(KoyaWebscript.WSCONST_NODEREF));
+		} catch (Exception ex) {
+			throw new WebScriptException("KoyaError cannot build noderef: "
+					+ ex.toString());
 
-        }
-        Integer nbAncestor;
-        try {
-            nbAncestor = Integer.valueOf((String) urlParams.get(KoyaWebscript.WSCONST_NBANCESTOR));
-        } catch (NumberFormatException ex) {
-            nbAncestor = KoyaNodeService.NB_ANCESTOR_INFINTE;
-        }
-        String response;
-        try {
-            response = KoyaWebscript.getObjectAsJson(koyaNodeService.getParentsList(node, nbAncestor));
+		}
+		Integer nbAncestor;
+		try {
+			nbAncestor = Integer.valueOf((String) urlParams
+					.get(KoyaWebscript.WSCONST_NBANCESTOR));
+		} catch (NumberFormatException ex) {
+			nbAncestor = KoyaNodeService.NB_ANCESTOR_INFINTE;
+		}
+		String response;
+		try {
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService
+					.getParentsList(node, nbAncestor));
 
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
 }

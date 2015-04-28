@@ -35,7 +35,7 @@
         <property name="contentService" ref="contentService" />
         <property name="dossierService" ref="dossierService" />
         <property name="userService" ref="userService" />
-        <property name="subSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService" />
+        <property name="spaceCollaboratorsAclService" ref="spaceCollaboratorsAclService" />
         <property name="koyaNodeService" ref="koyaNodeService" />
         <property name="koyaContentService" ref="koyaContentService" />
         <property name="authenticationService" ref="authenticationService" />
@@ -75,7 +75,7 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>        
         <property name="nodeService" ref="NodeService"/>        
         <property name="companyAclService" ref="companyAclService"/> 
-        <property name="subSpaceAclService" ref="subSpaceAclService"/>        
+        <property name="spaceAclService" ref="spaceAclService"/>        
     </bean>
     
     

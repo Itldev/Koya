@@ -19,12 +19,8 @@
 
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.KoyaNode;
 
-public final class Template extends SecuredItem {
-
-    @Override
-    public String getType() {
-        return "template";
-    }
+public final class Template extends KoyaNode {
+   
 }

@@ -47,7 +47,7 @@
     </bean>
     
     
-    <bean name="subSpaceAclService" class="fr.itldev.koya.alfservice.security.SubSpaceAclService"
+    <bean name="spaceAclService" class="fr.itldev.koya.alfservice.security.SpaceAclService"
           init-method="init">     
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="permissionService" ref="PermissionService"/>     
@@ -67,14 +67,14 @@
     </bean>
     
     
-    <bean name="subSpaceConsumersAclService"
-          class="fr.itldev.koya.alfservice.security.SubSpaceConsumersAclService" 
-          parent="subSpaceAclService">     
+    <bean name="spaceConsumersAclService"
+          class="fr.itldev.koya.alfservice.security.SpaceConsumersAclService" 
+          parent="spaceAclService">     
     </bean>
     
-    <bean name="SubSpaceCollaboratorsAclService"
-          class="fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService" 
-          parent="subSpaceAclService">      
+    <bean name="spaceCollaboratorsAclService"
+          class="fr.itldev.koya.alfservice.security.SpaceCollaboratorsAclService" 
+          parent="spaceAclService">      
     </bean>
    
 </beans>

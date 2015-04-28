@@ -3,7 +3,7 @@ package fr.itldev.koya.action.notification;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Company;
@@ -28,7 +28,7 @@ public class NewContentNotifierActionExecuter extends KoyaNotifierActionExecuter
     protected KoyaMailService koyaMailService;
     protected KoyaNodeService koyaNodeService;
     protected CompanyAclService companyAclService;
-    protected SubSpaceAclService subSpaceAclService;
+    protected SpaceAclService spaceAclService;
 
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     public void setNodeService(NodeService nodeService) {
@@ -47,8 +47,8 @@ public class NewContentNotifierActionExecuter extends KoyaNotifierActionExecuter
         this.companyAclService = companyAclService;
     }
 
-    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
-        this.subSpaceAclService = subSpaceAclService;
+    public void setSpaceAclService(SpaceAclService spaceAclService) {
+        this.spaceAclService = spaceAclService;
     }
 
     //</editor-fold>
@@ -77,7 +77,7 @@ public class NewContentNotifierActionExecuter extends KoyaNotifierActionExecuter
              */
 
             if (nodeService.hasAspect(u.getNodeRef(), KoyaModel.ASPECT_USERNOTIFIED)
-                    && subSpaceAclService.listUsers(d, null).contains(u)
+                    && spaceAclService.listUsers(d, null).contains(u)
                     && !u.getUserName().equals(modifierUserName)) {
                 try {                
                 	logger.trace("send to "+u.getEmail()+"for node "+actionedUponNodeRef);

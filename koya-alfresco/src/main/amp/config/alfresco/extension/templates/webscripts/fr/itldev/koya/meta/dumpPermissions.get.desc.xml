@@ -20,7 +20,7 @@
 -->
 
 <webscript>
-    <shortname>Dump company all subspaces permissions in log</shortname>
+    <shortname>Dump company all Spaces permissions in log</shortname>
     <family>Itldev</family>
     <url>/fr/itldev/koya/meta/dumpPermissions/{companyName}</url>
     <authentication>admin</authentication>

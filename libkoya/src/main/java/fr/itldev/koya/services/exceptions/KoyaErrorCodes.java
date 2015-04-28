@@ -27,7 +27,7 @@ public interface KoyaErrorCodes {
     // 000 -> global errors
     public static final Integer UNHANDLED = 0;
     public static final Integer INVALID_NODEREF = 1;
-    public static final Integer INVALID_SECUREDITEM_NODEREF = 2;
+    public static final Integer INVALID_KOYANODE_NODEREF = 2;
     public static final Integer INVALID_NODE_HIERACHY = 3;
     public static final Integer DUPLICATE_CHILD_RENAME = 4;
     public static final Integer INVALID_LUCENE_PATH = 5;

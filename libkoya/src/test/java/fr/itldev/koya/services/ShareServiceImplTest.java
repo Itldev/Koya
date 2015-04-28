@@ -18,16 +18,10 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
+
 import junit.framework.TestCase;
+
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -38,51 +32,62 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestClientException;
 
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class ShareServiceImplTest extends TestCase {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	@SuppressWarnings("unused")
+	private Logger logger = Logger.getLogger(this.getClass());
 
-    @Autowired
-    UserService userService;
+	@Autowired
+	UserService userService;
 
-    @Autowired
-    private CompanyService companyService;
+	@Autowired
+	private CompanyService companyService;
 
-    @Autowired
-    private SpaceService spaceService;
+	@Autowired
+	private SpaceService spaceService;
 
-    @Autowired
-    private DossierService dossierService;
+	@Autowired
+	private DossierService dossierService;
 
-    @Autowired
-    private ShareService shareService;
+	@Autowired
+	private ShareService shareService;
 
-    private Company companyTests;
-    private Space spaceTests;
-    User admin;
+	private Company companyTests;
+	private Space spaceTests;
+	User admin;
 
-    @Before
-    public void createSpace() throws RestClientException, AlfrescoServiceException {
-        admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, "company" + new Random().nextInt(1000000),
-                companyService.listSalesOffer(admin).get(0).getName(), "default");
-        spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
-    }
+	@Before
+	public void createSpace() throws RestClientException,
+			AlfrescoServiceException {
+		admin = userService.login("admin", "admin");
+		companyTests = companyService.create(admin,
+				"company" + new Random().nextInt(1000000), companyService
+						.listSalesOffer(admin).get(0).getName(), "default");
+		spaceTests = spaceService.create(admin, new Space("testSpace"),
+				companyTests);
+	}
 
-    @After
-    public void deleteCompany() throws RestClientException, AlfrescoServiceException {
-        companyService.delete(admin, companyTests);
-    }
+	@After
+	public void deleteCompany() throws RestClientException,
+			AlfrescoServiceException {
+		companyService.delete(admin, companyTests);
+	}
 
-    @Test
-    public void testShareDossiers() throws AlfrescoServiceException {
+	@Test
+	public void testShareDossiers() throws AlfrescoServiceException {
 
-        Dossier d1 = dossierService.create(admin, spaceTests, "doss1");
-        Dossier d2 = dossierService.create(admin, spaceTests, "doss2");
+		Dossier d1 = dossierService.create(admin, spaceTests, "doss1");
+		Dossier d2 = dossierService.create(admin, spaceTests, "doss2");
 
-        shareService.shareItem(admin, d1, "test@itldev.fr");
-        shareService.shareItem(admin, d2, "test@itldev.fr");
-    }
+		shareService.shareItem(admin, d1, "test@itldev.fr");
+		shareService.shareItem(admin, d2, "test@itldev.fr");
+	}
 }

@@ -18,63 +18,70 @@
  */
 package fr.itldev.koya.webscript.user;
 
-import fr.itldev.koya.alfservice.KoyaNotificationService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNotificationService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * get the notification status of the user
- *
+ * 
  */
 public class NotificationStatus extends AbstractWebScript {
 
-    private KoyaNotificationService koyaNotificationService;
-    private UserService userService;
+	private KoyaNotificationService koyaNotificationService;
+	private UserService userService;
 
-    public void setKoyaNotificationService(KoyaNotificationService koyaNotificationService) {
-        this.koyaNotificationService = koyaNotificationService;
-    }
+	public void setKoyaNotificationService(
+			KoyaNotificationService koyaNotificationService) {
+		this.koyaNotificationService = koyaNotificationService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
 
-        //passer obligatoirement la cible de notifs
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        String strEnable = (String) urlParams.get(KoyaWebscript.WSCONST_ENABLE);
-        String username = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
-        String response;
+		// passer obligatoirement la cible de notifs
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+		String strEnable = (String) urlParams.get(KoyaWebscript.WSCONST_ENABLE);
+		String username = (String) urlParams
+				.get(KoyaWebscript.WSCONST_USERNAME);
+		String response;
 
-        /**
-         * TODO process secureditem parameter
-         */
-        SecuredItem node = null;
-        try {
-            User u = userService.getUserByUsername(username);
-            if (strEnable != null) {
-                if (Boolean.valueOf(strEnable)) {
-                    koyaNotificationService.addNotification(u, node);
-                } else {
-                    koyaNotificationService.removeNotification(u, node);
-                }
-            }
-            response = KoyaWebscript.getObjectAsJson(koyaNotificationService.isUserNotified(u, node));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+		/**
+		 * TODO process KoyaNode parameter
+		 */
+		KoyaNode node = null;
+		try {
+			User u = userService.getUserByUsername(username);
+			if (strEnable != null) {
+				if (Boolean.valueOf(strEnable)) {
+					koyaNotificationService.addNotification(u, node);
+				} else {
+					koyaNotificationService.removeNotification(u, node);
+				}
+			}
+			response = KoyaWebscript.getObjectAsJson(koyaNotificationService
+					.isUserNotified(u, node));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
 }

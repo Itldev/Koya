@@ -18,75 +18,85 @@
  */
 package fr.itldev.koya.webscript.dossier;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.interfaces.SubSpace;
-import fr.itldev.koya.model.permissions.KoyaPermission;
-import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SpaceCollaboratorsAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
- *
+ * 
  * Del one or many persons in charge of specified dossier.
- *
+ * 
  */
 public class DelResponsible extends AbstractWebScript {
 
-    private SubSpaceCollaboratorsAclService SubSpaceCollaboratorsAclService;
-    private KoyaNodeService koyaNodeService;
-    private UserService userService;
+	private SpaceCollaboratorsAclService spaceCollaboratorsAclService;
+	private KoyaNodeService koyaNodeService;
+	private UserService userService;
 
-    public void setSubSpaceCollaboratorsAclService(SubSpaceCollaboratorsAclService SubSpaceCollaboratorsAclService) {
-        this.SubSpaceCollaboratorsAclService = SubSpaceCollaboratorsAclService;
-    }
+	public void setSpaceCollaboratorsAclService(
+			SpaceCollaboratorsAclService spaceCollaboratorsAclService) {
+		this.spaceCollaboratorsAclService = spaceCollaboratorsAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public static List<KoyaPermission> permissions = Collections.unmodifiableList(new ArrayList() {
-        {
-            add(KoyaPermissionCollaborator.RESPONSIBLE);
-        }
-    });
+	public static List<KoyaPermission> permissions = Collections
+			.unmodifiableList(new ArrayList() {
+				{
+					add(KoyaPermissionCollaborator.RESPONSIBLE);
+				}
+			});
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        try {
-            NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-            String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
+		try {
+			NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams
+					.get(KoyaWebscript.WSCONST_NODEREF));
+			String userName = (String) urlParams
+					.get(KoyaWebscript.WSCONST_USERNAME);
 
-            SubSpaceCollaboratorsAclService.unShareSecuredItem(
-                    (SubSpace) koyaNodeService.getSecuredItem(nodeRef),
-                    userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.MEMBER);
+			spaceCollaboratorsAclService.unShareKoyaNode(
+					(Space) koyaNodeService.getKoyaNode(nodeRef), userService
+							.getUserByUsername(userName).getEmail(),
+					KoyaPermissionCollaborator.MEMBER);
 
-            SubSpaceCollaboratorsAclService.unShareSecuredItem(
-                    (SubSpace) koyaNodeService.getSecuredItem(nodeRef),
-                    userService.getUserByUsername(userName).getEmail(), KoyaPermissionCollaborator.RESPONSIBLE);
+			spaceCollaboratorsAclService.unShareKoyaNode(
+					(Space) koyaNodeService.getKoyaNode(nodeRef), userService
+							.getUserByUsername(userName).getEmail(),
+					KoyaPermissionCollaborator.RESPONSIBLE);
 
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write("");
-    }
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write("");
+	}
 
 }

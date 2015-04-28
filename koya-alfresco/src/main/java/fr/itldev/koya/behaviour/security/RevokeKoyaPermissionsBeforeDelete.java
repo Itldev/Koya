@@ -1,10 +1,5 @@
 package fr.itldev.koya.behaviour.security;
 
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.interfaces.SubSpace;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
@@ -12,49 +7,58 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.Space;
+
 /**
  * This Behaviour deletes koya specific permissions before node deleting so that
  * parents permissions wil be updated.
- *
+ * 
  */
 public class RevokeKoyaPermissionsBeforeDelete implements
-        NodeServicePolicies.BeforeDeleteNodePolicy {
+		NodeServicePolicies.BeforeDeleteNodePolicy {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
-    private Behaviour beforeDeleteNode;
-    private PolicyComponent policyComponent;
-    private SubSpaceAclService subSpaceAclService;
-    private KoyaNodeService koyaNodeService;
+	private final Logger logger = Logger.getLogger(this.getClass());
+	private Behaviour beforeDeleteNode;
+	private PolicyComponent policyComponent;
+	private SpaceAclService spaceAclService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setPolicyComponent(PolicyComponent policyComponent) {
-        this.policyComponent = policyComponent;
-    }
+	public void setPolicyComponent(PolicyComponent policyComponent) {
+		this.policyComponent = policyComponent;
+	}
 
-    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
-        this.subSpaceAclService = subSpaceAclService;
-    }
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void init() {
-        this.beforeDeleteNode = new JavaBehaviour(this, "beforeDeleteNode", Behaviour.NotificationFrequency.FIRST_EVENT);
-        this.policyComponent.bindClassBehaviour(NodeServicePolicies.BeforeDeleteNodePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
-                this.beforeDeleteNode);
+	public void init() {
+		this.beforeDeleteNode = new JavaBehaviour(this, "beforeDeleteNode",
+				Behaviour.NotificationFrequency.FIRST_EVENT);
+		this.policyComponent.bindClassBehaviour(
+				NodeServicePolicies.BeforeDeleteNodePolicy.QNAME,
+				KoyaModel.TYPE_DOSSIER, this.beforeDeleteNode);
 
-        this.policyComponent.bindClassBehaviour(NodeServicePolicies.BeforeDeleteNodePolicy.QNAME, KoyaModel.TYPE_SPACE,
-                this.beforeDeleteNode);
-    }
+		this.policyComponent.bindClassBehaviour(
+				NodeServicePolicies.BeforeDeleteNodePolicy.QNAME,
+				KoyaModel.TYPE_SPACE, this.beforeDeleteNode);
+	}
 
-    @Override
-    public void beforeDeleteNode(NodeRef nodeRef) {
-        try {
-            SubSpace s = (SubSpace) koyaNodeService.getSecuredItem(nodeRef);
-            subSpaceAclService.cleanAllKoyaSubSpacePermissions(s);
-        } catch (KoyaServiceException ex) {
-            logger.error("before delete node error : " + ex.toString());
-        }
-    }
+	@Override
+	public void beforeDeleteNode(NodeRef nodeRef) {
+		try {
+			Space s = koyaNodeService.getKoyaNode(nodeRef, Space.class);
+			spaceAclService.cleanAllKoyaSpacePermissions(s);
+		} catch (KoyaServiceException ex) {
+			logger.error("before delete node error : " + ex.toString());
+		}
+	}
 
 }

@@ -19,8 +19,6 @@
 
 package fr.itldev.koya.model.json;
 
-import fr.itldev.koya.model.SecuredItem;
-import java.util.List;
 
 /**
  *

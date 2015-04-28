@@ -18,62 +18,69 @@
  */
 package fr.itldev.koya.webscript.dossier;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.security.SubSpaceCollaboratorsAclService;
-import fr.itldev.koya.model.permissions.KoyaPermission;
-import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.SpaceCollaboratorsAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
- *
+ * 
  * Get All persons in charge of specified dossier.
- *
+ * 
  */
 public class ListResponsible extends AbstractWebScript {
 
-    private SubSpaceCollaboratorsAclService SubSpaceCollaboratorsAclService;
-    private KoyaNodeService koyaNodeService;
+	private SpaceCollaboratorsAclService spaceCollaboratorsAclService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setSubSpaceCollaboratorsAclService(SubSpaceCollaboratorsAclService SubSpaceCollaboratorsAclService) {
-        this.SubSpaceCollaboratorsAclService = SubSpaceCollaboratorsAclService;
-    }
+	public void setSpaceCollaboratorsAclService(
+			SpaceCollaboratorsAclService spaceCollaboratorsAclService) {
+		this.spaceCollaboratorsAclService = spaceCollaboratorsAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public static List<KoyaPermission> permissions = Collections.unmodifiableList(new ArrayList() {
-        {
-            add(KoyaPermissionCollaborator.RESPONSIBLE);
-        }
-    });
+	public static List<KoyaPermission> permissions = Collections
+			.unmodifiableList(new ArrayList() {
+				{
+					add(KoyaPermissionCollaborator.RESPONSIBLE);
+				}
+			});
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String response;
-        try {
-            NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-            response = KoyaWebscript.getObjectAsJson(
-                    SubSpaceCollaboratorsAclService.listUsers(
-                            koyaNodeService.getSecuredItem(nodeRef), permissions));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+		String response;
+		try {
+			NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams
+					.get(KoyaWebscript.WSCONST_NODEREF));
+			response = KoyaWebscript
+					.getObjectAsJson(spaceCollaboratorsAclService.listUsers(
+							koyaNodeService.getKoyaNode(nodeRef), permissions));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
 
 }

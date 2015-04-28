@@ -18,19 +18,9 @@
  */
 package fr.itldev.koya.js;
 
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.KoyaNotificationService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.permissions.KoyaPermission;
-import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.processor.BaseProcessorExtension;
@@ -41,116 +31,134 @@ import org.alfresco.service.cmr.rule.Rule;
 import org.alfresco.service.cmr.rule.RuleService;
 import org.alfresco.service.cmr.rule.RuleType;
 
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.KoyaNotificationService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
+
 /**
  *
  *
  */
 public class KoyaScript extends BaseProcessorExtension {
 
-    private SubSpaceAclService subSpaceAclService;
-    private KoyaNodeService koyaNodeService;
-    private UserService userService;
-    private CompanyService companyService;
-    private KoyaNotificationService koyaNotificationService;
-    private NodeService nodeService;
-    private RuleService ruleService;
+	private SpaceAclService spaceAclService;
+	private KoyaNodeService koyaNodeService;
+	private UserService userService;
+	private CompanyService companyService;
+	private KoyaNotificationService koyaNotificationService;
+	private NodeService nodeService;
+	private RuleService ruleService;
 
-    private ServiceRegistry serviceRegistry;
+	private ServiceRegistry serviceRegistry;
 
-    // <editor-fold defaultstate="collapsed" desc="getters/setters">
-    public void setServiceRegistry(ServiceRegistry serviceRegistry) {
-        this.serviceRegistry = serviceRegistry;
-    }
+	// <editor-fold defaultstate="collapsed" desc="getters/setters">
+	public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+		this.serviceRegistry = serviceRegistry;
+	}
 
-    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
-        this.subSpaceAclService = subSpaceAclService;
-    }
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public void setCompanyService(CompanyService companyService) {
-        this.companyService = companyService;
-    }
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
 
-    public void setKoyaNotificationService(KoyaNotificationService koyaNotificationService) {
-        this.koyaNotificationService = koyaNotificationService;
-    }
+	public void setKoyaNotificationService(
+			KoyaNotificationService koyaNotificationService) {
+		this.koyaNotificationService = koyaNotificationService;
+	}
 
-    public void setNodeService(NodeService nodeService) {
-        this.nodeService = nodeService;
-    }
+	public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
 
-    public void setRuleService(RuleService ruleService) {
-        this.ruleService = ruleService;
-    }
+	public void setRuleService(RuleService ruleService) {
+		this.ruleService = ruleService;
+	}
 
-    //</editor-fold>
-    /**
-     * List users who can access a node.
-     *
-     * @param n
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public List<ScriptNode> listConsumersAccess(ScriptNode n) throws KoyaServiceException {
-        List<ScriptNode> users = new ArrayList<>();
-        SecuredItem s = koyaNodeService.getSecuredItem(n.getNodeRef());
-        for (User u : subSpaceAclService.listUsers(s, KoyaPermissionConsumer.getAll())) {
-            users.add(new ScriptNode(u.getNodeRef(), serviceRegistry));
-        }
+	// </editor-fold>
+	/**
+	 * List users who can access a node.
+	 * 
+	 * @param n
+	 * @return
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public List<ScriptNode> listConsumersAccess(ScriptNode n)
+			throws KoyaServiceException {
+		List<ScriptNode> users = new ArrayList<>();
+		KoyaNode s = koyaNodeService.getKoyaNode(n.getNodeRef());
+		for (User u : spaceAclService.listUsers(s,
+				KoyaPermissionConsumer.getAll())) {
+			users.add(new ScriptNode(u.getNodeRef(), serviceRegistry));
+		}
 
-        return users;
-    }
+		return users;
+	}
 
-    /**
-     *
-     * @param n
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public List<ScriptNode> listUserNodes(ScriptNode n) throws KoyaServiceException {
-        List<ScriptNode> sharedElements = new ArrayList<>();
+	/**
+	 * 
+	 * @param n
+	 * @return
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public List<ScriptNode> listUserNodes(ScriptNode n)
+			throws KoyaServiceException {
+		List<ScriptNode> sharedElements = new ArrayList<>();
 
-        for (Company c : companyService.list()) {
-            for (SecuredItem s : subSpaceAclService.listSecuredItems(c,
-                    userService.buildUser(n.getNodeRef()),
-                    KoyaPermission.getAll())) {
-                sharedElements.add(new ScriptNode(s.getNodeRef(), serviceRegistry));
-            }
-        }
-        return sharedElements;
-    }
+		for (Company c : companyService.list()) {
+			for (KoyaNode s : spaceAclService.listKoyaNodes(c,
+					userService.buildUser(n.getNodeRef()),
+					KoyaPermission.getAll())) {
+				sharedElements.add(new ScriptNode(s.getNodeRef(),
+						serviceRegistry));
+			}
+		}
+		return sharedElements;
+	}
 
-    /**
-     * Create notification rule for company if such a rules doesn't exists
-     *
-     * @param n
-     * @throws java.lang.Exception
-     */
-    public void createNotificationRule(ScriptNode n) throws Exception {
+	/**
+	 * Create notification rule for company if such a rules doesn't exists
+	 * 
+	 * @param n
+	 * @throws java.lang.Exception
+	 */
+	public void createNotificationRule(ScriptNode n) throws Exception {
 
-        Company c = koyaNodeService.getSecuredItem(n.getNodeRef(), Company.class);
+		Company c = koyaNodeService.getKoyaNode(n.getNodeRef(), Company.class);
 
-        //checks if company rule exists.
-        final NodeRef docLibNodeRef = nodeService.getChildByName(
-                c.getNodeRef(), ContentModel.ASSOC_CONTAINS, "documentLibrary");
+		// checks if company rule exists.
+		final NodeRef docLibNodeRef = nodeService.getChildByName(
+				c.getNodeRef(), ContentModel.ASSOC_CONTAINS, "documentLibrary");
 
-        List<Rule> rules = ruleService.getRules(docLibNodeRef, true, RuleType.INBOUND);
+		List<Rule> rules = ruleService.getRules(docLibNodeRef, true,
+				RuleType.INBOUND);
 
-        for (Rule r : rules) {
-            if (r.getTitle().equals("Koya notification rule")) {
-                throw new Exception("Rule alredy exists fro this company");
-            }
-        }
+		for (Rule r : rules) {
+			if (r.getTitle().equals("Koya notification rule")) {
+				throw new Exception("Rule alredy exists fro this company");
+			}
+		}
 
-        //create company rule
-        koyaNotificationService.createCompanyNotificationRule(c);
-    }
+		// create company rule
+		koyaNotificationService.createCompanyNotificationRule(c);
+	}
 
 }

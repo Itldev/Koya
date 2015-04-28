@@ -47,7 +47,8 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class DossierServiceImplTest extends TestCase {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+    @SuppressWarnings("unused")
+	private Logger logger = Logger.getLogger(this.getClass());
 
     @Autowired
     UserService userService;
@@ -155,7 +156,6 @@ public class DossierServiceImplTest extends TestCase {
         assertEquals(resp.size(), 1);// creator automaticly set as responsible
 
         User u1 = testUsers.get(0);
-        User u2 = testUsers.get(1);
 
         // Add a new responsibles --> now 2 reponsibles
         dossierService.addResponsible(admin, d, u1);

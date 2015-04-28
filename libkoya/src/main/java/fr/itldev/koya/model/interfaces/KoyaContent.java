@@ -19,6 +19,14 @@
 
 package fr.itldev.koya.model.interfaces;
 
-public interface SubSpace extends AlfrescoNode {
+import org.alfresco.service.cmr.repository.NodeRef;
+
+public interface KoyaContent {
+
+	NodeRef getNodeRef();
+
+	String getName();
+
+	String getTitle();
 
 }

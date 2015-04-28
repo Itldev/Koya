@@ -26,67 +26,76 @@ import java.util.Map;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.FavouriteService;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-public class FavouriteServiceImpl extends AlfrescoRestService implements FavouriteService {
+public class FavouriteServiceImpl extends AlfrescoRestService implements
+		FavouriteService {
 
-    private static final String REST_GET_LISTFAVOURITES = "/s/fr/itldev/koya/favourites/list";
-    private static final String REST_POST_FAVOURITE_STATUS = "/s/fr/itldev/koya/favourites/set";
+	private static final String REST_GET_LISTFAVOURITES = "/s/fr/itldev/koya/favourites/list";
+	private static final String REST_POST_FAVOURITE_STATUS = "/s/fr/itldev/koya/favourites/set";
 
-    @Autowired
-    UserService userService;
-    
-    private CacheManager cacheManager;
-    
+	@Autowired
+	UserService userService;
 
-    public void setCacheManager(CacheManager cacheManager) {
+	private CacheManager cacheManager;
+
+	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
 	@Override
-    public List<SecuredItem> getFavourites(User user) throws AlfrescoServiceException {
+	public List<KoyaNode> getFavourites(User user)
+			throws AlfrescoServiceException {
 
-        if (user == null) {
-            return new ArrayList<>();
-        }
-        List<SecuredItem> userFavourites = cacheManager.getUserFavourites(user);
-       
-            if (userFavourites != null) {
-                return userFavourites;
-            }
-       
-        userFavourites = fromJSON(new TypeReference<List<SecuredItem>>() {
-        }, user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_LISTFAVOURITES, String.class));
-        cacheManager.setUserFavourites(user, userFavourites);
-        return userFavourites;
-    }
+		if (user == null) {
+			return new ArrayList<>();
+		}
+		List<KoyaNode> userFavourites = cacheManager.getUserFavourites(user);
 
-    @Override
-    public Boolean setFavouriteValue(User user, SecuredItem item, Boolean favouriteValue) throws AlfrescoServiceException {
-        cacheManager.revokeUserFavourites(user);
-       
-        Map<String, Object> postParams = new HashMap<>();
-        //TODO write directly nodeRef Object instead of toString() value
-        postParams.put("nodeRef", item.getNodeRef().toString());
-        postParams.put("status", favouriteValue);
+		if (userFavourites != null) {
+			return userFavourites;
+		}
 
-        Boolean status = fromJSON(new TypeReference<Boolean>() {
-        }, user.getRestTemplate().postForObject(
-                getAlfrescoServerUrl() + REST_POST_FAVOURITE_STATUS, postParams, String.class));
-        //Automaticly reload user's preferences
-        userService.loadPreferences(user);
-        return status;
-    }
+		userFavourites = fromJSON(
+				new TypeReference<List<KoyaNode>>() {
+				},
+				user.getRestTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_LISTFAVOURITES,
+						String.class));
+		cacheManager.setUserFavourites(user, userFavourites);
+		return userFavourites;
+	}
 
-    @Override
-    public Boolean isFavourite(User user, SecuredItem item) throws AlfrescoServiceException {
-        return getFavourites(user).contains(item);
-    }
+	@Override
+	public Boolean setFavouriteValue(User user, KoyaNode item,
+			Boolean favouriteValue) throws AlfrescoServiceException {
+		cacheManager.revokeUserFavourites(user);
+
+		Map<String, Object> postParams = new HashMap<>();
+		// TODO write directly nodeRef Object instead of toString() value
+		postParams.put("nodeRef", item.getNodeRef().toString());
+		postParams.put("status", favouriteValue);
+
+		Boolean status = fromJSON(
+				new TypeReference<Boolean>() {
+				},
+				user.getRestTemplate().postForObject(
+						getAlfrescoServerUrl() + REST_POST_FAVOURITE_STATUS,
+						postParams, String.class));
+		// Automaticly reload user's preferences
+		userService.loadPreferences(user);
+		return status;
+	}
+
+	@Override
+	public Boolean isFavourite(User user, KoyaNode item)
+			throws AlfrescoServiceException {
+		return getFavourites(user).contains(item);
+	}
 
 }

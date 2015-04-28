@@ -18,59 +18,67 @@
  */
 package fr.itldev.koya.webscript.share;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.SubSpaceConsumersAclService;
-import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SpaceConsumersAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * List users shares in a company.
- *
- *
+ * 
+ * 
  */
 public class ListUserShares extends AbstractWebScript {
 
-    private SubSpaceConsumersAclService subSpaceConsumersAclService;
-    private KoyaNodeService koyaNodeService;
-    private UserService userService;
+	private SpaceConsumersAclService spaceConsumersAclService;
+	private KoyaNodeService koyaNodeService;
+	private UserService userService;
 
-    public void setSubSpaceConsumersAclService(SubSpaceConsumersAclService subSpaceConsumersAclService) {
-        this.subSpaceConsumersAclService = subSpaceConsumersAclService;
-    }
+	public void setSpaceConsumersAclService(
+			SpaceConsumersAclService spaceConsumersAclService) {
+		this.spaceConsumersAclService = spaceConsumersAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
-        String response;
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+		String userName = (String) urlParams
+				.get(KoyaWebscript.WSCONST_USERNAME);
+		String companyName = (String) urlParams
+				.get(KoyaWebscript.WSCONST_COMPANYNAME);
+		String response;
 
-        try {
-            User u = userService.getUserByUsername(userName);
-            Company c = koyaNodeService.companyBuilder(companyName);
-            response = KoyaWebscript.getObjectAsJson(subSpaceConsumersAclService.listSecuredItems(c, u, KoyaPermissionConsumer.getAll()));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+		try {
+			User u = userService.getUserByUsername(userName);
+			Company c = koyaNodeService.companyBuilder(companyName);
+			response = KoyaWebscript.getObjectAsJson(spaceConsumersAclService
+					.listKoyaNodes(c, u, KoyaPermissionConsumer.getAll()));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
 }

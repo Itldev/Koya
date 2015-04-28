@@ -18,17 +18,10 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.MetaInfos;
-import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.Random;
+
 import junit.framework.TestCase;
+
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -41,11 +34,22 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestClientException;
 
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.MetaInfos;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class GenericServiceImplTest extends TestCase {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+    @SuppressWarnings("unused")
+	private Logger logger = Logger.getLogger(this.getClass());
 
     @Autowired
     UserService userService;
@@ -66,7 +70,7 @@ public class GenericServiceImplTest extends TestCase {
     private KoyaContentService koyaContentService;
 
     @Autowired
-    private SecuredItemService securedItemService;
+    private KoyaNodeService koyaNodeService;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -98,13 +102,13 @@ public class GenericServiceImplTest extends TestCase {
     public void testgetParent() throws AlfrescoServiceException {
         Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRef(), "dir");
         System.err.println(dir);
-        assertTrue(securedItemService.getParent(admin, (SecuredItem) dir).getName().equals("doss1"));
+        assertTrue(koyaNodeService.getParent(admin, (KoyaNode) dir).getName().equals("doss1"));
     }
 
     @Test
     public void testgetParents1() throws AlfrescoServiceException {
         Directory dir = koyaContentService.createDir(admin, dossierTests.getNodeRef(), "dir2");
-        assertEquals(securedItemService.getParents(admin, (SecuredItem) dir).size(), 3);
+        assertEquals(koyaNodeService.getParents(admin, (KoyaNode) dir).size(), 3);
     }
 
     @Test
@@ -115,7 +119,7 @@ public class GenericServiceImplTest extends TestCase {
         Resource toUpload = applicationContext.getResource("classpath:docs/testupload.txt");
         Document doc = koyaContentService.upload(admin, subDir.getNodeRef(), toUpload);
 
-        assertEquals(securedItemService.getParents(admin, doc).size(), 5);
+        assertEquals(koyaNodeService.getParents(admin, doc).size(), 5);
     }
 
     @Test

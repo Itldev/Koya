@@ -23,10 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 import fr.itldev.koya.model.KoyaNode;
-import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 
 /**
  *
@@ -95,4 +93,5 @@ public class Contact extends KoyaNode {
         c.setUser(user);
         return c;
     }
+
 }

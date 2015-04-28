@@ -80,7 +80,7 @@
         <property name="koyaMailService" ref="koyaMailService"/>
         <property name="spaceService" ref="spaceService" />
         <property name="dossierService" ref="dossierService" />
-        <property name="subSpaceCollaboratorsAclService" ref="SubSpaceCollaboratorsAclService" />
+        <property name="spaceCollaboratorsAclService" ref="spaceCollaboratorsAclService" />
         <property name="inactiveFrom" value="${koya.inactivedossiers.duration}" />
     </bean>
 </beans>

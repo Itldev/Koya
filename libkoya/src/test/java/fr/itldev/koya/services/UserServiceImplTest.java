@@ -36,99 +36,102 @@ import org.springframework.web.client.RestClientException;
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class UserServiceImplTest extends TestCase {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	@SuppressWarnings("unused")
+	private Logger logger = Logger.getLogger(this.getClass());
 
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private UserService userService;
 
-    @Test
-    public void testAdminLogin() throws AlfrescoServiceException {
-        User admin = null;
-        try {
-            admin = userService.login("admin", "admin");
-        } catch (RestClientException ex) {
-            fail();
-        }
-        assertNotNull(admin);
-    }
+	@Test
+	public void testAdminLogin() throws AlfrescoServiceException {
+		User admin = null;
+		try {
+			admin = userService.login("admin", "admin");
+		} catch (RestClientException ex) {
+			fail();
+		}
+		assertNotNull(admin);
+	}
 
-    @Test
-    public void testUnknownLogin() throws Exception {
+	@Test
+	public void testUnknownLogin() throws Exception {
 
-        try {
-            User userUnknown = userService.login("unknown", "unknown");
-        } catch (AlfrescoServiceException aex) {
-            assertEquals(aex.getHttpErrorCode().intValue(), HttpStatus.FORBIDDEN.value());
-        }
-    }
+		try {
+			userService.login("unknown", "unknown");
+		} catch (AlfrescoServiceException aex) {
+			assertEquals(aex.getHttpErrorCode().intValue(),
+					HttpStatus.FORBIDDEN.value());
+		}
+	}
 
-    @Test
-    public void testGetPrefs() throws IOException, AlfrescoServiceException {
+	@Test
+	public void testGetPrefs() throws IOException, AlfrescoServiceException {
 
-        User admin = null;
-        try {
-            admin = userService.login("admin", "admin");
-        } catch (RestClientException ex) {
-            fail();
-        }
-        System.out.println(admin.getPreferences());
+		User admin = null;
+		try {
+			admin = userService.login("admin", "admin");
+		} catch (RestClientException ex) {
+			fail();
+		}
+		System.out.println(admin.getPreferences());
 
-    }
+	}
 
-    @Test
-    public void testSetPrefs() throws IOException, AlfrescoServiceException {
-        String testKey = "fr.itldev.test";
-        User admin = null;
-        try {
-            admin = userService.login("admin", "admin");
-        } catch (RestClientException ex) {
-            fail();
-        }
-        int nbPrefs = admin.getPreferences().size();
-        System.out.println(admin.getPreferences());
+	@Test
+	public void testSetPrefs() throws IOException, AlfrescoServiceException {
+		String testKey = "fr.itldev.test";
+		User admin = null;
+		try {
+			admin = userService.login("admin", "admin");
+		} catch (RestClientException ex) {
+			fail();
+		}
+		int nbPrefs = admin.getPreferences().size();
+		System.out.println(admin.getPreferences());
 
-        /* =============== Add a test preference ===========*/
-        admin.getPreferences().put(testKey, "OK_PREF");
-        userService.commitPreferences(admin);
+		/* =============== Add a test preference =========== */
+		admin.getPreferences().put(testKey, "OK_PREF");
+		userService.commitPreferences(admin);
 
-        //one more preference
-        assertEquals(nbPrefs + 1, admin.getPreferences().size());
-        //   System.out.println(admin.getPreferences());
+		// one more preference
+		assertEquals(nbPrefs + 1, admin.getPreferences().size());
+		// System.out.println(admin.getPreferences());
 
-        /* =============== Del test preference =====*/
-        admin.getPreferences().remove(testKey);
-        userService.commitPreferences(admin);
+		/* =============== Del test preference ===== */
+		admin.getPreferences().remove(testKey);
+		userService.commitPreferences(admin);
 
-        assertEquals(nbPrefs, admin.getPreferences().size());
-        /* ============= final state ============= */
-        userService.loadPreferences(admin);
-        //   System.out.println(admin.getPreferences());
+		assertEquals(nbPrefs, admin.getPreferences().size());
+		/* ============= final state ============= */
+		userService.loadPreferences(admin);
+		// System.out.println(admin.getPreferences());
 
-    }
+	}
 
-    @Test
-    public void testModifyDetails() throws IOException, AlfrescoServiceException {
-        User userTest = userService.login("admin", "admin");
+	@Test
+	public void testModifyDetails() throws IOException,
+			AlfrescoServiceException {
+		User userTest = userService.login("admin", "admin");
 
-        userTest.setName("tester");
+		userTest.setName("tester");
 
-        try {
-            userService.commitProperties(userTest);
-        } catch (AlfrescoServiceException ex) {
-            fail();
-        }
-    }
+		try {
+			userService.commitProperties(userTest);
+		} catch (AlfrescoServiceException ex) {
+			fail();
+		}
+	}
 
-    @Test
-    public void testFindUsers() throws IOException, AlfrescoServiceException {
-        User user = userService.login("admin", "admin");
+	@Test
+	public void testFindUsers() throws IOException, AlfrescoServiceException {
+		User user = userService.login("admin", "admin");
 
-        try {
-            userService.find(user, "l", 10, null, null);
-        } catch (AlfrescoServiceException ex) {
-            fail();
-        }
-    }
+		try {
+			userService.find(user, "l", 10, null, null);
+		} catch (AlfrescoServiceException ex) {
+			fail();
+		}
+	}
 
-    //TODO test change password
+	// TODO test change password
 }

@@ -33,7 +33,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -93,7 +93,7 @@ public class ListContent extends AbstractWebScript {
 					+ ";filterExpr=" + filterExpr + ";sortExpr=" + sortExpr
 					+ ";typeFilter=" + typeFilter);
 
-			Pair<List<SecuredItem>, Pair<Integer, Integer>> listChildren = koyaNodeService
+			Pair<List<KoyaNode>, Pair<Integer, Integer>> listChildren = koyaNodeService
 					.listChildrenPaginated(parent, skipCount, maxItems,
 							onlyFolders, filterExpr);
 

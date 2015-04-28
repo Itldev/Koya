@@ -37,7 +37,7 @@ public interface UserCheckPermissionsTest {
 
     void canDeleteDossierTest();
 
-    //Administrive
+    //Administrative
     void canListMembersDossierTest();
 
     void canListResponsiblesDossierTest();

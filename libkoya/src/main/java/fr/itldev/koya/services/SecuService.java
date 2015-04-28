@@ -18,88 +18,97 @@
  */
 package fr.itldev.koya.services;
 
+import java.util.List;
+
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.Permissions;
-import fr.itldev.koya.model.SecuredItem;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.model.impl.UserRole;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.util.List;
 
 public interface SecuService {
 
-    /**
-     * List available userRoles for a company.
-     *
-     * @param userLogged
-     * @param c
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    List<UserRole> listAvailableRoles(User userLogged, Company c) throws AlfrescoServiceException;
+	/**
+	 * List available userRoles for a company.
+	 * 
+	 * @param userLogged
+	 * @param c
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<UserRole> listAvailableRoles(User userLogged, Company c)
+			throws AlfrescoServiceException;
 
-    /**
-     * Get current Role in Company context for specified User.
-     *
-     * @param userLogged
-     * @param c
-     * @param userToGetRole
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    UserRole getUserRole(User userLogged, Company c, User userToGetRole) throws AlfrescoServiceException;
+	/**
+	 * Get current Role in Company context for specified User.
+	 * 
+	 * @param userLogged
+	 * @param c
+	 * @param userToGetRole
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	UserRole getUserRole(User userLogged, Company c, User userToGetRole)
+			throws AlfrescoServiceException;
 
-    /**
-     * Set userRole in Company context for specified User.
-     *
-     * @param userLogged
-     * @param c
-     * @param userNameSetRole
-     * @param roleName
-     * @throws AlfrescoServiceException
-     */
-    void setUserRole(User userLogged, Company c, String userNameSetRole, String roleName) throws AlfrescoServiceException;
+	/**
+	 * Set userRole in Company context for specified User.
+	 * 
+	 * @param userLogged
+	 * @param c
+	 * @param userNameSetRole
+	 * @param roleName
+	 * @throws AlfrescoServiceException
+	 */
+	void setUserRole(User userLogged, Company c, String userNameSetRole,
+			String roleName) throws AlfrescoServiceException;
 
-    /**
-     *
-     * @param userLogged
-     * @param userToGetConnections
-     * @param companyFilter
-     * @param maxResults
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    List<UserConnection> listUserConnections(User userLogged, User userToGetConnections, List<Company> companyFilter, Integer maxResults) throws AlfrescoServiceException;
+	/**
+	 * 
+	 * @param userLogged
+	 * @param userToGetConnections
+	 * @param companyFilter
+	 * @param maxResults
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<UserConnection> listUserConnections(User userLogged,
+			User userToGetConnections, List<Company> companyFilter,
+			Integer maxResults) throws AlfrescoServiceException;
 
-    /**
-     * revoke all user Acces on specified company.
-     *
-     * @param userLogged
-     * @param c
-     * @param u
-     * @throws AlfrescoServiceException
-     */
-    void revokeAccess(User userLogged, Company c, User u) throws AlfrescoServiceException;
+	/**
+	 * revoke all user Acces on specified company.
+	 * 
+	 * @param userLogged
+	 * @param c
+	 * @param u
+	 * @throws AlfrescoServiceException
+	 */
+	void revokeAccess(User userLogged, Company c, User u)
+			throws AlfrescoServiceException;
 
-    /**
-     * Checks if user logged is company manager.
-     *
-     * @param userLogged
-     * @param c
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    Boolean isCompanyManager(User userLogged, Company c) throws AlfrescoServiceException;
+	/**
+	 * Checks if user logged is company manager.
+	 * 
+	 * @param userLogged
+	 * @param c
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Boolean isCompanyManager(User userLogged, Company c)
+			throws AlfrescoServiceException;
 
-    /**
-     * Get permissions on defined secured Item
-     *
-     * @param user
-     * @param s
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    Permissions getPermissions(User user, SecuredItem s) throws AlfrescoServiceException;
+	/**
+	 * Get permissions on defined secured Item
+	 * 
+	 * @param user
+	 * @param s
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Permissions getPermissions(User user, KoyaNode s)
+			throws AlfrescoServiceException;
 
 }

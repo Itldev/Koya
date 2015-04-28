@@ -18,54 +18,59 @@
  */
 package fr.itldev.koya.webscript.share;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
-import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * Checks if current node has any KoyaPermissionConsumer in acl
- *
- *
+ * 
+ * 
  * TODO define a generalist service that checks if nodeRef has role(s) in list
- *
+ * 
  */
 public class IsSharedConsumer extends AbstractWebScript {
 
-    private SubSpaceAclService subSpaceAclService;
-    private KoyaNodeService koyaNodeService;
+	private SpaceAclService spaceAclService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
-        this.subSpaceAclService = subSpaceAclService;
-    }
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String response;
-        try {
-            NodeRef n = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-            response = KoyaWebscript.getObjectAsJson(
-                    !subSpaceAclService.listUsers(koyaNodeService.getSecuredItem(n), KoyaPermissionConsumer.getAll())
-                    .isEmpty());
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+		String response;
+		try {
+			NodeRef n = koyaNodeService.getNodeRef((String) urlParams
+					.get(KoyaWebscript.WSCONST_NODEREF));
+			response = KoyaWebscript.getObjectAsJson(!spaceAclService
+					.listUsers(koyaNodeService.getKoyaNode(n),
+							KoyaPermissionConsumer.getAll()).isEmpty());
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
 
 }

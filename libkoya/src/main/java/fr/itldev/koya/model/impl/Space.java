@@ -18,52 +18,48 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.interfaces.Container;
-import fr.itldev.koya.model.interfaces.SubSpace;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public final class Space extends SecuredItem implements Container, SubSpace {
+import fr.itldev.koya.model.KoyaNode;
 
-    /*---------------------*/
-    @JsonIgnore
-    private SecuredItem parent;
+public class Space extends KoyaNode {
 
-    @JsonProperty("childspaces")
-    private List<Space> childSpaces = new ArrayList<>();
+	/*---------------------*/
+	@JsonIgnore
+	private KoyaNode parent;
 
-    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public List<Space> getChildSpaces() {
-        return childSpaces;
-    }
+	@JsonProperty("childspaces")
+	private List<Space> childSpaces = new ArrayList<>();
 
-    public void setChildSpaces(List<Space> childSpaces) {
-        this.childSpaces = childSpaces;
-    }
+	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+	public List<Space> getChildSpaces() {
+		return childSpaces;
+	}
 
-    // </editor-fold>
-    private Space() {
-    }
+	public void setChildSpaces(List<Space> childSpaces) {
+		this.childSpaces = childSpaces;
+	}
 
-    public Space(String name) {
-        setName(name);
-    }
+	// </editor-fold>
+	protected Space() {
+	}
 
-    @Override
-    public String toString() {
-        return "Space [ name = " + getName() + ", noderef=" + getNodeRef() +  "]";
-    }
+	public Space(String name) {
+		setName(name);
+	}
 
-    @Override
-    public String getType() {
-        return "space";
-    }
+	@Override
+	public String toString() {
+		return "Space [ name = " + getName() + ", noderef=" + getNodeRef()
+				+ "]";
+	}
 
-    public static Space newInstance() {
-        return new Space();
-    }
+	public static Space newInstance() {
+		return new Space();
+	}
 
 }

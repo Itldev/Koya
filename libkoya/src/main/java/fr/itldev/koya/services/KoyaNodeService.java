@@ -22,75 +22,56 @@ package fr.itldev.koya.services;
 import java.util.List;
 
 import fr.itldev.koya.model.KoyaNode;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-public interface SpaceService extends AlfrescoService {
+/**
+ * KoyaNodes Generic methods
+ * 
+ */
+public interface KoyaNodeService extends AlfrescoService {
 
 	/**
-	 * Create a new space
+	 * Deletes item.
 	 * 
 	 * @param user
-	 * @param space
-	 * @param parent
-	 * @return
-	 * @throws AlfrescoServiceException
+	 * @param KoyaNode
+	 * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
 	 */
-	Space create(User user, Space space, KoyaNode parent)
-			throws AlfrescoServiceException;
+	void delete(User user, KoyaNode koyaNode) throws AlfrescoServiceException;
 
 	/**
-	 * Activate a space
+	 * Renames item.
 	 * 
 	 * @param user
-	 * @param space
-	 * @throws AlfrescoServiceException
+	 * @param koyaNode
+	 * @param newName
+	 * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
 	 */
-	void enable(User user, Space space) throws AlfrescoServiceException;
-
-	/**
-	 * disable a space
-	 * 
-	 * @param user
-	 * @param space
-	 * @throws AlfrescoServiceException
-	 */
-	void disable(User user, Space space) throws AlfrescoServiceException;
-
-	/**
-	 * List Company Spaces Structure
-	 * 
-	 * @param user
-	 * @param company
-	 * @param depth
-	 * @return
-	 * @throws AlfrescoServiceException
-	 */
-	List<Space> list(User user, Company company, Integer... depth)
+	void rename(User user, KoyaNode koyaNode, String newName)
 			throws AlfrescoServiceException;
 
 	/**
 	 * 
+	 * Returns KoyaNode Parent if exists.
+	 * 
 	 * @param user
-	 * @param toMove
-	 * @param destination
+	 * @param koyaNode
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	Space move(User user, Space toMove, Space destination)
+	KoyaNode getParent(User user, KoyaNode koyaNode)
 			throws AlfrescoServiceException;
 
 	/**
+	 * Returns koyaNodes ancestors list.
 	 * 
 	 * @param user
-	 * @param toMove
-	 * @param destination
+	 * @param koyaNode
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	Space move(User user, Space toMove, Company destination)
+	List<KoyaNode> getParents(User user, KoyaNode koyaNode)
 			throws AlfrescoServiceException;
 
 }

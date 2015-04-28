@@ -22,14 +22,13 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.extensions.webscripts.AbstractWebScript;
-import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -39,35 +38,35 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  */
 public class IsConfidential extends AbstractWebScript {
 
-    private SubSpaceAclService SubSpaceAclService;
-    private KoyaNodeService koyaNodeService;
+	private SpaceAclService spaceAclService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
-        SubSpaceAclService = subSpaceAclService;
-    }
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res)
-            throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        Boolean isConfidential = false;
-        try {
-            SecuredItem item = koyaNodeService.getSecuredItem(koyaNodeService
-                    .getNodeRef((String) urlParams
-                            .get(KoyaWebscript.WSCONST_NODEREF)));
+		Boolean isConfidential = false;
+		try {
+			KoyaNode item = koyaNodeService.getKoyaNode(koyaNodeService
+					.getNodeRef((String) urlParams
+							.get(KoyaWebscript.WSCONST_NODEREF)));
 
-            isConfidential = SubSpaceAclService.isConfidential(item);
+			isConfidential = spaceAclService.isConfidential(item);
 
-        } catch (KoyaServiceException ex) {
-        	//silently ignore exception 
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(isConfidential.toString());
-    }
+		} catch (KoyaServiceException ex) {
+			// silently ignore exception
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(isConfidential.toString());
+	}
 
 }

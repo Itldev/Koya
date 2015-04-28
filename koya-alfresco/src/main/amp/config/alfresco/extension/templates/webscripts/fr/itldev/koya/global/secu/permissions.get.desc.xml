@@ -20,7 +20,7 @@
 -->
 
 <webscript>
-    <shortname>Get Permissions on securedItem</shortname>    
+    <shortname>Get Permissions on koyaNode</shortname>    
     <family>Itldev</family>
     <url>/fr/itldev/koya/global/secu/permissions/{nodeRef}</url>
     <authentication>user</authentication>    

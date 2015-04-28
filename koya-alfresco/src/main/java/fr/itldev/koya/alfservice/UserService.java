@@ -42,7 +42,7 @@ import org.json.simple.JSONObject;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
@@ -489,8 +489,8 @@ public class UserService {
 	 * @param u
 	 * @return
 	 */
-	public List<SecuredItem> getSharedKoyaNodes(String userName, Company c) {
-		List<SecuredItem> sharedKoyaNodes = new ArrayList<SecuredItem>();
+	public List<KoyaNode> getSharedKoyaNodes(String userName, Company c) {
+		List<KoyaNode> sharedKoyaNodes = new ArrayList<KoyaNode>();
 		try {
 			User u = getUser(userName);
 			if (nodeService.hasAspect(u.getNodeRef(),
@@ -508,7 +508,7 @@ public class UserService {
 												ar.getTargetRef(),
 												Company.class))) {
 							sharedKoyaNodes.add(koyaNodeService
-									.getSecuredItem(ar.getTargetRef()));
+									.getKoyaNode(ar.getTargetRef()));
 						}
 					} catch (KoyaServiceException e) {
 					}

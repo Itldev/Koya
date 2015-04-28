@@ -18,48 +18,54 @@
  */
 package fr.itldev.koya.webscript.global.secu;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * Get Permissions object for a node
- *
+ * 
  */
 public class GetPermissions extends AbstractWebScript {
 
-    private SubSpaceAclService subSpaceAclService;
-    private KoyaNodeService koyaNodeService;
+	private SpaceAclService spaceAclService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
-        this.subSpaceAclService = subSpaceAclService;
-    }
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String response;
-        try {
-            NodeRef nodeRef = koyaNodeService.getNodeRef(urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-            response = KoyaWebscript.getObjectAsJson(subSpaceAclService.getPermissions(nodeRef));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+		String response;
+		try {
+			NodeRef nodeRef = koyaNodeService.getNodeRef(urlParams
+					.get(KoyaWebscript.WSCONST_NODEREF));
+			response = KoyaWebscript.getObjectAsJson(spaceAclService
+					.getPermissions(nodeRef));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
 
 }

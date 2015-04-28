@@ -27,7 +27,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,10 +34,6 @@ import java.util.Set;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.Pair;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.json.simple.JSONObject;
 import org.springframework.core.io.Resource;
@@ -48,12 +43,11 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
-import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.interfaces.Content;
+import fr.itldev.koya.model.interfaces.KoyaContent;
 import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.DiskSizeWrapper;
 import fr.itldev.koya.model.json.PaginatedContentList;
@@ -116,15 +110,15 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
 						getAlfrescoServerUrl() + REST_POST_UPLOAD, request,
 						String.class));
 
-		return (Document) getSecuredItem(user, upReturn.getNodeRef());
+		return (Document) getKoyaNode(user, upReturn.getNodeRef());
 
 	}
 
 	@Override
-	public Content move(User user, NodeRef contentToMove, NodeRef destination)
+	public KoyaContent move(User user, NodeRef contentToMove, NodeRef destination)
 			throws AlfrescoServiceException {
-		return (Content) fromJSON(
-				new TypeReference<SecuredItem>() {
+		return (KoyaContent) fromJSON(
+				new TypeReference<KoyaNode>() {
 				},
 				user.getRestTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_MOVECONTENT,
@@ -132,39 +126,29 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
 	}
 
 	@Override
-	public Content copy(User user, NodeRef contentToCopy, NodeRef destination)
+	public KoyaContent copy(User user, NodeRef contentToCopy, NodeRef destination)
 			throws AlfrescoServiceException {
-		return (Content) fromJSON(
-				new TypeReference<SecuredItem>() {
+		return (KoyaContent) fromJSON(
+				new TypeReference<KoyaNode>() {
 				},
 				user.getRestTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_COPYCONTENT,
 						String.class, contentToCopy, destination));
 	}
 
-	private static final Transformer TRANSFORM_TO_CONTENTS = new Transformer() {
-		@Override
-		public Object transform(Object input) {
-			return (Content) input;
-		}
-	};
-
 	// TODO merge with a generic listing service
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Content> list(User user, NodeRef containerToList,
+	public List<KoyaContent> list(User user, NodeRef containerToList,
 			Boolean onlyFolders, Integer depth) throws AlfrescoServiceException {
 
 		@SuppressWarnings("rawtypes")
 		List contents = fromJSON(
-				new TypeReference<List<SecuredItem>>() {
+				new TypeReference<List<KoyaNode>>() {
 				},
 				user.getRestTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_LISTCONTENTTREE,
 						String.class, containerToList, onlyFolders, depth));
-
-		// tranform SecuredItems to contents
-		CollectionUtils.transform(contents, TRANSFORM_TO_CONTENTS);
 
 		return contents;
 	}
@@ -179,7 +163,6 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public PaginatedContentList listPaginatedDirectChild(User user,
 			NodeRef containerToList, Integer skipCount, Integer maxItems,
@@ -194,8 +177,8 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
 	}
 
 	@Override
-	public Integer countChildren(User user, SecuredItem parent,
-			Boolean onlyFolders) throws AlfrescoServiceException {
+	public Integer countChildren(User user, KoyaNode parent, Boolean onlyFolders)
+			throws AlfrescoServiceException {
 
 		Set<QName> typeFilter = new HashSet<>();
 
@@ -207,20 +190,20 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
 	}
 
 	@Override
-	public Long getDiskSize(User user, SecuredItem securedItem)
+	public Long getDiskSize(User user, KoyaNode KoyaNode)
 			throws AlfrescoServiceException {
 		DiskSizeWrapper ret = fromJSON(
 				new TypeReference<DiskSizeWrapper>() {
 				},
 				user.getRestTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_DISKSIZE,
-						String.class, securedItem.getNodeRef()));
+						String.class, KoyaNode.getNodeRef()));
 		return ret.getSize();
 	}
 
 	@Override
-	public InputStream getZipInputStream(User user,
-			List<SecuredItem> securedItems) throws AlfrescoServiceException {
+	public InputStream getZipInputStream(User user, List<KoyaNode> KoyaNodes)
+			throws AlfrescoServiceException {
 		HttpURLConnection con;
 
 		try {
@@ -230,7 +213,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
 			Map<String, Serializable> params = new HashMap<>();
 			ArrayList<String> selected = new ArrayList<>();
 			params.put("nodeRefs", selected);
-			for (SecuredItem item : securedItems) {
+			for (KoyaNode item : KoyaNodes) {
 				selected.add(item.getNodeRef().toString());
 			}
 

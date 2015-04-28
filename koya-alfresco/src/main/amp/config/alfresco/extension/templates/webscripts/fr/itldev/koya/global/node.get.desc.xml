@@ -20,10 +20,9 @@
 -->
 
 <webscript>
-    <shortname>Get Secured Item</shortname>
-    <description>Get SecuredItem by NodeRef</description>
+    <shortname>Get Koya Node by NodeRef</shortname>    
     <family>Itldev</family>
-    <url>/fr/itldev/koya/global/getsecureditem/{nodeRef}</url>
+    <url>/fr/itldev/koya/global/node/{nodeRef}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

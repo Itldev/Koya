@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.repo.invitation.InvitationSearchCriteriaImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteDoesNotExistException;
@@ -35,15 +34,8 @@ import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.invitation.InvitationSearchCriteria;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.collections.CollectionUtils;
@@ -55,8 +47,7 @@ import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserRole;
@@ -65,308 +56,334 @@ import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 public class CompanyAclService {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	private Logger logger = Logger.getLogger(this.getClass());
 
-    protected SiteService siteService;
-    protected UserService userService;
-    protected InvitationService invitationService;
-    protected AuthorityService authorityService;
-    protected AuthenticationService authenticationService;
-    protected ActionService actionService;
+	protected SiteService siteService;
+	protected UserService userService;
+	protected InvitationService invitationService;
+	protected AuthorityService authorityService;
+	protected AuthenticationService authenticationService;
+	protected ActionService actionService;
 
-    protected KoyaNodeService koyaNodeService;
-    protected KoyaMailService koyaMailService;
-    
-    /*
-     * Invitation Url Params     
-     */
-    private String koyaClientServerPath;
-    private String koyaClientAcceptUrl;
-    private String koyaClientRejectUrl;
+	protected KoyaNodeService koyaNodeService;
+	protected KoyaMailService koyaMailService;
 
-    // <editor-fold defaultstate="collapsed" desc="getters/setters">
-    public void setAuthorityService(AuthorityService authorityService) {
-        this.authorityService = authorityService;
-    }
+	/*
+	 * Invitation Url Params
+	 */
+	private String koyaClientServerPath;
+	private String koyaClientAcceptUrl;
+	private String koyaClientRejectUrl;
 
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+	// <editor-fold defaultstate="collapsed" desc="getters/setters">
+	public void setAuthorityService(AuthorityService authorityService) {
+		this.authorityService = authorityService;
+	}
 
-    public void setActionService(ActionService actionService) {
-        this.actionService = actionService;
-    }
+	public void setAuthenticationService(
+			AuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
+	}
 
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
-    }
-    
-    
-    public void setKoyaMailService(KoyaMailService koyaMailService) {
+	public void setActionService(ActionService actionService) {
+		this.actionService = actionService;
+	}
+
+	public void setSiteService(SiteService siteService) {
+		this.siteService = siteService;
+	}
+
+	public void setKoyaMailService(KoyaMailService koyaMailService) {
 		this.koyaMailService = koyaMailService;
 	}
 
 	public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+		this.userService = userService;
+	}
 
-    public void setInvitationService(InvitationService invitationService) {
-        this.invitationService = invitationService;
-    }
+	public void setInvitationService(InvitationService invitationService) {
+		this.invitationService = invitationService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-  		this.koyaNodeService = koyaNodeService;
-  	}
-  	
-    
-    //
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-  
+	//
 
 	public void setKoyaClientServerPath(String koyaClientServerPath) {
-        this.koyaClientServerPath = koyaClientServerPath;
-    }
-    
-    public String getKoyaClientServerPath(){
-    	return this.koyaClientServerPath;
-    }
+		this.koyaClientServerPath = koyaClientServerPath;
+	}
 
-    public void setKoyaClientAcceptUrl(String koyaClientAcceptUrl) {
-        this.koyaClientAcceptUrl = koyaClientAcceptUrl;
-    }
-    
-    public String getKoyaClientAcceptUrl(){
-    	return this.koyaClientAcceptUrl;
-    }
+	public String getKoyaClientServerPath() {
+		return this.koyaClientServerPath;
+	}
 
-    public void setKoyaClientRejectUrl(String koyaClientRejectUrl) {
-        this.koyaClientRejectUrl = koyaClientRejectUrl;
-    }
-    
-    public String getKoyaClientRejectUrl(){
-    	return this.koyaClientRejectUrl;
-    }
-    
+	public void setKoyaClientAcceptUrl(String koyaClientAcceptUrl) {
+		this.koyaClientAcceptUrl = koyaClientAcceptUrl;
+	}
 
-    //</editor-fold>
-    //TODO refine by userTypes : Collaborators Roles, Client Roles
-    public List<UserRole> getAvailableRoles(Company c) throws KoyaServiceException {
-        try {
-            List<UserRole> userRoles = new ArrayList<>();
-            for (String r : SitePermission.getAllAsString()) {
-                userRoles.add(new UserRole(r));
-            }
-            return userRoles;
-        } catch (SiteDoesNotExistException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
-        }
-    }
+	public String getKoyaClientAcceptUrl() {
+		return this.koyaClientAcceptUrl;
+	}
 
-    /**
-     * List both validated users and pending invitation users.
-     *
-     * @param companyName
-     * @param permissionsFilter
-     * @return
-     */
-    public List<User> listMembers(String companyName, List<SitePermission> permissionsFilter) {
-        List<User> members = new ArrayList<>();
-        members.addAll(listMembersValidated(companyName, permissionsFilter));
-        members.addAll(listMembersPendingInvitation(companyName, permissionsFilter));
-        return members;
-    }
+	public void setKoyaClientRejectUrl(String koyaClientRejectUrl) {
+		this.koyaClientRejectUrl = koyaClientRejectUrl;
+	}
 
-    /**
-     * List members of the company already validated.
-     *
-     * Automaticly excludes Alfresco administrators.
-     *
-     * @param companyName
-     * @param permissionsFilter
-     * @return
-     */
-    public List<User> listMembersValidated(String companyName, List<SitePermission> permissionsFilter) {
-        final List<String> permissions = CollectionUtils.toListOfStrings(permissionsFilter);
-        Map<String, String> members = siteService.listMembers(companyName, null, null, 0);
+	public String getKoyaClientRejectUrl() {
+		return this.koyaClientRejectUrl;
+	}
 
-        List<Map.Entry<String, String>> companyMembers = new ArrayList(members.entrySet());
+	// </editor-fold>
+	// TODO refine by userTypes : Collaborators Roles, Client Roles
+	public List<UserRole> getAvailableRoles(Company c)
+			throws KoyaServiceException {
+		try {
+			List<UserRole> userRoles = new ArrayList<>();
+			for (String r : SitePermission.getAllAsString()) {
+				userRoles.add(new UserRole(r));
+			}
+			return userRoles;
+		} catch (SiteDoesNotExistException ex) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+		}
+	}
 
-        if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
-            companyMembers = CollectionUtils.filter(companyMembers, new Filter<Map.Entry<String, String>>() {
+	/**
+	 * List both validated users and pending invitation users.
+	 * 
+	 * @param companyName
+	 * @param permissionsFilter
+	 * @return
+	 */
+	public List<User> listMembers(String companyName,
+			List<SitePermission> permissionsFilter) {
+		List<User> members = new ArrayList<>();
+		members.addAll(listMembersValidated(companyName, permissionsFilter));
+		members.addAll(listMembersPendingInvitation(companyName,
+				permissionsFilter));
+		return members;
+	}
 
-                @Override
-                public Boolean apply(Map.Entry<String, String> member) {
-                    return permissions.contains(member.getValue()) && !authorityService.isAdminAuthority(member.getKey());
-                }
-            });
-        }
+	/**
+	 * List members of the company already validated.
+	 * 
+	 * Automaticly excludes Alfresco administrators.
+	 * 
+	 * @param companyName
+	 * @param permissionsFilter
+	 * @return
+	 */
+	public List<User> listMembersValidated(String companyName,
+			List<SitePermission> permissionsFilter) {
+		final List<String> permissions = CollectionUtils
+				.toListOfStrings(permissionsFilter);
+		Map<String, String> members = siteService.listMembers(companyName,
+				null, null, 0);
 
-        List<User> usersOfCompanyValidated = CollectionUtils.transform(companyMembers, new Function<Map.Entry<String, String>, User>() {
+		List<Map.Entry<String, String>> companyMembers = new ArrayList(
+				members.entrySet());
 
-            @Override
-            public User apply(Map.Entry<String, String> entry) {
-                return userService.getUserByUsername(entry.getKey());
-            }
-        });
+		if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
+			companyMembers = CollectionUtils.filter(companyMembers,
+					new Filter<Map.Entry<String, String>>() {
 
-        return usersOfCompanyValidated;
-    }
+						@Override
+						public Boolean apply(Map.Entry<String, String> member) {
+							return permissions.contains(member.getValue())
+									&& !authorityService
+											.isAdminAuthority(member.getKey());
+						}
+					});
+		}
 
-    /**
-     * List Members of the company with pending invitation.
-     *
-     * @param companyName
-     * @param permissionsFilter
-     * @return
-     */
-    public List<User> listMembersPendingInvitation(final String companyName, final List<SitePermission> permissionsFilter) {
-        List<Invitation> pendinginvitations = getPendingInvite(companyName, null, null);
-        final List<String> permissions = CollectionUtils.toListOfStrings(permissionsFilter);
+		List<User> usersOfCompanyValidated = CollectionUtils.transform(
+				companyMembers,
+				new Function<Map.Entry<String, String>, User>() {
 
-        if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
-            pendinginvitations = CollectionUtils.filter(pendinginvitations, new Filter<Invitation>() {
+					@Override
+					public User apply(Map.Entry<String, String> entry) {
+						return userService.getUserByUsername(entry.getKey());
+					}
+				});
 
-                @Override
-                public Boolean apply(Invitation i) {
-                    return permissions.contains(i.getRoleName());
-                }
-            });
-        }
+		return usersOfCompanyValidated;
+	}
 
-        List<User> usersOfCompanyPendingInvitation = CollectionUtils.transform(pendinginvitations, new Function<Invitation, User>() {
+	/**
+	 * List Members of the company with pending invitation.
+	 * 
+	 * @param companyName
+	 * @param permissionsFilter
+	 * @return
+	 */
+	public List<User> listMembersPendingInvitation(final String companyName,
+			final List<SitePermission> permissionsFilter) {
+		List<Invitation> pendinginvitations = getPendingInvite(companyName,
+				null, null);
+		final List<String> permissions = CollectionUtils
+				.toListOfStrings(permissionsFilter);
 
-            @Override
-            public User apply(Invitation invitation) {
-                return userService.getUserByUsername(invitation.getInviteeUserName());
-            }
-        });
+		if (permissionsFilter != null && !permissionsFilter.isEmpty()) {
+			pendinginvitations = CollectionUtils.filter(pendinginvitations,
+					new Filter<Invitation>() {
 
-        return usersOfCompanyPendingInvitation;
-    }
+						@Override
+						public Boolean apply(Invitation i) {
+							return permissions.contains(i.getRoleName());
+						}
+					});
+		}
 
-    public List<Invitation> getPendingInvite(String companyId, String inviterId, String inviteeId) {
-        final InvitationSearchCriteriaImpl criteria = new InvitationSearchCriteriaImpl();
-        criteria.setInvitationType(InvitationSearchCriteria.InvitationType.NOMINATED);
-        criteria.setResourceType(Invitation.ResourceType.WEB_SITE);
+		List<User> usersOfCompanyPendingInvitation = CollectionUtils.transform(
+				pendinginvitations, new Function<Invitation, User>() {
 
-        if (inviterId != null) {
-            criteria.setInviter(inviterId);
-        }
-        if (inviteeId != null) {
-            criteria.setInvitee(inviteeId);
-        }
-        if (companyId != null) {
-            criteria.setResourceName(companyId);
-        }
+					@Override
+					public User apply(Invitation invitation) {
+						return userService.getUserByUsername(invitation
+								.getInviteeUserName());
+					}
+				});
 
-        return AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<List<Invitation>>() {
-            @Override
-            public List<Invitation> doWork() throws Exception {
-                return invitationService.searchInvitation(criteria);
-            }
-        });
-    }
+		return usersOfCompanyPendingInvitation;
+	}
 
-    /**
-     *
-     * @param username
-     * @return List of companies a user belong to
-     */
-    public List<Company> listCompany(String username) {
-        List<SiteInfo> l = siteService.listSites(username);
+	public List<Invitation> getPendingInvite(String companyId,
+			String inviterId, String inviteeId) {
+		final InvitationSearchCriteriaImpl criteria = new InvitationSearchCriteriaImpl();
+		criteria.setInvitationType(InvitationSearchCriteria.InvitationType.NOMINATED);
+		criteria.setResourceType(Invitation.ResourceType.WEB_SITE);
 
-        List<Company> res = CollectionUtils.transform(l, new Function<SiteInfo, Company>() {
+		if (inviterId != null) {
+			criteria.setInviter(inviterId);
+		}
+		if (inviteeId != null) {
+			criteria.setInvitee(inviteeId);
+		}
+		if (companyId != null) {
+			criteria.setResourceName(companyId);
+		}
 
-            @Override
-            public Company apply(SiteInfo siteInfo) {
-                try {
-                    return koyaNodeService.getSecuredItem(siteInfo.getNodeRef(), Company.class);
-                } catch (KoyaServiceException ex) {
-                }
-                return null;
-            }
-        });
+		return AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<List<Invitation>>() {
+					@Override
+					public List<Invitation> doWork() throws Exception {
+						return invitationService.searchInvitation(criteria);
+					}
+				});
+	}
 
-        return res;
-    }
+	/**
+	 * 
+	 * @param username
+	 * @return List of companies a user belong to
+	 */
+	public List<Company> listCompany(String username) {
+		List<SiteInfo> l = siteService.listSites(username);
 
-    /**
-     * Checks if current logged user is company manager on specified company.
-     *
-     * @param companyName
-     * @return
-     * @throws fr.itldev.koya.exception.KoyaServiceException
-     */
-    public Boolean isCompanyManager(String companyName) throws KoyaServiceException {
-        try {
-            return SitePermission.MANAGER.equals(
-                    siteService.getMembersRole(companyName, authenticationService.getCurrentUserName()));
-        } catch (SiteDoesNotExistException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
-        }
-    }
+		List<Company> res = CollectionUtils.transform(l,
+				new Function<SiteInfo, Company>() {
 
-    public SitePermission getSitePermission(Company c, String userMail) {
-        User u = userService.getUserByEmailFailOver(userMail);
-        if (u != null) {
-            return getSitePermission(c, u);
-        }
-        return null;
-    }
+					@Override
+					public Company apply(SiteInfo siteInfo) {
+						try {
+							return koyaNodeService.getKoyaNode(
+									siteInfo.getNodeRef(), Company.class);
+						} catch (KoyaServiceException ex) {
+						}
+						return null;
+					}
+				});
 
-    /**
-     * Returns SitePermission of user on Company if exists.
-     *
-     * @param c
-     * @param u
-     * @return
-     */
-    public SitePermission getSitePermission(Company c, User u) {
-        //try with validated members            
-        String roleOfSite = siteService.getMembersRole(c.getName(), u.getUserName());
-        if (roleOfSite != null) {
-            return SitePermission.valueOf(roleOfSite);
-        }
-        //if not found, try with pending invitation users
-        Iterator<Invitation> it = getPendingInvite(c.getName(), null, u.getUserName()).iterator();
-        if (it.hasNext()) {
-            return SitePermission.valueOf(it.next().getRoleName());
-        }
+		return res;
+	}
 
-        //if no results return null;
-        return null;
-    }
+	/**
+	 * Checks if current logged user is company manager on specified company.
+	 * 
+	 * @param companyName
+	 * @return
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public Boolean isCompanyManager(String companyName)
+			throws KoyaServiceException {
+		try {
+			return SitePermission.MANAGER.equals(siteService.getMembersRole(
+					companyName, authenticationService.getCurrentUserName()));
+		} catch (SiteDoesNotExistException ex) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+		}
+	}
 
-    /**
-     * Invite user to company with defined roleName.
-     * sharedItemIs optionnal
-     *
-     * Returns invitation if processed
-     *
-     *
-     * @param c
-     * @param userMail
-     * @param permission
-     * @return
-     * @throws KoyaServiceException
-     */
-    public Invitation inviteMember(final Company c, final String userMail,
-            final SitePermission permission,final SecuredItem sharedItem) throws KoyaServiceException {
+	public SitePermission getSitePermission(Company c, String userMail) {
+		User u = userService.getUserByEmailFailOver(userMail);
+		if (u != null) {
+			return getSitePermission(c, u);
+		}
+		return null;
+	}
 
-        User u = userService.getUserByEmailFailOver(userMail);
+	/**
+	 * Returns SitePermission of user on Company if exists.
+	 * 
+	 * @param c
+	 * @param u
+	 * @return
+	 */
+	public SitePermission getSitePermission(Company c, User u) {
+		// try with validated members
+		String roleOfSite = siteService.getMembersRole(c.getName(),
+				u.getUserName());
+		if (roleOfSite != null) {
+			return SitePermission.valueOf(roleOfSite);
+		}
+		// if not found, try with pending invitation users
+		Iterator<Invitation> it = getPendingInvite(c.getName(), null,
+				u.getUserName()).iterator();
+		if (it.hasNext()) {
+			return SitePermission.valueOf(it.next().getRoleName());
+		}
 
-        if (u == null) {
-            /**
-             * Workaround to resolve invite by user bug :
-             *
-             *
-             *
-             * https://forums.alfresco.com/forum/installation-upgrades-configuration-integration/configuration/site-invite-failures
-             * https://issues.alfresco.com/jira/browse/ALF-20897
-             * http://forums.alfresco.com/forum/installation-upgrades-configuration-integration/configuration/problem-invite-external-users
-             *
-             *
-             */
+		// if no results return null;
+		return null;
+	}
+
+	/**
+	 * Invite user to company with defined roleName. sharedItemIs optionnal
+	 * 
+	 * Returns invitation if processed
+	 * 
+	 * 
+	 * @param c
+	 * @param userMail
+	 * @param permission
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	public Invitation inviteMember(final Company c, final String userMail,
+			final SitePermission permission, final KoyaNode sharedItem)
+			throws KoyaServiceException {
+
+		User u = userService.getUserByEmailFailOver(userMail);
+
+		if (u == null) {
+			/**
+			 * Workaround to resolve invite by user bug :
+			 * 
+			 * 
+			 * 
+			 * https://forums.alfresco.com/forum/installation-upgrades-
+			 * configuration-integration/configuration/site-invite-failures
+			 * https://issues.alfresco.com/jira/browse/ALF-20897
+			 * http://forums.alfresco
+			 * .com/forum/installation-upgrades-configuration
+			 * -integration/configuration/problem-invite-external-users
+			 * 
+			 * 
+			 */
 			Invitation invitation = AuthenticationUtil
 					.runAsSystem(new AuthenticationUtil.RunAsWork<Invitation>() {
 						@Override
@@ -390,112 +407,124 @@ public class CompanyAclService {
 							return invitation;
 
 						}
-            });
-        	
-        	return invitation;
-        	
-        } else {
-            /**
-             * 
-             * TODO check if this behaviour is compatible with invitation workflow
-             * user should be invited for each company
-             * 
-             * User exist so we've to check if he has already a role on company
-             * 
-             * 
-             */
-            SitePermission sitePermission = getSitePermission(c, u);
+					});
 
-            if (sitePermission == null) {
-                //no setted permission -> do it
-                siteService.setMembership(c.getName(), u.getUserName(), permission.toString());
-            } else {
-                throw new KoyaServiceException(KoyaErrorCodes.SECU_USER_CANT_BE_INVITED_ALREADY_EXISTS_IN_COMPANY_WITH_OTHER_ROLE);
-            }
-        }
+			return invitation;
 
-        return null;
-    }
+		} else {
+			/**
+			 * 
+			 * TODO check if this behaviour is compatible with invitation
+			 * workflow user should be invited for each company
+			 * 
+			 * User exist so we've to check if he has already a role on company
+			 * 
+			 * 
+			 */
+			SitePermission sitePermission = getSitePermission(c, u);
 
-    /**
-     * Set user identified by userName specified userRole in companyName
-     * context.
-     *
-     * User MUST already be a member of the company
-     *
-     * @param c
-     * @param u
-     * @param role
-     * @throws KoyaServiceException
-     */
-    public void setRole(Company c, User u, SitePermission role) throws KoyaServiceException {
+			if (sitePermission == null) {
+				// no setted permission -> do it
+				siteService.setMembership(c.getName(), u.getUserName(),
+						permission.toString());
+			} else {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.SECU_USER_CANT_BE_INVITED_ALREADY_EXISTS_IN_COMPANY_WITH_OTHER_ROLE);
+			}
+		}
 
-        //checks if user is already a company member
-        SitePermission roleSite = getSitePermission(c, u);
+		return null;
+	}
 
-        if (roleSite == null) {
-            throw new KoyaServiceException(KoyaErrorCodes.SECU_USER_MUSTBE_COMPANY_MEMBER_TO_CHANGE_COMPANYROLE);
-        }
-        /**
-         * TODO check if pending invitation exists
-         */
+	/**
+	 * Set user identified by userName specified userRole in companyName
+	 * context.
+	 * 
+	 * User MUST already be a member of the company
+	 * 
+	 * @param c
+	 * @param u
+	 * @param role
+	 * @throws KoyaServiceException
+	 */
+	public void setRole(Company c, User u, SitePermission role)
+			throws KoyaServiceException {
 
-        try {
-            siteService.setMembership(c.getName(), u.getUserName(), role.toString());
-        } catch (SiteDoesNotExistException ex) {
-            throw new KoyaServiceException(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
-        }
+		// checks if user is already a company member
+		SitePermission roleSite = getSitePermission(c, u);
 
-    }
+		if (roleSite == null) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.SECU_USER_MUSTBE_COMPANY_MEMBER_TO_CHANGE_COMPANYROLE);
+		}
+		/**
+		 * TODO check if pending invitation exists
+		 */
 
-    /**
-     * Revoke user access to defined company.
-     *
-     * @param c
-     * @param u
-     * @throws KoyaServiceException
-     */
-    public void removeFromMembers(Company c, User u) throws KoyaServiceException {
-        List<Invitation> invitations = getPendingInvite(c.getName(), null, u.getUserName());
-        if (invitations.isEmpty()) {
-            siteService.removeMembership(c.getName(), u.getUserName());
+		try {
+			siteService.setMembership(c.getName(), u.getUserName(),
+					role.toString());
+		} catch (SiteDoesNotExistException ex) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+		}
 
-            //Launch backend action that cleans all users specific permissions in company
-            //Only delete specific permissions on dossiers 
-            try {
-                Map<String, Serializable> paramsClean = new HashMap<>();
-                paramsClean.put("userName", u.getUserName());
-                Action cleanUserAuth = actionService.createAction("cleanPermissions", paramsClean);
-                cleanUserAuth.setExecuteAsynchronously(true);
-                actionService.executeAction(cleanUserAuth, siteService.getSite(c.getName()).getNodeRef());
-            } catch (InvalidNodeRefException ex) {
-                throw new KoyaServiceException(0, "");//TODO
-            }
-        } else {
-            List<Exception> exceptions = new ArrayList<>();
-            for (final Invitation i : invitations) {
-                Exception eCancel = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Exception>() {
+	}
 
-                    @Override
-                    public Exception doWork() throws Exception {
-                        try {
-                            invitationService.cancel(i.getInviteId());
-                        } catch (Exception e) {
-                            logger.error(e.getMessage(), e);
-                            return e;
-                        }
-                        return null;
-                    }
-                });
-                if (eCancel != null) {
-                    exceptions.add(eCancel);
-                }
+	/**
+	 * Revoke user access to defined company.
+	 * 
+	 * @param c
+	 * @param u
+	 * @throws KoyaServiceException
+	 */
+	public void removeFromMembers(Company c, User u)
+			throws KoyaServiceException {
+		List<Invitation> invitations = getPendingInvite(c.getName(), null,
+				u.getUserName());
+		if (invitations.isEmpty()) {
+			siteService.removeMembership(c.getName(), u.getUserName());
 
-            }
-            if (!exceptions.isEmpty()) {
-                throw new KoyaServiceException(0, "");//TODO
-            }
-        }
-    }
+			// Launch backend action that cleans all users specific permissions
+			// in company
+			// Only delete specific permissions on dossiers
+			try {
+				Map<String, Serializable> paramsClean = new HashMap<>();
+				paramsClean.put("userName", u.getUserName());
+				Action cleanUserAuth = actionService.createAction(
+						"cleanPermissions", paramsClean);
+				cleanUserAuth.setExecuteAsynchronously(true);
+				actionService.executeAction(cleanUserAuth,
+						siteService.getSite(c.getName()).getNodeRef());
+			} catch (InvalidNodeRefException ex) {
+				throw new KoyaServiceException(0, "");// TODO
+			}
+		} else {
+			List<Exception> exceptions = new ArrayList<>();
+			for (final Invitation i : invitations) {
+				Exception eCancel = AuthenticationUtil
+						.runAsSystem(new AuthenticationUtil.RunAsWork<Exception>() {
+
+							@Override
+							public Exception doWork() throws Exception {
+								try {
+									invitationService.cancel(i.getInviteId());
+								} catch (Exception e) {
+									logger.error(e.getMessage(), e);
+									return e;
+								}
+								return null;
+							}
+						});
+				if (eCancel != null) {
+					exceptions.add(eCancel);
+				}
+
+			}
+			if (!exceptions.isEmpty()) {
+				throw new KoyaServiceException(0, "");// TODO
+			}
+		}
+	}
 
 }

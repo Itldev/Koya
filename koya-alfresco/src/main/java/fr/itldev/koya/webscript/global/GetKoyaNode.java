@@ -18,12 +18,9 @@
  */
 package fr.itldev.koya.webscript.global;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -31,34 +28,43 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  *
- *
+ *TODO nom a changer !!!
  */
-public class GetSecuredItem extends AbstractWebScript {
+public class GetKoyaNode extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String response;
+		String response;
 
-        try {
-            NodeRef nodeRefStr = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_NODEREF));
-            response = KoyaWebscript.getObjectAsJson(
-                    koyaNodeService.getSecuredItem(nodeRefStr));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        } catch (AccessDeniedException ade) {
-            throw new WebScriptException("KoyaError : " +KoyaErrorCodes.ACCESS_DENIED.toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+		try {
+			NodeRef nodeRefStr = koyaNodeService.getNodeRef((String) urlParams
+					.get(KoyaWebscript.WSCONST_NODEREF));
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService
+					.getKoyaNode(nodeRefStr));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		} catch (AccessDeniedException ade) {
+			throw new WebScriptException("KoyaError : "
+					+ KoyaErrorCodes.ACCESS_DENIED.toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
 }

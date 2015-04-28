@@ -160,8 +160,8 @@ public class KoyaModel {
 				}
 			});
 
-	public static final Map<Class<? extends SecuredItem>, QName> CLASS_TO_QNAME = Collections
-			.unmodifiableMap(new HashMap<Class<? extends SecuredItem>, QName>() {
+	public static final Map<Class<? extends KoyaNode>, QName> CLASS_TO_QNAME = Collections
+			.unmodifiableMap(new HashMap<Class<? extends KoyaNode>, QName>() {
 				private static final long serialVersionUID = 1L;
 
 				{

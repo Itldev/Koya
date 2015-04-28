@@ -58,7 +58,7 @@
 	           <div class="yui-u">
 	              <select id="${el}-create-company-salesOffer" name="salesOffer" tabindex="0">
 	                 <#list salesOffers as salesOffer>
-	                    <option value="${salesOffer.donnees.name}">${salesOffer.donnees.name}</option>
+	                    <option value="${salesOffer.name}">${salesOffer.name}</option>
 	                 </#list>
 	              </select>
 	           </div>

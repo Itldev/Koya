@@ -13,13 +13,14 @@ import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
-import fr.itldev.koya.model.SecuredItem;
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.interfaces.KoyaContent;
 import fr.itldev.koya.model.json.PaginatedContentList;
 
 public class PaginatedContentListDeserializer extends
 		JsonDeserializer<PaginatedContentList> {
 
-	private static TypeReference<List<SecuredItem>> TYPEREF_LSTKOYANODES = new TypeReference<List<SecuredItem>>() {
+	private static TypeReference<List<KoyaNode>> TYPEREF_LSTKOYANODES = new TypeReference<List<KoyaNode>>() {
 	};
 
 	@Override
@@ -31,8 +32,8 @@ public class PaginatedContentListDeserializer extends
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode node = mapper.readTree(jp);
 
-		pcl.setChildren((List<SecuredItem>) mapper.readValue(
-				node.get("children"), TYPEREF_LSTKOYANODES));
+		pcl.setChildren((List<KoyaContent>) mapper.readValue(node.get("children"),
+				TYPEREF_LSTKOYANODES));
 
 		HashMap<String, String> tm = mapper.readValue(node.get("totalValues"),
 				new TypeReference<HashMap<String, String>>() {

@@ -19,17 +19,24 @@
 
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.services.impl.util.PreferencesDeserializer;
-import fr.itldev.koya.services.impl.util.PreferencesSerializer;
 import java.util.HashMap;
+
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import fr.itldev.koya.services.impl.util.PreferencesDeserializer;
+import fr.itldev.koya.services.impl.util.PreferencesSerializer;
 
 @JsonDeserialize(using = PreferencesDeserializer.class)
 @JsonSerialize(using = PreferencesSerializer.class)
 public final class Preferences extends HashMap<String, Object> {
 
-    @Override
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Override
     public String toString() {
         StringBuilder ts = new StringBuilder(" ==== Preferences ===== \n");
 

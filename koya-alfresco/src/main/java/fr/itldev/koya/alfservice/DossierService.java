@@ -18,12 +18,6 @@
  */
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import javax.transaction.UserTransaction;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.LuceneUtils;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -47,6 +41,13 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
+
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 /**
  * Dossiers Handling Service
@@ -119,7 +120,7 @@ public class DossierService {
                 KoyaModel.TYPE_DOSSIER,
                 properties);
 
-        Dossier created = koyaNodeService.getSecuredItem(car.getChildRef(), Dossier.class);
+        Dossier created = koyaNodeService.getKoyaNode(car.getChildRef(), Dossier.class);
         logger.info("[Koya] Dossier creation : " + created.getTitle() + " created (" + created.getNodeRef() + ")");
         return created;
     }
@@ -149,7 +150,7 @@ public class DossierService {
             @Override
             public Object transform(Object input) {
                 try {
-                    return koyaNodeService.getSecuredItem(((ChildAssociationRef) input).getChildRef(), Dossier.class);
+                    return koyaNodeService.getKoyaNode(((ChildAssociationRef) input).getChildRef(), Dossier.class);
                 } catch (KoyaServiceException ex) {
                     return null;
                 }
@@ -177,7 +178,7 @@ public class DossierService {
                 case 0:
                     throw new KoyaServiceException(KoyaErrorCodes.NO_SUCH_DOSSIER_REFERENCE, reference);
                 case 1:
-                    return koyaNodeService.getSecuredItem(rs.iterator().next().getNodeRef(), Dossier.class);
+                    return koyaNodeService.getKoyaNode(rs.iterator().next().getNodeRef(), Dossier.class);
                 default:
                     throw new KoyaServiceException(KoyaErrorCodes.MANY_DOSSIERS_REFERENCE, reference);
             }
@@ -202,7 +203,7 @@ public class DossierService {
 
             List<Dossier> inactiveDossier = new ArrayList<>(rs.length());
             for (NodeRef n : rs.getNodeRefs()) {
-                inactiveDossier.add(koyaNodeService.getSecuredItem(n, Dossier.class));
+                inactiveDossier.add(koyaNodeService.getKoyaNode(n, Dossier.class));
             }
 
             return inactiveDossier;

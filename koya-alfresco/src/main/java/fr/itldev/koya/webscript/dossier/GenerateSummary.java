@@ -124,10 +124,8 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * Find Dossier
 			 */
 			Dossier d = koyaNodeService
-					.getSecuredItem(koyaNodeService
-							.getNodeRef((String) urlParams
-									.get(KoyaWebscript.WSCONST_NODEREF)),
-							Dossier.class);
+					.getKoyaNode(koyaNodeService.getNodeRef((String) urlParams
+							.get(KoyaWebscript.WSCONST_NODEREF)), Dossier.class);
 			/**
 			 * =================================================
 			 * 
@@ -173,9 +171,8 @@ public class GenerateSummary extends AbstractWebScript implements
 			 */
 			String htmlText = null;
 			Map<String, Serializable> paramsTemplate = new HashMap<>();
-			paramsTemplate.put("dossier",
-					new TemplateNode(d.getNodeRef(), serviceRegistry,
-							null));
+			paramsTemplate.put("dossier", new TemplateNode(d.getNodeRef(),
+					serviceRegistry, null));
 			try {
 				htmlText = templateService.processTemplate("freemarker",
 						summarytemplate.toString(), paramsTemplate);
@@ -212,14 +209,13 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * Write html file
 			 */
 
-			htmlSummaryNodeRef = nodeService.getChildByName(
-					d.getNodeRef(), ContentModel.ASSOC_CONTAINS,
-					documentName + ".html");
+			htmlSummaryNodeRef = nodeService.getChildByName(d.getNodeRef(),
+					ContentModel.ASSOC_CONTAINS, documentName + ".html");
 
 			if (htmlSummaryNodeRef == null) {
-				htmlSummaryNodeRef = fileFolderService.create(
-						d.getNodeRef(), documentName + ".html",
-						ContentModel.TYPE_CONTENT).getNodeRef();
+				htmlSummaryNodeRef = fileFolderService.create(d.getNodeRef(),
+						documentName + ".html", ContentModel.TYPE_CONTENT)
+						.getNodeRef();
 			}
 
 			ContentWriter fileWriter = fileFolderService
@@ -235,14 +231,13 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * Convert html to pdf
 			 */
 
-			pdfSummaryNodeRef = nodeService.getChildByName(
-					d.getNodeRef(), ContentModel.ASSOC_CONTAINS,
-					documentName + ".pdf");
+			pdfSummaryNodeRef = nodeService.getChildByName(d.getNodeRef(),
+					ContentModel.ASSOC_CONTAINS, documentName + ".pdf");
 
 			if (pdfSummaryNodeRef == null) {
-				pdfSummaryNodeRef = fileFolderService.create(
-						d.getNodeRef(), documentName + ".pdf",
-						ContentModel.TYPE_CONTENT).getNodeRef();
+				pdfSummaryNodeRef = fileFolderService.create(d.getNodeRef(),
+						documentName + ".pdf", ContentModel.TYPE_CONTENT)
+						.getNodeRef();
 			}
 
 			ContentReader htmlSummaryReader = fileFolderService
@@ -253,14 +248,15 @@ public class GenerateSummary extends AbstractWebScript implements
 					.getWriter(pdfSummaryNodeRef);
 			pdfSummaryWriter.setEncoding("UTF-8");
 			pdfSummaryWriter.setMimetype("application/pdf");
-			
-			ContentTransformer transformer = contentService.getTransformer("text/html", "application/pdf");
-			logger.debug("convert html to pdf with :"+transformer.getName());
-			//TODO use appropriate transformer
+
+			ContentTransformer transformer = contentService.getTransformer(
+					"text/html", "application/pdf");
+			logger.debug("convert html to pdf with :" + transformer.getName());
+			// TODO use appropriate transformer
 			transformer.transform(htmlSummaryReader, pdfSummaryWriter);
 			// creates new revision
 			versionService.createVersion(pdfSummaryNodeRef, null);
-							
+
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
 					+ ex.getErrorCode().toString());

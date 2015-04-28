@@ -28,7 +28,7 @@
         <property name="extensionName">
             <value>koya</value>
         </property>
-        <property name="subSpaceAclService" ref="subSpaceAclService"/>
+        <property name="spaceAclService" ref="spaceAclService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>    
         <property name="userService" ref="userService"/>
         <property name="companyService" ref="companyService"/>

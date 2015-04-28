@@ -18,68 +18,65 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.interfaces.Container;
-import fr.itldev.koya.model.interfaces.Content;
-import fr.itldev.koya.model.SecuredItem;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public final class Directory extends SecuredItem implements Container, Content {
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.interfaces.KoyaContent;
 
-    @JsonProperty("childdir")
-    private List<Directory> childDir = new ArrayList<>();
+public final class Directory extends KoyaNode implements KoyaContent{
 
-    @JsonProperty("childdoc")
-    private List<Document> childDoc = new ArrayList<>();
+	@JsonProperty("childdir")
+	private List<Directory> childDir = new ArrayList<>();
 
-    @JsonIgnore
-    public List<Content> getChildren() {
-        List<Content> content = new ArrayList<>();
-        content.addAll(childDir);
-        content.addAll(childDoc);
-        return content;
-    }
+	@JsonProperty("childdoc")
+	private List<Document> childDoc = new ArrayList<>();
 
-    public void setChildren(List<Content> children) {
-        for (Content c : children) {
-            if (Directory.class.isAssignableFrom(c.getClass())) {
-                childDir.add((Directory) c);
-            } else if (Document.class.isAssignableFrom(c.getClass())) {
-                childDoc.add((Document) c);
-            }
-        }
-    }
+	@JsonIgnore
+	public List<KoyaContent> getChildren() {
+		List<KoyaContent> content = new ArrayList<>();
+		content.addAll(childDir);
+		content.addAll(childDoc);
+		return content;
+	}
 
-    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public List<Directory> getChildDir() {
-        return childDir;
-    }
+	public void setChildren(List<KoyaNode> children) {
+		for (KoyaNode c : children) {
+			if (Directory.class.isAssignableFrom(c.getClass())) {
+				childDir.add((Directory) c);
+			} else if (Document.class.isAssignableFrom(c.getClass())) {
+				childDoc.add((Document) c);
+			}
+		}
+	}
 
-    public void setChildDir(List<Directory> childDir) {
-        this.childDir = childDir;
-    }
+	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+	public List<Directory> getChildDir() {
+		return childDir;
+	}
 
-    public List<Document> getChildDoc() {
-        return childDoc;
-    }
+	public void setChildDir(List<Directory> childDir) {
+		this.childDir = childDir;
+	}
 
-    public void setChildDoc(List<Document> childDoc) {
-        this.childDoc = childDoc;
-    }
-    // </editor-fold>
+	public List<Document> getChildDoc() {
+		return childDoc;
+	}
 
-    private Directory() {
-    }
+	public void setChildDoc(List<Document> childDoc) {
+		this.childDoc = childDoc;
+	}
 
-    @Override
-    public String getType() {
-        return "directory";
-    }
+	// </editor-fold>
 
-    public static Directory newInstance() {
-        return new Directory();
-    }
+	private Directory() {
+	}
+	
+	public static Directory newInstance() {
+		return new Directory();
+	}
 
 }

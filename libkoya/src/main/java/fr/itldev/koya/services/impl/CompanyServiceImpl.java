@@ -94,10 +94,9 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
     
     public Company get(User user, String shortName) throws RestClientException, AlfrescoServiceException{
      
-        return fromJSON(new TypeReference<Company>() {
-        }, user.getRestTemplate().
+        return  user.getRestTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_COMPANY,
-                        String.class, shortName));
+                        Company.class, shortName);
     }
 
 

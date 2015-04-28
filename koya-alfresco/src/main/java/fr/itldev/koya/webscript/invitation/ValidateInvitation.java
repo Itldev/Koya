@@ -44,7 +44,6 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 import fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter;
 import fr.itldev.koya.alfservice.KoyaNotificationService;
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.SubSpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
@@ -52,227 +51,252 @@ import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Validate User invitation.
- *
- *
+ * 
+ * 
  */
 public class ValidateInvitation extends AbstractWebScript {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	private Logger logger = Logger.getLogger(this.getClass());
 
-    private UserService userService;
-    private InvitationService invitationService;
-    private WorkflowService workflowService;
-    protected SubSpaceAclService subSpaceAclService;
-    protected ActivityService activityService;
-    protected ActionService actionService;
-    protected SiteService siteService;
-    protected KoyaNotificationService koyaNotificationService; 
-    
-    
-    // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	private UserService userService;
+	private InvitationService invitationService;
+	private WorkflowService workflowService;
+	protected ActivityService activityService;
+	protected ActionService actionService;
+	protected SiteService siteService;
+	protected KoyaNotificationService koyaNotificationService;
 
-    public void setInvitationService(InvitationService invitationService) {
-        this.invitationService = invitationService;
-    }
+	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public void setWorkflowService(WorkflowService workflowService) {
-        this.workflowService = workflowService;
-    }
+	public void setInvitationService(InvitationService invitationService) {
+		this.invitationService = invitationService;
+	}
 
-    public void setSubSpaceAclService(SubSpaceAclService subSpaceAclService) {
-        this.subSpaceAclService = subSpaceAclService;
-    }
+	public void setWorkflowService(WorkflowService workflowService) {
+		this.workflowService = workflowService;
+	}
 
-    public void setActivityService(ActivityService activityService) {
-        this.activityService = activityService;
-    }
+	public void setActivityService(ActivityService activityService) {
+		this.activityService = activityService;
+	}
 
-    public void setActionService(ActionService actionService) {
-        this.actionService = actionService;
-    }
+	public void setActionService(ActionService actionService) {
+		this.actionService = actionService;
+	}
 
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
-    }
+	public void setSiteService(SiteService siteService) {
+		this.siteService = siteService;
+	}
 
-    public void setKoyaNotificationService(
+	public void setKoyaNotificationService(
 			KoyaNotificationService koyaNotificationService) {
 		this.koyaNotificationService = koyaNotificationService;
 	}
 
-	//</editor-fold>
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+	// </editor-fold>
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 
-        final String invitationId = (String) jsonPostMap.get("inviteId");
-        final String inviteTicket = (String) jsonPostMap.get("inviteTicket");
-        final String newPassword = (String) jsonPostMap.get("password");
-        final User userInvited = new User();
-        userInvited.setName((String) jsonPostMap.get("lastName"));
-        userInvited.setFirstName((String) jsonPostMap.get("firstName"));
-        userInvited.setCivilTitle((String) jsonPostMap.get("civilTitle"));
+		final String invitationId = (String) jsonPostMap.get("inviteId");
+		final String inviteTicket = (String) jsonPostMap.get("inviteTicket");
+		final String newPassword = (String) jsonPostMap.get("password");
+		final User userInvited = new User();
+		userInvited.setName((String) jsonPostMap.get("lastName"));
+		userInvited.setFirstName((String) jsonPostMap.get("firstName"));
+		userInvited.setCivilTitle((String) jsonPostMap.get("civilTitle"));
 
-        try {
-            final NominatedInvitation invitation;
-            try {
-                invitation = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< NominatedInvitation>() {
-                    @Override
-                    public NominatedInvitation doWork() throws Exception {
-                        try {
-                            return (NominatedInvitation) invitationService.getInvitation(invitationId);
-                        } catch (Exception ex) {
-                            logger.error("Error getting invitation from invitationId : " + ex.toString());
-                            throw ex;
+		try {
+			final NominatedInvitation invitation;
+			try {
+				invitation = AuthenticationUtil
+						.runAsSystem(new AuthenticationUtil.RunAsWork<NominatedInvitation>() {
+							@Override
+							public NominatedInvitation doWork()
+									throws Exception {
+								try {
+									return (NominatedInvitation) invitationService
+											.getInvitation(invitationId);
+								} catch (Exception ex) {
+									logger.error("Error getting invitation from invitationId : "
+											+ ex.toString());
+									throw ex;
 
-                        }
-                    }
-                });
-            } catch (RuntimeException rex) {
-                throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_ID);
-            }
+								}
+							}
+						});
+			} catch (RuntimeException rex) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVALID_INVITATION_ID);
+			}
 
-            WorkflowTask startTask;
-            try {
-                startTask = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< WorkflowTask>() {
-                    @Override
-                    public WorkflowTask doWork() throws Exception {
-                        try {
-                            return workflowService.getStartTask(invitationId);
-                        } catch (Exception ex) {
-                            logger.error("Error getting WorkflowTask from invitationId : " + ex.toString());
-                            throw ex;
-                        }
-                    }
-                });
-            } catch (RuntimeException rex) {
-                throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_ID);
-            }
+			WorkflowTask startTask;
+			try {
+				startTask = AuthenticationUtil
+						.runAsSystem(new AuthenticationUtil.RunAsWork<WorkflowTask>() {
+							@Override
+							public WorkflowTask doWork() throws Exception {
+								try {
+									return workflowService
+											.getStartTask(invitationId);
+								} catch (Exception ex) {
+									logger.error("Error getting WorkflowTask from invitationId : "
+											+ ex.toString());
+									throw ex;
+								}
+							}
+						});
+			} catch (RuntimeException rex) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVALID_INVITATION_ID);
+			}
 
-            /**
-             * Test invitation validity code inspired by InvitationServiceImpl
-             */
-            List<WorkflowTask> tasks = workflowService.getTasksForWorkflowPath(startTask.getPath().getId());
-            if (tasks.size() != 1) {
-            	logger.warn("invitation validation error : "+tasks.size() + " tasks found for (id="+invitationId + ";ticket="+inviteTicket);
-                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
-            }
+			/**
+			 * Test invitation validity code inspired by InvitationServiceImpl
+			 */
+			List<WorkflowTask> tasks = workflowService
+					.getTasksForWorkflowPath(startTask.getPath().getId());
+			if (tasks.size() != 1) {
+				logger.warn("invitation validation error : " + tasks.size()
+						+ " tasks found for (id=" + invitationId + ";ticket="
+						+ inviteTicket);
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
+			}
 
-            WorkflowTask task = tasks.get(0);
-            if (!taskTypeMatches(task,
-                    WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING,
-                    WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING)) {
-            	logger.warn("invitation validation error : taskType="+task.getDefinition().getMetadata().getName()+" for (id="+invitationId + ";ticket="+inviteTicket);
-            	throw new KoyaServiceException(KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
-            }
+			WorkflowTask task = tasks.get(0);
+			if (!taskTypeMatches(
+					task,
+					WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING,
+					WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING)) {
+				logger.warn("invitation validation error : taskType="
+						+ task.getDefinition().getMetadata().getName()
+						+ " for (id=" + invitationId + ";ticket="
+						+ inviteTicket);
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVITATION_ALREADY_COMPLETED);
+			}
 
-            /**
-             * Test invite ticket validity
-             */
-            if (!invitation.getTicket().equals(inviteTicket)) {
-                throw new KoyaServiceException(KoyaErrorCodes.INVALID_INVITATION_TICKET);
-            }
+			/**
+			 * Test invite ticket validity
+			 */
+			if (!invitation.getTicket().equals(inviteTicket)) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVALID_INVITATION_TICKET);
+			}
 
-            userInvited.setUserName(invitation.getInviteeUserName());
-            userInvited.setEmail(invitation.getInviteeEmail());
+			userInvited.setUserName(invitation.getInviteeUserName());
+			userInvited.setEmail(invitation.getInviteeEmail());
 
-            Map<QName, Serializable> taskProps = startTask.getProperties();
-            final String oldPassword = (String) taskProps.get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_GEN_PASSWORD);
+			Map<QName, Serializable> taskProps = startTask.getProperties();
+			final String oldPassword = (String) taskProps
+					.get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_GEN_PASSWORD);
 
-            //First accept invitation
-            Exception eInvite = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
-                @Override
-                public Exception doWork() throws Exception {
+			// First accept invitation
+			Exception eInvite = AuthenticationUtil.runAs(
+					new AuthenticationUtil.RunAsWork<Exception>() {
+						@Override
+						public Exception doWork() throws Exception {
 
-                    try {
-                        invitationService.accept(invitationId, inviteTicket);
-                    } catch (Exception ex) {
-                        return ex;
-                    }
-                    return null;
-                }
-            }, invitation.getInviteeUserName());
+							try {
+								invitationService.accept(invitationId,
+										inviteTicket);
+							} catch (Exception ex) {
+								return ex;
+							}
+							return null;
+						}
+					}, invitation.getInviteeUserName());
 
-            if (eInvite != null) {
-                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_ACCEPT_ERROR, eInvite);
-            }
+			if (eInvite != null) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVITATION_PROCESS_ACCEPT_ERROR, eInvite);
+			}
 
-            // then modify user properties and password
-            Exception eModify = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
-                @Override
-                public Exception doWork() throws Exception {
-                    try {
+			// then modify user properties and password
+			Exception eModify = AuthenticationUtil.runAs(
+					new AuthenticationUtil.RunAsWork<Exception>() {
+						@Override
+						public Exception doWork() throws Exception {
+							try {
 
-                        userService.modifyUser(userInvited);
-                        userService.changePassword(oldPassword, newPassword);
-                    } catch (Exception ex) {
-                        return ex;
-                    }
-                    return null;
-                }
-            }, invitation.getInviteeUserName());
+								userService.modifyUser(userInvited);
+								userService.changePassword(oldPassword,
+										newPassword);
+							} catch (Exception ex) {
+								return ex;
+							}
+							return null;
+						}
+					}, invitation.getInviteeUserName());
 
-            if (eModify != null) {
-                eModify.printStackTrace();
-                throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
-            }
+			if (eModify != null) {
+				eModify.printStackTrace();
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR,
+						eModify);
+			}
 
-            /**
-             * Post an activity for dossiers shared to this user executed
-             * asynchronously
-             */
-            AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>() {
-                @Override
-                public Void doWork() throws Exception {
-                    Action doPostActivity = actionService.createAction(
-                            AfterValidateInvitePostActivityActionExecuter.NAME, null);
+			/**
+			 * Post an activity for dossiers shared to this user executed
+			 * asynchronously
+			 */
+			AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>() {
+				@Override
+				public Void doWork() throws Exception {
+					Action doPostActivity = actionService.createAction(
+							AfterValidateInvitePostActivityActionExecuter.NAME,
+							null);
 
-                    actionService.executeAction(doPostActivity,
-                            siteService.getSite(invitation.getResourceName()).getNodeRef(), false, true);
-                    return null;
-                }
-            }, invitation.getInviteeUserName());
-            
-            
-            /**
-             * 
-             * Defaultly enable notifications for user
-             * 
-             * TODO modify behaviour : notifications will be set on Spaces or Dossiers in future implementations.
-             * 
-             */        
-    		try {
-    			 AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>() {
-    	                @Override
-    	                public Void doWork() throws Exception {
-    	                	koyaNotificationService.addNotification(
-    	        					userService.getUser(userInvited.getUserName()), null);
-    	                    return null;
-    	                }
-    	            }, invitation.getInviteeUserName());
-    			
-    		} catch (Exception e) {
-    		}
-            
+					actionService.executeAction(doPostActivity,
+							siteService.getSite(invitation.getResourceName())
+									.getNodeRef(), false, true);
+					return null;
+				}
+			}, invitation.getInviteeUserName());
 
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        
-       
-        
-        logger.info("invitation validation : user " + userInvited.getEmail() + " has validated his account");
-        res.setContentType("application/json");
-        //TODO return validation status
-        res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));
-    }
+			/**
+			 * 
+			 * Defaultly enable notifications for user
+			 * 
+			 * TODO modify behaviour : notifications will be set on Spaces or
+			 * Dossiers in future implementations.
+			 * 
+			 */
+			try {
+				AuthenticationUtil.runAs(
+						new AuthenticationUtil.RunAsWork<Void>() {
+							@Override
+							public Void doWork() throws Exception {
+								koyaNotificationService.addNotification(
+										userService.getUser(userInvited
+												.getUserName()), null);
+								return null;
+							}
+						}, invitation.getInviteeUserName());
 
-    private boolean taskTypeMatches(WorkflowTask task, QName... types) {
-        QName taskDefName = task.getDefinition().getMetadata().getName();
-        return Arrays.asList(types).contains(taskDefName);
-    }
+			} catch (Exception e) {
+			}
+
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+
+		logger.info("invitation validation : user " + userInvited.getEmail()
+				+ " has validated his account");
+		res.setContentType("application/json");
+		// TODO return validation status
+		res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));
+	}
+
+	private boolean taskTypeMatches(WorkflowTask task, QName... types) {
+		QName taskDefName = task.getDefinition().getMetadata().getName();
+		return Arrays.asList(types).contains(taskDefName);
+	}
 
 }

@@ -18,17 +18,19 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.impl.MetaInfos;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.AlfrescoUploadReturn;
-import fr.itldev.koya.model.json.MailWrapper;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.util.Set;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.springframework.core.io.Resource;
+
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.MetaInfos;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.AlfrescoUploadReturn;
+import fr.itldev.koya.model.json.MailWrapper;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+
 
 public interface AlfrescoService {
 
@@ -57,14 +59,14 @@ public interface AlfrescoService {
     void sendMail(User user, MailWrapper wrapper) throws AlfrescoServiceException;
 
     /**
-     * Get SecuredItem from noderef reference.
+     * Get koyaNode from noderef reference.
      *
      * @param user
      * @param nodeRef
      * @return
      * @throws AlfrescoServiceException
      */
-    SecuredItem getSecuredItem(User user, NodeRef nodeRef) throws AlfrescoServiceException;
+    KoyaNode getKoyaNode(User user, NodeRef nodeRef) throws AlfrescoServiceException;
 
     /**
      * Get NodeRef reference from xpath expression.
@@ -96,6 +98,7 @@ public interface AlfrescoService {
      * @return
      * @throws AlfrescoServiceException
      */
-    Integer countChildren(User user, SecuredItem parent, Set<QName> qNameFilter) throws AlfrescoServiceException;
+	Integer countChildren(User user, KoyaNode parent, Set<QName> qNameFilter)
+			throws AlfrescoServiceException;
 
 }

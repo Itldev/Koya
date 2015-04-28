@@ -25,8 +25,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
-import fr.itldev.koya.model.SecuredItem;
-import fr.itldev.koya.model.interfaces.Container;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 
 /**
@@ -37,7 +36,7 @@ import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
  * Name (inherited attribute) is calculated from title.
  *
  */
-public final class Company extends SecuredItem implements Container {
+public final class Company extends KoyaNode {
 
     // private String title;//displayed title
     private NodeRef currentSaleOfferNodeRef;
@@ -77,11 +76,12 @@ public final class Company extends SecuredItem implements Container {
         this.saleOffersHistory = saleOffersHistory;
     }
 
-    public List<? extends SecuredItem> getChildren() {
+    public List<? extends KoyaNode> getChildren() {
         return children;
     }
 
-    public void setChildren(List<? extends SecuredItem> children) {
+    @SuppressWarnings("unchecked")
+	public void setChildren(List<? extends KoyaNode> children) {
         this.children = (List<Space>) children;
     }
 
@@ -94,10 +94,6 @@ public final class Company extends SecuredItem implements Container {
         return "Company {" + "name=" + getName() + ", title=" + getTitle() + ", nodeRef=" + getNodeRef() + '}';
     }
 
-    @Override
-    public String getType() {
-        return "company";
-    }
 
     public static Company newInstance() {
         return new Company();

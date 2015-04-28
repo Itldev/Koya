@@ -24,7 +24,6 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -48,157 +47,158 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class CompanyServiceImplTest extends TestCase {
 
-    private Logger logger = Logger.getLogger(this.getClass());
-    private User admin;
-    @Autowired
-    UserService userService;
-    @Autowired
-    private CompanyService companyService;
+	@SuppressWarnings("unused")
+	private Logger logger = Logger.getLogger(this.getClass());
+	private User admin;
+	@Autowired
+	UserService userService;
+	@Autowired
+	private CompanyService companyService;
 
-    @Before
-    public void createUser() throws RestClientException,
-            AlfrescoServiceException {
-        admin = userService.login("admin", "admin");
-    }
+	@Before
+	public void createUser() throws RestClientException,
+			AlfrescoServiceException {
+		admin = userService.login("admin", "admin");
+	}
 
-    /**
-     * Suppression des eventuels relicats
-     * 
-     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
-     */
-    @After
-    public void deleteAll() throws RestClientException,
-            AlfrescoServiceException {
-//        for (Company s : companyService.list(admin)) {
-//            companyService.delete(admin, s);
-//        }
-    }
+	/**
+	 * Suppression des eventuels relicats
+	 * 
+	 * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
+	 */
+	@After
+	public void deleteAll() throws RestClientException,
+			AlfrescoServiceException {
+		// for (Company s : companyService.list(admin)) {
+		// companyService.delete(admin, s);
+		// }
+	}
 
-    @Test
-    public void testListSalesOffer() throws RestClientException,
-            AlfrescoServiceException {
-        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
-        assertTrue(offresCom.size() > 0);
-    }
+	@Test
+	public void testListSalesOffer() throws RestClientException,
+			AlfrescoServiceException {
+		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+		assertNotNull("SalesOffer null list",offresCom);
+		assertTrue(offresCom.size() > 0);
+	}
 
-    @Test
-    public void testCreateCompany() throws RestClientException,
-            AlfrescoServiceException {
-        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
-        assertTrue(offresCom.size() > 0);
-        SalesOffer sel = offresCom.get(0);
+	@Test
+	public void testCreateCompany() throws RestClientException,
+			AlfrescoServiceException {
+		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+		assertTrue(offresCom.size() > 0);
+		SalesOffer sel = offresCom.get(0);
 
-        Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000000), sel.getName(), "default");
-        assertNotNull(created);
-    }
+		Company created = companyService.create(admin, "company_"
+				+ new Random().nextInt(1000000), sel.getName(), "default");
+		assertNotNull(created);
+	}
 
-    @Test
-    public void testListCompanies() throws RestClientException,
-            AlfrescoServiceException {
-        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
-        assertTrue(offresCom.size() > 0);
-        SalesOffer sel = offresCom.get(0);
+	@Test
+	public void testListCompanies() throws RestClientException,
+			AlfrescoServiceException {
+		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+		assertTrue(offresCom.size() > 0);
+		SalesOffer sel = offresCom.get(0);
 
-        Random r = new Random();
-        Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000000), sel.getName(), "default");
+		companyService.create(admin, "company_"
+				+ new Random().nextInt(1000000), sel.getName(), "default");
 
-        List<Company> lst = companyService.list(admin);
-        assertTrue(lst.size() > 0);
-    }
+		List<Company> lst = companyService.list(admin);
+		assertTrue(lst.size() > 0);
+	}
 
-    @Test
-    public void testDelAllCompanies() throws RestClientException,
-            AlfrescoServiceException {
-        for (Company s : companyService.list(admin)) {
-            companyService.delete(admin, s);
-        }
-        assertEquals(companyService.list(admin).size(), 0);
-    }
+	@Test
+	public void testDelAllCompanies() throws RestClientException,
+			AlfrescoServiceException {
+		for (Company s : companyService.list(admin)) {
+			companyService.delete(admin, s);
+		}
+		assertEquals(companyService.list(admin).size(), 0);
+	}
 
-    //@Test
-    public void testGetPrefs() throws IOException, AlfrescoServiceException {
+	// @Test
+	public void testGetPrefs() throws IOException, AlfrescoServiceException {
 
-        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
-        assertTrue(offresCom.size() > 0);
-        SalesOffer sel = offresCom.get(0);
+		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+		assertTrue(offresCom.size() > 0);
+		SalesOffer sel = offresCom.get(0);
 
-        Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000000), sel.getName(), "default");
+		Company created = companyService.create(admin, "company_"
+				+ new Random().nextInt(1000000), sel.getName(), "default");
 
-        System.out.println("comp = " + created);
+		System.out.println("comp = " + created);
 
-        Preferences p = companyService.getPreferences(admin, created);
+		Preferences p = companyService.getPreferences(admin, created);
 
-        assertTrue(p.size() == 0);
-    }
+		assertTrue(p.size() == 0);
+	}
 
-    @Test
-    public void testSetPrefs() throws IOException, AlfrescoServiceException {
+	@Test
+	public void testSetPrefs() throws IOException, AlfrescoServiceException {
 
-        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
-        assertTrue(offresCom.size() > 0);
-        SalesOffer sel = offresCom.get(0);
+		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+		assertTrue(offresCom.size() > 0);
+		SalesOffer sel = offresCom.get(0);
 
-        Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000000), sel.getName(), "default");
-        Preferences p = companyService.getPreferences(admin, created);
-        String testKey = "fr.itldev.test";
+		Company created = companyService.create(admin, "company_"
+				+ new Random().nextInt(1000000), sel.getName(), "default");
+		Preferences p = companyService.getPreferences(admin, created);
+		String testKey = "fr.itldev.test";
 
-        int nbPrefs = p.size();
+		int nbPrefs = p.size();
 
-        /* =============== Add a test preference =========== */
-        p.put(testKey, "OK_PREF");
-        companyService.commitPreferences(admin, created, p);
+		/* =============== Add a test preference =========== */
+		p.put(testKey, "OK_PREF");
+		companyService.commitPreferences(admin, created, p);
 
-        Preferences p2 = companyService.getPreferences(admin, created);
+		Preferences p2 = companyService.getPreferences(admin, created);
 
-        // one more preference
-        assertEquals(nbPrefs + 1, p2.size());
+		// one more preference
+		assertEquals(nbPrefs + 1, p2.size());
 
-        /* =============== Del test preference ===== */
-        p2.remove(testKey);
-        companyService.commitPreferences(admin, created, p2);
-        Preferences p3 = companyService.getPreferences(admin, created);
-        assertEquals(nbPrefs, p3.size());
+		/* =============== Del test preference ===== */
+		p2.remove(testKey);
+		companyService.commitPreferences(admin, created, p2);
+		Preferences p3 = companyService.getPreferences(admin, created);
+		assertEquals(nbPrefs, p3.size());
 
-    } 
-    @Test
-    public void testcommitProperties() throws IOException,
-            AlfrescoServiceException {
-        List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
-        SalesOffer sel = offresCom.get(0);
+	}
 
-        Company created = companyService.create(admin, "company_"
-                + new Random().nextInt(1000000), sel.getName(), "default");
+	@Test
+	public void testcommitProperties() throws IOException,
+			AlfrescoServiceException {
+		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+		SalesOffer sel = offresCom.get(0);
 
-        
-        CompanyProperties cp = companyService.getProperties(admin, created);
-                
-        cp.setAddress("adress1");
-        cp.setAddress2("adress2");
-        cp.setCity("alfresco city");
-        cp.setZipCode("zip");
-        
-        ContactItem c = ContactItem.newInstance(ContactItem.TYPE_MAIL, "x@y");
-        cp.getContactItems().add(c);       
-        ContactItem c2 = ContactItem.newInstance(ContactItem.TYPE_TEL, "0000000");
-        cp.getContactItems().add(c2);
-       
-        
-        //get user admin person noderef
-        
-        Contact co1 = Contact.newInstance(admin);        
-        ContactItem cc1 = ContactItem.newInstance(ContactItem.TYPE_TEL, "tel admin");
-        co1.getContactItems().add(cc1);
-        
-        
-        cp.getContacts().add(co1);
-        
-        companyService.commitProperties(admin, created, cp);
-        
-        companyService.getProperties(admin, created);
-        
-    }
+		Company created = companyService.create(admin, "company_"
+				+ new Random().nextInt(1000000), sel.getName(), "default");
+
+		CompanyProperties cp = companyService.getProperties(admin, created);
+
+		cp.setAddress("adress1");
+		cp.setAddress2("adress2");
+		cp.setCity("alfresco city");
+		cp.setZipCode("zip");
+
+		ContactItem c = ContactItem.newInstance(ContactItem.TYPE_MAIL, "x@y");
+		cp.getContactItems().add(c);
+		ContactItem c2 = ContactItem.newInstance(ContactItem.TYPE_TEL,
+				"0000000");
+		cp.getContactItems().add(c2);
+
+		// get user admin person noderef
+
+		Contact co1 = Contact.newInstance(admin);
+		ContactItem cc1 = ContactItem.newInstance(ContactItem.TYPE_TEL,
+				"tel admin");
+		co1.getContactItems().add(cc1);
+
+		cp.getContacts().add(co1);
+
+		companyService.commitProperties(admin, created, cp);
+
+		companyService.getProperties(admin, created);
+
+	}
 }

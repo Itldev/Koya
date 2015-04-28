@@ -18,16 +18,20 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.SecuredItem;
+import java.util.List;
+
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.util.List;
 
 public interface FavouriteService {
 
-    public List<SecuredItem> getFavourites(User user) throws AlfrescoServiceException;
+	public List<KoyaNode> getFavourites(User user)
+			throws AlfrescoServiceException;
 
-    public Boolean setFavouriteValue(User user, SecuredItem item, Boolean favouriteValue) throws AlfrescoServiceException;
+	public Boolean setFavouriteValue(User user, KoyaNode item,
+			Boolean favouriteValue) throws AlfrescoServiceException;
 
-    public Boolean isFavourite(User user, SecuredItem item) throws AlfrescoServiceException;
+	public Boolean isFavourite(User user, KoyaNode item)
+			throws AlfrescoServiceException;
 }

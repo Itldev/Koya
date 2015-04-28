@@ -39,113 +39,131 @@ import org.springframework.web.client.RestClientException;
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class SpaceServiceImplTest extends TestCase {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	@SuppressWarnings("unused")
+	private Logger logger = Logger.getLogger(this.getClass());
 
-    @Autowired
-    UserService userService;
+	@Autowired
+	UserService userService;
 
-    @Autowired
-    private CompanyService companyService;
+	@Autowired
+	private CompanyService companyService;
 
-    @Autowired
-    private SpaceService spaceService;
-    @Autowired
-    private SecuredItemService securedItemService;
+	@Autowired
+	private SpaceService spaceService;
+	@Autowired
+	private KoyaNodeService koyaNodeService;
 
-    private Company companyTests;
-    private User admin;
+	private Company companyTests;
+	private User admin;
 
-    @Before
-    public void createCompany() throws RestClientException, AlfrescoServiceException {
-        admin = userService.login("admin", "admin");
-        companyTests = companyService.create(admin, "company" + new Random().nextInt(1000),
-                companyService.listSalesOffer(admin).get(0).getName(), "default");
-    }
+	@Before
+	public void createCompany() throws RestClientException,
+			AlfrescoServiceException {
+		admin = userService.login("admin", "admin");
+		companyTests = companyService.create(admin,
+				"company" + new Random().nextInt(1000), companyService
+						.listSalesOffer(admin).get(0).getName(), "default");
+	}
 
-    @After
-    public void deleteCompany() throws RestClientException, AlfrescoServiceException {
-        try {
-            companyService.delete(admin, companyTests);
-        } catch (AlfrescoServiceException aex) {
-            System.err.println("error deleting company '" + companyTests.getTitle() + "' : " + aex.getKoyaErrorCode() + " - " + aex.getMessage());
-        }
-    }
+	@After
+	public void deleteCompany() throws RestClientException,
+			AlfrescoServiceException {
+		try {
+			companyService.delete(admin, companyTests);
+		} catch (AlfrescoServiceException aex) {
+			System.err.println("error deleting company '"
+					+ companyTests.getTitle() + "' : " + aex.getKoyaErrorCode()
+					+ " - " + aex.getMessage());
+		}
+	}
 
-    @Test
-    public void testCreateSpace() throws RestClientException, AlfrescoServiceException {
+	@Test
+	public void testCreateSpace() throws RestClientException,
+			AlfrescoServiceException {
 
-        Space eTocreate = new Space("space1");
-        Space eCreated = spaceService.create(admin, eTocreate, companyTests);
-        assertNotNull("error crating 'space1'", eCreated);
+		Space eTocreate = new Space("space1");
+		Space eCreated = spaceService.create(admin, eTocreate, companyTests);
+		assertNotNull("error crating 'space1'", eCreated);
 
-    }
+	}
 
-    @Test
-    public void testCreateSubSpace() throws RestClientException, AlfrescoServiceException {
+	@Test
+	public void testCreateChildSpace() throws RestClientException,
+			AlfrescoServiceException {
 
-        Space eCreated = spaceService.create(admin, new Space("parentSpace"), companyTests);
-        assertNotNull("'parent Space creation error'", eCreated);
+		Space eCreated = spaceService.create(admin, new Space("parentSpace"),
+				companyTests);
+		assertNotNull("'parent Space creation error'", eCreated);
 
-        Space eEnfant = spaceService.create(admin, new Space("childSpace"), eCreated);
-        assertNotNull("'child Space creation error'", eEnfant);
+		Space eEnfant = spaceService.create(admin, new Space("childSpace"),
+				eCreated);
+		assertNotNull("'child Space creation error'", eEnfant);
 
-    }
+	}
 
-    @Test
-    public void testListSpaces() throws RestClientException, AlfrescoServiceException {
+	@Test
+	public void testListSpaces() throws RestClientException,
+			AlfrescoServiceException {
 
-        Space eParent1 = spaceService.create(admin, new Space("parentSpace1"), companyTests);
+		Space eParent1 = spaceService.create(admin, new Space("parentSpace1"),
+				companyTests);
 
-        spaceService.create(admin, new Space("childSpace11"), eParent1);
+		spaceService.create(admin, new Space("childSpace11"), eParent1);
 
-        spaceService.create(admin, new Space("childSpace12"), eParent1);
+		spaceService.create(admin, new Space("childSpace12"), eParent1);
 
-        Space eParent2 = spaceService.create(admin, new Space("parentSpace2"), companyTests);
+		Space eParent2 = spaceService.create(admin, new Space("parentSpace2"),
+				companyTests);
 
-        spaceService.create(admin, new Space("childSpace21"), eParent2);
+		spaceService.create(admin, new Space("childSpace21"), eParent2);
 
-        spaceService.create(admin, new Space("childSpace22"), eParent2);
+		spaceService.create(admin, new Space("childSpace22"), eParent2);
 
-        List<Space> lstArboEspaces = spaceService.list(admin, companyTests);
+		List<Space> lstArboEspaces = spaceService.list(admin, companyTests);
 
-        //2 created + defaultspace automaticly created on company creation
-        assertEquals(3, lstArboEspaces.size());
+		// 2 created + defaultspace automaticly created on company creation
+		assertEquals(3, lstArboEspaces.size());
 
-        for (Space e : lstArboEspaces) {
-            if (!e.getName().equals("defaultSpace")) {
-                assertEquals(2, e.getChildSpaces().size());
-            }
-        }
+		for (Space e : lstArboEspaces) {
+			if (!e.getName().equals("defaultSpace")) {
+				assertEquals(2, e.getChildSpaces().size());
+			}
+		}
 
-    }
+	}
 
-    @Test
-    public void testMoveSpaces() throws RestClientException, AlfrescoServiceException {
+	@Test
+	public void testMoveSpaces() throws RestClientException,
+			AlfrescoServiceException {
 
-        Space parentSpace = spaceService.create(admin, new Space("parentSpace"), companyTests);
+		Space parentSpace = spaceService.create(admin,
+				new Space("parentSpace"), companyTests);
 
-        Space childSpace = spaceService.create(admin, new Space("childSpace"), parentSpace);
-        //1 created + defaultspace automaticly created on company creation
-        assertEquals(2, spaceService.list(admin, companyTests).size());
-        //move
-        spaceService.move(admin, childSpace, companyTests);
-        //TODO check this test
-       // assertEquals(3, spaceService.list(admin, companyTests).size());
-    }
+		Space childSpace = spaceService.create(admin, new Space("childSpace"),
+				parentSpace);
+		// 1 created + defaultspace automaticly created on company creation
+		assertEquals(2, spaceService.list(admin, companyTests).size());
+		// move
+		spaceService.move(admin, childSpace, companyTests);
+		// TODO check this test
+		// assertEquals(3, spaceService.list(admin, companyTests).size());
+	}
 
-    @Test
-    public void testDelSpace() throws RestClientException, AlfrescoServiceException {
+	@Test
+	public void testDelSpace() throws RestClientException,
+			AlfrescoServiceException {
 
-        Space space1 = spaceService.create(admin, new Space("space1"), companyTests);
+		spaceService.create(admin, new Space("space1"), companyTests);
 
-        Space space2 = spaceService.create(admin, new Space("space2"), companyTests);
+		Space space2 = spaceService.create(admin, new Space("space2"),
+				companyTests);
 
-        //2 created + defaultspace automaticly created on company creation
-        assertEquals(3, spaceService.list(admin, companyTests).size());
-        //del
-        securedItemService.delete(admin, space2);
+		// 2 created + defaultspace automaticly created on company creation
+		assertEquals(3, spaceService.list(admin, companyTests).size());
+		// del
+		koyaNodeService.delete(admin, space2);
 
-        assertEquals(2, spaceService.list(admin, companyTests).size());
-    }
+		assertEquals(2, spaceService.list(admin, companyTests).size());
+	}
 
 }
