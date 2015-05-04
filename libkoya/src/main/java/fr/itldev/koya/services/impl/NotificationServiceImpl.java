@@ -1,8 +1,6 @@
 package fr.itldev.koya.services.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.type.TypeReference;
@@ -15,43 +13,34 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public class NotificationServiceImpl extends AlfrescoRestService implements
 		NotificationService {
-
-	private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?s={siteId}"
-			+ "&exclUser={excludeUser}"
-			+ "&exclOthers={excludeOthers}"
-			+ "&minFeedId={minFeedId}"
-			+ "&activityFilter={activityFilter}"
-			+ "&format=json";
+	private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?format=json";
 
 	@Override
 	public List<Notification> list(User user, Company company,
 			final Boolean excludeUser, Boolean excludeOthers, Long minFeedId,
 			List<String> activityFilter) throws AlfrescoServiceException {
 
-		Map<String, Object> urlVariable = new HashMap<>();
+		String activitiesUrl = getAlfrescoServerUrl() + REST_GET_ACTIVITIES;
+
 		if (company != null) {
-			urlVariable.put("s", company.getName());
+			activitiesUrl += "&s=" + company.getName();
 		}
 		if (excludeUser != null) {
-			urlVariable.put("excludeUser", excludeUser);
+			activitiesUrl += "&exclUser=" + excludeUser;
 		}
 		if (excludeOthers != null) {
-			urlVariable.put("excludeOthers", excludeOthers);
+			activitiesUrl += "&exclOthers=" + excludeOthers;
 		}
 		if (minFeedId != null) {
-			urlVariable.put("minFeedId", minFeedId);
+			activitiesUrl += "&minFeedId=" + minFeedId;
 		}
 		if (activityFilter != null && !activityFilter.isEmpty()) {
-			urlVariable.put("activityFilter",
-					StringUtils.join(activityFilter, ","));
+			activitiesUrl += "&activityFilter="
+					+ StringUtils.join(activityFilter, ",");
 		}
 
-		return fromJSON(
-				new TypeReference<List<Notification>>() {
-				},
-				user.getRestTemplate().getForObject(
-						getAlfrescoServerUrl() + REST_GET_ACTIVITIES,
-						String.class, urlVariable));
+		return fromJSON(new TypeReference<List<Notification>>() {
+		}, user.getRestTemplate().getForObject(activitiesUrl, String.class));
 	}
 
 }

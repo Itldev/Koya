@@ -2,85 +2,124 @@ package fr.itldev.koya.model.impl;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
-
-import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationDetails {
 
-    private NodeRef parentNodeRef;
-    private String firstName;
-    private String lastName;
-    private String name;
-    private String title;
-    private String typeQName;
-    private NodeRef nodeRef;
-    private String displayPath;
+	private NodeRef parentNodeRef;
+	private String firstName;
+	private String lastName;
+	private String name;
+	private String title;
+	private String typeQName;
+	private NodeRef nodeRef;
+	private String displayPath;
 
-    public NodeRef getParentNodeRef() {
-        return parentNodeRef;
-    }
+	@JsonProperty("koyaParentCompanyTitle")
+	private String companyTitle;
+	@JsonProperty("koyaParentCompanyNodeRef")
+	private NodeRef companyNodeRef;
 
-    public void setParentNodeRef(NodeRef parentNodeRef) {
-        this.parentNodeRef = parentNodeRef;
-    }
+	@JsonProperty("koyaParentDossierTitle")
+	private String dossierTitle;
+	@JsonProperty("koyaParentDossierNodeRef")
+	private NodeRef dossierNodeRef;
 
-    public String getFirstName() {
-        return firstName;
-    }
+	public NodeRef getParentNodeRef() {
+		return parentNodeRef;
+	}
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+	public void setParentNodeRef(NodeRef parentNodeRef) {
+		this.parentNodeRef = parentNodeRef;
+	}
 
-    public String getLastName() {
-        return lastName;
-    }
+	public String getFirstName() {
+		return firstName;
+	}
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getLastName() {
+		return lastName;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String getTypeQName() {
-        return typeQName;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public void setTypeQName(String typeQName) {
-        this.typeQName = typeQName;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-//    @JsonDeserialize(using = NodeRefDeserializer.class)
-    public NodeRef getNodeRef() {
-        return nodeRef;
-    }
+	public String getTypeQName() {
+		return typeQName;
+	}
 
-    public void setNodeRef(NodeRef nodeRef) {
-        this.nodeRef = nodeRef;
-    }
+	public void setTypeQName(String typeQName) {
+		this.typeQName = typeQName;
+	}
 
-    public String getDisplayPath() {
-        return displayPath;
-    }
+	public NodeRef getNodeRef() {
+		return nodeRef;
+	}
 
-    public void setDisplayPath(String displayPath) {
-        this.displayPath = displayPath;
-    }
-    
+	public void setNodeRef(NodeRef nodeRef) {
+		this.nodeRef = nodeRef;
+	}
+
+	public String getDisplayPath() {
+		return displayPath;
+	}
+
+	public void setDisplayPath(String displayPath) {
+		this.displayPath = displayPath;
+	}
+
+	public String getCompanyTitle() {
+		return companyTitle;
+	}
+
+	public void setCompanyTitle(String companyTitle) {
+		this.companyTitle = companyTitle;
+	}
+
+	public NodeRef getCompanyNodeRef() {
+		return companyNodeRef;
+	}
+
+	public void setCompanyNodeRef(NodeRef companyNodeRef) {
+		this.companyNodeRef = companyNodeRef;
+	}
+
+	public String getDossierTitle() {
+		return dossierTitle;
+	}
+
+	public void setDossierTitle(String dossierTitle) {
+		this.dossierTitle = dossierTitle;
+	}
+
+	public NodeRef getDossierNodeRef() {
+		return dossierNodeRef;
+	}
+
+	public void setDossierNodeRef(NodeRef dossierNodeRef) {
+		this.dossierNodeRef = dossierNodeRef;
+	}
+
 }

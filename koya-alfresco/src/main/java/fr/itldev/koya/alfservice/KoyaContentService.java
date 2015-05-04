@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
-import org.alfresco.opencmis.ActivityPoster;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.action.ActionService;
@@ -79,7 +78,7 @@ public class KoyaContentService {
 	protected NamespaceService namespaceService;
 	protected FileFolderService fileFolderService;
 	protected ActionService actionService;
-	private ActivityPoster activityPoster;
+	private KoyaActivityPoster activityPoster;
 
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setNodeService(NodeService nodeService) {
@@ -110,7 +109,7 @@ public class KoyaContentService {
 		this.actionService = actionService;
 	}
 
-	public void setActivityPoster(ActivityPoster activityPoster) {
+	public void setActivityPoster(KoyaActivityPoster activityPoster) {
 		this.activityPoster = activityPoster;
 	}
 

@@ -28,8 +28,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.opencmis.ActivityPoster;
-import org.alfresco.opencmis.ActivityPosterImpl;
 import org.alfresco.query.PagingRequest;
 import org.alfresco.query.PagingResults;
 import org.alfresco.repo.dictionary.RepositoryLocation;
@@ -87,7 +85,7 @@ public class KoyaNodeService {
 	private AuthenticationService authenticationService;
 	private SiteService siteService;// TODO remove this dependancy
 	private AncestorNodeLocator ancestorNodeLocator;
-	private ActivityPoster activityPoster;
+	private KoyaActivityPoster activityPoster;
 	protected SearchService searchService;
 	protected NamespaceService namespaceService;
 
@@ -125,7 +123,7 @@ public class KoyaNodeService {
 		this.ancestorNodeLocator = ancestorNodeLocator;
 	}
 
-	public void setActivityPoster(ActivityPoster activityPoster) {
+	public void setActivityPoster(KoyaActivityPoster activityPoster) {
 		this.activityPoster = activityPoster;
 	}
 
@@ -386,7 +384,7 @@ public class KoyaNodeService {
 	 * @throws KoyaServiceException
 	 */
 	public void delete(NodeRef n) throws KoyaServiceException {
-		ActivityPosterImpl.ActivityInfo info = activityPoster
+		KoyaActivityPoster.KoyaActivityInfo info = activityPoster
 				.getActivityInfo(n);
 		/**
 		 * Delete from favourites
