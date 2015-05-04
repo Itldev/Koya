@@ -39,16 +39,13 @@ public class SearchServiceImpl extends AlfrescoRestService implements
 
 	private static final String REST_GET_SEARCH = "/s/slingshot/search?"
 			+ "term={term}&maxResults={maxResults}"
-			+ "&sort=&repo=false&rootNode={rootNode}&query={query}";
+			+ "&sort=&repo=true&rootNode={rootNode}&query={query}";
 
-	private static final String SEARCHRESULTKEY_TOTALRECORDS = "totalRecords";
-	private static final String SEARCHRESULTKEY_TOTALRECORDSUPPER = "totalRecordsUpper";
-	private static final String SEARCHRESULTKEY_STARTINDEX = "startIndex";
 	private static final String SEARCHRESULTKEY_ITEMS = "items";
+
+	private static final String AFRESCO_SITES_ROOT_NODE = "alfresco://sites/home";
 	// item attributes
 	private static final String SEARCHRESULTKEY_NODEREF = "nodeRef";
-	private static final String SEARCHRESULTKEY_NAME = "name";
-	private static final String SEARCHRESULTKEY_DISPLAYNAME = "displayName";
 
 	/*
      * 
@@ -66,10 +63,12 @@ public class SearchServiceImpl extends AlfrescoRestService implements
 	@Override
 	public List<KoyaNode> search(User user, KoyaNode base, String searchexpr) {
 
-		String baseNodeRef = "";
+		String rootNode = "";
 
 		if (base != null) {
-			baseNodeRef = base.getNodeRef().toString();
+			rootNode = base.getNodeRef().toString();
+		} else {
+			rootNode = AFRESCO_SITES_ROOT_NODE;
 		}
 
 		List<KoyaNode> itemsFound = new ArrayList<>();
@@ -80,7 +79,7 @@ public class SearchServiceImpl extends AlfrescoRestService implements
 				user.getRestTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_SEARCH, String.class,
 						processSearchExpr(searchexpr), DEFAULT_MAXITEMS,
-						baseNodeRef, ""));
+						rootNode, ""));
 
 		for (Map itemMap : (List<Map>) result.get(SEARCHRESULTKEY_ITEMS)) {
 
