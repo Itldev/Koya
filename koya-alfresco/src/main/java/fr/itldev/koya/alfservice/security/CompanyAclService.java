@@ -33,6 +33,7 @@ import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.invitation.InvitationSearchCriteria;
 import org.alfresco.service.cmr.invitation.InvitationService;
+import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
@@ -363,7 +364,7 @@ public class CompanyAclService {
 	 * @return
 	 * @throws KoyaServiceException
 	 */
-	public Invitation inviteMember(final Company c, final String userMail,
+	public NominatedInvitation inviteMember(final Company c, final String userMail,
 			final SitePermission permission, final KoyaNode sharedItem)
 			throws KoyaServiceException {
 
@@ -384,18 +385,20 @@ public class CompanyAclService {
 			 * 
 			 * 
 			 */
-			Invitation invitation = AuthenticationUtil
-					.runAsSystem(new AuthenticationUtil.RunAsWork<Invitation>() {
+			
+			
+			NominatedInvitation invitation = AuthenticationUtil
+					.runAsSystem(new AuthenticationUtil.RunAsWork<NominatedInvitation>() {
 						@Override
-						public Invitation doWork() throws Exception {
-							Invitation invitation = invitationService
+						public NominatedInvitation doWork() throws Exception {
+							NominatedInvitation invitation = invitationService
 									.inviteNominated(null, userMail, userMail,
 											Invitation.ResourceType.WEB_SITE,
 											c.getName(), permission.toString(),
 											koyaClientServerPath,
 											koyaClientAcceptUrl,
 											koyaClientRejectUrl);
-
+							
 							// Force addSharedNode Before sending invite mail if
 							// sharedItem exists
 							if (sharedItem != null) {

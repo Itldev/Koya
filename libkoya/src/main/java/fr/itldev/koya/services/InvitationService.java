@@ -4,6 +4,7 @@ import java.util.Map;
 
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 /**
@@ -21,7 +22,7 @@ public interface InvitationService extends AlfrescoService {
 	 * @param roleName
 	 * @throws AlfrescoServiceException
 	 */
-	void inviteUser(User userLogged, Company c, String userEmail,
+	KoyaInvite inviteUser(User userLogged, Company c, String userEmail,
 			String roleName) throws AlfrescoServiceException;
 
 	/**
@@ -32,7 +33,7 @@ public interface InvitationService extends AlfrescoService {
 	 * @param inviteTicket
 	 * @throws AlfrescoServiceException
 	 */
-	void validateInvitation(User user, String inviteId, String inviteTicket)
+	User validateInvitation(User user, String inviteId, String inviteTicket)
 			throws AlfrescoServiceException;
 
 	/**

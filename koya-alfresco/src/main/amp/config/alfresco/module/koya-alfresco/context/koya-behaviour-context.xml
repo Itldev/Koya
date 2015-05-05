@@ -69,16 +69,16 @@
     
     
     <!--Update parent node before revoke space permission--> 
-    <bean id="UpdateParentNodesBeforeRevokeKoyaPermission"
-          class="fr.itldev.koya.behaviour.security.UpdateParentNodesBeforeRevokeKoyaPermission" 
-          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
-        <property name="spaceAclService" ref="spaceAclService" />
-        <property name="policyComponent" ref="policyComponent" />
-        <property name="koyaNodeService" ref="koyaNodeService" />
-        <property name="nodeService" ref="NodeService" />
-        <property name="permissionService" ref="PermissionService"/>
-        <property name="siteService" ref="SiteService"/>
-    </bean>
+<!--     <bean id="UpdateParentNodesBeforeRevokeKoyaPermission" -->
+<!--           class="fr.itldev.koya.behaviour.security.UpdateParentNodesBeforeRevokeKoyaPermission"  -->
+<!--           init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >         -->
+<!--         <property name="spaceAclService" ref="spaceAclService" /> -->
+<!--         <property name="policyComponent" ref="policyComponent" /> -->
+<!--         <property name="koyaNodeService" ref="koyaNodeService" /> -->
+<!--         <property name="nodeService" ref="NodeService" /> -->
+<!--         <property name="permissionService" ref="PermissionService"/> -->
+<!--         <property name="siteService" ref="SiteService"/> -->
+<!--     </bean> -->
     
            
                   

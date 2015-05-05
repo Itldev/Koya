@@ -28,6 +28,8 @@ import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.KoyaInvite;
+import fr.itldev.koya.model.json.KoyaShare;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.ShareService;
 import fr.itldev.koya.services.cache.CacheManager;
@@ -57,8 +59,9 @@ public class ShareServiceImpl extends AlfrescoRestService implements
 	}
 
 	@Override
-	public void shareItem(User user, KoyaNode itemToShare, String sharedUserMail)
+	public KoyaShare shareItem(User user, KoyaNode itemToShare, String sharedUserMail)
 			throws AlfrescoServiceException {
+		
 		cacheManager.revokeNodeSharedWithConsumer(itemToShare);
 
 		Map<String, String> shareParams = new HashMap<>();
@@ -66,10 +69,9 @@ public class ShareServiceImpl extends AlfrescoRestService implements
 		shareParams.put("nodeRef", itemToShare.getNodeRef().toString());
 		shareParams.put("koyaPermission",
 				KoyaPermissionConsumer.CLIENT.toString());
-
-		user.getRestTemplate().postForObject(
+		return user.getRestTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_SHARESINGLE, shareParams,
-				String.class);
+				KoyaShare.class);
 	}
 
 	/**

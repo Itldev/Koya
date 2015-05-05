@@ -25,7 +25,7 @@ import org.codehaus.jackson.type.TypeReference;
 
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.InviteWrapper;
+import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.services.InvitationService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -55,19 +55,19 @@ public class InvitationServiceImpl extends AlfrescoRestService implements
 	 * @throws AlfrescoServiceException
 	 */
 	@Override
-	public void inviteUser(User userLogged, Company c, String userEmail,
+	public KoyaInvite inviteUser(User userLogged, Company c, String userEmail,
 			String roleName) throws AlfrescoServiceException {
 
 		cacheManager.revokeInvitations(userEmail);
 
-		InviteWrapper iw = new InviteWrapper();
+		KoyaInvite iw = new KoyaInvite();
 		iw.setCompanyName(c.getName());
 		iw.setEmail(userEmail);
 		iw.setRoleName(roleName);
 
-		userLogged.getRestTemplate()
+		return userLogged.getRestTemplate()
 				.postForObject(getAlfrescoServerUrl() + REST_POST_INVITEUSER,
-						iw, String.class);
+						iw, KoyaInvite.class);
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class InvitationServiceImpl extends AlfrescoRestService implements
 	 * @throws AlfrescoServiceException
 	 */
 	@Override
-	public void validateInvitation(User user, String inviteId,
+	public User validateInvitation(User user, String inviteId,
 			String inviteTicket) throws AlfrescoServiceException {
 
 		Map<String, String> params = new HashMap<>();
@@ -90,13 +90,11 @@ public class InvitationServiceImpl extends AlfrescoRestService implements
 		params.put("firstName", user.getFirstName());
 		params.put("civilTitle", user.getCivilTitle());
 
-		User u = fromJSON(
-				new TypeReference<User>() {
-				},
-				getTemplate().postForObject(
-						getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE,
-						params, String.class));
+		User u = getTemplate().postForObject(
+				getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, params,
+				User.class);
 		cacheManager.revokeInvitations(u.getEmail());
+		return u;
 	}
 
 	/**

@@ -165,11 +165,11 @@ public class DossierServiceImplTest extends TestCase {
         assertEquals(2, dossierService.listResponsibles(admin, d).size());
 
         // del a responsible --> now only 1
-        dossierService.delMemberOrResponsible(admin, d, admin);// -> NPE ???
+        dossierService.removeMembership(admin, d, admin);// -> NPE ???
         assertEquals(1, dossierService.listResponsibles(admin, d).size());
         assertEquals(u1, dossierService.listResponsibles(admin, d).get(0));
         // remove non responsive shouldn't have impact
-        dossierService.delMemberOrResponsible(admin, d, admin);
+        dossierService.removeMembership(admin, d, admin);
         assertEquals(1, dossierService.listResponsibles(admin, d).size());
 
         // Add / del collection test
@@ -178,7 +178,7 @@ public class DossierServiceImplTest extends TestCase {
         // 2 because u1 is already in responsibles list
 
         for (User u : testUsers) {
-            dossierService.delMemberOrResponsible(admin, d, u);
+            dossierService.removeMembership(admin, d, u);
         }
         assertEquals(0, dossierService.listResponsibles(admin, d).size());
 

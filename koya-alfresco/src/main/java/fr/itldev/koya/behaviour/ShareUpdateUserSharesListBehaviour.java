@@ -44,21 +44,28 @@ public class ShareUpdateUserSharesListBehaviour implements
 	}
 
 	@Override
-	public void afterShareItem(final NodeRef nodeRef,final String userMail, User inviter,
-			Boolean sharedByImporter) {	
+	public void afterShareItem(final NodeRef nodeRef, final String userMail,
+			User inviter, Boolean sharedByImporter) {
 		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
-            @Override
-            public Object doWork() throws Exception {
-        		userService.addSharedNode(userMail, nodeRef);
-        		return null;
-            }
-        });
-		
+			@Override
+			public Object doWork() throws Exception {
+				userService.addSharedNode(userMail, nodeRef);
+				return null;
+			}
+		});
+
 	}
 
 	@Override
-	public void afterUnshareItem(NodeRef nodeRef, String userMail, User inviter) {
-		userService.removeSharedNode(userMail, nodeRef);
+	public void afterUnshareItem(final NodeRef nodeRef, final String userMail, User inviter) {
+		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
+			@Override
+			public Object doWork() throws Exception {
+				userService.removeSharedNode(userMail, nodeRef);
+				return null;
+			}
+		});
+
 	}
 
 }

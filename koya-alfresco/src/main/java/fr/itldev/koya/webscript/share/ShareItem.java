@@ -21,6 +21,7 @@ package fr.itldev.koya.webscript.share;
 import java.io.IOException;
 import java.util.Map;
 
+import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -31,19 +32,17 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceConsumersAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.json.KoyaInvite;
+import fr.itldev.koya.model.json.KoyaShare;
 import fr.itldev.koya.model.permissions.KoyaPermission;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
- * Share secured items webscript.
+ * Share Spaces
  * 
  */
 public class ShareItem extends AbstractWebScript {
-
-	private final Logger logger = Logger.getLogger(this.getClass());
 
 	private SpaceConsumersAclService spaceConsumersAclService;
 	private KoyaNodeService koyaNodeService;
@@ -67,31 +66,34 @@ public class ShareItem extends AbstractWebScript {
 	public void execute(WebScriptRequest req, WebScriptResponse res)
 			throws IOException {
 		Map<String, Object> params = KoyaWebscript.getJsonMap(req);
+		String response;
 		try {
 			NodeRef n = koyaNodeService.getNodeRef((String) params
 					.get(KoyaWebscript.WSCONST_NODEREF));
 
-			Space s;
-			KoyaNode si = koyaNodeService.getKoyaNode(n);
-			if (Space.class.isAssignableFrom(si.getClass())) {
-				s = (Space) si;
-			} else {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
-			}
+			Space space = koyaNodeService.getKoyaNode(n, Space.class);
 
-			spaceConsumersAclService.shareKoyaNode(koyaNodeService
-					.getKoyaNode(n,Space.class), (String) params
-					.get(KoyaWebscript.WSCONST_EMAIL), KoyaPermission
-					.valueOf((String) params
-							.get(KoyaWebscript.WSCONST_KOYAPERMISSION)), false);
+			String permission = (String) params
+					.get(KoyaWebscript.WSCONST_KOYAPERMISSION);
+
+			String userMail = (String) params.get(KoyaWebscript.WSCONST_EMAIL);
+
+			NominatedInvitation i = spaceConsumersAclService.shareKoyaNode(
+					space, userMail, KoyaPermission.valueOf(permission), false);
+
+			KoyaShare koyaShare = new KoyaShare(space,userMail,permission);
+
+			if (i != null) {				
+				koyaShare.setKoyaInvite(new KoyaInvite(i));
+			}
+			response = KoyaWebscript.getObjectAsJson(koyaShare);
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
 					+ ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json");
-		res.getWriter().write("");
+		res.getWriter().write(response);
 	}
 
 }

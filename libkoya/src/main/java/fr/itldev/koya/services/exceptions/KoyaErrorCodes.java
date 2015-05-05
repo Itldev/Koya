@@ -113,6 +113,8 @@ public interface KoyaErrorCodes {
     public static final Integer SECU_USER_CANT_BE_INVITED_ALREADY_EXISTS_IN_COMPANY_WITH_OTHER_ROLE = 805;
     public static final Integer SECU_CONFIDENTIAL_FLAG_TYPE_ERROR = 806;
     public static final Integer SECU_CONFIDENTIAL_USER_CANT_TOGGLE_FLAG = 807;
+    public static final Integer SECU_USER_MUSTBE_MEMBER_OR_RESPONSIBLE_TO_SHARE = 808;
+
     
 
     //900 -> Koya mail

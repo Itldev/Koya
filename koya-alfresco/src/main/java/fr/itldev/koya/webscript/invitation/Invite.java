@@ -18,15 +18,8 @@
  */
 package fr.itldev.koya.webscript.invitation;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.json.InviteWrapper;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -35,47 +28,59 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.KoyaInvite;
+import fr.itldev.koya.model.permissions.SitePermission;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * Invite new or user user to a company with defined role.
- *
- *
+ * 
+ * 
  * TODO use alfresco standard invite webscript
- *
- *
+ * 
+ * 
  */
 public class Invite extends AbstractWebScript {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	private Logger logger = Logger.getLogger(this.getClass());
 
-    private CompanyAclService companyAclService;
-    private KoyaNodeService koyaNodeService;
+	private CompanyAclService companyAclService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
-    }
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        String response;
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            InviteWrapper iw = mapper.readValue(req.getContent().getReader(), InviteWrapper.class);
-            NominatedInvitation invitation = (NominatedInvitation) companyAclService.inviteMember(koyaNodeService.companyBuilder(iw.getCompanyName()),
-                    iw.getEmail(), SitePermission.valueOf(iw.getRoleName()),null);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		String response;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			KoyaInvite iw = mapper.readValue(req.getContent().getReader(),
+					KoyaInvite.class);
+			NominatedInvitation invitation = (NominatedInvitation) companyAclService
+					.inviteMember(
+							koyaNodeService.companyBuilder(iw.getCompanyName()),
+							iw.getEmail(),
+							SitePermission.valueOf(iw.getRoleName()), null);
+			iw.setInviteId(invitation.getInviteId());
+			iw.setTicket(invitation.getTicket());
 
-            Map<String, String> jsonInvitation = new HashMap<>();
-            jsonInvitation.put("inviteId", invitation.getInviteId());
-            jsonInvitation.put("ticket", invitation.getTicket());
+			response = KoyaWebscript.getObjectAsJson(iw);
 
-            response = KoyaWebscript.getObjectAsJson(jsonInvitation);
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json");
-        res.getWriter().write(response);
-    }
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json");
+		res.getWriter().write(response);
+	}
 }

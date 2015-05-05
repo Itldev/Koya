@@ -24,7 +24,9 @@ import java.util.List;
 
 import org.alfresco.repo.policy.ClassPolicyDelegate;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.invitation.InvitationService;
+import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -56,6 +58,7 @@ import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.policies.KoyaPermissionsPolicies;
 import fr.itldev.koya.policies.SharePolicies;
@@ -189,11 +192,11 @@ public class SpaceAclService {
 	public void initSpaceWithDefaultPermissions(Space space)
 			throws KoyaServiceException {
 
-		Company c = koyaNodeService.getFirstParentOfType(
-				space.getNodeRef(), Company.class);
+		Company c = koyaNodeService.getFirstParentOfType(space.getNodeRef(),
+				Company.class);
 		// Clear the node inherited permissions
-		permissionService.setInheritParentPermissions(
-				space.getNodeRef(), false);
+		permissionService
+				.setInheritParentPermissions(space.getNodeRef(), false);
 		/*
 		 * Setting default permissions on node
 		 */
@@ -215,13 +218,13 @@ public class SpaceAclService {
 		 * permission on Dossier in order to read content.
 		 */
 		if (Space.class.isAssignableFrom(space.getClass())) {
-			permissionService.setPermission(space.getNodeRef(),
-					siteService.getSiteRoleGroup(c.getName(),
+			permissionService.setPermission(space.getNodeRef(), siteService
+					.getSiteRoleGroup(c.getName(),
 							SitePermission.COLLABORATOR.toString()),
 					SitePermission.CONTRIBUTOR.toString(), true);
 		} else {
-			permissionService.setPermission(space.getNodeRef(),
-					siteService.getSiteRoleGroup(c.getName(),
+			permissionService.setPermission(space.getNodeRef(), siteService
+					.getSiteRoleGroup(c.getName(),
 							SitePermission.COLLABORATOR.toString()),
 					SitePermission.CONSUMER.toString(), true);
 		}
@@ -235,8 +238,8 @@ public class SpaceAclService {
 	 * @param authority
 	 * @param permission
 	 */
-	public void grantSpacePermission(final Space space,
-			final String authority, KoyaPermission permission) {
+	public void grantSpacePermission(final Space space, final String authority,
+			KoyaPermission permission) {
 		logger.debug("Grant permission '" + permission.toString() + "' to '"
 				+ authority + "' on '" + space.getTitle() + "' ("
 				+ space.getClass().getSimpleName() + ")");
@@ -286,7 +289,7 @@ public class SpaceAclService {
 	 * @param sharedByImporter
 	 * @throws KoyaServiceException
 	 */
-	public void shareKoyaNode(final Space space,
+	public NominatedInvitation shareKoyaNode(final Space space,
 			final String userMail, final KoyaPermission perm,
 			final Boolean sharedByImporter) throws KoyaServiceException {
 
@@ -297,26 +300,27 @@ public class SpaceAclService {
 				.beforeShareItem(space.getNodeRef(), userMail, inviter,
 						sharedByImporter);
 
-		shareKoyaNodeImpl(space, userMail, perm);
+		NominatedInvitation invitation = shareKoyaNodeImpl(space, userMail,
+				perm);
 
 		afterShareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.afterShareItem(space.getNodeRef(), userMail, inviter,
 						sharedByImporter);
 
 		logger.info("[Koya] public sharing : user " + inviter.getEmail()
-				+ "has shared " + space.toString() + " with user "
-				+ userMail);
+				+ "has shared " + space.toString() + " with user " + userMail);
+		return invitation;
 
 	}
 
-	protected void shareKoyaNodeImpl(Space space, String userMail,
-			KoyaPermission perm) throws KoyaServiceException {
+	protected NominatedInvitation shareKoyaNodeImpl(Space space,
+			String userMail, KoyaPermission perm) throws KoyaServiceException {
 		throw new KoyaServiceException(0);// TODO errror code - shoulnever be
 											// called
 	}
 
-	public void unShareKoyaNode(Space space, String userMail,
-			KoyaPermission perm) throws KoyaServiceException {
+	public void unShareKoyaNode(final Space space, String userMail,
+			final KoyaPermission perm) throws KoyaServiceException {
 
 		User revoker = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
@@ -326,14 +330,8 @@ public class SpaceAclService {
 				+ " permission = " + perm.toString());
 
 		// Gets the user involved in unsharing - throws execption if not found
-		User u = userService.getUser(userMail);
-
-		if (Dossier.class.isAssignableFrom(space.getClass())) {
-			revokeSpacePermission(space, u.getUserName(), perm);
-		} else {
-			logger.error("Unsupported unsharing type "
-					+ space.getClass().getSimpleName());
-		}
+		final User u = userService.getUser(userMail);
+		revokeSpacePermission(space, u.getUserName(), perm);
 		afterUnshareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.afterUnshareItem(space.getNodeRef(), userMail, revoker);
 
@@ -542,8 +540,8 @@ public class SpaceAclService {
 
 	/**
 	 * 
-	 * Returns user's KoyaNodes filtered by type that have one of
-	 * KoyaPermission filter item set.
+	 * Returns user's KoyaNodes filtered by type that have one of KoyaPermission
+	 * filter item set.
 	 * 
 	 * This method return application wide nodes. no matter the company.
 	 * 
@@ -559,8 +557,8 @@ public class SpaceAclService {
 		List<KoyaNode> koyaNodesWithKoyaPermissions = new ArrayList<>();
 
 		/**
-		 * If a KoyaNode is readable, it returned by user lucene search. If
-		 * not, it's hidden.
+		 * If a KoyaNode is readable, it returned by user lucene search. If not,
+		 * it's hidden.
 		 */
 		String luceneRequest = "";
 

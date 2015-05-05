@@ -1,5 +1,6 @@
 package fr.itldev.koya.alfservice.security;
 
+import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.apache.log4j.Logger;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -31,7 +32,7 @@ public class SpaceCollaboratorsAclService extends SpaceAclService {
 	 * @throws KoyaServiceException
 	 */
 	@Override
-	protected void shareKoyaNodeImpl(Space space, String userMail,
+	protected NominatedInvitation shareKoyaNodeImpl(Space space, String userMail,
 			KoyaPermission perm) throws KoyaServiceException {
 
 		if (!Dossier.class.isAssignableFrom(space.getClass())) {
@@ -73,5 +74,6 @@ public class SpaceCollaboratorsAclService extends SpaceAclService {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.SECU_USER_MUSTBE_COLLABORATOR_OR_ADMIN_TO_APPLY_PERMISSION);
 		}
+		return null;
 	}
 }

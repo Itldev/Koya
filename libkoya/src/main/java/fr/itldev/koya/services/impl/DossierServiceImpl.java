@@ -247,14 +247,14 @@ public class DossierServiceImpl extends AlfrescoRestService implements
     }
 
     @Override
-    public void addMember(User user, Dossier dossier, User responsible)
+    public void addMember(User user, Dossier dossier, User member)
             throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_ADDMEMBER, String.class,
-                responsible.getUserName(), dossier.getNodeRef());
+                member.getUserName(), dossier.getNodeRef());
         
         //invalidate user cache
-        cacheManager.revokePermission(responsible, dossier.getNodeRef());      
+        cacheManager.revokePermission(member, dossier.getNodeRef());      
     }
 
     /**
@@ -299,7 +299,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
      * @throws AlfrescoServiceException
      */
     @Override
-    public void delMemberOrResponsible(User user, Dossier dossier,
+    public void removeMembership(User user, Dossier dossier,
             User memberOrResp) throws AlfrescoServiceException {
         user.getRestTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,

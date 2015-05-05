@@ -1,7 +1,6 @@
 package fr.itldev.koya.alfservice.security;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.invitation.Invitation;
+import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.apache.log4j.Logger;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -32,8 +31,8 @@ public class SpaceConsumersAclService extends SpaceAclService {
 	 * @throws KoyaServiceException
 	 */
 	@Override
-	protected void shareKoyaNodeImpl(final Space space, String userMail,
-			KoyaPermission perm) throws KoyaServiceException {
+	protected NominatedInvitation shareKoyaNodeImpl(final Space space,
+			String userMail, KoyaPermission perm) throws KoyaServiceException {
 
 		if (!Dossier.class.isAssignableFrom(space.getClass())) {
 			throw new KoyaServiceException(KoyaErrorCodes.SECU_UNSHARABLE_TYPE);
@@ -47,10 +46,11 @@ public class SpaceConsumersAclService extends SpaceAclService {
 		// Get company the shared Node belongs To
 		Company company = koyaNodeService.getFirstParentOfType(
 				space.getNodeRef(), Company.class);
+
 		SitePermission userPermissionInCompany = companyAclService
 				.getSitePermission(company, userMail);
 
-		Invitation invitation = null;
+		NominatedInvitation invitation = null;
 		// If user can't access specified company then invite him even if he
 		// already exists in alfresco
 		if (userPermissionInCompany == null) {
@@ -66,23 +66,18 @@ public class SpaceConsumersAclService extends SpaceAclService {
 
 		// Now user should exist for company as a site Consumer member
 		if (userPermissionInCompany.equals(SitePermission.CONSUMER)) {
-			// exec as system user if current user is member of dossier -> get
-			// temporarly more permissions
-			// TODO check user role (is KoyaMember on shared dossier) before run
-			AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
-				@Override
-				public Object doWork() throws Exception {
-					grantSpacePermission(space, u.getUserName(),
-							KoyaPermissionConsumer.CLIENT);
-					return null;
-				}
-			});
+
+			grantSpacePermission(space, u.getUserName(),
+					KoyaPermissionConsumer.CLIENT);
+
 		} else {
 			logger.error("Consumer Share not available for "
 					+ userPermissionInCompany.toString() + " users");
 			throw new KoyaServiceException(
 					KoyaErrorCodes.SECU_USER_MUSTBE_CONSUMER_TO_APPLY_PERMISSION);
 		}
+
+		return invitation;
 	}
 
 }

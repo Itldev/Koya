@@ -39,8 +39,8 @@
         
         
         <permissionGroup name="KoyaMember" allowFullControl="false" expose="true">
-             <includePermissionGroup permissionGroup="Contributor" type="cm:cmobject" />
-            <!--<requiredPermission on="node" type="st:site" name="SiteCollaborator" />-->
+             <includePermissionGroup permissionGroup="Contributor" type="cm:cmobject" />            
+             <includePermissionGroup permissionGroup="ChangePermissions" type="sys:base" />
         </permissionGroup>
         
         

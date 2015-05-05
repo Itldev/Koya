@@ -19,9 +19,6 @@
 package fr.itldev.koya.webscript.dossier;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -35,7 +32,6 @@ import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SpaceCollaboratorsAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -63,12 +59,6 @@ public class DelResponsible extends AbstractWebScript {
 		this.userService = userService;
 	}
 
-	public static List<KoyaPermission> permissions = Collections
-			.unmodifiableList(new ArrayList() {
-				{
-					add(KoyaPermissionCollaborator.RESPONSIBLE);
-				}
-			});
 
 	@Override
 	public void execute(WebScriptRequest req, WebScriptResponse res)
@@ -81,6 +71,9 @@ public class DelResponsible extends AbstractWebScript {
 			String userName = (String) urlParams
 					.get(KoyaWebscript.WSCONST_USERNAME);
 
+			
+			
+			/// TODO refactor
 			spaceCollaboratorsAclService.unShareKoyaNode(
 					(Space) koyaNodeService.getKoyaNode(nodeRef), userService
 							.getUserByUsername(userName).getEmail(),

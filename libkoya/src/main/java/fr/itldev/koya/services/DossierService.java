@@ -146,7 +146,7 @@ public interface DossierService extends AlfrescoService {
      * @param responsible
      * @throws AlfrescoServiceException
      */
-    void addMember(User user, Dossier dossier, User responsible)
+    void addMember(User user, Dossier dossier, User member)
             throws AlfrescoServiceException;
 
     /**
@@ -179,7 +179,7 @@ public interface DossierService extends AlfrescoService {
      * @param memberOrResp
      * @throws AlfrescoServiceException
      */
-    void delMemberOrResponsible(User user, Dossier dossier, User memberOrResp)
+    void removeMembership(User user, Dossier dossier, User memberOrResp)
             throws AlfrescoServiceException;
 
     /**
