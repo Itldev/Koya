@@ -19,6 +19,7 @@
 package fr.itldev.koya.services;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -43,6 +44,14 @@ import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
+/*
+ * Company testing class
+ * 
+ *  TODO test sales offer in a separate Unit Tests class.Staticly load sales offer 
+ *  
+ *  TODO test user roles acces to comapnies
+ * 
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class CompanyServiceImplTest extends TestCase {
@@ -55,30 +64,35 @@ public class CompanyServiceImplTest extends TestCase {
 	@Autowired
 	private CompanyService companyService;
 
+	private Company created;
+
 	@Before
 	public void createUser() throws RestClientException,
 			AlfrescoServiceException {
 		admin = userService.login("admin", "admin");
+
 	}
 
 	/**
-	 * Suppression des eventuels relicats
+	 * Deletes created company
 	 * 
-	 * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
+	 * @throws RestClientException
+	 * @throws AlfrescoServiceException
 	 */
 	@After
 	public void deleteAll() throws RestClientException,
 			AlfrescoServiceException {
-		// for (Company s : companyService.list(admin)) {
-		// companyService.delete(admin, s);
-		// }
+
+		if (created != null) {
+			companyService.delete(admin, created);
+		}
 	}
 
 	@Test
 	public void testListSalesOffer() throws RestClientException,
 			AlfrescoServiceException {
 		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
-		assertNotNull("SalesOffer null list",offresCom);
+		assertNotNull("SalesOffer null list", offresCom);
 		assertTrue(offresCom.size() > 0);
 	}
 
@@ -89,9 +103,10 @@ public class CompanyServiceImplTest extends TestCase {
 		assertTrue(offresCom.size() > 0);
 		SalesOffer sel = offresCom.get(0);
 
-		Company created = companyService.create(admin, "company_"
-				+ new Random().nextInt(1000000), sel.getName(), "default");
-		assertNotNull(created);
+		created = companyService.create(admin,
+				"company_" + new Random().nextInt(1000000), sel.getName(),
+				"default");
+		assertNotNull(created);		
 	}
 
 	@Test
@@ -101,36 +116,49 @@ public class CompanyServiceImplTest extends TestCase {
 		assertTrue(offresCom.size() > 0);
 		SalesOffer sel = offresCom.get(0);
 
-		companyService.create(admin, "company_"
-				+ new Random().nextInt(1000000), sel.getName(), "default");
+		created = companyService.create(admin,
+				"company_" + new Random().nextInt(1000000), sel.getName(),
+				"default");
 
 		List<Company> lst = companyService.list(admin);
 		assertTrue(lst.size() > 0);
 	}
 
 	@Test
-	public void testDelAllCompanies() throws RestClientException,
+	public void testDelCompanies() throws RestClientException,
 			AlfrescoServiceException {
-		for (Company s : companyService.list(admin)) {
+		int sizeBefore = companyService.list(admin).size();
+
+		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
+		assertTrue(offresCom.size() > 0);
+		SalesOffer sel = offresCom.get(0);
+
+		List<Company> comps = new ArrayList<Company>();
+		for (int i = 0; i < 10; i++) {
+			comps.add(companyService.create(admin,
+					"company_" + new Random().nextInt(1000000) + "_" + i,
+					sel.getName(), "default"));
+		}
+		assertEquals(sizeBefore + 10, companyService.list(admin).size());
+
+		for (Company s : comps) {
 			companyService.delete(admin, s);
 		}
-		assertEquals(companyService.list(admin).size(), 0);
+		assertEquals(sizeBefore, companyService.list(admin).size());
 	}
 
-	// @Test
+	@Test
 	public void testGetPrefs() throws IOException, AlfrescoServiceException {
 
 		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
 		assertTrue(offresCom.size() > 0);
 		SalesOffer sel = offresCom.get(0);
 
-		Company created = companyService.create(admin, "company_"
-				+ new Random().nextInt(1000000), sel.getName(), "default");
-
-		System.out.println("comp = " + created);
+		created = companyService.create(admin,
+				"company_" + new Random().nextInt(1000000), sel.getName(),
+				"default");
 
 		Preferences p = companyService.getPreferences(admin, created);
-
 		assertTrue(p.size() == 0);
 	}
 
@@ -141,8 +169,9 @@ public class CompanyServiceImplTest extends TestCase {
 		assertTrue(offresCom.size() > 0);
 		SalesOffer sel = offresCom.get(0);
 
-		Company created = companyService.create(admin, "company_"
-				+ new Random().nextInt(1000000), sel.getName(), "default");
+		created = companyService.create(admin,
+				"company_" + new Random().nextInt(1000000), sel.getName(),
+				"default");
 		Preferences p = companyService.getPreferences(admin, created);
 		String testKey = "fr.itldev.test";
 
@@ -171,8 +200,9 @@ public class CompanyServiceImplTest extends TestCase {
 		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
 		SalesOffer sel = offresCom.get(0);
 
-		Company created = companyService.create(admin, "company_"
-				+ new Random().nextInt(1000000), sel.getName(), "default");
+		created = companyService.create(admin,
+				"company_" + new Random().nextInt(1000000), sel.getName(),
+				"default");
 
 		CompanyProperties cp = companyService.getProperties(admin, created);
 
@@ -201,4 +231,5 @@ public class CompanyServiceImplTest extends TestCase {
 		companyService.getProperties(admin, created);
 
 	}
+
 }

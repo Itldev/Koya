@@ -68,6 +68,7 @@ public class AlfrescoRestService implements AlfrescoService {
 	private static final String REST_POST_COUNTCHILDREN = "/s/fr/itldev/koya/global/countchildren/{parentNodeRef}";
 
 	private String alfrescoServerUrl;
+	private String shareWebappUrl;
 
 	private RestTemplate template;
 
@@ -78,6 +79,14 @@ public class AlfrescoRestService implements AlfrescoService {
 
 	public void setAlfrescoServerUrl(String alfrescoServerUrl) {
 		this.alfrescoServerUrl = alfrescoServerUrl;
+	}
+	
+	public String getShareWebappUrl() {
+		return shareWebappUrl;
+	}
+
+	public void setShareWebappUrl(String shareWebappUrl) {
+		this.shareWebappUrl = shareWebappUrl;
 	}
 
 	public RestTemplate getTemplate() {

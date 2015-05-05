@@ -89,6 +89,7 @@
     <!--================== service parent abstrait - gere l'héritage de propriétés ==-->
     <bean id="abstractRestService" abstract="true">
         <property name="alfrescoServerUrl" value="${alfresco.server.url}"/>
+        <property name="shareWebappUrl" value="${share.webapp.url}" />
         <property name="template" ref="anonymousRestTemplate"/>
     </bean>
     

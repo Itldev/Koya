@@ -37,6 +37,8 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService {
 
     private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add";
+    private static final String REST_POST_SHAREPRESET_COMPANY = "/page/fr/itldev/koya/company/apply-preset";
+    
     private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
     private static final String REST_GET_COMPANY = "/s/fr/itldev/koya/company/get/{companyName}";
 
@@ -69,20 +71,29 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
      * @throws RestClientException
      * @throws AlfrescoServiceException
      */
-    @Override
-    public Company create(User admin, String title, String salesOfferName, String spaceTemplate) throws RestClientException, AlfrescoServiceException {
+	@Override
+	public Company create(User admin, String title, String salesOfferName,
+			String spaceTemplate) throws RestClientException,
+			AlfrescoServiceException {
 
-        Map<String, String> params = new HashMap<>();
+		Map<String, String> companyParams = new HashMap<>();
+		companyParams.put("title", title);
+		companyParams.put("salesoffer", salesOfferName);
+		companyParams.put("spacetemplate", spaceTemplate);
 
-        params.put("title", title);
-        params.put("salesoffer", salesOfferName);
-        params.put("spacetemplate", spaceTemplate);
+		Company c = admin.getRestTemplate().postForObject(
+				getAlfrescoServerUrl() + REST_POST_ADDCOMPANY, companyParams,
+				Company.class);
 
-        //TODO verifications (name + offrecom)
-        return fromJSON(new TypeReference<Company>() {
-        }, admin.getRestTemplate().postForObject(getAlfrescoServerUrl()
-                + REST_POST_ADDCOMPANY, params, String.class));
-    }
+		Map<String, String> initPresetsParams = new HashMap<>();
+		initPresetsParams.put("companyName", c.getName());
+		initPresetsParams.put("sitePreset", "site-dashboard");
+
+		admin.getRestTemplate().postForObject(
+				getShareWebappUrl() + REST_POST_SHAREPRESET_COMPANY,
+				initPresetsParams, String.class);
+		return c;
+	}
 
     @Override
     public List<Company> list(User admin) throws RestClientException, AlfrescoServiceException {//TODO search filter
