@@ -18,9 +18,13 @@
  */
 package fr.itldev.koya.alfservice.security;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.repo.policy.ClassPolicyDelegate;
 import org.alfresco.repo.policy.PolicyComponent;
@@ -60,7 +64,6 @@ import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.policies.KoyaPermissionsPolicies;
 import fr.itldev.koya.policies.SharePolicies;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
@@ -88,12 +91,6 @@ public class SpaceAclService {
 	protected CompanyAclService companyAclService;
 	protected TransactionService transactionService;
 
-	/*
-	 * Policy delegates
-	 */
-	// Grant Permission on node delegate
-	private ClassPolicyDelegate<KoyaPermissionsPolicies.AfterGrantKoyaPermissionPolicy> afterGrantKoyaPermissionDelegate;
-	private ClassPolicyDelegate<KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy> beforeRevokeKoyaPermissionDelegate;
 	// sharing delegates
 	private ClassPolicyDelegate<SharePolicies.BeforeSharePolicy> beforeShareDelegate;
 	private ClassPolicyDelegate<SharePolicies.AfterSharePolicy> afterShareDelegate;
@@ -168,10 +165,7 @@ public class SpaceAclService {
 	 */
 	public void init() {
 		// Register the various policies
-		afterGrantKoyaPermissionDelegate = policyComponent
-				.registerClassPolicy(KoyaPermissionsPolicies.AfterGrantKoyaPermissionPolicy.class);
-		beforeRevokeKoyaPermissionDelegate = policyComponent
-				.registerClassPolicy(KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy.class);
+
 		beforeShareDelegate = policyComponent
 				.registerClassPolicy(SharePolicies.BeforeSharePolicy.class);
 		afterShareDelegate = policyComponent
@@ -233,6 +227,9 @@ public class SpaceAclService {
 	}
 
 	/**
+	 * Grant permission on space for a specified user
+	 * 
+	 * Calling this method assumes user already has a site role on company
 	 * 
 	 * @param space
 	 * @param authority
@@ -244,12 +241,68 @@ public class SpaceAclService {
 				+ authority + "' on '" + space.getTitle() + "' ("
 				+ space.getClass().getSimpleName() + ")");
 
+		/**
+		 * Ensure user has read acces on parents hierachy
+		 */
+		List<KoyaNode> parentsKoyaNodes = koyaNodeService.getParentsList(
+				space.getNodeRef(), -1);
+
+		for (KoyaNode k : parentsKoyaNodes) {
+			
+			if(!Space.class.isAssignableFrom(k.getClass())){
+				//read acces only occurs on spaces
+				break;
+			}
+			
+			final NodeRef currentNodeRef = k.getNodeRef();
+			boolean userCanRead = AuthenticationUtil.runAs(
+					new AuthenticationUtil.RunAsWork<Boolean>() {
+						@Override
+						public Boolean doWork() throws Exception {
+							return permissionService.hasPermission(
+									currentNodeRef,
+									KoyaPermissionConsumer.CLIENT.toString())
+									.equals(AccessStatus.ALLOWED);
+						}
+					}, authority);
+
+			/**
+			 * if can't read current node then grant read acces 
+			 * 
+			 * Action realized running as system user as current can not have
+			 * enough permissions on parent space (space member is not necessary
+			 * parent space member)
+			 * 
+			 */
+			if (!userCanRead) {
+				final KoyaNode currentKoyaNode = k;
+				AuthenticationUtil
+						.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
+							@Override
+							public Object doWork() throws Exception {
+								logger.debug("Grant read permission  to '"
+										+ authority
+										+ "' on '"
+										+ currentKoyaNode.getTitle()
+										+ "' ("
+										+ currentKoyaNode.getClass()
+												.getSimpleName() + ")");
+								permissionService.setPermission(currentNodeRef,
+										authority,
+										KoyaPermissionConsumer.CLIENT
+												.toString(), true);
+								return null;
+							}
+						});
+			}
+
+		}
+
+		/**
+		 * Grant permission on space Node
+		 */
 		permissionService.setPermission(space.getNodeRef(), authority,
 				permission.toString(), true);
-
-		afterGrantKoyaPermissionDelegate.get(
-				nodeService.getType(space.getNodeRef()))
-				.afterGrantKoyaPermission(space, authority, permission);
 
 	}
 
@@ -269,14 +322,18 @@ public class SpaceAclService {
 		logger.debug("Revoke permission '" + permission.toString() + "' to '"
 				+ authority + "' on '" + space.getTitle() + "' ("
 				+ space.getClass().getSimpleName() + ")");
-		beforeRevokeKoyaPermissionDelegate.get(
-				nodeService.getType(space.getNodeRef()))
-				.beforeRevokeKoyaPermission(space, authority, permission);
 
 		permissionService.deletePermission(space.getNodeRef(), authority,
-				permission.toString());// >>> NPE dans les TU ???
+				permission.toString());
 
-		// TODO after hook that check if user needs to stay company member
+		/**
+		 * Revoke Consumer parents read access if not used anymore : ie parent
+		 * node has no other node access but the space that has been just
+		 * revoked
+		 * 
+		 * cf inactive beahviour UpdateParentNodesBeforeRevokeKoyaPermission
+		 */
+	
 	}
 
 	/**

@@ -1,7 +1,6 @@
 package fr.itldev.koya.behaviour.security;
 
 import org.alfresco.repo.policy.Behaviour;
-import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -15,13 +14,11 @@ import org.apache.log4j.Logger;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.policies.KoyaPermissionsPolicies;
 
 /**
  * This Behaviour deletes specific permission on parents spaces if necessary
@@ -29,8 +26,7 @@ import fr.itldev.koya.policies.KoyaPermissionsPolicies;
  * 
  * 
  */
-public class UpdateParentNodesBeforeRevokeKoyaPermission implements
-		KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy {
+public class UpdateParentNodesBeforeRevokeKoyaPermission  {
 
 	private final Logger logger = Logger.getLogger(this.getClass());
 	private Behaviour beforeRevokeKoyaPermission;
@@ -69,15 +65,15 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
 	// </editor-fold>
 	public void init() {
 		// Create behaviours
-		this.beforeRevokeKoyaPermission = new JavaBehaviour(this,
-				"beforeRevokeKoyaPermission",
-				Behaviour.NotificationFrequency.FIRST_EVENT);
-		this.policyComponent.bindClassBehaviour(
-				KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy.QNAME,
-				KoyaModel.TYPE_DOSSIER, this.beforeRevokeKoyaPermission);
-		this.policyComponent.bindClassBehaviour(
-				KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy.QNAME,
-				KoyaModel.TYPE_SPACE, this.beforeRevokeKoyaPermission);
+//		this.beforeRevokeKoyaPermission = new JavaBehaviour(this,
+//				"beforeRevokeKoyaPermission",
+//				Behaviour.NotificationFrequency.FIRST_EVENT);
+//		this.policyComponent.bindClassBehaviour(
+//				KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy.QNAME,
+//				KoyaModel.TYPE_DOSSIER, this.beforeRevokeKoyaPermission);
+//		this.policyComponent.bindClassBehaviour(
+//				KoyaPermissionsPolicies.BeforeRevokeKoyaPermissionPolicy.QNAME,
+//				KoyaModel.TYPE_SPACE, this.beforeRevokeKoyaPermission);
 
 	}
 
@@ -92,7 +88,6 @@ public class UpdateParentNodesBeforeRevokeKoyaPermission implements
 	 * @param authority
 	 * @param permission
 	 */
-	@Override
 	public void beforeRevokeKoyaPermission(Space space, String authority,
 			KoyaPermission permission) {
 
