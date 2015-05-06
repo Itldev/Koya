@@ -28,7 +28,7 @@ import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
 		@Type(value = Document.class, name = "Document"),
 		@Type(value = SalesOffer.class, name = "Salesoffer"),
 		@Type(value = Template.class, name = "Template"),
-		@Type(value = User.class, name = "User")})
+		@Type(value = User.class, name = "User") })
 public abstract class KoyaNode {
 
 	protected NodeRef nodeRef;
@@ -126,6 +126,11 @@ public abstract class KoyaNode {
 			return false;
 		}
 		return true;
+	}
+
+	public String toString() {
+		return "{'ktype':'" + getKtype() + "','name':'" + getName() + "'}";
+		// "','nodeRef':'" + getNodeRef().toString() +
 	}
 
 }

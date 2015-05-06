@@ -50,13 +50,7 @@ public class Space extends KoyaNode {
 
 	public Space(String name) {
 		setName(name);
-	}
-
-	@Override
-	public String toString() {
-		return "Space [ name = " + getName() + ", noderef=" + getNodeRef()
-				+ "]";
-	}
+	}	
 
 	public static Space newInstance() {
 		return new Space();

@@ -40,7 +40,12 @@ import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.model.json.KoyaShare;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-
+/**
+ * TODO 
+ * 
+ * - chained permissions at share & unshare  		
+ * 
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
 public class ShareServiceImplTest extends TestCase {
@@ -92,9 +97,9 @@ public class ShareServiceImplTest extends TestCase {
 		/**
 		 * Create manager user
 		 */
-		KoyaInvite managerInviteWrapper = invitationService.inviteUser(
-				admin, companyTests, USER_MANAGER + randomTestId
-						+ USER_MAILDOMAIN, SitePermission.MANAGER.toString());
+		KoyaInvite managerInviteWrapper = invitationService.inviteUser(admin,
+				companyTests, USER_MANAGER + randomTestId + USER_MAILDOMAIN,
+				SitePermission.MANAGER.toString());
 		// validate invitation with default password
 		manager = validateInvitationAndLogin(USER_MANAGER, managerInviteWrapper);
 
@@ -114,7 +119,7 @@ public class ShareServiceImplTest extends TestCase {
 	@After
 	public void deleteCompany() throws RestClientException,
 			AlfrescoServiceException {
-		//companyService.delete(admin, companyTests);
+		// companyService.delete(admin, companyTests);
 	}
 
 	@Test
@@ -141,7 +146,8 @@ public class ShareServiceImplTest extends TestCase {
 				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN);
 		assertNotNull(share.getKoyaInvite().getTicket());
 		// sharing should result in invitation : user exists
-		sharedClient = validateInvitationAndLogin(USER_SHAREDCLIENT, share.getKoyaInvite());
+		sharedClient = validateInvitationAndLogin(USER_SHAREDCLIENT,
+				share.getKoyaInvite());
 
 		try {
 			shareService.shareItem(sharedClient, d1, USER_SHAREDCLIENT
@@ -160,18 +166,21 @@ public class ShareServiceImplTest extends TestCase {
 
 		KoyaShare share = shareService.shareItem(collaborator, d1,
 				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN);
-		assertNotNull(share.getKoyaInvite().getTicket()); // sharing should result in inviation.
-										// User exists
+		assertNotNull(share.getKoyaInvite().getTicket()); // sharing should
+															// result in
+															// inviation.
+		// User exists
 		//
-		sharedClient = validateInvitationAndLogin(USER_SHAREDCLIENT, share.getKoyaInvite());
+		sharedClient = validateInvitationAndLogin(USER_SHAREDCLIENT,
+				share.getKoyaInvite());
 
 		// shared client can now list/read dossier content
 		// TODO fill dossier with demo content
-		
+
 		shareService.unShareItem(collaborator, d1, USER_SHAREDCLIENT
 				+ randomTestId + USER_MAILDOMAIN);
-		
-		//now shared client should'nt have access on dossier 
+
+		// now shared client should'nt have access on dossier
 
 	}
 
@@ -184,15 +193,17 @@ public class ShareServiceImplTest extends TestCase {
 
 		KoyaShare share = shareService.shareItem(collaborator, d1,
 				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN);
-		assertNotNull(share.getKoyaInvite().getTicket()); // sharing should result in inviation.
-										// User exists
+		assertNotNull(share.getKoyaInvite().getTicket()); // sharing should
+															// result in
+															// inviation.
+		// User exists
 		//
-		sharedClient = validateInvitationAndLogin(USER_SHAREDCLIENT, share.getKoyaInvite());
+		sharedClient = validateInvitationAndLogin(USER_SHAREDCLIENT,
+				share.getKoyaInvite());
 
 		// remove collab membership
 		dossierService.removeMembership(admin, d1, collaborator);
-		//TODO l'acces est il reelement supprimé ?
-		
+		// TODO l'acces est il reelement supprimé ?
 
 		try {
 			shareService.unShareItem(collaborator, d1, USER_SHAREDCLIENT

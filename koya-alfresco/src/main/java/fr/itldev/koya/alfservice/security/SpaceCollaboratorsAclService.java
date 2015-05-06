@@ -44,10 +44,6 @@ public class SpaceCollaboratorsAclService extends SpaceAclService {
 					KoyaErrorCodes.SECU_UNSETTABLE_PERMISSION);
 		}
 
-		logger.debug("Grant Collaborator permission  " + perm + " to user "
-				+ userMail + " on " + space.getName() + "("
-				+ space.getClass().getSimpleName() + ")");
-
 		// Get company the shared Node belongs To
 		Company company = koyaNodeService.getFirstParentOfType(
 				space.getNodeRef(), Company.class);

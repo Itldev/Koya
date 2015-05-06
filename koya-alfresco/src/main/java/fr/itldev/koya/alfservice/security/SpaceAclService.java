@@ -31,6 +31,8 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
+import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -90,6 +92,7 @@ public class SpaceAclService {
 	protected DossierService dossierService;
 	protected CompanyAclService companyAclService;
 	protected TransactionService transactionService;
+	protected FileFolderService fileFolderService;
 
 	// sharing delegates
 	private ClassPolicyDelegate<SharePolicies.BeforeSharePolicy> beforeShareDelegate;
@@ -157,6 +160,10 @@ public class SpaceAclService {
 
 	public void setTransactionService(TransactionService transactionService) {
 		this.transactionService = transactionService;
+	}
+
+	public void setFileFolderService(FileFolderService fileFolderService) {
+		this.fileFolderService = fileFolderService;
 	}
 
 	// </editor-fold>
@@ -237,9 +244,13 @@ public class SpaceAclService {
 	 */
 	public void grantSpacePermission(final Space space, final String authority,
 			KoyaPermission permission) {
-		logger.debug("Grant permission '" + permission.toString() + "' to '"
-				+ authority + "' on '" + space.getTitle() + "' ("
-				+ space.getClass().getSimpleName() + ")");
+
+		User user = userService.getUserByUsername(authenticationService
+				.getCurrentUserName());
+
+		logger.info("[Grant] : {'user':'" + user.getEmail() + "','authority':'"
+				+ authority + "','koyaNode':'" + space.toString()
+				+ "','permission':'" + permission.toString() + "}");
 
 		/**
 		 * Ensure user has read acces on parents hierachy
@@ -248,12 +259,12 @@ public class SpaceAclService {
 				space.getNodeRef(), -1);
 
 		for (KoyaNode k : parentsKoyaNodes) {
-			
-			if(!Space.class.isAssignableFrom(k.getClass())){
-				//read acces only occurs on spaces
+
+			if (!Space.class.isAssignableFrom(k.getClass())) {
+				// read acces only occurs on spaces
 				break;
 			}
-			
+
 			final NodeRef currentNodeRef = k.getNodeRef();
 			boolean userCanRead = AuthenticationUtil.runAs(
 					new AuthenticationUtil.RunAsWork<Boolean>() {
@@ -267,7 +278,7 @@ public class SpaceAclService {
 					}, authority);
 
 			/**
-			 * if can't read current node then grant read acces 
+			 * if can't read current node then grant read acces
 			 * 
 			 * Action realized running as system user as current can not have
 			 * enough permissions on parent space (space member is not necessary
@@ -280,13 +291,15 @@ public class SpaceAclService {
 						.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
 							@Override
 							public Object doWork() throws Exception {
-								logger.debug("Grant read permission  to '"
+
+								logger.info("[Grant Chained] : {'authority':'"
 										+ authority
-										+ "' on '"
-										+ currentKoyaNode.getTitle()
-										+ "' ("
-										+ currentKoyaNode.getClass()
-												.getSimpleName() + ")");
+										+ "','koyaNode':'"
+										+ currentNodeRef.toString()
+										+ "','permission':'"
+										+ KoyaPermissionConsumer.CLIENT
+												.toString() + "}");
+
 								permissionService.setPermission(currentNodeRef,
 										authority,
 										KoyaPermissionConsumer.CLIENT
@@ -317,11 +330,19 @@ public class SpaceAclService {
 	 * @param permission
 	 * 
 	 */
-	public void revokeSpacePermission(Space space, String authority,
+	public void revokeSpacePermission(Space space, final String authority,
 			KoyaPermission permission) {
-		logger.debug("Revoke permission '" + permission.toString() + "' to '"
-				+ authority + "' on '" + space.getTitle() + "' ("
-				+ space.getClass().getSimpleName() + ")");
+
+		User revoker = userService.getUserByUsername(authenticationService
+				.getCurrentUserName());
+
+		logger.info("[Revoke] : {'user':'" + revoker.getEmail()
+				+ "','authority':'" + authority + "','koyaNode':'"
+				+ space.toString() + "','permission':'" + permission.toString()
+				+ "}");
+
+		List<KoyaNode> parentsKoyaNodes = koyaNodeService.getParentsList(
+				space.getNodeRef(), -1);
 
 		permissionService.deletePermission(space.getNodeRef(), authority,
 				permission.toString());
@@ -331,9 +352,88 @@ public class SpaceAclService {
 		 * node has no other node access but the space that has been just
 		 * revoked
 		 * 
-		 * cf inactive beahviour UpdateParentNodesBeforeRevokeKoyaPermission
 		 */
-	
+
+		for (KoyaNode k : parentsKoyaNodes) {
+			final KoyaNode current = k;
+
+			if (Space.class.isAssignableFrom(k.getClass())) {
+				Integer nbChilds = AuthenticationUtil.runAs(
+						new AuthenticationUtil.RunAsWork<Integer>() {
+							@Override
+							public Integer doWork() throws Exception {
+
+								return fileFolderService.list(
+										current.getNodeRef()).size();
+							}
+						}, authority);
+
+				if (nbChilds == 0) {
+
+					// delete existing read permission on parent node
+					AuthenticationUtil
+							.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
+								@Override
+								public Object doWork() throws Exception {
+
+									logger.info("[Revoke Chained] : {'authority':'"
+											+ authority
+											+ "','koyaNode':'"
+											+ current.toString()
+											+ "','permission':'"
+											+ KoyaPermissionConsumer.CLIENT
+													.toString() + "}");
+
+									permissionService.deletePermission(current
+											.getNodeRef(), authority,
+											KoyaPermissionConsumer.CLIENT
+													.toString());
+									return null;
+								}
+							});
+				}
+			} else if (Company.class.isAssignableFrom(k.getClass())) {
+				// list company first level spaces
+
+				Integer nbSpaces = AuthenticationUtil.runAs(
+						new AuthenticationUtil.RunAsWork<Integer>() {
+							@Override
+							public Integer doWork() throws Exception {
+
+								return spaceService.list(current.getName(),
+										Integer.MAX_VALUE).size();
+							}
+						}, authority);
+
+				// if no space available : revoke company access
+				if (nbSpaces == 0) {
+
+					final User revoked = userService.getUser(authority);
+
+					AuthenticationUtil
+							.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
+								@Override
+								public Object doWork() throws Exception {
+									logger.info("[Revoke Company Chained] : {'authority':'"
+											+ authority
+											+ "','company':'"
+											+ current.getName()
+											+ "','role':'"
+											+ companyAclService
+													.getSitePermission(
+															(Company) current,
+															revoked) + "'}");
+
+									companyAclService.removeFromMembers(
+											(Company) current, revoked);
+									return null;
+								}
+							});
+
+				}
+			}
+		}
+
 	}
 
 	/**
@@ -353,6 +453,10 @@ public class SpaceAclService {
 		User inviter = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
 
+		logger.info("[Share] : {'user':'" + inviter.getEmail()
+				+ "','invitee':'" + userMail + "','koyaNode':'"
+				+ space.toString() + "','permission':'" + perm.toString() + "}");
+
 		beforeShareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.beforeShareItem(space.getNodeRef(), userMail, inviter,
 						sharedByImporter);
@@ -364,8 +468,6 @@ public class SpaceAclService {
 				.afterShareItem(space.getNodeRef(), userMail, inviter,
 						sharedByImporter);
 
-		logger.info("[Koya] public sharing : user " + inviter.getEmail()
-				+ "has shared " + space.toString() + " with user " + userMail);
 		return invitation;
 
 	}
@@ -379,15 +481,19 @@ public class SpaceAclService {
 	public void unShareKoyaNode(final Space space, String userMail,
 			final KoyaPermission perm) throws KoyaServiceException {
 
+		final User u = userService.getUser(userMail);
+
 		User revoker = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
+
+		logger.info("[Unshare] : {'user':'" + revoker.getEmail()
+				+ "','unshared':'" + u.getEmail() + "','koyaNode':'"
+				+ space.toString() + "','permission':'" + perm.toString() + "}");
+
 		beforeUnshareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.beforeUnshareItem(space.getNodeRef(), userMail, revoker);
-		logger.debug("Unshare " + space.getName() + " for " + userMail
-				+ " permission = " + perm.toString());
 
 		// Gets the user involved in unsharing - throws execption if not found
-		final User u = userService.getUser(userMail);
 		revokeSpacePermission(space, u.getUserName(), perm);
 		afterUnshareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.afterUnshareItem(space.getNodeRef(), userMail, revoker);

@@ -54,7 +54,11 @@ public class SpaceConsumersAclService extends SpaceAclService {
 		// If user can't access specified company then invite him even if he
 		// already exists in alfresco
 		if (userPermissionInCompany == null) {
-			logger.debug("Invite " + userMail + " to " + company.getTitle());
+			logger.info("[Invite] : {'invitee':'" + userMail + "','company':'"
+				+ company + "','permission':'" + SitePermission.CONSUMER + "}");
+			
+			
+			
 			invitation = companyAclService.inviteMember(company, userMail,
 					SitePermission.CONSUMER, space);
 

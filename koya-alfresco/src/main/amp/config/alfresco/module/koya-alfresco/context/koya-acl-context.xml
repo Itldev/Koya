@@ -64,6 +64,7 @@
         <property name="dossierService" ref="dossierService"/>  
         <property name="companyAclService" ref="companyAclService"/>
         <property name="transactionService" ref="transactionService"/>
+        <property name="fileFolderService" ref="FileFolderService"/>
     </bean>
     
     
