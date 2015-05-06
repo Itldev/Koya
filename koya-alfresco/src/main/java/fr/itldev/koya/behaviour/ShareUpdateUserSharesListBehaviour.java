@@ -57,11 +57,11 @@ public class ShareUpdateUserSharesListBehaviour implements
 	}
 
 	@Override
-	public void afterUnshareItem(final NodeRef nodeRef, final String userMail, User inviter) {
+	public void afterUnshareItem(final NodeRef nodeRef, final User user, User inviter) {
 		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
 			@Override
 			public Object doWork() throws Exception {
-				userService.removeSharedNode(userMail, nodeRef);
+				userService.removeSharedNode(user.getEmail(), nodeRef);
 				return null;
 			}
 		});
