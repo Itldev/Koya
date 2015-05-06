@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
@@ -125,6 +126,13 @@ public class SpaceService {
 		NodeRef nodeDocLib = getDocLibNodeRef(companyService.getSiteInfo(
 				companyShortName).getNodeRef());
 		return listRecursive(nodeDocLib, depth);
+	}
+	
+	
+	public List<Space> list(Company c)
+			throws KoyaServiceException {
+		NodeRef nodeDocLib = getDocLibNodeRef(c.getNodeRef());
+		return listRecursive(nodeDocLib, Integer.MAX_VALUE);
 	}
 
 	/**

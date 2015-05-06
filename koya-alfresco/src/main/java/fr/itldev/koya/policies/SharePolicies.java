@@ -94,6 +94,6 @@ public interface SharePolicies {
          * @param userMail
          * @param revoker
          */
-        public void afterUnshareItem(NodeRef nodeRef, String userMail, User revoker);
+        public void afterUnshareItem(NodeRef nodeRef, User user, User revoker);
     }
 }

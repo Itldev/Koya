@@ -19,107 +19,125 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 
-public class ShareNotificationBehaviour implements SharePolicies.AfterSharePolicy, SharePolicies.AfterUnsharePolicy {
+public class ShareNotificationBehaviour implements
+		SharePolicies.AfterSharePolicy, SharePolicies.AfterUnsharePolicy {
 
-    protected static Log logger = LogFactory.getLog(ShareNotificationBehaviour.class);
+	protected static Log logger = LogFactory
+			.getLog(ShareNotificationBehaviour.class);
 
-    private ActivityService activityService;
-    private SiteService siteService;
-    private UserService userService;
-    private PolicyComponent policyComponent;
-    private CompanyAclService companyAclService;
+	private ActivityService activityService;
+	private SiteService siteService;
+	private UserService userService;
+	private PolicyComponent policyComponent;
+	private CompanyAclService companyAclService;
 
-    public void setActivityService(ActivityService activityService) {
-        this.activityService = activityService;
-    }
+	public void setActivityService(ActivityService activityService) {
+		this.activityService = activityService;
+	}
 
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
-    }
+	public void setSiteService(SiteService siteService) {
+		this.siteService = siteService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public void setPolicyComponent(PolicyComponent policyComponent) {
-        this.policyComponent = policyComponent;
-    }
+	public void setPolicyComponent(PolicyComponent policyComponent) {
+		this.policyComponent = policyComponent;
+	}
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
-    }
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    public void init() {
-        this.policyComponent.bindClassBehaviour(SharePolicies.AfterSharePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
-                new JavaBehaviour(this, "afterShareItem", Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
+	public void init() {
+		this.policyComponent.bindClassBehaviour(
+				SharePolicies.AfterSharePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
+				new JavaBehaviour(this, "afterShareItem",
+						Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
 
-        this.policyComponent.bindClassBehaviour(SharePolicies.AfterUnsharePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
-                new JavaBehaviour(this, "afterUnshareItem", Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
-    }
+		this.policyComponent.bindClassBehaviour(
+				SharePolicies.AfterUnsharePolicy.QNAME, KoyaModel.TYPE_DOSSIER,
+				new JavaBehaviour(this, "afterUnshareItem",
+						Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
+	}
 
-    @Override
-    public void afterShareItem(NodeRef nodeRef, String userMail, User inviter, Boolean sharedByImporter) {
-        try {
-            User user = userService.getUser(userMail);
-            if (user.isEnabled() != null && user.isEnabled()) {
-                String siteShortName = siteService.getSiteShortName(nodeRef);
+	@Override
+	public void afterShareItem(NodeRef nodeRef, String userMail, User inviter,
+			Boolean sharedByImporter) {
+		try {
+			User user = userService.getUser(userMail);
+			if (user.isEnabled() != null && user.isEnabled()) {
+				String siteShortName = siteService.getSiteShortName(nodeRef);
 
-                List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName, null, user.getUserName());
+				List<Invitation> invitations = companyAclService
+						.getPendingInvite(siteShortName, null,
+								user.getUserName());
 
-                if (invitations.isEmpty()) {
-                        //Posting the according activity
+				if (invitations.isEmpty()) {
+					// Posting the according activity
 
-                    //TODO call action or use condition
-                    activityService.postActivity(NotificationType.KOYA_SHARED,
-                            siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
-                }
-            }
-        } catch (KoyaServiceException ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-    }
+					// TODO call action or use condition
+					activityService.postActivity(NotificationType.KOYA_SHARED,
+							siteShortName, "koya",
+							getActivityData(user, nodeRef), user.getUserName());
+				}
+			}
+		} catch (KoyaServiceException ex) {
+			logger.error(ex.getMessage(), ex);
+		}
+	}
 
-    @Override
-    public void afterUnshareItem(NodeRef nodeRef, String userMail, User inviter) {
-        try {
-            User user = userService.getUser(userMail);
-            if (user.isEnabled() != null && user.isEnabled()) {
-                String siteShortName = siteService.getSiteShortName(nodeRef);
+	@Override
+	public void afterUnshareItem(NodeRef nodeRef, User user, User inviter) {
+		try {
 
-                List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName, null, user.getUserName());
+			// User user = userService.getUser(userMail);
+			// if (user.isEnabled() != null && user.isEnabled()) {
+			// TODO test if user still exists : treat invitation deletion case
+			String siteShortName = siteService.getSiteShortName(nodeRef);
 
-                if (invitations.isEmpty()) {
-                    //TODO call action
-                    //Posting the according activity
-                    activityService.postActivity(NotificationType.KOYA_UNSHARED, siteShortName, "koya", getActivityData(user, nodeRef), user.getUserName());
+			List<Invitation> invitations = companyAclService.getPendingInvite(
+					siteShortName, null, user.getUserName());
 
-                }
-            }
-        } catch (KoyaServiceException ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-    }
+			if (invitations.isEmpty()) {
+				// TODO call action
+				// Posting the according activity
+				activityService.postActivity(NotificationType.KOYA_UNSHARED,
+						siteShortName, "koya", getActivityData(user, nodeRef),
+						user.getUserName());
 
-    /**
-     * Helper method to get the activity data for a user
-     *
-     * @param userName user name
-     * @param role role
-     * @return
-     */
-    private String getActivityData(User user, NodeRef nodeRef) throws KoyaServiceException {
-        String memberFN = user.getFirstName();
-        String memberLN = user.getName();
-        String userMail = user.getEmail();
+			}
+			// }
+		} catch (KoyaServiceException ex) {
+			logger.error(ex.getMessage(), ex);
+		}
+	}
 
-        JSONObject activityData = new JSONObject();
-        activityData.put("memberUserName", user.getEmail());
-        activityData.put("memberFirstName", memberFN);
-        activityData.put("memberLastName", memberLN);
-        activityData.put("title", (memberFN + " " + memberLN + " ("
-                + userMail + ")").trim());
-        activityData.put("nodeRef", nodeRef.toString());
-        return activityData.toString();
-    }
+	/**
+	 * Helper method to get the activity data for a user
+	 * 
+	 * @param userName
+	 *            user name
+	 * @param role
+	 *            role
+	 * @return
+	 */
+	private String getActivityData(User user, NodeRef nodeRef)
+			throws KoyaServiceException {
+		String memberFN = user.getFirstName();
+		String memberLN = user.getName();
+		String userMail = user.getEmail();
+
+		JSONObject activityData = new JSONObject();
+		activityData.put("memberUserName", user.getEmail());
+		activityData.put("memberFirstName", memberFN);
+		activityData.put("memberLastName", memberLN);
+		activityData.put("title",
+				(memberFN + " " + memberLN + " (" + userMail + ")").trim());
+		activityData.put("nodeRef", nodeRef.toString());
+		return activityData.toString();
+	}
 
 }

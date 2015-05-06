@@ -29,6 +29,7 @@ import java.util.Map;
 import org.alfresco.repo.policy.ClassPolicyDelegate;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -362,7 +363,6 @@ public class SpaceAclService {
 						new AuthenticationUtil.RunAsWork<Integer>() {
 							@Override
 							public Integer doWork() throws Exception {
-
 								return fileFolderService.list(
 										current.getNodeRef()).size();
 							}
@@ -391,45 +391,84 @@ public class SpaceAclService {
 									return null;
 								}
 							});
+				}else{
+					return;
 				}
 			} else if (Company.class.isAssignableFrom(k.getClass())) {
-				// list company first level spaces
+				/*
+				 * list company first level spaces
+				 * 
+				 * if user has a pending invitation nbSpaces = 0
+				 * spaceService.list > permission exception
+				 */
 
-				Integer nbSpaces = AuthenticationUtil.runAs(
-						new AuthenticationUtil.RunAsWork<Integer>() {
-							@Override
-							public Integer doWork() throws Exception {
-
-								return spaceService.list(current.getName(),
-										Integer.MAX_VALUE).size();
-							}
-						}, authority);
-
-				// if no space available : revoke company access
-				if (nbSpaces == 0) {
-
-					final User revoked = userService.getUser(authority);
+				final List<Invitation> inv = companyAclService
+						.getPendingInvite(((Company) current).getName(), null,
+								authority);
+				if (inv.size() > 0) {
+					/**
+					 * User is not validated (invitation is pending) then reject
+					 * invitation
+					 * 
+					 * TODO this branch of code delete invitations for users who
+					 * have many shares. This Souln't happen because this step
+					 * is the last of chain revoke permissions. Previous steps
+					 * should return before reaching this code
+					 */
+					logger.info("[Revoke Invitation Chained] : {'authority':'"
+							+ authority + "','company':'" + current.getName()
+							+ "'}");
 
 					AuthenticationUtil
 							.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
 								@Override
 								public Object doWork() throws Exception {
-									logger.info("[Revoke Company Chained] : {'authority':'"
-											+ authority
-											+ "','company':'"
-											+ current.getName()
-											+ "','role':'"
-											+ companyAclService
-													.getSitePermission(
-															(Company) current,
-															revoked) + "'}");
-
-									companyAclService.removeFromMembers(
-											(Company) current, revoked);
+									invitationService.reject(inv.get(0)
+											.getInviteId(),
+											"[Revoke] chained deletion");
 									return null;
 								}
 							});
 
+				} else {
+					/*
+					 * list company first level spaces
+					 */
+					Integer nbSpaces = AuthenticationUtil.runAs(
+							new AuthenticationUtil.RunAsWork<Integer>() {
+								@Override
+								public Integer doWork() throws Exception {
+									return spaceService.list((Company) current)
+											.size();
+								}
+							}, authority);
+
+					// if no space available : revoke company access
+					if (nbSpaces == 0) {
+
+						final User revoked = userService.getUser(authority);
+
+						AuthenticationUtil
+								.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
+									@Override
+									public Object doWork() throws Exception {
+										logger.info("[Revoke Company Chained] : {'authority':'"
+												+ authority
+												+ "','company':'"
+												+ current.getName()
+												+ "','role':'"
+												+ companyAclService
+														.getSitePermission(
+																(Company) current,
+																revoked) + "'}");
+
+										companyAclService.removeFromMembers(
+												(Company) current, revoked);
+										return null;
+									}
+								});
+
+					}
 				}
 			}
 		}
@@ -496,7 +535,7 @@ public class SpaceAclService {
 		// Gets the user involved in unsharing - throws execption if not found
 		revokeSpacePermission(space, u.getUserName(), perm);
 		afterUnshareDelegate.get(nodeService.getType(space.getNodeRef()))
-				.afterUnshareItem(space.getNodeRef(), userMail, revoker);
+				.afterUnshareItem(space.getNodeRef(), u, revoker);
 
 	}
 
