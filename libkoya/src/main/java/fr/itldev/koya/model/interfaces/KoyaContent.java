@@ -28,5 +28,7 @@ public interface KoyaContent {
 	String getName();
 
 	String getTitle();
+        
+        String getKtype();
 
 }
