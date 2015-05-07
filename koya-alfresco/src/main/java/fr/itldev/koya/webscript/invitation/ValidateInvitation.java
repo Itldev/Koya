@@ -287,8 +287,8 @@ public class ValidateInvitation extends AbstractWebScript {
 					+ ex.getErrorCode().toString());
 		}
 
-		logger.info("invitation validation : user " + userInvited.getEmail()
-				+ " has validated his account");
+		logger.info("[Invite Validation] : {'user':'" + userInvited.getEmail()
+				+ "','company':''}");
 		res.setContentType("application/json");
 		// TODO return validation status
 		res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));
