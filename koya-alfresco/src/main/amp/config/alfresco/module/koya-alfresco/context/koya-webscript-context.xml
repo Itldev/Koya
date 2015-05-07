@@ -559,7 +559,6 @@
         <property name="activityService" ref="activityService" />
         <property name="actionService" ref="ActionService" />
         <property name="siteService" ref="siteService" />
-        <property name="koyaNotificationService" ref="koyaNotificationService" />
     </bean>
 
 
@@ -640,19 +639,6 @@
         <property name="debuggerService" ref="debuggerService" />   
         <property name="spaceService" ref="spaceService" />   
     </bean>
-    <!--
-    ==================================================================
-    ========================== Notifications  ========================
-    ==================================================================
-    -->
-    
-    <bean id="webscript.fr.itldev.koya.user.emailnotification.get" 
-          class="fr.itldev.koya.webscript.user.NotificationStatus"
-          parent="webscript">
-        <property name="koyaNotificationService" ref="koyaNotificationService" />
-        <property name="userService" ref="userService"/>   
-    </bean>
-    
     
     <!--
     ==================================================================

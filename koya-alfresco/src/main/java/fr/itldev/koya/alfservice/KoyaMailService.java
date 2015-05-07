@@ -212,6 +212,13 @@ public class KoyaMailService implements InitializingBean {
 
 	}
 
+	/**
+	 * TODO Remove as direct share notif not used anymore
+	 * 
+	 * TODO Remove assocated template
+	 * 
+	 */
+	@Deprecated
 	public void sendShareNotifMail(User sender, String destMail, Company c,
 			final NodeRef sharedNodeRef) throws KoyaServiceException {
 		Map<String, Serializable> paramsMail = new HashMap<>();
@@ -292,6 +299,13 @@ public class KoyaMailService implements InitializingBean {
 						MailActionExecuter.NAME, paramsMail), null, false, true);
 	}
 
+	/**
+	 * TODO Remove as direct new content modification Notif not used anymore
+	 * 
+	 * TODO Remove assocated template
+	 * 
+	 */
+	@Deprecated
 	public void sendNewContentNotificationMail(User dest,
 			final NodeRef sharedItem) throws KoyaServiceException {
 		Map<String, Serializable> paramsMail = new HashMap<>();

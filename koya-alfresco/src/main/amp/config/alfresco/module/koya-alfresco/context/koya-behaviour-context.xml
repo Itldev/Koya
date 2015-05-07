@@ -72,19 +72,7 @@
         <property name="userService" ref="userService"/>
         <property name="companyAclService" ref="companyAclService" />
     </bean>
-    
-    
-    <!-- Send Email notification to share invitee     
-    -->
-    <bean id="ShareMailNotificationBehaviour" class="fr.itldev.koya.behaviour.ShareMailNotificationBehaviour"
-          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
-        <property name="policyComponent" ref="policyComponent" />       
-        <property name="koyaMailService" ref="koyaMailService" />       
-        <property name="koyaNodeService" ref="koyaNodeService" />       
-        <property name="userService" ref="userService" />       
-        <property name="companyAclService" ref="companyAclService" />       
-    </bean>
-    
+       
     
 	<!--     Update user shares list -->
     <bean id="ShareUpdateUserSharesListBehaviour" class="fr.itldev.koya.behaviour.ShareUpdateUserSharesListBehaviour"

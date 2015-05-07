@@ -67,9 +67,6 @@ public class KoyaModel {
 	public static final QName ASPECT_MAILUNIQUE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "mailunique");
 
-	public static final QName ASPECT_USERNOTIFIED = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "userNotified");
-
 	public static final QName ASPECT_CIVILTITLED = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "civilTitled");
 

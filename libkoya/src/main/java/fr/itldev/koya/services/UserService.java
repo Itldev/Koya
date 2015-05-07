@@ -134,24 +134,7 @@ public interface UserService {
      */
     User getUserFromEmailFailProof(User user, String email);
 
-    /**
-     * Set wether or not a user receive an email notification on every document
-     * added
-     *
-     * @param user
-     * @param notify
-     * @throws AlfrescoServiceException
-     */
-    void setEmailNotification(User user, boolean notify) throws AlfrescoServiceException;
-
-    /**
-     *
-     * @param user
-     * @return true if user notify on each new document.
-     * @throws AlfrescoServiceException
-     */
-    Boolean getEmailNotification(User user) throws AlfrescoServiceException;
-
+   
     /**
      * Send Reset password request to alfresco server.
      *

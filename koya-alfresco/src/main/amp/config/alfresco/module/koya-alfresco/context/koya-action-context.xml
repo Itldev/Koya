@@ -65,23 +65,9 @@
     
     <!--Koya notifications actions Actions--> 
     
-    
-    <bean id="koyaNotifier" abstract="true" class="fr.itldev.koya.action.notification.KoyaNotifierActionExecuter">
-        <property name="koyaNotificationService" ref="koyaNotificationService"/>        
-    </bean>
-    
-    <bean id="newContentNotifier" class="fr.itldev.koya.action.notification.NewContentNotifierActionExecuter" parent="koyaNotifier">
-        <property name="koyaMailService" ref="koyaMailService"/>        
-        <property name="koyaNodeService" ref="koyaNodeService"/>        
-        <property name="nodeService" ref="NodeService"/>        
-        <property name="companyAclService" ref="companyAclService"/> 
-        <property name="spaceAclService" ref="spaceAclService"/>        
-    </bean>
-    
-    
+       
     <bean id="afterValidateInvitePostActivity" 
-          class="fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter" 
-          parent="koyaNotifier">
+          class="fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter" >
         <property name="spaceService" ref="spaceService"/>        
         <property name="dossierService" ref="dossierService"/>        
         <property name="koyaNodeService" ref="koyaNodeService"/>        

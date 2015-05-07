@@ -1,6 +1,10 @@
 package fr.itldev.koya.action.notification;
 
+import java.util.List;
+
+import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -23,7 +27,7 @@ import fr.itldev.koya.model.impl.User;
  * validating invitation
  */
 public class AfterValidateInvitePostActivityActionExecuter extends
-		KoyaNotifierActionExecuter {
+		ActionExecuterAbstractBase {
 
 	private final Logger logger = Logger.getLogger(this.getClass());
 
@@ -110,6 +114,10 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 				(memberFN + " " + memberLN + " (" + userMail + ")").trim());
 		activityData.put("nodeRef", nodeRef.toString());
 		return activityData.toString();
+	}
+
+	@Override
+	protected void addParameterDefinitions(List<ParameterDefinition> paramList) {	
 	}
 
 }

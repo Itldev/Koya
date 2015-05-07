@@ -78,10 +78,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
 	private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
 	private static final String REST_POST_PREFERENCES = "/s/api/people/{userid}/preferences";
 	private static final String REST_DELETE_PREFERENCES = "/s/api/people/{userid}/preferences?pf={preferencefilter?}";
-
-	// ====== Notifications
-	private static final String REST_GET_EMAILNOTIFICATION = "/s/fr/itldev/koya/user/emailnotification/{userName}";
-	private static final String REST_GET_EMAILNOTIFICATION_ENABLE = "/s/fr/itldev/koya/user/emailnotification/{userName}/{enable}";
+	
 
 	// ====== reset password BPM
 	private static final String REST_POST_RESET_PASSWORD_REQUEST = "/s/fr/itldev/koya/resetpassword/request";
@@ -427,22 +424,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
 			this.httpContext = httpContext;
 		}
 	}
-
-	@Override
-	public void setEmailNotification(User user, boolean notify)
-			throws AlfrescoServiceException {
-		user.getRestTemplate().getForObject(
-				getAlfrescoServerUrl() + REST_GET_EMAILNOTIFICATION_ENABLE,
-				Boolean.class, user.getUserName(), notify);
-	}
-
-	@Override
-	public Boolean getEmailNotification(User user)
-			throws AlfrescoServiceException {
-		return user.getRestTemplate().getForObject(
-				getAlfrescoServerUrl() + REST_GET_EMAILNOTIFICATION,
-				Boolean.class, user.getUserName());
-	}
+	
 
 	/**
 	 * Send Reset password request to alfresco server.

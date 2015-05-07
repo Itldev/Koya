@@ -42,7 +42,6 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter;
-import fr.itldev.koya.alfservice.KoyaNotificationService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.User;
@@ -64,7 +63,6 @@ public class ValidateInvitation extends AbstractWebScript {
 	protected ActivityService activityService;
 	protected ActionService actionService;
 	protected SiteService siteService;
-	protected KoyaNotificationService koyaNotificationService;
 
 	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 	public void setUserService(UserService userService) {
@@ -89,11 +87,6 @@ public class ValidateInvitation extends AbstractWebScript {
 
 	public void setSiteService(SiteService siteService) {
 		this.siteService = siteService;
-	}
-
-	public void setKoyaNotificationService(
-			KoyaNotificationService koyaNotificationService) {
-		this.koyaNotificationService = koyaNotificationService;
 	}
 
 	// </editor-fold>
@@ -261,27 +254,12 @@ public class ValidateInvitation extends AbstractWebScript {
 
 			/**
 			 * 
-			 * Defaultly enable notifications for user
+			 * TODO Enable notification by default when
+			 * user validates invitation
 			 * 
-			 * TODO modify behaviour : notifications will be set on Spaces or
-			 * Dossiers in future implementations.
 			 * 
 			 */
-			try {
-				AuthenticationUtil.runAs(
-						new AuthenticationUtil.RunAsWork<Void>() {
-							@Override
-							public Void doWork() throws Exception {
-								koyaNotificationService.addNotification(
-										userService.getUser(userInvited
-												.getUserName()), null);
-								return null;
-							}
-						}, invitation.getInviteeUserName());
-
-			} catch (Exception e) {
-			}
-
+			
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
 					+ ex.getErrorCode().toString());

@@ -19,6 +19,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 
+/**
+ * TODO define action executer to post this kind of activity
+ * 
+ * 
+ * 
+ */
+@Deprecated
 public class ShareNotificationBehaviour implements
 		SharePolicies.AfterSharePolicy, SharePolicies.AfterUnsharePolicy {
 

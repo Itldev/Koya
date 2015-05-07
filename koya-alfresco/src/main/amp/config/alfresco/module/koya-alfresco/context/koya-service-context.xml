@@ -52,7 +52,6 @@
         <property name="modelService" ref="modelService" />
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="fileFolderService" ref="FileFolderService" />      
-        <property name="koyaNotificationService" ref="koyaNotificationService"/>
         <property name="searchService" ref="SearchService"/>  
         <property name="companyPropertiesService" ref="companyPropertiesService"/>          
     </bean>     
@@ -169,18 +168,6 @@
 
 
     <bean id="nameBasedUserNameGenerator" class="fr.itldev.koya.repo.security.authentication.EmailBasedNameGenerator" />
-    
-    
-    <bean id="koyaNotificationService" class="fr.itldev.koya.alfservice.KoyaNotificationService">
-        <property name="actionService" ref="actionService"/> 
-        <property name="ruleService" ref="ruleService"/> 
-        <property name="userService" ref="userService"/> 
-        <property name="koyaMailService" ref="koyaMailService"/>
-        <property name="nodeService" ref="NodeService"/>
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="companyAclService" ref="companyAclService"/>
-        <property name="spaceAclService" ref="spaceAclService"/>        
-    </bean>
     
     
     

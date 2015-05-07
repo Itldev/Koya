@@ -21,19 +21,14 @@ package fr.itldev.koya.js;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.processor.BaseProcessorExtension;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.rule.Rule;
 import org.alfresco.service.cmr.rule.RuleService;
-import org.alfresco.service.cmr.rule.RuleType;
 
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.KoyaNotificationService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -53,7 +48,6 @@ public class KoyaScript extends BaseProcessorExtension {
 	private KoyaNodeService koyaNodeService;
 	private UserService userService;
 	private CompanyService companyService;
-	private KoyaNotificationService koyaNotificationService;
 	private NodeService nodeService;
 	private RuleService ruleService;
 
@@ -78,12 +72,7 @@ public class KoyaScript extends BaseProcessorExtension {
 
 	public void setCompanyService(CompanyService companyService) {
 		this.companyService = companyService;
-	}
-
-	public void setKoyaNotificationService(
-			KoyaNotificationService koyaNotificationService) {
-		this.koyaNotificationService = koyaNotificationService;
-	}
+	}	
 
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
@@ -132,33 +121,6 @@ public class KoyaScript extends BaseProcessorExtension {
 			}
 		}
 		return sharedElements;
-	}
-
-	/**
-	 * Create notification rule for company if such a rules doesn't exists
-	 * 
-	 * @param n
-	 * @throws java.lang.Exception
-	 */
-	public void createNotificationRule(ScriptNode n) throws Exception {
-
-		Company c = koyaNodeService.getKoyaNode(n.getNodeRef(), Company.class);
-
-		// checks if company rule exists.
-		final NodeRef docLibNodeRef = nodeService.getChildByName(
-				c.getNodeRef(), ContentModel.ASSOC_CONTAINS, "documentLibrary");
-
-		List<Rule> rules = ruleService.getRules(docLibNodeRef, true,
-				RuleType.INBOUND);
-
-		for (Rule r : rules) {
-			if (r.getTitle().equals("Koya notification rule")) {
-				throw new Exception("Rule alredy exists fro this company");
-			}
-		}
-
-		// create company rule
-		koyaNotificationService.createCompanyNotificationRule(c);
 	}
 
 }

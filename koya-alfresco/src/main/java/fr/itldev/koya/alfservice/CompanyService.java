@@ -69,7 +69,6 @@ public class CompanyService {
 	protected ModelService modelService;
 	protected AuthenticationService authenticationService;
 	protected FileFolderService fileFolderService;
-	protected KoyaNotificationService koyaNotificationService;
 	protected SearchService searchService;
 	protected CompanyPropertiesService companyPropertiesService;
 
@@ -102,11 +101,7 @@ public class CompanyService {
 	public void setFileFolderService(FileFolderService fileFolderService) {
 		this.fileFolderService = fileFolderService;
 	}
-
-	public void setKoyaNotificationService(
-			KoyaNotificationService koyaNotificationService) {
-		this.koyaNotificationService = koyaNotificationService;
-	}
+	
 
 	public void setSearchService(SearchService searchService) {
 		this.searchService = searchService;
@@ -159,10 +154,7 @@ public class CompanyService {
 
 		modelService.companyInitTemplate(shortName, spaceTemplate);
 
-		modelService.companyInitImports(shortName);
-
-		// add users notification rule on documentLibraryNode
-		koyaNotificationService.createCompanyNotificationRule(created);
+		modelService.companyInitImports(shortName);		
 
 		// TODO copy config files to the koya-config directory
 		return created;
