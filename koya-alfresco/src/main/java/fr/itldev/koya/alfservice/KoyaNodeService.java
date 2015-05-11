@@ -85,7 +85,7 @@ public class KoyaNodeService {
 	private AuthenticationService authenticationService;
 	private SiteService siteService;// TODO remove this dependancy
 	private AncestorNodeLocator ancestorNodeLocator;
-	private KoyaActivityPoster activityPoster;
+	private KoyaFileFolderActivityPoster activityPoster;
 	protected SearchService searchService;
 	protected NamespaceService namespaceService;
 
@@ -123,7 +123,7 @@ public class KoyaNodeService {
 		this.ancestorNodeLocator = ancestorNodeLocator;
 	}
 
-	public void setActivityPoster(KoyaActivityPoster activityPoster) {
+	public void setActivityPoster(KoyaFileFolderActivityPoster activityPoster) {
 		this.activityPoster = activityPoster;
 	}
 
@@ -384,7 +384,7 @@ public class KoyaNodeService {
 	 * @throws KoyaServiceException
 	 */
 	public void delete(NodeRef n) throws KoyaServiceException {
-		KoyaActivityPoster.KoyaActivityInfo info = activityPoster
+		KoyaFileFolderActivityPoster.KoyaActivityInfo info = activityPoster
 				.getActivityInfo(n);
 		/**
 		 * Delete from favourites

@@ -29,7 +29,17 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 
-public class KoyaActivityPoster implements InitializingBean {
+
+/**
+ * TODO transform methods in actions ActivityPoster
+ * 
+ * Define KOYA specific app tool 
+ * 
+ * 
+ * 
+ */
+
+public class KoyaFileFolderActivityPoster implements InitializingBean {
 
 	private static final String APP_TOOL = "CMIS";
 	public static final char PathSeperatorChar = '/';
@@ -48,7 +58,7 @@ public class KoyaActivityPoster implements InitializingBean {
 	/**
 	 * Constructor
 	 */
-	public KoyaActivityPoster() {
+	public KoyaFileFolderActivityPoster() {
 	}
 
 	public void setHiddenAspect(HiddenAspect hiddenAspect) {

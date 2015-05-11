@@ -63,16 +63,7 @@
         <property name="nodeService" ref="NodeService"/>
     </bean>
     
-    
-    <bean id="ShareNotificationBehaviour" class="fr.itldev.koya.behaviour.ShareNotificationBehaviour"
-          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
-        <property name="policyComponent" ref="policyComponent" />
-        <property name="siteService" ref="siteService"/>
-        <property name="activityService" ref="activityService"/>
-        <property name="userService" ref="userService"/>
-        <property name="companyAclService" ref="companyAclService" />
-    </bean>
-       
+         
     
 	<!--     Update user shares list -->
     <bean id="ShareUpdateUserSharesListBehaviour" class="fr.itldev.koya.behaviour.ShareUpdateUserSharesListBehaviour"

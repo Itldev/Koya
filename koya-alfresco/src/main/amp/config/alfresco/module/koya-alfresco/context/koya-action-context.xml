@@ -63,8 +63,12 @@
     </bean>
 
     
-    <!--Koya notifications actions Actions--> 
-    
+    <!--Koya notifications actions Actions-->
+
+	<bean id="koyaActivityPoster" abstract="true"
+		class="fr.itldev.koya.action.notification.KoyaActivityPoster">
+		<property name="activityService" ref="activityService" />
+	</bean>
        
     <bean id="afterValidateInvitePostActivity" 
           class="fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter" >
@@ -75,4 +79,23 @@
         <property name="userService" ref="userService"/>                
         <property name="authenticationService" ref="AuthenticationService"/>        
     </bean>
+
+
+	<bean id="shareSpaceActivityPoster"
+		class="fr.itldev.koya.action.notification.ShareSpaceActivityPoster"
+		parent="koyaActivityPoster">
+		<property name="siteService" ref="siteService" />
+		<property name="userService" ref="userService" />
+		<property name="companyAclService" ref="companyAclService" />
+	</bean>
+	
+	<bean id="unshareSpaceActivityPoster"
+		class="fr.itldev.koya.action.notification.UnshareSpaceActivityPoster"
+		parent="koyaActivityPoster">
+		<property name="siteService" ref="siteService" />
+		<property name="userService" ref="userService" />
+		<property name="companyAclService" ref="companyAclService" />
+	</bean>
+    
+    
 </beans>
