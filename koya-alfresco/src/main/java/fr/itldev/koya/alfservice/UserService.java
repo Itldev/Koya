@@ -38,12 +38,11 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.PropertyMap;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
@@ -384,31 +383,6 @@ public class UserService {
 	}
 
 	/**
-	 * Helper method to get the activity data for a user
-	 * 
-	 * @param userMail
-	 *            user mail
-	 * @return
-	 */
-	public String getActivityUserData(String userMail)
-			throws KoyaServiceException {
-		User user = getUser(userMail);
-		String memberFN = "";
-		String memberLN = "";
-
-		memberFN = user.getFirstName();
-		memberLN = user.getName();
-
-		JSONObject activityData = new JSONObject();
-		activityData.put("memberUserName", userMail);
-		activityData.put("memberFirstName", memberFN);
-		activityData.put("memberLastName", memberLN);
-		activityData.put("title",
-				(memberFN + " " + memberLN + " (" + userMail + ")").trim());
-		return activityData.toString();
-	}
-
-	/**
 	 * Checks if user has disabled aspect
 	 * 
 	 * @param u
@@ -489,8 +463,8 @@ public class UserService {
 	 * @param u
 	 * @return
 	 */
-	public List<KoyaNode> getSharedKoyaNodes(String userName, Company c) {
-		List<KoyaNode> sharedKoyaNodes = new ArrayList<KoyaNode>();
+	public List<Space> getSharedKoyaNodes(String userName, Company c) {
+		List<Space> sharedKoyaNodes = new ArrayList<Space>();
 		try {
 			User u = getUser(userName);
 			if (nodeService.hasAspect(u.getNodeRef(),
@@ -508,7 +482,7 @@ public class UserService {
 												ar.getTargetRef(),
 												Company.class))) {
 							sharedKoyaNodes.add(koyaNodeService
-									.getKoyaNode(ar.getTargetRef()));
+									.getKoyaNode(ar.getTargetRef(),Space.class));
 						}
 					} catch (KoyaServiceException e) {
 					}

@@ -55,7 +55,7 @@ public class ShareServiceImplTest extends TestCase {
 	private static String USER_SHAREDCLIENT = "sharedClient";
 	private static String USER_MAILDOMAIN = "@itldev.net";
 
-	private static String USERS_PWD = "itldevpwd";
+	private static String USERS_PWD = "junittest";
 
 	@SuppressWarnings("unused")
 	private Logger logger = Logger.getLogger(this.getClass());

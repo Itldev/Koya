@@ -38,7 +38,7 @@
         <property name="authenticationService" ref="AuthenticationService" />
         <property name="siteService" ref="SiteService"/>
         <property name="ancestorNodeLocator" ref="ancestorNodeLocator"/>
-        <property name="activityPoster" ref="koyaFileFolderActivityPoster" />
+        <property name="activityPoster" ref="koyaActivityPoster" />
         <property name="searchService" ref="searchService"/>
         <property name="namespaceService" ref="namespaceService"/>
     </bean>
@@ -92,7 +92,7 @@
         <property name="namespaceService" ref="NamespaceService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
         <property name="actionService" ref="ActionService"/>
-        <property name="activityPoster" ref="koyaFileFolderActivityPoster" />
+        <property name="activityPoster" ref="koyaActivityPoster" />
     </bean>
    
     
@@ -220,14 +220,15 @@
       <property name="hiddenAspect" ref="hiddenAspect"/>
    </bean>
 
-	<bean name="koyaFileFolderActivityPoster" class="fr.itldev.koya.alfservice.KoyaFileFolderActivityPoster">
+	<bean name="koyaActivityPoster" class="fr.itldev.koya.alfservice.KoyaActivityPoster">
 		<property name="activityService" ref="activityService" />
 		<property name="siteService" ref="SiteService" />
-		<property name="tenantService" ref="tenantService" />
 		<property name="nodeService" ref="NodeService" />
 		<property name="fileFolderService" ref="FileFolderService" />
 		<property name="hiddenAspect" ref="hiddenAspect" />
 		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="userService" ref="userService"/>
+		<property name="companyAclService" ref="companyAclService"/>
 	</bean>
    
 </beans>

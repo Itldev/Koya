@@ -5,18 +5,17 @@ import java.util.List;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
-import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
 import fr.itldev.koya.alfservice.DossierService;
+import fr.itldev.koya.alfservice.KoyaActivityPoster;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.NotificationType;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
@@ -33,32 +32,23 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 
 	public static final String NAME = "afterValidateInvitePostActivity";
 
-	protected SpaceService spaceService;
-	protected DossierService dossierService;
 	protected KoyaNodeService koyaNodeService;
-	protected ActivityService activityService;
 	protected UserService userService;
+	protected KoyaActivityPoster koyaActivityPoster;
 	protected AuthenticationService authenticationService;
 
 	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
-	public void setSpaceService(SpaceService spaceService) {
-		this.spaceService = spaceService;
-	}
-
-	public void setDossierService(DossierService dossierService) {
-		this.dossierService = dossierService;
-	}
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
 	}
 
-	public void setActivityService(ActivityService activityService) {
-		this.activityService = activityService;
-	}
-
 	public void setUserService(UserService userService) {
 		this.userService = userService;
+	}
+
+	public void setKoyaActivityPoster(KoyaActivityPoster koyaActivityPoster) {
+		this.koyaActivityPoster = koyaActivityPoster;
 	}
 
 	public void setAuthenticationService(
@@ -77,13 +67,11 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 			Company c = koyaNodeService.getKoyaNode(actionedUponNodeRef,
 					Company.class);
 
-			for (Space s : spaceService.list(c.getName(), Integer.MAX_VALUE)) {
-				for (Dossier d : dossierService.list(s.getNodeRef())) {
-					activityService.postActivity(NotificationType.KOYA_SHARED,
-							c.getName(), "koya",
-							getActivityData(user, d.getNodeRef()),
-							user.getUserName());
-				}
+			// list user shares to post space shared activity
+			for (Space space : userService.getSharedKoyaNodes(
+					authenticationService.getCurrentUserName(), c)) {
+				koyaActivityPoster.postSpaceShared(user.getEmail(), "", space);
+				// inviter is ommited
 			}
 		} catch (KoyaServiceException ex) {
 			logger.error("Error while posting shared activity " + ex.toString());
@@ -91,33 +79,8 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 
 	}
 
-	/**
-	 * Helper method to get the activity data for a user
-	 * 
-	 * @param userName
-	 *            user name
-	 * @param role
-	 *            role
-	 * @return
-	 */
-	private String getActivityData(User user, NodeRef nodeRef)
-			throws KoyaServiceException {
-		String memberFN = user.getFirstName();
-		String memberLN = user.getName();
-		String userMail = user.getEmail();
-
-		JSONObject activityData = new JSONObject();
-		activityData.put("memberUserName", userMail);
-		activityData.put("memberFirstName", memberFN);
-		activityData.put("memberLastName", memberLN);
-		activityData.put("title",
-				(memberFN + " " + memberLN + " (" + userMail + ")").trim());
-		activityData.put("nodeRef", nodeRef.toString());
-		return activityData.toString();
-	}
-
 	@Override
-	protected void addParameterDefinitions(List<ParameterDefinition> paramList) {	
+	protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
 	}
 
 }

@@ -78,7 +78,7 @@ public class KoyaContentService {
 	protected NamespaceService namespaceService;
 	protected FileFolderService fileFolderService;
 	protected ActionService actionService;
-	private KoyaFileFolderActivityPoster activityPoster;
+	private KoyaActivityPoster activityPoster;
 
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setNodeService(NodeService nodeService) {
@@ -109,7 +109,7 @@ public class KoyaContentService {
 		this.actionService = actionService;
 	}
 
-	public void setActivityPoster(KoyaFileFolderActivityPoster activityPoster) {
+	public void setActivityPoster(KoyaActivityPoster activityPoster) {
 		this.activityPoster = activityPoster;
 	}
 

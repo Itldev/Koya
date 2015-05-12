@@ -21,7 +21,6 @@ package fr.itldev.koya.alfservice.security;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,6 @@ import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.model.FileFolderService;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -52,12 +50,9 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 
-import fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter;
-import fr.itldev.koya.action.notification.KoyaActivityPoster;
-import fr.itldev.koya.action.notification.ShareSpaceActivityPoster;
-import fr.itldev.koya.action.notification.UnshareSpaceActivityPoster;
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.DossierService;
+import fr.itldev.koya.alfservice.KoyaActivityPoster;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.alfservice.UserService;
@@ -100,7 +95,7 @@ public class SpaceAclService {
 	protected CompanyAclService companyAclService;
 	protected TransactionService transactionService;
 	protected FileFolderService fileFolderService;
-	protected ActionService actionService;
+	protected KoyaActivityPoster koyaActivityPoster;
 
 	// sharing delegates
 	private ClassPolicyDelegate<SharePolicies.BeforeSharePolicy> beforeShareDelegate;
@@ -174,8 +169,8 @@ public class SpaceAclService {
 		this.fileFolderService = fileFolderService;
 	}
 
-	public void setActionService(ActionService actionService) {
-		this.actionService = actionService;
+	public void setKoyaActivityPoster(KoyaActivityPoster koyaActivityPoster) {
+		this.koyaActivityPoster = koyaActivityPoster;
 	}
 
 	// </editor-fold>
@@ -521,16 +516,8 @@ public class SpaceAclService {
 		/**
 		 * Post a Share activity using ShareSpaceActivityPoster
 		 */
-		Map<String, Serializable> postActionParams = new HashMap<>();
-		postActionParams.put(KoyaActivityPoster.SHARE_USER_MAILINVITEE,
-				userMail);
-		postActionParams.put(KoyaActivityPoster.SHARE_USER_MAILINVITER,
-				inviter.getEmail());
-
-		Action doPostShareActivity = actionService.createAction(
-				ShareSpaceActivityPoster.NAME, postActionParams);
-		actionService.executeAction(doPostShareActivity, space.getNodeRef(),
-				false, true);
+		koyaActivityPoster.postSpaceShared(userMail, inviter.getUserName(),
+				space);
 
 		return invitation;
 
@@ -565,16 +552,8 @@ public class SpaceAclService {
 		/**
 		 * Post an Unshare activity using UnshareSpaceActivityPoster
 		 */
-		Map<String, Serializable> postActionParams = new HashMap<>();
-		postActionParams.put(KoyaActivityPoster.SHARE_USER_MAILINVITEE,
-				userMail);
-		postActionParams.put(KoyaActivityPoster.SHARE_USER_MAILINVITER,
-				revoker.getEmail());
-		
-		Action doPostUnshareActivity = actionService.createAction(
-				UnshareSpaceActivityPoster.NAME, postActionParams);
-		actionService.executeAction(doPostUnshareActivity, space.getNodeRef(),
-				false, true);
+		koyaActivityPoster.postSpaceUnshared(userMail, revoker.getUserName(),
+				space);
 
 	}
 

@@ -7,8 +7,8 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.opencmis.ActivityPoster;
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.model.filefolder.HiddenAspect;
-import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.service.cmr.activities.ActivityService;
+import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileFolderServiceType;
 import org.alfresco.service.cmr.model.FileInfo;
@@ -25,40 +25,30 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.InitializingBean;
 
+import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.NotificationType;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.User;
 
+public class KoyaActivityPoster implements InitializingBean {
 
-/**
- * TODO transform methods in actions ActivityPoster
- * 
- * Define KOYA specific app tool 
- * 
- * 
- * 
- */
-
-public class KoyaFileFolderActivityPoster implements InitializingBean {
-
-	private static final String APP_TOOL = "CMIS";
 	public static final char PathSeperatorChar = '/';
 
-	// Logging
 	private static Log logger = LogFactory.getLog(ActivityPoster.class);
 
 	private ActivityService activityService;
 	private SiteService siteService;
-	private TenantService tenantService;
 	private NodeService nodeService;
 	private FileFolderService fileFolderService;
 	private HiddenAspect hiddenAspect;
 	private KoyaNodeService koyaNodeService;
+	private UserService userService;
+	private CompanyAclService companyAclService;
 
-	/**
-	 * Constructor
-	 */
-	public KoyaFileFolderActivityPoster() {
+	public KoyaActivityPoster() {
 	}
 
 	public void setHiddenAspect(HiddenAspect hiddenAspect) {
@@ -67,10 +57,6 @@ public class KoyaFileFolderActivityPoster implements InitializingBean {
 
 	public void setFileFolderService(FileFolderService fileFolderService) {
 		this.fileFolderService = fileFolderService;
-	}
-
-	public void setTenantService(TenantService tenantService) {
-		this.tenantService = tenantService;
 	}
 
 	public void setSiteService(SiteService siteService) {
@@ -89,68 +75,87 @@ public class KoyaFileFolderActivityPoster implements InitializingBean {
 		this.koyaNodeService = koyaNodeService;
 	}
 
-	private final String getPathFromNode(NodeRef rootNodeRef, NodeRef nodeRef)
-			throws FileNotFoundException {
-		// Check if the nodes are valid, or equal
-		if (rootNodeRef == null || nodeRef == null)
-			throw new IllegalArgumentException(
-					"Invalid node(s) in getPathFromNode call");
-
-		// short cut if the path node is the root node
-		if (rootNodeRef.equals(nodeRef))
-			return "";
-
-		// get the path elements
-		List<FileInfo> pathInfos = fileFolderService.getNamePath(rootNodeRef,
-				nodeRef);
-
-		// build the path string
-		StringBuilder sb = new StringBuilder(pathInfos.size() * 20);
-		for (FileInfo fileInfo : pathInfos) {
-			sb.append(PathSeperatorChar);
-			sb.append(fileInfo.getName());
-		}
-		// done
-		if (logger.isDebugEnabled()) {
-			logger.debug("Build name path for node: \n" + "   root: "
-					+ rootNodeRef + "\n" + "   target: " + nodeRef + "\n"
-					+ "   path: " + sb);
-		}
-		return sb.toString();
+	public void setUserService(UserService userService) {
+		this.userService = userService;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
+
 	public void afterPropertiesSet() throws Exception {
 		PropertyCheck.mandatory(this, "activityService", activityService);
 		PropertyCheck.mandatory(this, "siteService", siteService);
-		PropertyCheck.mandatory(this, "tenantService", tenantService);
 		PropertyCheck.mandatory(this, "nodeService", nodeService);
 		PropertyCheck.mandatory(this, "fileFolderService", fileFolderService);
+		PropertyCheck.mandatory(this, "koyaNodeService", koyaNodeService);
+		PropertyCheck.mandatory(this, "userService", userService);
+		PropertyCheck.mandatory(this, "companyAclService", companyAclService);
 	}
 
-	private String getCurrentTenantDomain() {
-		String tenantDomain = tenantService.getCurrentUserDomain();
-		if (tenantDomain == null) {
-			return TenantService.DEFAULT_DOMAIN;
+	public void postSpaceShared(String inviteeEmail, String inviterUserName,
+			Space sharedSpace) {
+		try {
+
+			User user = userService.getUser(inviteeEmail);
+			if (user != null && user.isEnabled() != null && user.isEnabled()) {
+				// TODO test if user still exists : treat invitation deletion
+				// case
+				String siteShortName = siteService.getSiteShortName(sharedSpace
+						.getNodeRef());
+
+				List<Invitation> invitations = companyAclService
+						.getPendingInvite(siteShortName, null,
+								user.getUserName());
+
+				if (invitations.isEmpty()) {
+					activityService.postActivity(
+							NotificationType.KOYA_SPACESHARED,
+							siteShortName,
+							NotificationType.KOYA_APPTOOL,
+							getShareActivityData(user, inviterUserName,
+									sharedSpace), user.getUserName());
+
+				}
+			}
+		} catch (KoyaServiceException ex) {
+			logger.error(ex.getMessage(), ex);
 		}
-		return tenantDomain;
 	}
 
-	private boolean isFolder(NodeRef nodeRef) {
-		QName typeQName = nodeService.getType(nodeRef);
-		FileFolderServiceType type = fileFolderService.getType(typeQName);
-		boolean isFolder = type.equals(FileFolderServiceType.FOLDER);
-		return isFolder;
+	public void postSpaceUnshared(String revokedinviteeEmail,
+			String revokerUserName, Space unsharedSpace) {
+		try {
+
+			User user = userService.getUser(revokedinviteeEmail);
+			if (user.isEnabled() != null && user.isEnabled()) {
+				// TODO test if user still exists : treat invitation deletion
+				// case
+				String siteShortName = siteService
+						.getSiteShortName(unsharedSpace.getNodeRef());
+
+				List<Invitation> invitations = companyAclService
+						.getPendingInvite(siteShortName, null,
+								user.getUserName());
+
+				if (invitations.isEmpty()) {
+					// TODO call action
+					// Posting the according activity
+					activityService.postActivity(
+							NotificationType.KOYA_SPACEUNUNSHARED,
+							siteShortName,
+							NotificationType.KOYA_APPTOOL,
+							getShareActivityData(user, revokerUserName,
+									unsharedSpace), user.getUserName());
+
+				}
+			}
+		} catch (KoyaServiceException ex) {
+			logger.error(ex.getMessage(), ex);
+		}
+
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public void postFileFolderAdded(NodeRef nodeRef) {
 
 		if (!hiddenAspect.hasHiddenAspect(nodeRef)) {
@@ -288,18 +293,19 @@ public class KoyaFileFolderActivityPoster implements InitializingBean {
 		}
 	}
 
+	/*
+	 * ===== Private Utils ======
+	 */
+
 	private void postFileFolderActivity(String activityType, String path,
 			NodeRef parentNodeRef, NodeRef nodeRef, String siteId, String name,
 			Company parentCompany, Dossier parentDossier) {
-		logger.error("activity type =" + activityType);
 
-		JSONObject json = createActivityJSON(getCurrentTenantDomain(), path,
-				parentNodeRef, nodeRef, name, parentCompany, parentDossier);
+		JSONObject json = createActivityJSON(path, parentNodeRef, nodeRef,
+				name, parentCompany, parentDossier);
 
-		logger.error(json.toString());
-
-		activityService.postActivity(activityType, siteId, APP_TOOL,
-				json.toString());
+		activityService.postActivity(activityType, siteId,
+				NotificationType.KOYA_APPTOOL, json.toString());
 	}
 
 	/**
@@ -312,9 +318,9 @@ public class KoyaFileFolderActivityPoster implements InitializingBean {
 	 * @throws WebDAVServerException
 	 * @return JSONObject
 	 */
-	private JSONObject createActivityJSON(String tenantDomain, String path,
-			NodeRef parentNodeRef, NodeRef nodeRef, String fileName,
-			Company parentCompany, Dossier parentDossier) {
+	private JSONObject createActivityJSON(String path, NodeRef parentNodeRef,
+			NodeRef nodeRef, String fileName, Company parentCompany,
+			Dossier parentDossier) {
 		JSONObject json = new JSONObject();
 		try {
 			json.put("nodeRef", nodeRef);
@@ -333,11 +339,6 @@ public class KoyaFileFolderActivityPoster implements InitializingBean {
 			}
 			json.put("title", fileName);
 
-			if (!tenantDomain.equals(TenantService.DEFAULT_DOMAIN)) {
-				// Only used in multi-tenant setups.
-				json.put("tenantDomain", tenantDomain);
-			}
-
 			if (parentCompany != null) {
 				json.put("koyaParentCompanyNodeRef", parentCompany.getNodeRef()
 						.toString());
@@ -355,6 +356,60 @@ public class KoyaFileFolderActivityPoster implements InitializingBean {
 		}
 
 		return json;
+	}
+
+	protected String getShareActivityData(User invitee, String inviter,
+			Space space) throws KoyaServiceException {
+		try {
+
+			JSONObject activityData = new JSONObject();
+			activityData.put("email", invitee.getEmail());
+			activityData.put("firstname", invitee.getFirstName());
+			activityData.put("lastname", invitee.getName());
+			activityData.put("spaceNodeRef", space.getNodeRef());
+			activityData.put("inviter", inviter);
+			return activityData.toString();
+		} catch (JSONException jsonEx) {
+			throw new KoyaServiceException(0);// TODO define error code
+		}
+
+	}
+
+	private boolean isFolder(NodeRef nodeRef) {
+		QName typeQName = nodeService.getType(nodeRef);
+		FileFolderServiceType type = fileFolderService.getType(typeQName);
+		boolean isFolder = type.equals(FileFolderServiceType.FOLDER);
+		return isFolder;
+	}
+
+	private final String getPathFromNode(NodeRef rootNodeRef, NodeRef nodeRef)
+			throws FileNotFoundException {
+		// Check if the nodes are valid, or equal
+		if (rootNodeRef == null || nodeRef == null)
+			throw new IllegalArgumentException(
+					"Invalid node(s) in getPathFromNode call");
+
+		// short cut if the path node is the root node
+		if (rootNodeRef.equals(nodeRef))
+			return "";
+
+		// get the path elements
+		List<FileInfo> pathInfos = fileFolderService.getNamePath(rootNodeRef,
+				nodeRef);
+
+		// build the path string
+		StringBuilder sb = new StringBuilder(pathInfos.size() * 20);
+		for (FileInfo fileInfo : pathInfos) {
+			sb.append(PathSeperatorChar);
+			sb.append(fileInfo.getName());
+		}
+		// done
+		if (logger.isDebugEnabled()) {
+			logger.debug("Build name path for node: \n" + "   root: "
+					+ rootNodeRef + "\n" + "   target: " + nodeRef + "\n"
+					+ "   path: " + sb);
+		}
+		return sb.toString();
 	}
 
 	public static class KoyaActivityInfo {

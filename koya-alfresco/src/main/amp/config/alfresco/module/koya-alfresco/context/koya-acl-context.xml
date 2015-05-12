@@ -65,7 +65,7 @@
         <property name="companyAclService" ref="companyAclService"/>
         <property name="transactionService" ref="transactionService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
-        <property name="actionService" ref="ActionService"/>
+        <property name="koyaActivityPoster" ref="koyaActivityPoster"/>
     </bean>
     
     
