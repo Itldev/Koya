@@ -42,6 +42,7 @@ import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
@@ -213,24 +214,29 @@ public class KoyaMailService implements InitializingBean {
 	}
 
 	/**
-	 * TODO Remove as direct share notif not used anymore
-	 * 
-	 * TODO Remove assocated template
 	 * 
 	 */
-	@Deprecated
-	public void sendShareNotifMail(User sender, String destMail, Company c,
+	public void sendShareNotifMail(String destUserName, String inviterUserName,
 			final NodeRef sharedNodeRef) throws KoyaServiceException {
+
+		final Space s = koyaNodeService.getKoyaNode(sharedNodeRef, Space.class);
+		final Company c = koyaNodeService.getFirstParentOfType(sharedNodeRef,
+				Company.class);
+		User u = userService.getUser(destUserName);
+
+		if(logger.isDebugEnabled()){
+			logger.debug("Alert Email - Share : space " + s.getTitle()
+					+ ";user " + u.getEmail());
+		}
+		
 		Map<String, Serializable> paramsMail = new HashMap<>();
-		paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
+		paramsMail.put(MailActionExecuter.PARAM_TO, u.getEmail());
 
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE,
 				getFileTemplateRef(shareNotificationTemplateLocation));
 
 		// TODO i18n templates
 		Map<String, Serializable> templateModel = new HashMap<>();
-
-		final KoyaNode s = koyaNodeService.getKoyaNode(sharedNodeRef);
 
 		/**
 		 * Model Objects
@@ -245,8 +251,12 @@ public class KoyaMailService implements InitializingBean {
 
 		templateModel.put("koyaClient", koyaClientParams);
 
-		templateModel.put("inviter", new ScriptNode(sender.getNodeRef(),
-				serviceRegistry));
+		if (inviterUserName != null) {
+			User inviter = userService.getUser(inviterUserName);
+			templateModel.put("inviter", new ScriptNode(inviter.getNodeRef(),
+					serviceRegistry));
+		}
+
 		templateModel.put(TemplateService.KEY_COMPANY_HOME,
 				repositoryHelper.getCompanyHome());
 		templateModel.put("company", companyPropertiesService.getProperties(c)

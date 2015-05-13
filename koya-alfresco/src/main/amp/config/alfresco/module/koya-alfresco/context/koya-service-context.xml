@@ -230,5 +230,22 @@
 		<property name="userService" ref="userService"/>
 		<property name="companyAclService" ref="companyAclService"/>
 	</bean>
-   
+
+
+
+    <!--  Import feedNotifier bean from the ActivitiesFeed subsystem -->
+    <bean id="feedNotifier" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
+        <property name="sourceApplicationContextFactory">
+            <ref bean="ActivitiesFeed"/>
+        </property>
+        <property name="sourceBeanName">
+            <value>feedNotifier</value>
+        </property>
+        <property name="interfaces">
+            <list>
+                <value>org.alfresco.repo.activities.feed.FeedNotifier</value>
+            </list>
+        </property>
+    </bean>
+
 </beans>

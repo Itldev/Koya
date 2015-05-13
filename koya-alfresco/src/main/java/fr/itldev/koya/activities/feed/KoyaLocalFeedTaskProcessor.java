@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.model.NotificationType;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
@@ -41,6 +42,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 			.getLog(KoyaLocalFeedTaskProcessor.class);
 	private SiteService siteService;
 	private PermissionService permissionService;
+	private KoyaMailService koyaMailService;
 
 	@Override
 	public void setPermissionService(PermissionService permissionService) {
@@ -52,6 +54,10 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	public void setSiteService(SiteService siteService) {
 		super.setSiteService(siteService);
 		this.siteService = siteService;
+	}
+
+	public void setKoyaMailService(KoyaMailService koyaMailService) {
+		this.koyaMailService = koyaMailService;
 	}
 
 	public void process(int jobTaskNode, long minSeq, long maxSeq, RepoCtx ctx)
@@ -83,7 +89,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 			}
 
 			// for each activity post ...
-			for (ActivityPostEntity activityPost : activityPosts) {
+			for (final ActivityPostEntity activityPost : activityPosts) {
 
 				// Get recipients of this post
 				Set<String> recipients = getRecipients(activityPost);
@@ -128,6 +134,51 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 							ActivityPostEntity.STATUS.PROCESSED);
 
 					commitTransaction();
+
+					// Send email alerts
+					if (Arrays.asList(SHARING_ACTIVITIES).contains(
+							activityPost.getActivityType())) {
+						// TODO Alert for company users
+
+						// external user sharing notification mail
+						if (listCompanyMembers(activityPost.getSiteNetwork(),
+								SitePermission.CONSUMER).contains(
+								activityPost.getUserId())) {
+
+							AuthenticationUtil
+									.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
+										@Override
+										public Void doWork() throws Exception {
+											Map<String, Object> activityPostData = null;
+											try {
+												activityPostData = new ObjectMapper().readValue(
+														activityPost
+																.getActivityData(),
+														Map.class);
+
+												NodeRef spaceNodeRef = new NodeRef(
+														activityPostData.get(
+																"spaceNodeRef")
+																.toString());
+												// TODO inviter parameter
+												koyaMailService.sendShareNotifMail(
+														activityPost
+																.getUserId(),
+														null, spaceNodeRef);
+											} catch (Exception e) {
+												logger.warn("Failed to send alert mail : "
+														+ e.toString());
+											}
+											return null;
+										}
+									});
+
+						}
+					}
+
+					/**
+					 * 
+					 */
 
 					if (logger.isDebugEnabled()) {
 						logger.debug("Processed: "
@@ -237,17 +288,8 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 		 */
 		if (Arrays.asList(COMPANYMEMBERSHIP_ACTIVITIES).contains(
 				activityPost.getActivityType())) {
-
-			return AuthenticationUtil
-					.runAsSystem(new AuthenticationUtil.RunAsWork<Set<String>>() {
-						@Override
-						public Set<String> doWork() throws Exception {
-							return siteService.listMembers(
-									activityPost.getSiteNetwork(), "",
-									SitePermission.MANAGER.toString(), -1)
-									.keySet();
-						}
-					});
+			return listCompanyMembers(activityPost.getSiteNetwork(),
+					SitePermission.MANAGER);
 		}
 
 		logger.warn("Unhandled Activity type : "
@@ -279,6 +321,19 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 
 						}
 						return usersId;
+					}
+				});
+	}
+
+	public Set<String> listCompanyMembers(final String companyName,
+			final SitePermission permission) {
+
+		return AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<Set<String>>() {
+					@Override
+					public Set<String> doWork() throws Exception {
+						return siteService.listMembers(companyName, "",
+								permission.toString(), -1).keySet();
 					}
 				});
 	}

@@ -106,11 +106,11 @@
               <value>alfresco/templates/activities</value>
           </list>
       </property>            
+      
+      <property name="koyaMailService" ref="koyaMailService"/>
    </bean>
    
-<!-- cf    /home/chris/contribsrc/alfresco/root/projects/repository/source/java/org/alfresco/repo/activities/feed -->
-   
-   <bean id="feedNotifier" class="fr.itldev.koya.activities.feed.FeedNotifierImpl">
+   <bean id="feedNotifier" class="org.alfresco.repo.activities.feed.FeedNotifierImpl">
       <property name="personService" ref="PersonService"/>
       <property name="nodeService" ref="NodeService"/>
       <property name="jobLockService" ref="JobLockService"/>
