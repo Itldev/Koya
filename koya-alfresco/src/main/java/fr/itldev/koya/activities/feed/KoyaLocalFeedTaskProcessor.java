@@ -24,7 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.NotificationType;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
@@ -43,6 +47,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	private SiteService siteService;
 	private PermissionService permissionService;
 	private KoyaMailService koyaMailService;
+	private KoyaNodeService koyaNodeService;
 
 	@Override
 	public void setPermissionService(PermissionService permissionService) {
@@ -54,6 +59,10 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	public void setSiteService(SiteService siteService) {
 		super.setSiteService(siteService);
 		this.siteService = siteService;
+	}
+
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
 	}
 
 	public void setKoyaMailService(KoyaMailService koyaMailService) {
@@ -161,7 +170,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 																"spaceNodeRef")
 																.toString());
 												// TODO inviter parameter
-												koyaMailService.sendShareNotifMail(
+												koyaMailService.sendShareAlertMail(
 														activityPost
 																.getUserId(),
 														null, spaceNodeRef);
@@ -270,10 +279,38 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 
 			// TODO refnode can be null : on node deleted
 
-			spaceNodeRef = new NodeRef(activityPostData.get("nodeRef")
-					.toString());
+			String referenceNodeRef = "";
+
+			if (activityPostData.get("nodeRef") != null) {
+				referenceNodeRef = activityPostData.get("nodeRef").toString();
+			} else {
+				referenceNodeRef = activityPostData.get("parentNodeRef")
+						.toString();
+			}
+
+			Space s = null;
+			try {
+
+				final NodeRef n = new NodeRef(referenceNodeRef);
+
+				s = AuthenticationUtil
+						.runAsSystem(new AuthenticationUtil.RunAsWork<Space>() {
+							@Override
+							public Space doWork() throws Exception {
+
+								return koyaNodeService.getFirstParentOfType(n,
+										Space.class);
+							}
+						});
+
+			} catch (Exception e) {
+				logger.error("File Folder Activity generation failed : Unable to find parent dossier"
+						+ e.toString());
+				return new HashSet<>();
+			}
+
 			// return list of members or responsibles of space
-			return listUsersWithPermission(spaceNodeRef,
+			return listUsersWithPermission(s.getNodeRef(),
 					KoyaPermissionCollaborator.RESPONSIBLE,
 					KoyaPermissionCollaborator.MEMBER,
 					KoyaPermissionConsumer.CLIENT,

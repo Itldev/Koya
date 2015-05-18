@@ -164,7 +164,7 @@ public class KoyaInviteSender extends InviteSender {
 			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE,
 					getEmailTemplateNodeRef());
 
-			Map<String, Serializable> templateModel = buildMailTextModel(
+			Map<String, Object> templateModel = buildMailTextModel(
 					properties, inviter, invitee);
 			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,
 					(Serializable) templateModel);
@@ -216,12 +216,12 @@ public class KoyaInviteSender extends InviteSender {
 		}
 	}
 
-	private Map<String, Serializable> buildMailTextModel(
+	private Map<String, Object> buildMailTextModel(
 			final Map<String, String> properties, NodeRef inviter,
 			NodeRef invitee) {
 		// Set the core model parts
 		// Note - the user part is skipped, as that's implied via the run-as
-		Map<String, Serializable> model = new HashMap<String, Serializable>();
+		Map<String, Object> model = new HashMap<>();
 		model.put(TemplateService.KEY_COMPANY_HOME, repository.getCompanyHome());
 		model.put(TemplateService.KEY_USER_HOME,
 				repository.getUserHome(inviter));

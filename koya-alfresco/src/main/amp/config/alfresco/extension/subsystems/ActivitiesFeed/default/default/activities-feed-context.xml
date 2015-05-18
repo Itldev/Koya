@@ -108,6 +108,7 @@
       </property>            
       
       <property name="koyaMailService" ref="koyaMailService"/>
+       <property name="koyaNodeService" ref="koyaNodeService"/>
    </bean>
    
    <bean id="feedNotifier" class="org.alfresco.repo.activities.feed.FeedNotifierImpl">
@@ -127,23 +128,24 @@
    </bean>
    
    <!--  Feed Email Notifier -->
-    
-   <bean id="emailUserNotifier" class="org.alfresco.repo.activities.feed.EmailUserNotifier">
-      <property name="activitiesFeedModdelBuilderFactory" ref="feedModelBuilderFactory"/>
-      <property name="activityService" ref="activityService"/>
-      <property name="namespaceService" ref="NamespaceService"/>
-      <property name="repoAdminService" ref="repoAdminService"/>
-      <property name="nodeService" ref="NodeService"/>
-      <property name="siteService" ref="SiteService"/>
-      <property name="actionService" ref="ActionService"/>
-      <property name="authenticationContext" ref="authenticationContext"/>
-      <property name="excludedEmailSuffixes">
-          <list>
-              <value>admin@alfresco.com</value>
-              <value>_import@alfresco.com</value>
-          </list>
-      </property>
-   </bean>
+
+	<bean id="emailUserNotifier" class="fr.itldev.koya.activities.feed.KoyaEmailUserNotifier">
+		<property name="activitiesFeedModdelBuilderFactory" ref="feedModelBuilderFactory" />
+		<property name="activityService" ref="activityService" />
+		<property name="namespaceService" ref="NamespaceService" />
+		<property name="repoAdminService" ref="repoAdminService" />
+		<property name="nodeService" ref="NodeService" />
+		<property name="siteService" ref="SiteService" />
+		<property name="actionService" ref="ActionService" />
+		<property name="authenticationContext" ref="authenticationContext" />
+		<property name="excludedEmailSuffixes">
+			<list>
+				<value>admin@alfresco.com</value>
+				<value>_import@alfresco.com</value>
+			</list>
+		</property>
+		<property name="koyaMailService" ref="koyaMailService" />
+	</bean>
    
    <bean id="feedModelBuilderFactory" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
       <property name="targetBeanName" value="feedModelBuilderPrototype"/>

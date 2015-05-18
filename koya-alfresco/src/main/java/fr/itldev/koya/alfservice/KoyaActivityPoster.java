@@ -363,9 +363,9 @@ public class KoyaActivityPoster implements InitializingBean {
 		try {
 
 			JSONObject activityData = new JSONObject();
-			activityData.put("email", invitee.getEmail());
-			activityData.put("firstname", invitee.getFirstName());
-			activityData.put("lastname", invitee.getName());
+			activityData.put("email", invitee.getEmail());				
+			activityData.put("spaceTitle", space.getTitle());
+			
 			activityData.put("spaceNodeRef", space.getNodeRef());
 			activityData.put("inviter", inviter);
 			return activityData.toString();

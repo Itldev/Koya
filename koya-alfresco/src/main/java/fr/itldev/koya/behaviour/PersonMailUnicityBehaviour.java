@@ -68,16 +68,21 @@ public class PersonMailUnicityBehaviour implements
     public void onCreateNode(ChildAssociationRef childAssocRef) {
 
         final NodeRef person = childAssocRef.getChildRef();
+        
         AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Object>() {
             @Override
             public Object doWork() throws Exception {
                 String mail = (String) nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+                		//Bugfix prevent mailNotif exception with deleted users TODO find reason
+						if (mail != null && !mail.isEmpty()) {
+							// add koya:mailunique aspect on person --> execute
+							// mail unicity constraint
+							final Map<QName, Serializable> props = new HashMap<>();
+							props.put(KoyaModel.PROP_MAIL, mail);
 
-                //add koya:mailunique aspect on person --> execute mail unicity constraint
-                final Map<QName, Serializable> props = new HashMap<>();
-                props.put(KoyaModel.PROP_MAIL, mail);
-
-                nodeService.addAspect(person, KoyaModel.ASPECT_MAILUNIQUE, props);
+							nodeService.addAspect(person,
+									KoyaModel.ASPECT_MAILUNIQUE, props);
+						}
                 return null;
             }
         });
@@ -92,7 +97,9 @@ public class PersonMailUnicityBehaviour implements
         AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< Object>() {
             @Override
             public Object doWork() throws Exception {
-
+            	//Bugfix prevent mailNotif exception with deleted users TODO find reason
+            	if(mailAfterModif != null && !mailAfterModif.isEmpty()){
+            	
                 //Add MailUnique Aspect if not already present
                 if (!nodeService.hasAspect(nodeRef, KoyaModel.ASPECT_MAILUNIQUE)) {
                     Map<QName, Serializable> props = new HashMap<>();
@@ -100,6 +107,7 @@ public class PersonMailUnicityBehaviour implements
                 }
 
                 nodeService.setProperty(nodeRef, KoyaModel.PROP_MAIL, mailAfterModif);
+            	}
                 return null;
             }
         });
