@@ -114,6 +114,7 @@ public interface KoyaErrorCodes {
     public static final Integer SECU_CONFIDENTIAL_FLAG_TYPE_ERROR = 806;
     public static final Integer SECU_CONFIDENTIAL_USER_CANT_TOGGLE_FLAG = 807;
     public static final Integer SECU_USER_MUSTBE_MEMBER_OR_RESPONSIBLE_TO_SHARE = 808;
+    public static final Integer SECU_USER_ALREADY_HAVE_PERMISSION_ON_SPACE = 809;
 
     
 

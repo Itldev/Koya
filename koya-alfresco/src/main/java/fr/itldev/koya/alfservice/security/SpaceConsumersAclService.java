@@ -1,6 +1,11 @@
 package fr.itldev.koya.alfservice.security;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
+import org.alfresco.service.cmr.security.AccessPermission;
 import org.apache.log4j.Logger;
 
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -55,10 +60,9 @@ public class SpaceConsumersAclService extends SpaceAclService {
 		// already exists in alfresco
 		if (userPermissionInCompany == null) {
 			logger.info("[Invite] : {'invitee':'" + userMail + "','company':'"
-				+ company + "','permission':'" + SitePermission.CONSUMER + "}");
-			
-			
-			
+					+ company + "','permission':'" + SitePermission.CONSUMER
+					+ "}");
+
 			invitation = companyAclService.inviteMember(company, userMail,
 					SitePermission.CONSUMER, space);
 
@@ -67,6 +71,29 @@ public class SpaceConsumersAclService extends SpaceAclService {
 		}
 
 		final User u = userService.getUserByEmailFailOver(userMail);
+
+		/**
+		 * User should not already have any permission on node
+		 * 
+		 */
+		AccessPermission existingPermission = AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<AccessPermission>() {
+					@Override
+					public AccessPermission doWork() throws Exception {
+						for (AccessPermission ap : permissionService
+								.getAllSetPermissions(space.getNodeRef())) {
+							if (ap.getAuthority().equals(u.getUserName())) {
+								return ap;
+							}
+						}
+						return null;
+					}
+				});
+						
+		if(existingPermission != null){
+			throw new KoyaServiceException(KoyaErrorCodes.SECU_USER_ALREADY_HAVE_PERMISSION_ON_SPACE);
+		}
+		
 
 		// Now user should exist for company as a site Consumer member
 		if (userPermissionInCompany.equals(SitePermission.CONSUMER)) {
