@@ -32,7 +32,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
- * Return True if given inviteId matches a pendinf invitation
+ * Return True if given inviteId matches a pending invitation
  *
  */
 public class GetInvitationPending extends AbstractWebScript {

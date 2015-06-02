@@ -145,6 +145,7 @@
 			</list>
 		</property>
 		<property name="koyaMailService" ref="koyaMailService" />
+		<property name="companyAclService" ref="companyAclService"/>
 	</bean>
    
    <bean id="feedModelBuilderFactory" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">

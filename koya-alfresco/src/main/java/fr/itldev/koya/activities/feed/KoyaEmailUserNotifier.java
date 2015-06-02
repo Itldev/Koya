@@ -9,6 +9,8 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.activities.feed.ActivitiesFeedModelBuilder;
 import org.alfresco.repo.activities.feed.EmailUserNotifier;
 import org.alfresco.repo.domain.activities.ActivityFeedEntity;
+import org.alfresco.repo.security.authentication.AuthenticationContext;
+import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.TemplateService;
 import org.alfresco.service.namespace.NamespaceException;
@@ -18,13 +20,32 @@ import org.alfresco.util.Pair;
 import org.json.JSONException;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
 	protected KoyaMailService koyaMailService;
+	protected CompanyAclService companyAclService;
 
 	public void setKoyaMailService(KoyaMailService koyaMailService) {
 		this.koyaMailService = koyaMailService;
+	}
+
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
+
+	/**
+	 * Skip User if he has a pending invitation on company
+	 * 
+	 * @return
+	 */
+	private Boolean skipUserOnCompany(String companyName, String userName) {
+		
+		List<Invitation> invitations = companyAclService.getPendingInvite(
+				companyName, null, userName);
+		return invitations != null && invitations.size() == 1;
 	}
 
 	public Pair<Integer, Long> notifyUser(final NodeRef personNodeRef,
@@ -58,37 +79,44 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 		if (feedEntries.size() > 0) {
 
 			Map<String, ActivitiesFeedModelBuilder> companyModelBuilder = new HashMap<>();
+			Map<String, Boolean> skipUserPendingInvite = new HashMap<>();
 
 			for (ActivityFeedEntity feedEntry : feedEntries) {
 
 				String companyName = feedEntry.getSiteNetwork();
 				ActivitiesFeedModelBuilder modelBuilder;
-				// select company model builder. Creates if not exists
 
-				if (!companyModelBuilder.containsKey(companyName)) {
-					try {
-						companyModelBuilder.put(companyName,
-								activitiesFeedModelBuilderFactory.getObject());
-					} catch (Exception error) {
-						logger.warn("Unable to create model builder for company '"
-								+ companyName + "' : " + error.getMessage());
-						return null;
-					}
+				if (!skipUserPendingInvite.containsKey(companyName)) {
+					skipUserPendingInvite.put(companyName,
+							skipUserOnCompany(companyName, feedUserId));
 				}
-				modelBuilder = companyModelBuilder.get(companyName);
 
-				try {
-					modelBuilder.addAcctivitiyFeedEntry(feedEntry);
+				// Add activity to model if user is not skiped because of
+				// pending invite
+				if (!skipUserPendingInvite.get(companyName)) {
+					// select company model builder. Creates if not exists
 
-					// desactivé
-					//
-					// String siteId = feedEntry.getSiteNetwork();
-					// // addSiteName(siteId, siteNames);
-				} catch (JSONException je) {
-					// skip this feed entry
-					logger.warn("Skip feed entry for user (" + feedUserId
-							+ "): " + je.getMessage());
-					continue;
+					if (!companyModelBuilder.containsKey(companyName)) {
+						try {
+							companyModelBuilder.put(companyName,
+									activitiesFeedModelBuilderFactory
+											.getObject());
+						} catch (Exception error) {
+							logger.warn("Unable to create model builder for company '"
+									+ companyName + "' : " + error.getMessage());
+							return null;
+						}
+					}
+					modelBuilder = companyModelBuilder.get(companyName);
+
+					try {
+						modelBuilder.addAcctivitiyFeedEntry(feedEntry);
+					} catch (JSONException je) {
+						// skip this feed entry
+						logger.warn("Skip feed entry for user (" + feedUserId
+								+ "): " + je.getMessage());
+						continue;
+					}
 				}
 			}
 
@@ -132,7 +160,7 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 					if (modelBuilder.getMaxFeedId() > maxFeedId) {
 						maxFeedId = modelBuilder.getMaxFeedId();
 					}
-					
+
 					// send with koyaMail
 					koyaMailService.sendUserNotifMail(personNodeRef, model,
 							templateNodeRef, companyName);

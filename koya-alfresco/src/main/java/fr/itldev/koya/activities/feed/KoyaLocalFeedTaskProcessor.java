@@ -15,6 +15,7 @@ import org.alfresco.repo.activities.feed.local.LocalFeedTaskProcessor;
 import org.alfresco.repo.domain.activities.ActivityFeedEntity;
 import org.alfresco.repo.domain.activities.ActivityPostEntity;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.site.SiteDoesNotExistException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -25,9 +26,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.NotificationType;
-import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
@@ -369,8 +368,14 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				.runAsSystem(new AuthenticationUtil.RunAsWork<Set<String>>() {
 					@Override
 					public Set<String> doWork() throws Exception {
-						return siteService.listMembers(companyName, "",
-								permission.toString(), -1).keySet();
+
+						try {
+							return siteService.listMembers(companyName, "",
+									permission.toString(), -1).keySet();
+						} catch (SiteDoesNotExistException ex) {
+							//silently catch site doesn't exists exception
+							return new HashSet<>();
+						}
 					}
 				});
 	}
