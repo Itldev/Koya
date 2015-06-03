@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.UserTransaction;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.LuceneUtils;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -38,6 +40,7 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespacePrefixResolver;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
@@ -62,6 +65,7 @@ public class DossierService {
     private KoyaNodeService koyaNodeService;
     protected SearchService searchService;
     private NamespacePrefixResolver prefixResolver;
+    private TransactionService transactionService;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
     public void setNodeService(NodeService nodeService) {
@@ -79,8 +83,12 @@ public class DossierService {
     public void setPrefixResolver(NamespacePrefixResolver prefixResolver) {
         this.prefixResolver = prefixResolver;
     }
+    
+    public void setTransactionService(TransactionService transactionService) {
+		this.transactionService = transactionService;
+	}
 
-    // </editor-fold>
+	// </editor-fold>
     /**
      *
      * @param title
@@ -237,7 +245,7 @@ public class DossierService {
         // get dossier
         try {
             NodeRef n = null;
-            Dossier d = koyaNodeService
+            final Dossier d = koyaNodeService
                     .getFirstParentOfType(nodeRef, Dossier.class);
             if (d != null) {
 
@@ -253,10 +261,10 @@ public class DossierService {
                         .runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
                             @Override
                             public Object doWork() throws Exception {
-                                //Quick and Dirty hack to avoid multiple files uploads faillure
-//                                UserTransaction transaction = transactionService.getNonPropagatingUserTransaction();
+                                //Quick and Dirty hack to avoid multiple files uploads failure
+                                UserTransaction transaction = transactionService.getNonPropagatingUserTransaction();
                                 try {
-//                                    transaction.begin();
+                                    transaction.begin();
 
                                     // Add lastModified Aspect if not already
                                     // present
@@ -273,10 +281,10 @@ public class DossierService {
                                             new Date());
                                     nodeService.setProperty(dossierNodeRef,
                                             KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
-//                                    transaction.commit();
+                                    transaction.commit();
                                 } catch (Exception cfe) {
-                                    // logger.warn("ConcurrencyFailureException on dossier " + d.getTitle());
-//                                    transaction.rollback();
+                                    logger.debug("ConcurrencyFailureException on dossier " + d.getTitle());
+                                    transaction.rollback();
                                 }
                                 return null;
                             }

@@ -81,6 +81,7 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="searchService" ref="searchService"/>
         <property name="prefixResolver" ref="namespaceService" />
+        <property name="transactionService" ref="transactionService"/>
     </bean>
 
     <!--Contents handling service-->
