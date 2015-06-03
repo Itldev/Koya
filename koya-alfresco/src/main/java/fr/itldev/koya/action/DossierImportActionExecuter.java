@@ -332,7 +332,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 		}
 
 		for (Dossier d : modifiedDossiers) {
-			dossierService.addOrUpdateLastModifiedDate(d.getNodeRef());
+			dossierService.updateLastModificationDate(d);
 		}
 
 	}

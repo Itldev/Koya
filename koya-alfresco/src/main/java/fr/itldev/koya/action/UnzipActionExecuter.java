@@ -18,19 +18,21 @@
  */
 package fr.itldev.koya.action;
 
-import fr.itldev.koya.alfservice.DossierService;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.ParameterDefinitionImpl;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
@@ -43,16 +45,13 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.util.TempFileProvider;
 import org.apache.log4j.Logger;
 
+import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.utils.Zips;
-import java.util.HashSet;
-import java.util.Set;
-import org.alfresco.repo.policy.BehaviourFilter;
-import org.alfresco.service.cmr.model.FileFolderService;
-import org.alfresco.service.cmr.model.FileInfo;
-import org.alfresco.service.cmr.repository.ContentWriter;
 
 public class UnzipActionExecuter extends ActionExecuterAbstractBase {
 
@@ -69,7 +68,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     private ContentService contentService;
     private NamespaceService namespaceService;
     private BehaviourFilter policyBehaviourFilter;
-    private FileFolderService fileFolderService;
+    private KoyaNodeService koyaNodeService;
 
     private KoyaContentService koyaContentService;
     private DossierService dossierService;
@@ -93,8 +92,8 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
         this.policyBehaviourFilter = policyBehaviourFilter;
     }
 
-    public void setFileFolderService(FileFolderService fileFolderService) {
-        this.fileFolderService = fileFolderService;
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
     }
 
     public void setKoyaContentService(KoyaContentService koyaContentService) {
@@ -128,8 +127,8 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                 // (LastModificationDateBehaviour)
                 policyBehaviourFilter
                         .disableBehaviour(ContentModel.ASPECT_AUDITABLE);
-                String zipName = (String) nodeService.getProperty(
-                        actionedUponNodeRef, ContentModel.PROP_NAME);
+//                String zipName = (String) nodeService.getProperty(
+//                        actionedUponNodeRef, ContentModel.PROP_NAME);
 
                 StringBuffer sbLog = new StringBuffer();
 
@@ -166,10 +165,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
                         logger.debug("Unzip Complete : "
                                 + nodeService.getPath(actionedUponNodeRef)
                                         .toPrefixString(namespaceService));
-
-                        // Update the modification date on the dossier
-                        dossierService
-                                .addOrUpdateLastModifiedDate(actionedUponNodeRef);
+                       
                     }
 
                 } catch (KoyaServiceException kse) {
@@ -200,7 +196,14 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
             }
 
             try {
-                nodeService.deleteNode(actionedUponNodeRef);
+                
+                
+                // Update the modification date on the parent dossier                
+              Dossier d = koyaNodeService.getFirstParentOfType(actionedUponNodeRef,
+						Dossier.class);
+              
+              nodeService.deleteNode(actionedUponNodeRef);
+              dossierService.updateLastModificationDate(d);
             } catch (Exception ex) {
                 throw new AlfrescoRuntimeException(ex.getMessage(), ex);
             }
