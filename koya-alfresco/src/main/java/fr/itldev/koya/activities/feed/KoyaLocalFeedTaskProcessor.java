@@ -2,6 +2,7 @@ package fr.itldev.koya.activities.feed;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.activities.feed.RepoCtx;
 import org.alfresco.repo.activities.feed.local.LocalFeedTaskProcessor;
@@ -17,6 +19,7 @@ import org.alfresco.repo.domain.activities.ActivityPostEntity;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteDoesNotExistException;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteService;
@@ -26,7 +29,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.NotificationType;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
@@ -47,6 +52,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	private PermissionService permissionService;
 	private KoyaMailService koyaMailService;
 	private KoyaNodeService koyaNodeService;
+	private NodeService nodeService;
 
 	@Override
 	public void setPermissionService(PermissionService permissionService) {
@@ -58,6 +64,12 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	public void setSiteService(SiteService siteService) {
 		super.setSiteService(siteService);
 		this.siteService = siteService;
+	}
+
+	@Override
+	public void setNodeService(NodeService nodeService) {
+		super.setNodeService(nodeService);
+		this.nodeService = nodeService;
 	}
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
@@ -110,10 +122,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				try {
 					startTransaction();
 
-					int excludedConnections = 0;
-
 					for (String recipient : recipients) {
-
 						ActivityFeedEntity feed = new ActivityFeedEntity();
 
 						// Generate activity feed summary
@@ -143,61 +152,23 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 
 					commitTransaction();
 
-					// Send email alerts
-					if (Arrays.asList(SHARING_ACTIVITIES).contains(
-							activityPost.getActivityType())) {
-						// TODO Alert for company users
-
-						// external user sharing notification mail
-						if (listCompanyMembers(activityPost.getSiteNetwork(),
-								SitePermission.CONSUMER).contains(
-								activityPost.getUserId())) {
-
-							AuthenticationUtil
-									.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
-										@Override
-										public Void doWork() throws Exception {
-											Map<String, Object> activityPostData = null;
-											try {
-												activityPostData = new ObjectMapper().readValue(
-														activityPost
-																.getActivityData(),
-														Map.class);
-
-												NodeRef spaceNodeRef = new NodeRef(
-														activityPostData.get(
-																"spaceNodeRef")
-																.toString());
-												// TODO inviter parameter
-												koyaMailService.sendShareAlertMail(
-														activityPost
-																.getUserId(),
-														null, spaceNodeRef);
-											} catch (Exception e) {
-												logger.warn("Failed to send alert mail : "
-														+ e.toString());
-											}
-											return null;
-										}
-									});
-
-						}
-					}
-
-					/**
-					 * 
-					 */
-
 					if (logger.isDebugEnabled()) {
-						logger.debug("Processed: "
-								+ (recipients.size() - excludedConnections)
+						logger.debug("Processed: " + recipients.size()
 								+ " connections for activity post "
-								+ activityPost.getId() + " (excluded "
-								+ excludedConnections + ")");
+								+ activityPost.getId() + ")");
 					}
 				} finally {
 					endTransaction();
 				}
+
+				// TODO do it in a new transaction
+				// Send email alerts
+				if (Arrays.asList(SHARING_ACTIVITIES).contains(
+						activityPost.getActivityType())) {
+					// TODO Alert for company users
+					sendShareNotificationMail(activityPost);
+				}
+
 			}
 		} catch (SQLException se) {
 			logger.error(se);
@@ -215,6 +186,40 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 					.append(System.currentTimeMillis() - startTime)
 					.append(" msecs)");
 			logger.info(sb.toString());
+		}
+	}
+
+	private void sendShareNotificationMail(final ActivityPostEntity activityPost) {
+		// external user sharing notification mail
+		if (listCompanyMembers(activityPost.getSiteNetwork(),
+				SitePermission.CONSUMER).contains(activityPost.getUserId())) {
+
+			AuthenticationUtil
+					.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
+						@Override
+						public Void doWork() throws Exception {
+							Map<String, Object> activityPostData = null;
+							try {
+								activityPostData = new ObjectMapper()
+										.readValue(
+												activityPost.getActivityData(),
+												Map.class);
+
+								NodeRef spaceNodeRef = new NodeRef(
+										activityPostData.get("spaceNodeRef")
+												.toString());
+								// TODO inviter parameter
+								koyaMailService.sendShareAlertMail(
+										activityPost.getUserId(), null,
+										spaceNodeRef);
+							} catch (Exception e) {
+								logger.warn("Failed to send alert mail : "
+										+ e.toString());
+							}
+							return null;
+						}
+					});
+
 		}
 	}
 
@@ -275,47 +280,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 		 */
 		if (Arrays.asList(FILEFOLDER_ACTIVITIES).contains(
 				activityPost.getActivityType())) {
-
-			// TODO refnode can be null : on node deleted
-
-			String referenceNodeRef = "";
-
-			if (activityPostData.get("nodeRef") != null) {
-				referenceNodeRef = activityPostData.get("nodeRef").toString();
-			} else {
-				referenceNodeRef = activityPostData.get("parentNodeRef")
-						.toString();
-			}
-
-			Space s = null;
-			try {
-
-				final NodeRef n = new NodeRef(referenceNodeRef);
-
-				s = AuthenticationUtil
-						.runAsSystem(new AuthenticationUtil.RunAsWork<Space>() {
-							@Override
-							public Space doWork() throws Exception {
-
-								return koyaNodeService.getFirstParentOfType(n,
-										Space.class);
-							}
-						});
-
-			} catch (Exception e) {
-				logger.error("File Folder Activity generation failed : Unable to find parent dossier"
-						+ e.toString());
-				return new HashSet<>();
-			}
-
-			// return list of members or responsibles of space
-			return listUsersWithPermission(s.getNodeRef(),
-					KoyaPermissionCollaborator.RESPONSIBLE,
-					KoyaPermissionCollaborator.MEMBER,
-					KoyaPermissionConsumer.CLIENT,
-					KoyaPermissionConsumer.CLIENTCONTRIBUTOR,
-					KoyaPermissionConsumer.PARTNER);
-
+			return getFileFolderActivityRecipents(activityPostData);
 		}
 
 		/**
@@ -332,6 +297,53 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				+ activityPost.getActivityType());
 
 		return new HashSet<>();
+	}
+
+	private Set<String> getFileFolderActivityRecipents(
+			final Map<String, Object> activityPostData) {
+		final String[] nodesCandidatesKeys = { "nodeRef", "parentNodeRef" };
+
+		Space s = AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<Space>() {
+					@Override
+					public Space doWork() throws Exception {
+						for (String nodeRefCandidate : nodesCandidatesKeys) {
+							try {
+								NodeRef candidate = new NodeRef(
+										activityPostData.get(nodeRefCandidate)
+												.toString());
+
+								if (nodeService.exists(candidate)) {
+									KoyaNode kn = koyaNodeService
+											.getKoyaNode(candidate);
+									if (kn.getClass().isAssignableFrom(
+											Dossier.class)) {
+										return (Space) kn;
+									}
+									return koyaNodeService
+											.getFirstParentOfType(candidate,
+													Dossier.class);
+								}
+							} catch (Exception e) {
+
+							}
+
+						}
+						return null;
+					}
+				});
+
+		if (s != null) {
+			// return list of members or responsibles of space
+			return listUsersWithPermission(s.getNodeRef(),
+					KoyaPermissionCollaborator.RESPONSIBLE,
+					KoyaPermissionCollaborator.MEMBER,
+					KoyaPermissionConsumer.CLIENT,
+					KoyaPermissionConsumer.CLIENTCONTRIBUTOR,
+					KoyaPermissionConsumer.PARTNER);
+		}
+		return new HashSet<String>();
+
 	}
 
 	public Set<String> listUsersWithPermission(final NodeRef n,
@@ -373,7 +385,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 							return siteService.listMembers(companyName, "",
 									permission.toString(), -1).keySet();
 						} catch (SiteDoesNotExistException ex) {
-							//silently catch site doesn't exists exception
+							// silently catch site doesn't exists exception
 							return new HashSet<>();
 						}
 					}
