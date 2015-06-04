@@ -280,7 +280,7 @@ public class DossierService {
 							/**silent concurency exception
 							 * If occurs, then node have update
 							 */
-							
+							transaction.rollback();
 						} catch (InvalidNodeRefException ie) {
 							// Occurs on dossier node creation because if
 							// separated transaction : no need to update this

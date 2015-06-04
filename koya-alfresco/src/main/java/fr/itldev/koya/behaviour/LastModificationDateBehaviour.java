@@ -112,8 +112,9 @@ public class LastModificationDateBehaviour implements
 			boolean isNodeArchived) {
 
 		if (existCondition(childAssocRef.getChildRef())
-				&& typeCondition(childAssocRef.getChildRef(),
-						ContentModel.TYPE_CONTENT)) {
+				&& (typeCondition(childAssocRef.getChildRef(),
+						ContentModel.TYPE_CONTENT) || typeCondition(
+						childAssocRef.getChildRef(), ContentModel.TYPE_FOLDER))) {
 
 			// failover find first parent of type dossier
 			try {
@@ -129,8 +130,9 @@ public class LastModificationDateBehaviour implements
 	@Override
 	public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
 		if (existCondition(nodeRef)
-				&& (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER) || typeCondition(
-						nodeRef, ContentModel.TYPE_CONTENT))) {
+				&& (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)
+						|| typeCondition(nodeRef, ContentModel.TYPE_CONTENT) || typeCondition(
+							nodeRef, ContentModel.TYPE_FOLDER))) {
 			// failover find first parent of type dossier
 			try {
 				Dossier d = koyaNodeService.getFirstParentOfType(nodeRef,
@@ -153,6 +155,12 @@ public class LastModificationDateBehaviour implements
 			}
 		}
 	}
+	
+	
+	//Add onCreateNode policy ? folder add ?
+	
+	
+	
 
 	private Boolean existCondition(NodeRef n) {
 		return nodeService.exists(n);
