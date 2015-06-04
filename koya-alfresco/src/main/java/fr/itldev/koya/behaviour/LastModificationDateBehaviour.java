@@ -110,9 +110,10 @@ public class LastModificationDateBehaviour implements
 	@Override
 	public void onDeleteNode(ChildAssociationRef childAssocRef,
 			boolean isNodeArchived) {
+
 		if (existCondition(childAssocRef.getChildRef())
-				&& !typeCondition(childAssocRef.getChildRef(),
-						KoyaModel.TYPE_DOSSIER)) {
+				&& typeCondition(childAssocRef.getChildRef(),
+						ContentModel.TYPE_CONTENT)) {
 
 			// failover find first parent of type dossier
 			try {
@@ -127,7 +128,9 @@ public class LastModificationDateBehaviour implements
 
 	@Override
 	public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
-		if (existCondition(nodeRef)) {
+		if (existCondition(nodeRef)
+				&& (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER) || typeCondition(
+						nodeRef, ContentModel.TYPE_CONTENT))) {
 			// failover find first parent of type dossier
 			try {
 				Dossier d = koyaNodeService.getFirstParentOfType(nodeRef,
@@ -143,16 +146,14 @@ public class LastModificationDateBehaviour implements
 	public void onAddAspect(NodeRef nodeRef, QName aspectTypeQName) {
 		if (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)) {
 			try {
-				Dossier d = koyaNodeService.getKoyaNode(nodeRef,
-						Dossier.class);
+				Dossier d = koyaNodeService.getKoyaNode(nodeRef, Dossier.class);
 				dossierService.updateLastModificationDate(d);
 			} catch (Exception e) {
 				// silently return
 			}
 		}
 	}
-	
-	
+
 	private Boolean existCondition(NodeRef n) {
 		return nodeService.exists(n);
 	}

@@ -45,6 +45,7 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
+import org.springframework.dao.ConcurrencyFailureException;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
@@ -275,6 +276,11 @@ public class DossierService {
 							transaction.commit();
 							logger.debug("Updated lastModificationDate of dossier : "
 									+ d.getTitle());
+						}catch(ConcurrencyFailureException cex){
+							/**silent concurency exception
+							 * If occurs, then node have update
+							 */
+							
 						} catch (InvalidNodeRefException ie) {
 							// Occurs on dossier node creation because if
 							// separated transaction : no need to update this
