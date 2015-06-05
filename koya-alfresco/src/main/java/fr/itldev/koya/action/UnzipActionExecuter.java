@@ -108,6 +108,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
         this.defaultZipCharset = defaultZipCharset;
     }
 
+
     public void setFailoverZipCharset(String failoverZipCharset) {
         this.failoverZipCharset = failoverZipCharset;
     }
@@ -213,10 +214,8 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Recursively import a directory structure into the specified root node
      *
-     * @param dir
-     *            The directory of files and folders to import
-     * @param root
-     *            The root node to import into
+     * @param dir The directory of files and folders to import
+     * @param root The root node to import into
      */
     private void importDirectory(String directory, NodeRef root,
             StringBuffer sbLog) {
@@ -295,8 +294,7 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Recursively delete a dir of files and directories
      *
-     * @param dir
-     *            directory to delete
+     * @param dir directory to delete
      */
     private static void deleteDir(File dir) {
         if (dir != null) {

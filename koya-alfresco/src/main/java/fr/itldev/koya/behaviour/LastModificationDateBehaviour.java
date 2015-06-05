@@ -21,11 +21,13 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 
+
 import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Dossier;
+
 
 /**
  * 
@@ -169,5 +171,4 @@ public class LastModificationDateBehaviour implements
 	private Boolean typeCondition(NodeRef n, QName type) {
 		return nodeService.getType(n).equals(type);
 	}
-
 }
