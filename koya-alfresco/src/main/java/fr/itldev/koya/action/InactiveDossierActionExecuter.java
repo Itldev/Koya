@@ -153,7 +153,6 @@ public class InactiveDossierActionExecuter extends ActionExecuterAbstractBase {
 
     @Override
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
-        logger.debug("addParameterDefinitions");
         paramList.add(new ParameterDefinitionImpl("dummy-param",
                 DataTypeDefinition.QNAME, true,
                 getParamDisplayLabel("dummy-param")));
