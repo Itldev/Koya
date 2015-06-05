@@ -292,10 +292,8 @@ public class KoyaMailService implements InitializingBean {
 		model.put("koyaClient", koyaClientParams);
 		model.put("company", companyPropertiesService
 				.getProperties(companyName).toHashMap());
-		
-		//Pour chaque activité : ajouter user mail correspondant + lien éléments
-		
-		logger.debug("User Notification mail model =" +model.toString());
+				
+		logger.trace("User Notification mail model =" +model.toString());
 
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,
 				(Serializable) model);
