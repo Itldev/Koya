@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.activities.feed.ActivitiesFeedModelBuilder;
 import org.alfresco.repo.activities.feed.EmailUserNotifier;
 import org.alfresco.repo.domain.activities.ActivityFeedEntity;
@@ -91,9 +92,13 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 							skipUserOnCompany(companyName, feedUserId));
 				}
 
+				Boolean skipUserJoined = feedEntry.getActivityType().equals(ActivityType.SITE_USER_JOINED) ||
+						feedEntry.getActivityType().equals(ActivityType.SITE_USER_REMOVED);
+				
+				
 				// Add activity to model if user is not skiped because of
 				// pending invite
-				if (!skipUserPendingInvite.get(companyName)) {
+				if (!skipUserPendingInvite.get(companyName) && !skipUserJoined) {
 					// select company model builder. Creates if not exists
 
 					if (!companyModelBuilder.containsKey(companyName)) {
