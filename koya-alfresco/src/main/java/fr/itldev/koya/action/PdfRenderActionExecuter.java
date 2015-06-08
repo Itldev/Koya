@@ -28,6 +28,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -35,57 +36,59 @@ import org.alfresco.service.namespace.QName;
  */
 public class PdfRenderActionExecuter extends ActionExecuterAbstractBase {
 
+    private final Logger logger = Logger.getLogger(PdfRenderActionExecuter.class);
+    
     public static final String NAME = "pdfRender";
-
+    
     private RenditionService renditionService;
     private FileFolderService fileFolderService;
     private NodeService nodeService;
-
+    
     public static final String RESULT_PARAM_NODEREF = "nodeRef";
     public static final String RESULT_PARAM_SUCCESS = "sucess";
     public static final String RESULT_PARAM_NAME = "name";
     public static final String RESULT_PARAM_TITLE = "title";
     public static QName QNAME_RENDTION = QName.createQName(
             NamespaceService.CONTENT_MODEL_1_0_URI, "pdfrendition");
-
+    
     private RenditionDefinition renditionDef;
-
+    
     public RenditionService getRenditionService() {
         return renditionService;
     }
-
+    
     public void setRenditionService(RenditionService renditionService) {
         this.renditionService = renditionService;
     }
-
+    
     public FileFolderService getFileFolderService() {
         return fileFolderService;
     }
-
+    
     public void setFileFolderService(FileFolderService fileFolderService) {
         this.fileFolderService = fileFolderService;
     }
-
+    
     public NodeService getNodeService() {
         return nodeService;
     }
-
+    
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
-
+    
     @Override
     protected void executeImpl(Action action, NodeRef actionedUponNodeRef) {
         Map<String, Serializable> result = new HashMap<>();
-
+        
         FileInfo fi = fileFolderService.getFileInfo(actionedUponNodeRef);
-
+        
         result.put(RESULT_PARAM_NODEREF, fi.getNodeRef().toString());
         result.put(RESULT_PARAM_NAME, fi.getName());
         result.put(RESULT_PARAM_TITLE, nodeService.getProperty(actionedUponNodeRef,
                 ContentModel.PROP_TITLE));
         result.put(RESULT_PARAM_SUCCESS, Boolean.FALSE);
-
+        
         if (!fi.isFolder()) {
             // Check for an already existing PDF rendition
             ChildAssociationRef car = renditionService.getRenditionByName(
@@ -99,45 +102,49 @@ public class PdfRenderActionExecuter extends ActionExecuterAbstractBase {
                         actionedUponNodeRef, ContentModel.PROP_MODIFIED);
                 Date rentionCreated = (Date) nodeService.getProperty(
                         pdfRendition, ContentModel.PROP_CREATED);
-
+                
                 if (docModified.after(rentionCreated)) {
                     car = null;
                 }
             }
+            
+            try {
+                if (car == null) {
+                    car = renditionService.render(actionedUponNodeRef,
+                            renditionDef);
+                    
+                    pdfRendition = car.getChildRef();
 
-            if (car == null) {
-                car = renditionService.render(actionedUponNodeRef,
-                        renditionDef);
-
-                pdfRendition = car.getChildRef();
-
-                // Add the aspect to hide the rendition from searches
-                nodeService.setType(pdfRendition, ContentModel.TYPE_THUMBNAIL);
-                nodeService.addAspect(pdfRendition,
-                        RenditionModel.ASPECT_HIDDEN_RENDITION, null);
+                    // Add the aspect to hide the rendition from searches
+                    nodeService.setType(pdfRendition, ContentModel.TYPE_THUMBNAIL);
+                    nodeService.addAspect(pdfRendition,
+                            RenditionModel.ASPECT_HIDDEN_RENDITION, null);
+                }
+                
+                String name = (String) nodeService.getProperty(actionedUponNodeRef,
+                        ContentModel.PROP_NAME);
+                name = name.replaceFirst("(. *)\\.[^.]+$", "$1.pdf");
+                String title = (String) nodeService.getProperty(actionedUponNodeRef,
+                        ContentModel.PROP_TITLE);
+                title = title.replaceFirst("(. *)\\.[^.]+$", "$1.pdf");
+                
+                result.put(RESULT_PARAM_NODEREF, pdfRendition.toString());
+                result.put(RESULT_PARAM_NAME, name);
+                result.put(RESULT_PARAM_TITLE, title);
+                result.put(RESULT_PARAM_SUCCESS, Boolean.TRUE);
+            } catch (Exception ex) {
+                logger.warn("Exception Occured during pdf rendtion : "+ex.getMessage());
+                logger.trace(ex.getMessage(), ex);
             }
-
-            String name = (String) nodeService.getProperty(actionedUponNodeRef,
-                    ContentModel.PROP_NAME);
-            name = name.replaceFirst("(. *)\\.[^.]+$", "$1.pdf");
-            String title = (String) nodeService.getProperty(actionedUponNodeRef,
-                    ContentModel.PROP_TITLE);
-            title = title.replaceFirst("(. *)\\.[^.]+$", "$1.pdf");
-
-            result.put(RESULT_PARAM_NODEREF, pdfRendition.toString());
-            result.put(RESULT_PARAM_NAME, name);
-            result.put(RESULT_PARAM_TITLE, title);
-            result.put(RESULT_PARAM_SUCCESS, Boolean.TRUE);
-
         }
-
+        
         action.setParameterValue(PARAM_RESULT, (Serializable) result);
     }
-
+    
     @Override
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
     }
-
+    
     public void init() {
         // Names must be provided for the rendition definition and the rendering
         // engine to use.
@@ -150,7 +157,7 @@ public class PdfRenderActionExecuter extends ActionExecuterAbstractBase {
         // Set parameters on the rendition definition.
         renditionDef.setParameterValue(AbstractRenderingEngine.PARAM_MIME_TYPE,
                 MimetypeMap.MIMETYPE_PDF);
-
+        
     }
-
+    
 }
