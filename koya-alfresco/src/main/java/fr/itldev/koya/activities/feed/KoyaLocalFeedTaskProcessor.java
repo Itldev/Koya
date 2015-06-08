@@ -344,8 +344,11 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				 */
 				
 				// return list of site manager
-				return listCompanyMembers(activityPost.getSiteNetwork(),
-						SitePermission.MANAGER);
+//				return listCompanyMembers(activityPost.getSiteNetwork(),
+//						SitePermission.MANAGER);
+				//TODO return list of responsibles or members on delete node
+				return new HashSet<String>();
+				
 				} else {
 				// return list of members or responsibles of space
 				return listUsersWithPermission(s.getNodeRef(),
