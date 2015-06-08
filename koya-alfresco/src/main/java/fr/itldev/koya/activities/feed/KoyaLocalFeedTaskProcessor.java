@@ -280,7 +280,8 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 		 */
 		if (Arrays.asList(FILEFOLDER_ACTIVITIES).contains(
 				activityPost.getActivityType())) {
-			return getFileFolderActivityRecipents(activityPostData);
+			return getFileFolderActivityRecipents(activityPostData,
+					activityPost);
 		}
 
 		/**
@@ -300,7 +301,8 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	}
 
 	private Set<String> getFileFolderActivityRecipents(
-			final Map<String, Object> activityPostData) {
+			final Map<String, Object> activityPostData,
+			ActivityPostEntity activityPost) {
 		final String[] nodesCandidatesKeys = { "nodeRef", "parentNodeRef" };
 
 		Space s = AuthenticationUtil
@@ -334,13 +336,25 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				});
 
 		if (s != null) {
-			// return list of members or responsibles of space
-			return listUsersWithPermission(s.getNodeRef(),
-					KoyaPermissionCollaborator.RESPONSIBLE,
-					KoyaPermissionCollaborator.MEMBER,
-					KoyaPermissionConsumer.CLIENT,
-					KoyaPermissionConsumer.CLIENTCONTRIBUTOR,
-					KoyaPermissionConsumer.PARTNER);
+
+			if (activityPost.getActivityType().equals(ActivityType.FOLDER_DELETED) &&
+					s.getClass().equals(Space.class)) {
+				/**
+				 * Folder deleted is a DOssier > 
+				 */
+				
+				// return list of site manager
+				return listCompanyMembers(activityPost.getSiteNetwork(),
+						SitePermission.MANAGER);
+				} else {
+				// return list of members or responsibles of space
+				return listUsersWithPermission(s.getNodeRef(),
+						KoyaPermissionCollaborator.RESPONSIBLE,
+						KoyaPermissionCollaborator.MEMBER,
+						KoyaPermissionConsumer.CLIENT,
+						KoyaPermissionConsumer.CLIENTCONTRIBUTOR,
+						KoyaPermissionConsumer.PARTNER);
+			}
 		}
 		return new HashSet<String>();
 
