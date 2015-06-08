@@ -71,7 +71,13 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>        
         <property name="koyaActivityPoster" ref="koyaActivityPoster"/> 
         <property name="userService" ref="userService"/>                
-        <property name="authenticationService" ref="AuthenticationService"/>        
+        <property name="authenticationService" ref="AuthenticationService"/>
     </bean>    
     
+    <bean id="pdfRender" init-method="init"
+          class="fr.itldev.koya.action.PdfRenderActionExecuter" parent="action-executer">
+        <property name="renditionService" ref="renditionService"/>
+        <property name="fileFolderService" ref="fileFolderService"/>
+        <property name="nodeService" ref="nodeService"/>
+    </bean>
 </beans>

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.itldev</groupId>
 	<artifactId>koya</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 	<name>[Koya] All Projects</name>
 	<packaging>pom</packaging>
 

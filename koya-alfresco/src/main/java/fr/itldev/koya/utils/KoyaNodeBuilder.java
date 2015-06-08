@@ -49,7 +49,8 @@ public class KoyaNodeBuilder {
                 && (koyaNodeService
                         .getFirstParentOfType(nodeRef, Dossier.class) != null)) {
             si = nodeDirBuilder(nodeRef);
-        } else if (type.equals(ContentModel.TYPE_CONTENT)
+        } else if ((type.equals(ContentModel.TYPE_CONTENT) 
+                || type.equals(ContentModel.TYPE_THUMBNAIL))
                 && (koyaNodeService
                         .getFirstParentOfType(nodeRef, Dossier.class) != null)) {
             si = nodeDocumentBuilder(nodeRef);

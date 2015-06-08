@@ -18,7 +18,9 @@
  */
 package fr.itldev.koya.webscript.content;
 
+import fr.itldev.koya.action.PdfRenderActionExecuter;
 import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.File;
@@ -26,10 +28,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_ZIP;
+import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -46,11 +53,21 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 public class ZipContent extends AbstractWebScript {
 
     private static final String ARG_NODEREFS = "nodeRefs";
+    private static final String ARG_PDF = "pdf";
 
+//    private ActionService actionService;
     private KoyaContentService koyaContentService;
+    private KoyaNodeService koyaNodeService;
 
+//    public void setActionService(ActionService actionService) {
+//        this.actionService = actionService;
+//    }
     public void setKoyaContentService(KoyaContentService koyaContentService) {
         this.koyaContentService = koyaContentService;
+    }
+
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
     }
 
     @Override
@@ -58,12 +75,19 @@ public class ZipContent extends AbstractWebScript {
             throws IOException {
         Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 
-        ArrayList<String> nodeRefs = new ArrayList<>();
+        ArrayList<NodeRef> nodeRefs = new ArrayList<>();
         JSONArray jsonArray = (JSONArray) jsonPostMap.get(ARG_NODEREFS);
+        Boolean pdf = (Boolean) jsonPostMap.get(ARG_PDF);
+        if (pdf == null) {
+            pdf = Boolean.FALSE;
+        }
+
         if (jsonArray != null) {
             int len = jsonArray.size();
             for (int i = 0; i < len; i++) {
-                nodeRefs.add(jsonArray.get(i).toString());
+                NodeRef n = koyaNodeService.getNodeRef(jsonArray.get(i)
+                        .toString());
+                nodeRefs.add(n);
             }
         }
 
@@ -77,7 +101,7 @@ public class ZipContent extends AbstractWebScript {
             res.setHeader("Pragma", "public");
             res.setHeader("Expires", "0");
 
-            File tmpZipFile = koyaContentService.zip(nodeRefs);
+            File tmpZipFile = koyaContentService.zip(nodeRefs, pdf);
 
             OutputStream outputStream = res.getOutputStream();
             if (nodeRefs.size() > 0) {
