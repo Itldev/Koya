@@ -41,16 +41,20 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 	private static List<String> ALLOWED_ACTIVITIES = new ArrayList<String>(
 			Arrays.asList(NotificationType.KOYA_SPACESHARED,
 					NotificationType.KOYA_SPACEUNUNSHARED,
-					ActivityType.FOLDER_ADDED, ActivityType.FILE_ADDED,					
+					ActivityType.FOLDER_ADDED, ActivityType.FILE_ADDED,
 					ActivityType.FILE_DELETED, ActivityType.FOLDER_DELETED,
 					ActivityType.FILE_UPDATED));
 
 	// TODO process theses activities
 
 	/**
+	 * 
+	 * ActivityType.SITE_USER_JOINED
+	 * 
+	 * 
 	 * ActivityType.FILES_ADDED, ActivityType.FOLDERS_ADDED,
 	 * 
-	 * ActivityType.SITE_USER_REMOVED ActivityType.SITE_USER_JOINED
+	 * ActivityType.SITE_USER_REMOVED
 	 * 
 	 */
 
@@ -129,6 +133,7 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
 					break;
 				}
+				
 
 				// Add activity to model if user is not skiped because of
 				// pending invite

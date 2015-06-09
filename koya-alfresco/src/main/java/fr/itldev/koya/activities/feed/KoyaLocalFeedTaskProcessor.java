@@ -2,7 +2,6 @@ package fr.itldev.koya.activities.feed;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.activities.feed.RepoCtx;
 import org.alfresco.repo.activities.feed.local.LocalFeedTaskProcessor;
@@ -29,10 +27,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.NotificationType;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
@@ -53,6 +53,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	private KoyaMailService koyaMailService;
 	private KoyaNodeService koyaNodeService;
 	private NodeService nodeService;
+	private UserService userService;
 
 	@Override
 	public void setPermissionService(PermissionService permissionService) {
@@ -78,6 +79,10 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 
 	public void setKoyaMailService(KoyaMailService koyaMailService) {
 		this.koyaMailService = koyaMailService;
+	}
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
 	}
 
 	public void process(int jobTaskNode, long minSeq, long maxSeq, RepoCtx ctx)
@@ -119,6 +124,41 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 							+ ">>> " + recipients);
 				}
 
+				String activitySummary = null;
+				// allows JSON to simply pass straight through
+				activitySummary = activityPost.getActivityData();
+
+				/**
+				 * get user joined recipient email from username and add it to
+				 * activitySummary
+				 */
+
+				if (activityPost.getActivityType().equals(
+						ActivityType.SITE_USER_JOINED)) {
+					try {
+
+						User u = AuthenticationUtil
+								.runAsSystem(new AuthenticationUtil.RunAsWork<User>() {
+									@Override
+									public User doWork() throws Exception {
+										return userService.getUser(activityPost
+												.getUserId());
+									}
+								});
+						// add user email to activitySummary
+						if (activitySummary.endsWith("}")) {
+							activitySummary = activitySummary.substring(0,
+									activitySummary.length() - 1)
+									+ ",\"memberEmail\":\""
+									+ u.getEmail()
+									+ "\"}";
+						}
+					} catch (Exception e) {
+						// silently continue
+					}
+
+				}
+
 				try {
 					startTransaction();
 
@@ -129,11 +169,6 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 						feed.setFeedUserId(recipient);
 						feed.setPostUserId(activityPost.getUserId());
 						feed.setActivityType(activityPost.getActivityType());
-
-						String activitySummary = null;
-						// allows JSON to simply pass straight through
-
-						activitySummary = activityPost.getActivityData();
 						feed.setActivitySummary(activitySummary);
 						feed.setSiteNetwork(activityPost.getSiteNetwork());
 						feed.setAppTool(activityPost.getAppTool());
@@ -337,19 +372,20 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 
 		if (s != null) {
 
-			if (activityPost.getActivityType().equals(ActivityType.FOLDER_DELETED) &&
-					s.getClass().equals(Space.class)) {
+			if (activityPost.getActivityType().equals(
+					ActivityType.FOLDER_DELETED)
+					&& s.getClass().equals(Space.class)) {
 				/**
-				 * Folder deleted is a DOssier > 
+				 * Folder deleted is a DOssier >
 				 */
-				
+
 				// return list of site manager
-//				return listCompanyMembers(activityPost.getSiteNetwork(),
-//						SitePermission.MANAGER);
-				//TODO return list of responsibles or members on delete node
+				// return listCompanyMembers(activityPost.getSiteNetwork(),
+				// SitePermission.MANAGER);
+				// TODO return list of responsibles or members on delete node
 				return new HashSet<String>();
-				
-				} else {
+
+			} else {
 				// return list of members or responsibles of space
 				return listUsersWithPermission(s.getNodeRef(),
 						KoyaPermissionCollaborator.RESPONSIBLE,
