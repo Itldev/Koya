@@ -1,6 +1,8 @@
 package fr.itldev.koya.activities.feed;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +12,6 @@ import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.activities.feed.ActivitiesFeedModelBuilder;
 import org.alfresco.repo.activities.feed.EmailUserNotifier;
 import org.alfresco.repo.domain.activities.ActivityFeedEntity;
-import org.alfresco.repo.security.authentication.AuthenticationContext;
 import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.TemplateService;
@@ -22,7 +23,7 @@ import org.json.JSONException;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.webscript.KoyaWebscript;
+import fr.itldev.koya.model.NotificationType;
 
 public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
@@ -37,13 +38,33 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 		this.companyAclService = companyAclService;
 	}
 
+	private static List<String> ALLOWED_ACTIVITIES = new ArrayList<String>(
+			Arrays.asList(NotificationType.KOYA_SPACESHARED,
+					NotificationType.KOYA_SPACEUNUNSHARED,
+					ActivityType.FOLDER_ADDED, ActivityType.FILE_ADDED,
+					ActivityType.FILE_DELETED, ActivityType.FOLDER_DELETED,
+					ActivityType.FILE_UPDATED));
+
+	// TODO process theses activities
+
+	/**
+	 * 
+	 * ActivityType.SITE_USER_JOINED
+	 * 
+	 * 
+	 * ActivityType.FILES_ADDED, ActivityType.FOLDERS_ADDED,
+	 * 
+	 * ActivityType.SITE_USER_REMOVED
+	 * 
+	 */
+
 	/**
 	 * Skip User if he has a pending invitation on company
 	 * 
 	 * @return
 	 */
 	private Boolean skipUserOnCompany(String companyName, String userName) {
-		
+
 		List<Invitation> invitations = companyAclService.getPendingInvite(
 				companyName, null, userName);
 		return invitations != null && invitations.size() == 1;
@@ -82,6 +103,8 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 			Map<String, ActivitiesFeedModelBuilder> companyModelBuilder = new HashMap<>();
 			Map<String, Boolean> skipUserPendingInvite = new HashMap<>();
 
+			long skippedMaxId = 0;
+
 			for (ActivityFeedEntity feedEntry : feedEntries) {
 
 				String companyName = feedEntry.getSiteNetwork();
@@ -92,13 +115,29 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 							skipUserOnCompany(companyName, feedUserId));
 				}
 
-				Boolean skipUserJoined = feedEntry.getActivityType().equals(ActivityType.SITE_USER_JOINED) ||
-						feedEntry.getActivityType().equals(ActivityType.SITE_USER_REMOVED);
+				/*
+				 * Filter on activity type
+				 * 
+				 * Activity must be an allowed type to be sent by email
+				 */
+
+				if (!ALLOWED_ACTIVITIES.contains(feedEntry.getActivityType())) {
+					logger.error("user"
+							+ feedUserId
+							+ " - Ignored activity type for email template composition : "
+							+ feedEntry.getActivityType() + " -> "
+							+ feedEntry.getId());
+					if (feedEntry.getId() > skippedMaxId) {
+						skippedMaxId = feedEntry.getId();
+					}
+
+					break;
+				}
 				
-				
+
 				// Add activity to model if user is not skiped because of
 				// pending invite
-				if (!skipUserPendingInvite.get(companyName) && !skipUserJoined) {
+				if (!skipUserPendingInvite.get(companyName)) {
 					// select company model builder. Creates if not exists
 
 					if (!companyModelBuilder.containsKey(companyName)) {
@@ -172,8 +211,13 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
 				}
 
-				return new Pair<Integer, Long>(activityCount, maxFeedId);
 			}
+			// update maxFeedId for skiped activities
+			if (skippedMaxId > maxFeedId) {
+				maxFeedId = skippedMaxId;
+			}
+
+			return new Pair<Integer, Long>(activityCount, maxFeedId);
 		}
 
 		return null;

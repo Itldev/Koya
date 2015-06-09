@@ -109,6 +109,7 @@
       
       <property name="koyaMailService" ref="koyaMailService"/>
        <property name="koyaNodeService" ref="koyaNodeService"/>
+       <property name="userService" ref="userService"/>
    </bean>
    
    <bean id="feedNotifier" class="org.alfresco.repo.activities.feed.FeedNotifierImpl">
