@@ -43,13 +43,13 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 					NotificationType.KOYA_SPACEUNUNSHARED,
 					ActivityType.FOLDER_ADDED, ActivityType.FILE_ADDED,
 					ActivityType.FILE_DELETED, ActivityType.FOLDER_DELETED,
-					ActivityType.FILE_UPDATED));
+					ActivityType.FILE_UPDATED,ActivityType.SITE_USER_JOINED));
 
 	// TODO process theses activities
 
 	/**
 	 * 
-	 * ActivityType.SITE_USER_JOINED
+	 * 
 	 * 
 	 * 
 	 * ActivityType.FILES_ADDED, ActivityType.FOLDERS_ADDED,
