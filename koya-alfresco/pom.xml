@@ -41,5 +41,7 @@
 	<properties>
 		<alfresco.client.war>alfresco</alfresco.client.war>
 	</properties>
-
+	<build>
+		<finalName>${project.artifactId}-${project.version}</finalName>
+	</build>
 </project>

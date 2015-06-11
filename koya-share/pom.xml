@@ -30,5 +30,7 @@
         <!-- Defines the target WAR version to run this amp, only used with the -Pamp-to-war switch -->
         <!-- <alfresco.client.war.version>${alfresco.version}</alfresco.client.war.version> -->
     </properties>
-    
+    <build>
+	<finalName>${project.artifactId}-${project.version}</finalName>
+    </build>	
 </project>
