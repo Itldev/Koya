@@ -77,7 +77,7 @@ public class ListMember extends AbstractWebScript {
 			throw new WebScriptException("KoyaError : "
 					+ ex.getErrorCode().toString());
 		}
-		res.setContentType("application/json");
+		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);
 	}
 

@@ -64,7 +64,7 @@ public class GetKoyaNode extends AbstractWebScript {
 			throw new WebScriptException("KoyaError : "
 					+ KoyaErrorCodes.ACCESS_DENIED.toString());
 		}
-		res.setContentType("application/json");
+		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);
 	}
 }

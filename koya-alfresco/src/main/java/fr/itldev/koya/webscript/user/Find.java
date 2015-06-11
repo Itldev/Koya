@@ -70,7 +70,7 @@ public class Find extends AbstractWebScript {
         }
         response = KoyaWebscript.getObjectAsJson(userService.find(query, maxResults,
                 companyName, rolesFilter));
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write(response);
     }
 

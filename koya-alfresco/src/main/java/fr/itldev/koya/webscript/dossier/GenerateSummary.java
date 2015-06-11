@@ -263,7 +263,7 @@ public class GenerateSummary extends AbstractWebScript implements
 		}
 
 		res.setContentEncoding("UTF-8");
-		res.setContentType("application/json");
+		res.setContentType("application/json;charset=UTF-8");
 
 		/**
 		 * Write summary nodeRefs on response

@@ -68,7 +68,7 @@ public class GetInfos extends AbstractWebScript {
             }
         }
         response = KoyaWebscript.getObjectAsJson(mInfos);
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write(response);
     }
 

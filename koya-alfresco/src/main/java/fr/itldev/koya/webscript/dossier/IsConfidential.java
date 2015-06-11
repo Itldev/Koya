@@ -65,7 +65,7 @@ public class IsConfidential extends AbstractWebScript {
 		} catch (KoyaServiceException ex) {
 			// silently ignore exception
 		}
-		res.setContentType("application/json");
+		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(isConfidential.toString());
 	}
 

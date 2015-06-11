@@ -129,7 +129,7 @@ public class Upload extends AbstractWebScript {
         if (format != null && format.equals("text")) {
             res.setContentType("text/plain");
         } else {
-            res.setContentType("application/json");
+            res.setContentType("application/json;charset=UTF-8");
         }
         res.getWriter().write(KoyaWebscript.getObjectAsJson(responseMap));
     }

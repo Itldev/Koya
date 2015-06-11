@@ -68,7 +68,7 @@ public class DumpPermissions extends AbstractWebScript {
         } catch (KoyaServiceException ex) {
             logger.error(ex.toString());
         }
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write("");
     }
 

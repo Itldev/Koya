@@ -46,7 +46,7 @@ public class GetInvitationPending extends AbstractWebScript {
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
 
         final String invitationId = (String) urlParams.get("inviteId");
         List<WorkflowTask> tasks = null;
