@@ -43,18 +43,15 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 					NotificationType.KOYA_SPACEUNUNSHARED,
 					ActivityType.FOLDER_ADDED, ActivityType.FILE_ADDED,
 					ActivityType.FILE_DELETED, ActivityType.FOLDER_DELETED,
-					ActivityType.FILE_UPDATED,ActivityType.SITE_USER_JOINED));
-
-	// TODO process theses activities
+					ActivityType.FILE_UPDATED, ActivityType.SITE_USER_JOINED));
 
 	/**
 	 * 
-	 * 
-	 * 
-	 * 
-	 * ActivityType.FILES_ADDED, ActivityType.FOLDERS_ADDED,
+	 * TODO process ignored activities 
 	 * 
 	 * ActivityType.SITE_USER_REMOVED
+	 *  ActivityType.FILES_ADDED,
+					ActivityType.FOLDERS_ADDED,
 	 * 
 	 */
 
@@ -121,6 +118,7 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 				 * Activity must be an allowed type to be sent by email
 				 */
 
+				boolean allowedActivity = true;
 				if (!ALLOWED_ACTIVITIES.contains(feedEntry.getActivityType())) {
 					logger.error("user"
 							+ feedUserId
@@ -131,13 +129,11 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 						skippedMaxId = feedEntry.getId();
 					}
 
-					break;
 				}
-				
 
 				// Add activity to model if user is not skiped because of
 				// pending invite
-				if (!skipUserPendingInvite.get(companyName)) {
+				if (!skipUserPendingInvite.get(companyName) && allowedActivity) {
 					// select company model builder. Creates if not exists
 
 					if (!companyModelBuilder.containsKey(companyName)) {
