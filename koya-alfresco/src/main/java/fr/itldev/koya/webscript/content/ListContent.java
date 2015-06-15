@@ -108,7 +108,7 @@ public class ListContent extends AbstractWebScript {
 					+ ex.getErrorCode().toString());
 		}
 		res.setContentEncoding("UTF-8");
-		res.setContentType("application/json");
+		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);
 	}
 

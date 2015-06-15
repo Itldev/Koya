@@ -70,7 +70,7 @@ public class ListConnect extends AbstractWebScript {
         }
         response = KoyaWebscript.getObjectAsJson(userService.getConnectionLog(userName, companiesFilter, maxResults));
 
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write(response);
     }
 

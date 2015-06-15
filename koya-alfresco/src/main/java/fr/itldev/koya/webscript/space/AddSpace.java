@@ -60,7 +60,7 @@ public class AddSpace extends AbstractWebScript {
         } catch (KoyaServiceException ex) {
             throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
         }
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write(response);
     }
 }

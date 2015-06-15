@@ -64,7 +64,7 @@ public class ListOffer extends AbstractWebScript {
 
 		String response = KoyaWebscript.getObjectAsJson(soList);
 
-		res.setContentType("application/json");
+		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);
 	}
 }

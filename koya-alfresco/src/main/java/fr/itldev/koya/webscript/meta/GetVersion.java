@@ -37,7 +37,7 @@ public class GetVersion extends AbstractWebScript {
 
     @Override
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write(KoyaUtil.getLibKoyaVersion());
     }
 

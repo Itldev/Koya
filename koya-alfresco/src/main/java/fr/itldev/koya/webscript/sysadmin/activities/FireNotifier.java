@@ -23,7 +23,7 @@ public class FireNotifier extends AbstractWebScript {
 	public void execute(WebScriptRequest req, WebScriptResponse res)
 			throws IOException {
 		feedNotifier.execute(0);
-		res.setContentType("application/json");
+		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write("");
 
 	}

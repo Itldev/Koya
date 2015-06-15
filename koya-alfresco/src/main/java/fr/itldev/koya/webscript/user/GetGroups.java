@@ -56,7 +56,7 @@ public class GetGroups extends AbstractWebScript {
                 return authorityService.getAuthoritiesForUser(username);
             }
         });
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write(KoyaWebscript.getObjectAsJson(groups));
     }
 

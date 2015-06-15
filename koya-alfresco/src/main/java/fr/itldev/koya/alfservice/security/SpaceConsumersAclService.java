@@ -48,12 +48,27 @@ public class SpaceConsumersAclService extends SpaceAclService {
 					KoyaErrorCodes.SECU_UNSETTABLE_PERMISSION);
 		}
 
+		long startTime = System.currentTimeMillis();
+		if (logger.isTraceEnabled()) {
+			logger.trace("=== Share process execution time " + userMail + "===");
+		}
+
 		// Get company the shared Node belongs To
 		Company company = koyaNodeService.getFirstParentOfType(
 				space.getNodeRef(), Company.class);
 
+		if (logger.isTraceEnabled()) {
+			logger.trace(">> Get Company +"
+					+ (System.currentTimeMillis() - startTime)+"ms");
+		}
+
 		SitePermission userPermissionInCompany = companyAclService
 				.getSitePermission(company, userMail);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace(">> Get UserPermission +"
+					+ (System.currentTimeMillis() - startTime)+"ms");
+		}
 
 		NominatedInvitation invitation = null;
 		// If user can't access specified company then invite him even if he
@@ -68,9 +83,20 @@ public class SpaceConsumersAclService extends SpaceAclService {
 
 			userPermissionInCompany = companyAclService.getSitePermission(
 					company, userMail);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace(">> Invite process +"
+						+ (System.currentTimeMillis() - startTime)+"ms");
+			}
+
 		}
 
 		final User u = userService.getUserByEmailFailOver(userMail);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace(">> Get User By Mail +"
+					+ (System.currentTimeMillis() - startTime)+"ms");
+		}
 
 		/**
 		 * User should not already have any permission on node
@@ -89,23 +115,37 @@ public class SpaceConsumersAclService extends SpaceAclService {
 						return null;
 					}
 				});
-						
-		if(existingPermission != null){
-			throw new KoyaServiceException(KoyaErrorCodes.SECU_USER_ALREADY_HAVE_PERMISSION_ON_SPACE);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace(">> Test Existing Permission +"
+					+ (System.currentTimeMillis() - startTime)+"ms");
 		}
-		
+
+		if (existingPermission != null) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.SECU_USER_ALREADY_HAVE_PERMISSION_ON_SPACE);
+		}
 
 		// Now user should exist for company as a site Consumer member
 		if (userPermissionInCompany.equals(SitePermission.CONSUMER)) {
 
 			grantSpacePermission(space, u.getUserName(),
 					KoyaPermissionConsumer.CLIENT);
+			if (logger.isTraceEnabled()) {
+				logger.trace(">> Grant Permission +"
+						+ (System.currentTimeMillis() - startTime)+"ms");
+			}
 
 		} else {
 			logger.error("Consumer Share not available for "
 					+ userPermissionInCompany.toString() + " users");
 			throw new KoyaServiceException(
 					KoyaErrorCodes.SECU_USER_MUSTBE_CONSUMER_TO_APPLY_PERMISSION);
+		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace(">> End Share Process +"
+					+ (System.currentTimeMillis() - startTime)+"ms");
 		}
 
 		return invitation;

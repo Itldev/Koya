@@ -120,7 +120,7 @@ public class SendInviteMail extends AbstractWebScript {
                     + ex.getErrorCode().toString());
         }
 
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write(KoyaWebscript.getObjectAsJson(returnValues));
     }
 

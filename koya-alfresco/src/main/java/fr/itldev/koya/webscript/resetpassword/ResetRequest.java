@@ -140,7 +140,7 @@ public class ResetRequest extends AbstractWebScript {
 
         }
 
-        res.setContentType("application/json");
+        res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write("");
     }
 }
