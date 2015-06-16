@@ -134,14 +134,6 @@
     ==================================================================
     -->
     
-    <!--space creation-->
-    <bean id="webscript.fr.itldev.koya.space.add.post"
-          class="fr.itldev.koya.webscript.space.AddSpace"
-          parent="webscript">                
-        <property name="spaceService" ref="spaceService" /> 
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-    
     <!-- apply space template -->
     <bean id="webscript.fr.itldev.koya.space.apply-template.get" 
           class="fr.itldev.koya.webscript.space.ApplyTemplates"
@@ -173,14 +165,7 @@
     ==================================================================
     -->
     
-    <!--create Dossier-->
-    <bean id="webscript.fr.itldev.koya.dossier.create.get" 
-          class="fr.itldev.koya.webscript.dossier.CreateDossier"
-          parent="webscript">                
-        <property name="dossierService" ref="dossierService" />
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-               
+           
     <!--list dossier responsibles-->
     <bean id="webscript.fr.itldev.koya.dossier.listresponsible.get" 
           class="fr.itldev.koya.webscript.dossier.ListResponsible"
@@ -270,13 +255,7 @@
     ==================================================================
     -->
  
-    <!--content creation-->
-    <bean id="webscript.fr.itldev.koya.content.createdir.get" 
-          class="fr.itldev.koya.webscript.content.CreateDir"
-          parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />
-        <property name="koyaNodeService" ref="koyaNodeService" />        
-    </bean>
+  
     <!--content listing-->
     <bean id="webscript.fr.itldev.koya.content.list.get" 
           class="fr.itldev.koya.webscript.content.ListContent"
@@ -359,6 +338,18 @@
     ========================== Global ============================
     ==================================================================
     -->
+    
+    
+    <!--Container creation space, dossier or directory-->
+    <bean id="webscript.fr.itldev.koya.global.create.post"
+          class="fr.itldev.koya.webscript.global.Create"
+          parent="webscript">                
+        <property name="spaceService" ref="spaceService" />
+        <property name="dossierService" ref="dossierService" /> 
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="koyaContentService" ref="koyaContentService" />          
+    </bean>
+    
     
     <!--Get used disk size-->
     <bean id="webscript.fr.itldev.koya.global.disksize.get" 
