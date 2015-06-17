@@ -32,6 +32,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <port>8080</port>
+                                    <uriEncoding>UTF-8</uriEncoding>
                                 </configuration>
                             </execution>
                         </executions>
