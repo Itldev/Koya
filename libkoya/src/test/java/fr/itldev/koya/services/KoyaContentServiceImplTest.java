@@ -86,8 +86,8 @@ public class KoyaContentServiceImplTest extends TestCase {
 		companyTests = companyService.create(admin,
 				"company" + new Random().nextInt(1000000), companyService
 						.listSalesOffer(admin).get(0).getName(), "default");
-		spaceTests = spaceService.create(admin, new Space("testSpace"),
-				companyTests);
+		spaceTests = spaceService.create(admin,
+				companyTests,"testSpace");
 		dossierTests = dossierService.create(admin, spaceTests, "doss1");
 	}
 
@@ -105,7 +105,7 @@ public class KoyaContentServiceImplTest extends TestCase {
 	@Test
 	public void testCreateDir() throws AlfrescoServiceException {
 		Directory dir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir");
+				dossierTests, "dir");
 		assertNotNull("error creating directory", dir);
 		koyaNodeService.delete(admin, (KoyaNode) dir);
 	}
@@ -113,11 +113,11 @@ public class KoyaContentServiceImplTest extends TestCase {
 	@Test
 	public void testCreateDirAlreadyExists() throws AlfrescoServiceException {
 		Directory dir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir");
+				dossierTests, "dir");
 		assertNotNull("error creating directory", dir);
 
 		try {
-			koyaContentService.createDir(admin, dossierTests.getNodeRef(),
+			koyaContentService.createDir(admin, dossierTests,
 					"dir");
 			fail("should throw exception with error code : "
 					+ KoyaErrorCodes.DIR_CREATION_NAME_EXISTS);
@@ -132,9 +132,9 @@ public class KoyaContentServiceImplTest extends TestCase {
 	@Test
 	public void testListDir() throws AlfrescoServiceException {
 		Directory dir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir");
-		koyaContentService.createDir(admin, dir.getNodeRef(), "subdir");
-		koyaContentService.createDir(admin, dossierTests.getNodeRef(), "dir2");
+				dossierTests, "dir");
+		koyaContentService.createDir(admin, dir, "subdir");
+		koyaContentService.createDir(admin, dossierTests, "dir2");
 		List<KoyaContent> lst = koyaContentService.list(admin,
 				dossierTests.getNodeRef(), true, 50);
 		assertEquals(2, lst.size());
@@ -143,9 +143,9 @@ public class KoyaContentServiceImplTest extends TestCase {
 	@Test
 	public void testListDirectChildren() throws AlfrescoServiceException {
 		Directory dir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir");
-		koyaContentService.createDir(admin, dir.getNodeRef(), "subdir");
-		koyaContentService.createDir(admin, dossierTests.getNodeRef(), "dir2");
+				dossierTests, "dir");
+		koyaContentService.createDir(admin, dir, "subdir");
+		koyaContentService.createDir(admin, dossierTests, "dir2");
 
 		Resource toUpload = applicationContext
 				.getResource("classpath:docs/testupload.txt");
@@ -165,11 +165,11 @@ public class KoyaContentServiceImplTest extends TestCase {
 	@Test
 	public void testMoveDir() throws AlfrescoServiceException {
 		Directory dir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir");
-		Directory sDir = koyaContentService.createDir(admin, dir.getNodeRef(),
+				dossierTests, "dir");
+		Directory sDir = koyaContentService.createDir(admin, dir,
 				"subdir");
 		Directory dir2 = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir2");
+				dossierTests, "dir2");
 
 		assertEquals(1,
 				koyaContentService.list(admin, dir.getNodeRef(), true, 1)
@@ -189,12 +189,12 @@ public class KoyaContentServiceImplTest extends TestCase {
 	@Test
 	public void testMoveDirAlreadyExists() throws AlfrescoServiceException {
 		Directory dir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir");
-		Directory sDir = koyaContentService.createDir(admin, dir.getNodeRef(),
+				dossierTests, "dir");
+		Directory sDir = koyaContentService.createDir(admin, dir,
 				"subdir");
 		Directory dir2 = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir2");
-		koyaContentService.createDir(admin, dir2.getNodeRef(), "subdir");
+				dossierTests, "dir2");
+		koyaContentService.createDir(admin, dir2, "subdir");
 
 		try {
 			koyaContentService
@@ -244,7 +244,7 @@ public class KoyaContentServiceImplTest extends TestCase {
 	public void testMoveFile() throws AlfrescoServiceException {
 
 		Directory dir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir1");
+				dossierTests, "dir1");
 
 		Integer sizeBefore = koyaContentService.list(admin,
 				dossierTests.getNodeRef(), false, 50).size();
@@ -277,8 +277,8 @@ public class KoyaContentServiceImplTest extends TestCase {
 	@Test
 	public void testGetParent() throws AlfrescoServiceException {
 		Directory dir3 = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir3");
-		Directory sdir = koyaContentService.createDir(admin, dir3.getNodeRef(),
+				dossierTests, "dir3");
+		Directory sdir = koyaContentService.createDir(admin, dir3,
 				"sousrep");
 
 		assertEquals(dir3, koyaNodeService.getParent(admin, (KoyaNode) sdir));
@@ -310,9 +310,9 @@ public class KoyaContentServiceImplTest extends TestCase {
 	public void testDirDiskSize() throws AlfrescoServiceException {
 
 		Directory dir4 = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "dir4");
+				dossierTests, "dir4");
 
-		Directory dir5 = koyaContentService.createDir(admin, dir4.getNodeRef(),
+		Directory dir5 = koyaContentService.createDir(admin, dir4,
 				"dir5");
 
 		Resource toUpload = applicationContext
@@ -331,7 +331,7 @@ public class KoyaContentServiceImplTest extends TestCase {
 		int nbDir = koyaContentService.list(admin, dossierTests.getNodeRef(),
 				false, 50).size();
 		Directory deldir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "deldir");
+				dossierTests, "deldir");
 
 		assertEquals(
 				nbDir + 1,
@@ -374,7 +374,7 @@ public class KoyaContentServiceImplTest extends TestCase {
 	public void testRenameDir() throws AlfrescoServiceException {
 
 		Directory renameDir = koyaContentService.createDir(admin,
-				dossierTests.getNodeRef(), "oldName");
+				dossierTests, "oldName");
 		for (KoyaContent c : koyaContentService.list(admin,
 				dossierTests.getNodeRef(), false, 50)) {
 			if (c.getName().equals("newName")) {

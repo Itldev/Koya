@@ -100,7 +100,7 @@ public class SearchServiceImplTest extends TestCase {
         admin = userService.login("admin", "admin");
         companyTests = companyService.create(admin, "company" + new Random().nextInt(1000000),
                 companyService.listSalesOffer(admin).get(0).getName(), "default");
-        spaceFinancial = spaceService.create(admin, new Space("financial"), companyTests);
+        spaceFinancial = spaceService.create(admin,  companyTests,"financial");
         dossierTestsOne = dossierService.create(admin, spaceFinancial, "one doss");
 
         Resource toUpload = applicationContext.getResource("classpath:docs/test financial report.txt");
@@ -109,7 +109,7 @@ public class SearchServiceImplTest extends TestCase {
         dossierTestsTwo = dossierService.create(admin, spaceFinancial, "two doss");
         dossierTestsThree = dossierService.create(admin, spaceFinancial, "three financial");
 
-        spaceBuildings = spaceService.create(admin, new Space("buildings"), companyTests);
+        spaceBuildings = spaceService.create(admin,companyTests,"buildings");
         dossierTestsFirst = dossierService.create(admin, spaceBuildings, "first test");
         dossierTestsSecond = dossierService.create(admin, spaceBuildings, "second test");
         dossierTestsThird = dossierService.create(admin, spaceBuildings, "third");
