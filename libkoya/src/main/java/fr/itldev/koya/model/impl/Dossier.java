@@ -81,9 +81,6 @@ public final class Dossier extends Space {
 	}
 
 	// </editor-fold>
-	public Dossier(String name) {
-		super(name);
-	}
 
 	private Dossier() {
 		super();
@@ -91,6 +88,12 @@ public final class Dossier extends Space {
 
 	public static Dossier newInstance() {
 		return new Dossier();
+	}
+	
+	public static Dossier newInstance(String title) {
+		Dossier d= new Dossier();
+		d.setTitle(title);
+		return d;
 	}
 
 }

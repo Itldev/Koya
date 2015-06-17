@@ -26,6 +26,7 @@ import org.codehaus.jackson.type.TypeReference;
 
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.SpaceService;
@@ -34,7 +35,6 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class SpaceServiceImpl extends AlfrescoRestService implements
 		SpaceService {
 
-	private static final String REST_POST_ADDSPACE = "/s/fr/itldev/koya/space/add/{parentNodeRef}";
 	private static final String REST_POST_LISTSPACE = "/s/fr/itldev/koya/space/list";
 	private static final String REST_POST_LISTSPACE_DEPTH_OPTION = "/s/fr/itldev/koya/space/list?maxdepth={maxdepth}";
 	private static final String REST_POST_MOVESPACE = "/s/fr/itldev/koya/space/move/{newParentNodeRef}";
@@ -49,14 +49,9 @@ public class SpaceServiceImpl extends AlfrescoRestService implements
 	 * @throws AlfrescoServiceException
 	 */
 	@Override
-	public Space create(User user, Space space, KoyaNode parent)
+	public Space create(User user, KoyaNode parent,String title)
 			throws AlfrescoServiceException {
-		return fromJSON(
-				new TypeReference<Space>() {
-				},
-				user.getRestTemplate().postForObject(
-						getAlfrescoServerUrl() + REST_POST_ADDSPACE, space,
-						String.class, parent.getNodeRef()));
+		return (Space) super.create(user, parent, Space.newInstance(title)); 			
 	}
 
 	@Override

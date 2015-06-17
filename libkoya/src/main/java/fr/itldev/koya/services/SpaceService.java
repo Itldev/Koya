@@ -38,7 +38,7 @@ public interface SpaceService extends AlfrescoService {
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	Space create(User user, Space space, KoyaNode parent)
+	Space create(User user, KoyaNode parent,String title)
 			throws AlfrescoServiceException;
 
 	/**
