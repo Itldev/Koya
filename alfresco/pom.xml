@@ -36,7 +36,7 @@ language governing permissions and limitations under the License. -->
             <artifactId>koya-alfresco</artifactId>
             <version>${project.version}</version>
             <type>amp</type>
-        </dependency>                
+        </dependency>
     </dependencies>
 
     <build>
@@ -50,6 +50,7 @@ language governing permissions and limitations under the License. -->
                    | explicitly mention it in the overlay section.
                    | NOTE: First-win resource strategy is used by the WAR plugin
                     -->
+                    
                     <overlays>
                         <!-- Current project customizations -->
                         <overlay/>
@@ -68,6 +69,7 @@ language governing permissions and limitations under the License. -->
                             <type>amp</type>
                         </overlay>                       
                     </overlays>
+                    <packagingExcludes>WEB-INF/lib/google-collect-1.0.jar</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>

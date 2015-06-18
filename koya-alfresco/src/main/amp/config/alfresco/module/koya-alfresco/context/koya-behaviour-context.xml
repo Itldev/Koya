@@ -81,5 +81,6 @@
         <property name="nodeService" ref="NodeService" />
         <property name="koyaNodeService" ref="koyaNodeService" />       
         <property name="dossierService" ref="dossierService" />
+        <property name="lastModifiedSharedCache" ref="node.lastModifiedSharedCache" />
     </bean>
 </beans>

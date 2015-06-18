@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>koya-alfresco</artifactId>
-	<name>[Koya] Alfresco amp </name>
-	<packaging>amp</packaging>
-	<description>koya alfresco - A corporate alfresco based dataroom module</description>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>koya-alfresco</artifactId>
+    <name>[Koya] Alfresco amp </name>
+    <packaging>amp</packaging>
+    <description>koya alfresco - A corporate alfresco based dataroom module</description>
 
-	<parent>
-		<groupId>fr.itldev</groupId>
-		<artifactId>koya</artifactId>
-		<version>0.9.5-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>fr.itldev</groupId>
+        <artifactId>koya</artifactId>
+        <version>0.9.5-SNAPSHOT</version>
+    </parent>
 
-	<dependencies>
-		<dependency>
-			<groupId>${alfresco.groupId}</groupId>
-			<artifactId>alfresco-repository</artifactId>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>${alfresco.groupId}</groupId>
+            <artifactId>alfresco-repository</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>fr.itldev</groupId>
-			<artifactId>libkoya</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>fr.itldev</groupId>
+            <artifactId>libkoya</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.5.11</version>
-		</dependency>
-	 <dependency>
-	  <groupId>org.springframework.shell</groupId>
-	  <artifactId>spring-shell</artifactId>
-	  <version>1.1.0.RELEASE</version>
-	  <type>jar</type>
-	 </dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.5.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.shell</groupId>
+            <artifactId>spring-shell</artifactId>
+            <version>1.1.0.RELEASE</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 
-	<properties>
-		<alfresco.client.war>alfresco</alfresco.client.war>
-	</properties>
-	<build>
-		<finalName>${project.artifactId}-${project.version}</finalName>
-	</build>
+    <properties>
+        <alfresco.client.war>alfresco</alfresco.client.war>
+    </properties>
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+    </build>
 </project>
