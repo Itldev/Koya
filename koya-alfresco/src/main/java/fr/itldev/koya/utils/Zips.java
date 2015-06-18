@@ -59,7 +59,7 @@ public class Zips {
             if (charset != null && charset.toLowerCase().equals("windows-1252")) {
                 // ibm850 (winzip?), is detected as windows-1252)
                 charset = "ibm850";
-            } else {
+            } else if(charset == null ){
                 charset = defaultCharset;
             }
             final String finalCharset = charset;
