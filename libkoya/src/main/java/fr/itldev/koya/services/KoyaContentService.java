@@ -37,7 +37,7 @@ import java.net.URL;
 
 public interface KoyaContentService extends AlfrescoService {
 
-    Directory createDir(User user, NodeRef parent, String title)
+    Directory createDir(User user, KoyaNode parent, String title)
             throws AlfrescoServiceException;
 
     Document upload(User user, NodeRef parent, Resource r)

@@ -43,20 +43,6 @@ public interface DossierService extends AlfrescoService {
      */
     Dossier create(User user, Space parentSpace, String title)
             throws AlfrescoServiceException;
-
-    /**
-     * Creates a new Dossier with content in a zip file
-     * 
-     * @param user
-     * @param parentSpace
-     * @param title
-     * @param zipFile
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    Dossier create(User user, Space parentSpace, String title, Resource zipFile)
-            throws AlfrescoServiceException;
-
     /**
      * 
      * @param user

@@ -58,7 +58,7 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class KoyaContentServiceImpl extends AlfrescoRestService implements
         KoyaContentService {
 
-    private static final String REST_GET_CREATEDIR = "/s/fr/itldev/koya/content/createdir/{parentNodeRef}?title={title}";
+
     private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}";
     private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}";
 
@@ -72,17 +72,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
     private static final String POST_PDFS_RENDER = "/s/fr/itldev/koya/render/pdfrender";
 
     @Override
-    public Directory createDir(User user, NodeRef parent, String title)
-            throws AlfrescoServiceException {
-        if (parent == null) {
-            throw new AlfrescoServiceException("parent noderef must be set", 0);
-        }
-        return fromJSON(
-                new TypeReference<Directory>() {
-                },
-                user.getRestTemplate().getForObject(
-                        getAlfrescoServerUrl() + REST_GET_CREATEDIR,
-                        String.class, parent.toString(), title));
+    public Directory createDir(User user, KoyaNode parent, String title)
+            throws AlfrescoServiceException {       
+        return (Directory) super.create(user, parent, Directory.newInstance(title));               
     }
 
     @Override

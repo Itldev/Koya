@@ -91,8 +91,8 @@ public class ShareServiceImplTest extends TestCase {
 		companyTests = companyService.create(admin, "company" + randomTestId,
 				companyService.listSalesOffer(admin).get(0).getName(),
 				"default");
-		spaceTests = spaceService.create(admin, new Space("testSpace"),
-				companyTests);
+		spaceTests = spaceService.create(admin, 
+				companyTests,"testSpace");
 
 		/**
 		 * Create manager user

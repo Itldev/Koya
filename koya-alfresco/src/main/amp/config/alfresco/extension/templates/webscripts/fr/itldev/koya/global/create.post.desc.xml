@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Create Directory</shortname>
+    <shortname>Create Space, Dossier or Directory</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/content/createdir/{parentNodeRef}?title={title}</url>
-    <authentication>user</authentication>
+    <url>/fr/itldev/koya/global/create/{parentNodeRef}</url>
+    <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
 

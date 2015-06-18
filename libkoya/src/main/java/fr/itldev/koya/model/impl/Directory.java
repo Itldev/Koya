@@ -78,5 +78,11 @@ public final class Directory extends KoyaNode implements KoyaContent{
 	public static Directory newInstance() {
 		return new Directory();
 	}
+	
+	public static Directory newInstance(String title) {
+		Directory d = new Directory();
+		d.setTitle(title);
+		return d;
+	}
 
 }

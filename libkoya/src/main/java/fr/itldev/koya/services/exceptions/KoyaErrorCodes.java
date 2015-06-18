@@ -35,6 +35,7 @@ public interface KoyaErrorCodes {
     public static final Integer CANNOT_FIND_XPATH_NODE = 7;
     public static final Integer ACCESS_DENIED=8;
     public static final Integer INVALID_NODEREF_TYPE_CAST = 9;
+    public static final Integer INVALID_TYPE_KOYANODECREATION = 10;
 
 
     //100 -> companies errors

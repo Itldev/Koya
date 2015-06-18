@@ -77,7 +77,7 @@ public class FavouriteServiceImplTest extends TestCase {
         companyTests = companyService.create(admin,
                 "company" + new Random().nextInt(1000000),
                 companyService.listSalesOffer(admin).get(0).getName(), "default");
-        spaceTests = spaceService.create(admin, new Space("testSpace"), companyTests);
+        spaceTests = spaceService.create(admin, companyTests,"testSpace");
         dossierTests = dossierService.create(admin, spaceTests, "doss1");
     }
 

@@ -51,6 +51,8 @@ public class AlfrescoRestService implements AlfrescoService {
 	private static final Logger logger = Logger
 			.getLogger(AlfrescoRestService.class);
 
+	private static final String REST_POST_CREATE = "/s/fr/itldev/koya/global/create/{parentNodeRef}";
+
 	private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos";
 	private static final String REST_POST_MAIL = "/s/fr/itldev/koya/global/mail";
 	private static final String REST_GET_KOYANODE = "/s/fr/itldev/koya/global/node/{nodeRef}";
@@ -80,7 +82,7 @@ public class AlfrescoRestService implements AlfrescoService {
 	public void setAlfrescoServerUrl(String alfrescoServerUrl) {
 		this.alfrescoServerUrl = alfrescoServerUrl;
 	}
-	
+
 	public String getShareWebappUrl() {
 		return shareWebappUrl;
 	}
@@ -98,6 +100,24 @@ public class AlfrescoRestService implements AlfrescoService {
 	}
 
 	// </editor-fold>
+
+	/**
+	 * Creates new Koya Node
+	 * 
+	 */
+	protected KoyaNode create(User user, KoyaNode parent, KoyaNode toCreate)
+			throws AlfrescoServiceException {
+		if (parent == null) {
+			throw new AlfrescoServiceException("parent noderef must be set", 0);
+		}
+		return fromJSON(
+				new TypeReference<KoyaNode>() {
+				},
+				user.getRestTemplate().postForObject(
+						getAlfrescoServerUrl() + REST_POST_CREATE, toCreate,
+						String.class, parent.getNodeRef()));
+	}
+
 	/**
 	 * Check if library version match with server one.
 	 */
@@ -279,12 +299,12 @@ public class AlfrescoRestService implements AlfrescoService {
 		}
 
 		try {
-			data = new ObjectMapper().readValue(jsonPacket, type);			
+			data = new ObjectMapper().readValue(jsonPacket, type);
 		} catch (Exception e) {
 			// Handle the problem
 			System.out.println("================");
-			System.out.println(" json="+jsonPacket);			
-			System.out.println(" err fromJson : "+type.getType());
+			System.out.println(" json=" + jsonPacket);
+			System.out.println(" err fromJson : " + type.getType());
 			e.printStackTrace();
 			System.out.println("================");
 			logger.error(e.getMessage(), e);

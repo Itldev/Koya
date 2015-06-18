@@ -18,24 +18,16 @@
  */
 package fr.itldev.koya.services.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.Pair;
-import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-import org.springframework.core.io.Resource;
 
 import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
@@ -47,10 +39,8 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public class DossierServiceImpl extends AlfrescoRestService implements
         DossierService {
-
-    private static final String REST_GET_CREATEDOSSIER = "/s/fr/itldev/koya/dossier/create/{parentNodeRef}?title={title}";
-
-   
+	
+	
     private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
 
     private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/dossier/member/list/{nodeRef}";
@@ -78,38 +68,10 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 
     @Override
     public Dossier create(User user, Space parentSpace, String title)
-            throws AlfrescoServiceException {
-        return fromJSON(
-                new TypeReference<Dossier>() {
-                },
-                user.getRestTemplate().getForObject(
-                        getAlfrescoServerUrl() + REST_GET_CREATEDOSSIER,
-                        String.class, parentSpace.getNodeRef(), title));
-
+            throws AlfrescoServiceException {    	
+    	return (Dossier) super.create(user, parentSpace, Dossier.newInstance(title));    	
     }
 
-    /**
-     * Creates a new Dossier with content in a zip file
-     * 
-     * TODO make this process atomic
-     * 
-     * @param user
-     * @param parentSpace
-     * @param zipFile
-     * 
-     * 
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    @Override
-    public Dossier create(User user, Space parentSpace, String title,
-            Resource zipFile) throws AlfrescoServiceException {
-        Dossier d = create(user, parentSpace, title);
-        Document zipDoc = KoyaContentService.upload(user,
-                d.getNodeRef(), zipFile);
-        KoyaContentService.importZipedContent(user, zipDoc);
-        return d;
-    }
 
     /**
      * 

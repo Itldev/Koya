@@ -48,12 +48,15 @@ public class Space extends KoyaNode {
 	protected Space() {
 	}
 
-	public Space(String name) {
-		setName(name);
-	}	
-
+	
 	public static Space newInstance() {
-		return new Space();
+		return  new Space();		
+	}
+
+	public static Space newInstance(String title) {
+		Space s= new Space();
+		s.setTitle(title);
+		return s;
 	}
 
 }
