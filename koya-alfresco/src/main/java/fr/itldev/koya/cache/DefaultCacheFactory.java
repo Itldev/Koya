@@ -1,6 +1,5 @@
 package fr.itldev.koya.cache;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
@@ -17,13 +16,13 @@ public class DefaultCacheFactory extends org.alfresco.repo.cache.AbstractCacheFa
         long maxItems = Long.parseLong(getProperty(cacheName, "maxItems", "0"));
         long maxIdle = Long.parseLong(getProperty(cacheName, "maxIdleSeconds", "0"));
 
-        if (timeToLive >= 0) {
+        if (timeToLive > 0) {
             builder.expireAfterWrite(timeToLive, TimeUnit.SECONDS);
         }
-        if (maxItems >= 0) {
+        if (maxItems > 0) {
             builder.maximumSize(maxItems);
         }
-        if (maxIdle >= 0) {
+        if (maxIdle > 0) {
             builder.expireAfterAccess(maxIdle, TimeUnit.SECONDS);
         }
 
