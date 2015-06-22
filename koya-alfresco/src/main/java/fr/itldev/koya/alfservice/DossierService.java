@@ -223,9 +223,7 @@ public class DossierService {
 				+ LuceneUtils.getLuceneDateString(inactiveFrom) + "\"]";
 		if (notNotifiedOnly) {
 			luceneRequest += " +@koya\\:notified:false";
-		}
-		logger.debug(luceneRequest);
-
+		}		
 		ResultSet rs = null;
 		try {
 			rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,

@@ -108,7 +108,6 @@ public class InactiveDossierActionExecuter extends ActionExecuterAbstractBase {
             throws KoyaServiceException {
 
         for (Space space : spaces) {
-            logger.debug("Space " + space.getName());
             if (space.getChildSpaces() != null
                     && !space.getChildSpaces().isEmpty()) {
                 executeSpace(action, space.getChildSpaces(),c);
@@ -130,7 +129,7 @@ public class InactiveDossierActionExecuter extends ActionExecuterAbstractBase {
             List<Dossier> inactiveDossiers = dossierService.getInactiveDossier(
                     space, duration.add(new Date(), duration), true);
             for (Dossier d : inactiveDossiers) {
-                logger.debug("Dossier " + d.getTitle() + " inactive since "
+                logger.debug("Dossier " + d.getTitle() + "(Space "+space.getName()+") inactive since "
                         + d.getLastModifiedDate());
                 List<User> responsibles = spaceCollaboratorsAclService
 						.listUsers(d, permissions);
