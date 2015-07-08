@@ -148,15 +148,7 @@
         <property name="spaceService" ref="spaceService" />
         
     </bean>
-    
-        
-    
-    <!--move a space-->
-    <bean id="webscript.fr.itldev.koya.space.move.post" 
-          class="fr.itldev.koya.webscript.space.MoveSpace"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />
-    </bean>
+           
     
     
     <!--

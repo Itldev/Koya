@@ -37,7 +37,6 @@ public class SpaceServiceImpl extends AlfrescoRestService implements
 
 	private static final String REST_POST_LISTSPACE = "/s/fr/itldev/koya/space/list";
 	private static final String REST_POST_LISTSPACE_DEPTH_OPTION = "/s/fr/itldev/koya/space/list?maxdepth={maxdepth}";
-	private static final String REST_POST_MOVESPACE = "/s/fr/itldev/koya/space/move/{newParentNodeRef}";
 
 	/**
 	 * Create a new space
@@ -86,26 +85,5 @@ public class SpaceServiceImpl extends AlfrescoRestService implements
 		}
 	}
 
-	@Override
-	public Space move(User user, Space toMove, Space destination)
-			throws AlfrescoServiceException {
-		return movePrivate(user, toMove, destination.getNodeRef());
-	}
-
-	@Override
-	public Space move(User user, Space toMove, Company destination)
-			throws AlfrescoServiceException {
-		return movePrivate(user, toMove, destination.getNodeRef());
-	}
-
-	private Space movePrivate(User user, Space toMove, NodeRef newParentNodeRef)
-			throws AlfrescoServiceException {
-		return fromJSON(
-				new TypeReference<Space>() {
-				},
-				user.getRestTemplate().postForObject(
-						getAlfrescoServerUrl() + REST_POST_MOVESPACE, toMove,
-						String.class, newParentNodeRef.toString()));
-	}
 
 }
