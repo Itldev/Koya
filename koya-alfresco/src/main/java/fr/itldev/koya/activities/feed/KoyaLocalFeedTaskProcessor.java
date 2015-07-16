@@ -2,6 +2,7 @@ package fr.itldev.koya.activities.feed;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -19,6 +20,8 @@ import org.alfresco.repo.site.SiteDoesNotExistException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
@@ -27,7 +30,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.NotificationType;
 import fr.itldev.koya.model.impl.Dossier;
@@ -54,6 +59,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	private KoyaNodeService koyaNodeService;
 	private NodeService nodeService;
 	private UserService userService;
+	private SpaceAclService spaceAclService;
 
 	@Override
 	public void setPermissionService(PermissionService permissionService) {
@@ -83,6 +89,10 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 
 	public void setUserService(UserService userService) {
 		this.userService = userService;
+	}
+
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
 	}
 
 	public void process(int jobTaskNode, long minSeq, long maxSeq, RepoCtx ctx)
@@ -302,9 +312,14 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 					.toString());
 			// return list of members or responsibles of space
 			// + user share destination whatever his role
-			Set<String> users = listUsersWithPermission(spaceNodeRef,
-					KoyaPermissionCollaborator.RESPONSIBLE,
-					KoyaPermissionCollaborator.MEMBER);
+
+			List<KoyaPermission> rolesSelector = new ArrayList<KoyaPermission>();
+			rolesSelector.add(KoyaPermissionCollaborator.RESPONSIBLE);
+			rolesSelector.add(KoyaPermissionCollaborator.MEMBER);
+
+			Set<String> users = spaceAclService.listUsersAuthorities(
+					spaceNodeRef, rolesSelector);
+
 			users.add(activityPost.getUserId());
 			return users;
 		}
@@ -386,43 +401,20 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				return new HashSet<String>();
 
 			} else {
-				// return list of members or responsibles of space
-				return listUsersWithPermission(s.getNodeRef(),
-						KoyaPermissionCollaborator.RESPONSIBLE,
-						KoyaPermissionCollaborator.MEMBER,
-						KoyaPermissionConsumer.CLIENT,
-						KoyaPermissionConsumer.PARTNER);
+
+				List<KoyaPermission> rolesSelector = new ArrayList<KoyaPermission>();
+				rolesSelector.add(KoyaPermissionCollaborator.RESPONSIBLE);
+				rolesSelector.add(KoyaPermissionCollaborator.MEMBER);
+				rolesSelector.add(KoyaPermissionConsumer.CLIENT);
+				rolesSelector.add(KoyaPermissionConsumer.PARTNER);
+
+				return spaceAclService.listUsersAuthorities(s.getNodeRef(),
+						rolesSelector);
+
 			}
 		}
 		return new HashSet<String>();
 
-	}
-
-	public Set<String> listUsersWithPermission(final NodeRef n,
-			KoyaPermission... permissions) {
-
-		final List<KoyaPermission> perms = Arrays.asList(permissions);
-
-		return AuthenticationUtil
-				.runAsSystem(new AuthenticationUtil.RunAsWork<Set<String>>() {
-					@Override
-					public Set<String> doWork() throws Exception {
-						Set<String> usersId = new HashSet<>();
-						for (AccessPermission ap : permissionService
-								.getAllSetPermissions(n)) {
-							try {
-								if (perms.contains(KoyaPermission.valueOf(ap
-										.getPermission()))) {
-									usersId.add(ap.getAuthority());
-								}
-							} catch (IllegalArgumentException iex) {
-
-							}
-
-						}
-						return usersId;
-					}
-				});
 	}
 
 	public Set<String> listCompanyMembers(final String companyName,

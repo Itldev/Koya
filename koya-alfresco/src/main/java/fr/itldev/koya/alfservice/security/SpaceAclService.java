@@ -21,6 +21,7 @@ package fr.itldev.koya.alfservice.security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -507,6 +508,51 @@ public class SpaceAclService {
 		return users;
 	}
 
+	/**
+	 * List user authorities involved in permissions on defined node
+	 * 
+	 * This method is used for defining activity notification receivers
+	 * 
+	 * @param n
+	 * @param permissions
+	 * @return
+	 */
+	public Set<String> listUsersAuthorities(final NodeRef n,
+			final List<KoyaPermission> permissions) {
+
+		return AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<Set<String>>() {
+					@Override
+					public Set<String> doWork() throws Exception {
+
+						// first select candidates authorities
+						// ie Groups which name ends with one of permissions in
+						// parameter
+						// Then add all contained user authorities
+
+						// cf permissions Groups implementation in
+						// SpaceAclService
+
+						Set<String> usersId = new HashSet<>();
+
+						for (AccessPermission ap : permissionService
+								.getAllSetPermissions(n)) {
+							for (KoyaPermission p : permissions) {
+								if (ap.getAuthority().endsWith(p.toString())) {
+
+									usersId.addAll(authorityService
+											.getContainedAuthorities(
+													AuthorityType.USER,
+													ap.getAuthority(), true));
+									break;
+								}
+							}
+						}
+						return usersId;
+					}
+				});
+	}
+
 	/*
 	 * ==================================================================
 	 * =================== Init and delete node =========================
@@ -905,7 +951,6 @@ public class SpaceAclService {
 
 		Company c = koyaNodeService.getFirstParentOfType(space.getNodeRef(),
 				Company.class);
-
 
 		// check user permissions
 		// only manager or element responsibles can toggle confidential aspect
