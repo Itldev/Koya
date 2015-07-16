@@ -14,9 +14,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
@@ -42,6 +43,7 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,14 +58,12 @@ import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.SpaceCollaboratorsAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
@@ -80,12 +80,13 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 	private ContentService contentService;
 	private DossierService dossierService;
 	private UserService userService;
-	private SpaceCollaboratorsAclService spaceCollaboratorsAclService;
+	private SpaceAclService spaceAclService;
 	private KoyaNodeService koyaNodeService;
 	private KoyaContentService koyaContentService;
 	private AuthenticationService authenticationService;
 	private BehaviourFilter policyBehaviourFilter;
 	private FileFolderService fileFolderService;
+	private TransactionService transactionService;
 
 	private String defaultZipCharset;
 	private String failoverZipCharset;
@@ -111,9 +112,9 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 		this.userService = userService;
 	}
 
-	public void setSpaceCollaboratorsAclService(
-			SpaceCollaboratorsAclService spaceCollaboratorsAclService) {
-		this.spaceCollaboratorsAclService = spaceCollaboratorsAclService;
+	public void setSpaceAclService(
+			SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
 	}
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
@@ -143,6 +144,10 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
 	public void setFailoverZipCharset(String failoverZipCharset) {
 		this.failoverZipCharset = failoverZipCharset;
+	}
+	
+	public void setTransactionService(TransactionService transactionService) {
+		this.transactionService = transactionService;
 	}
 
 	// </editor-fold>
@@ -177,7 +182,13 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 				ContentModel.PROP_NAME);
 
 		ContentData contentRef =  (ContentData )nodeService.getProperty(actionedUponNodeRef, ContentModel.PROP_CONTENT);
-		long zipSizeBytes = contentRef.getSize();
+		long zipSizeBytes = 0; 
+		try{
+			zipSizeBytes = contentRef.getSize(); 
+		}catch(Exception e){
+			
+		}
+		
 
 		if (!zipName.toLowerCase().endsWith(".zip")) {
 			return; // Not a zip file.
@@ -409,60 +420,88 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 							.getChildByName(documentLibrary,
 									ContentModel.ASSOC_CONTAINS, space);
 
-					logger.trace(getLogPrefix(companyName, userName)
-							+ "Creating dossier " + dossierTitle + " into "
-							+ spaceNodeRef);
-					Dossier d = null;
+					
+					
 					boolean newDossier = false;
-
+					Dossier d = null;
 					try {
+						// Try to get dossier by reference (if exists)
 						d = dossierService.getDossier(company,
 								dossierXml.getReference());
-						if (!d.getTitle().equals(dossierTitle)) {
-							sbLog.append("\nUpdating dossier " + d.getTitle()
-									+ " to " + dossierTitle);
-							koyaNodeService.rename(d.getNodeRef(),
-									dossierXml.getReference() + " - "
-											+ dossierXml.getName());
-							d = koyaNodeService.getKoyaNode(d.getNodeRef(),
-									Dossier.class);
+						if (d != null) {
+							// Dossier already exists
+							if (!d.getTitle().equals(dossierTitle)) {
+								sbLog.append("\nUpdating dossier "
+										+ d.getTitle() + " to " + dossierTitle);
+								koyaNodeService.rename(d.getNodeRef(),
+										dossierXml.getReference() + " - "
+												+ dossierXml.getName());
+								d = koyaNodeService.getKoyaNode(d.getNodeRef(),
+										Dossier.class);
 
+							} else {
+								sbLog.append("\nFound dossier " + d.getTitle());
+							}
+							dossierStat.countDossiersDuplicate++;
 						} else {
-							sbLog.append("\nFound dossier " + d.getTitle());
-						}
-					} catch (KoyaServiceException kse) {
-						if (KoyaErrorCodes.NO_SUCH_DOSSIER_REFERENCE.equals(kse
-								.getErrorCode())) {
+							logger.trace(getLogPrefix(companyName, userName)
+									+ "Creating dossier " + dossierTitle
+									+ " into " + spaceNodeRef);
+							// New dossier have to created
 							sbLog.append("\nCreating dossier "
 									+ dossierXml.getReference() + " - "
 									+ dossierXml.getName());
 
-							d = dossierService.create(dossierXml.getReference()
-									+ " - " + dossierXml.getName(),
-									spaceNodeRef, new HashMap<QName, String>() {
-										{
-											put(KoyaModel.PROP_REFERENCE,
-													dossierXml.getReference());
-										}
-									});
+							/**
+							 * Create dossier in a separated transaction.
+							 * Permissions groups are created when trying to add
+							 * collaborators permissions
+							 */
+
+							UserTransaction transaction = transactionService
+									.getNonPropagatingUserTransaction();
+							try {
+								transaction.begin();
+								Map<QName, String> props = new HashMap<QName, String>();
+								props.put(KoyaModel.PROP_REFERENCE,
+										dossierXml.getReference());
+
+								d = dossierService.create(
+										dossierXml.getReference() + " - "
+												+ dossierXml.getName(),
+										spaceNodeRef, props);
+								transaction.commit();
+							} catch (Exception e) {
+								try {
+									logger.error("rolllllllbasjj " +e.toString());
+									transaction.rollback();
+								} catch (IllegalStateException
+										| SecurityException | SystemException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+
 							newDossier = true;
 							modifiedDossiers.add(d);
-						} else {
-							logger.error(
-									getLogPrefix(companyName, userName)
-											+ "Cannot create dossier "
-											+ dossierXml.getReference(), kse);
-							sbLog.append("\nCannot create dossier "
-									+ dossierXml.getReference() + " : "
-									+ kse.getMessage());
-							dossierStat.countDossiersError++;
-							continue;
-
+							dossierStat.countDossiersCreated++;
 						}
+
+					} catch (Exception e) {
+						logger.error(
+								getLogPrefix(companyName, userName)
+										+ "Cannot create dossier "
+										+ dossierXml.getReference(), e);
+						sbLog.append("\nCannot create dossier "
+								+ dossierXml.getReference() + " : "
+								+ e.getMessage());
+						dossierStat.countDossiersError++;
+						continue;
 					}
 
+
 					mapCacheDossier.put(dossierXml.getReference(), d);
-					dossierStat.countDossiersCreated++;
+					
 
 					logger.trace(getLogPrefix(companyName, userName)
 							+ "Get dossier responsibles");
@@ -487,9 +526,9 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 						+ " dossiers created");
 				logger.trace(getLogPrefix(companyName, userName)
 						+ dossierStat.countDossiersDuplicate
-						+ " dossiers allready existing");
+						+ " dossiers already existing");
 				sbLog.append("\n" + dossierStat.countDossiersDuplicate
-						+ " dossiers allready existing");
+						+ " dossiers already existing");
 				logger.trace(getLogPrefix(companyName, userName)
 						+ dossierStat.countDossiersError
 						+ " dossiers not created (error)");
@@ -574,6 +613,14 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 				if (dossier == null) {
 					dossier = dossierService.getDossier(company,
 							contentXml.getDossierReference());
+					
+					if(dossier == null){
+						sbLog.append("\nDossier "
+								+ contentXml.getDossierReference() + " not found");
+						contentStat.countContentDossierNotFound++;
+						continue;
+					}
+					
 					mapCacheDossier.put(contentXml.getDossierReference(),
 							dossier);
 				}
@@ -633,13 +680,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
 				Integer errorCode = ex.getErrorCode();
 
-				if (errorCode.equals(KoyaErrorCodes.NO_SUCH_DOSSIER_REFERENCE)
-						|| errorCode
-								.equals(KoyaErrorCodes.MANY_DOSSIERS_REFERENCE)) {
-					sbLog.append("\nDossier "
-							+ contentXml.getDossierReference() + " not found");
-					contentStat.countContentDossierNotFound++;
-				} else if (errorCode
+				if (errorCode
 						.equals(KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS)) {
 					logger.error(getLogPrefix(companyName, userName) + "File "
 							+ filename + " - " + title + " already exist");
@@ -711,17 +752,12 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 			boolean newDossier, final StringBuffer sbLog) {
 		if (!newDossier) {
 			// Removing not responsible anymore
-			List<User> currentUsers = spaceCollaboratorsAclService.listUsers(d,
-					new ArrayList<KoyaPermission>() {
-						{
-							add(permissionCollaborator);
-						}
-					});
+			
+			List<User> currentUsers = spaceAclService.listMembership(d, permissionCollaborator);
 
 			for (User u : currentUsers) {
 				if (!usersMail.contains(u.getEmail())) {
-					spaceCollaboratorsAclService.unShareKoyaNode(d,
-							u.getEmail(), permissionCollaborator);
+					spaceAclService.removeKoyaAuthority(d, permissionCollaborator, u);					
 				}
 			}
 		}
@@ -729,23 +765,14 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 		for (String userMail : usersMail) {
 			User u = userService.getUserByEmailFailOver(userMail);
 			if (u != null) {
-
 				try {
-					if (societePermissions.contains(SitePermission
-							.valueOf(siteService.getMembersRole(c.getName(),
-									u.getUserName())))) {
-						logger.trace(getLogPrefix(c.getName(), null)
-								+ "Adding " + userMail + " as "
-								+ permissionCollaborator);
-						sbLog.append("\nAdding " + userMail + " as "
-								+ permissionCollaborator);
-						spaceCollaboratorsAclService.shareKoyaNode(
-								(Space) koyaNodeService.getKoyaNode(d
-										.getNodeRef()), userService
-										.getUserByUsername(u.getUserName())
-										.getEmail(), permissionCollaborator,
-								true);
-					}
+					spaceAclService.collaboratorShare(d, u, permissionCollaborator);
+					logger.trace(getLogPrefix(c.getName(), null)
+							+ "Adding " + userMail + " as "
+							+ permissionCollaborator);
+					sbLog.append("\nAdding " + userMail + " as "
+							+ permissionCollaborator);
+
 				} catch (KoyaServiceException ex) {
 					logger.error(
 							getLogPrefix(c.getName(), null) + "Error adding "

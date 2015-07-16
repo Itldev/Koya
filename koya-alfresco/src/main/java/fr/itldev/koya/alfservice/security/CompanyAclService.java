@@ -317,15 +317,8 @@ public class CompanyAclService {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
 		}
-	}
-
-	public SitePermission getSitePermission(Company c, String userMail) {
-		User u = userService.getUserByEmailFailOver(userMail);
-		if (u != null) {
-			return getSitePermission(c, u);
-		}
-		return null;
-	}
+	}	
+		
 
 	/**
 	 * Returns SitePermission of user on Company if exists.

@@ -66,17 +66,8 @@
         <property name="transactionService" ref="transactionService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
         <property name="koyaActivityPoster" ref="koyaActivityPoster"/>
-    </bean>
-    
-    
-    <bean name="spaceConsumersAclService"
-          class="fr.itldev.koya.alfservice.security.SpaceConsumersAclService" 
-          parent="spaceAclService">     
-    </bean>
-    
-    <bean name="spaceCollaboratorsAclService"
-          class="fr.itldev.koya.alfservice.security.SpaceCollaboratorsAclService" 
-          parent="spaceAclService">      
-    </bean>
+        <property name="modelService" ref="modelService" />
+        <property name="ownableService" ref="ownableService"/>
+    </bean>         
    
 </beans>

@@ -1,7 +1,6 @@
 package fr.itldev.koya.action;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,14 +23,13 @@ import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.SpaceService;
-import fr.itldev.koya.alfservice.security.SpaceCollaboratorsAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 
 
@@ -46,17 +44,11 @@ public class InactiveDossierActionExecuter extends ActionExecuterAbstractBase {
     protected KoyaMailService koyaMailService;
     protected SpaceService spaceService;
     protected DossierService dossierService;
-    private SpaceCollaboratorsAclService spaceCollaboratorsAclService;
+    private SpaceAclService spaceAclService;
 
     private String inactiveFrom = "-P15D";
 
-    public static List<KoyaPermission> permissions = Collections
-            .unmodifiableList(new ArrayList() {
-                {
-                    add(KoyaPermissionCollaborator.RESPONSIBLE);
-                }
-            });
-
+   
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
     }
@@ -77,9 +69,9 @@ public class InactiveDossierActionExecuter extends ActionExecuterAbstractBase {
         this.dossierService = dossierService;
     }
 
-    public void setSpaceCollaboratorsAclService(
-            SpaceCollaboratorsAclService spaceCollaboratorsAclService) {
-        this.spaceCollaboratorsAclService = spaceCollaboratorsAclService;
+    public void setSpaceAclService(
+            SpaceAclService spaceAclService) {
+        this.spaceAclService = spaceAclService;
     }
 
     public void setInactiveFrom(String inactiveFrom) {
@@ -131,8 +123,10 @@ public class InactiveDossierActionExecuter extends ActionExecuterAbstractBase {
             for (Dossier d : inactiveDossiers) {
                 logger.debug("Dossier " + d.getTitle() + "(Space "+space.getName()+") inactive since "
                         + d.getLastModifiedDate());
-                List<User> responsibles = spaceCollaboratorsAclService
-						.listUsers(d, permissions);
+                List<User> responsibles = spaceAclService
+						.listMembership(d, KoyaPermissionCollaborator.RESPONSIBLE);
+                
+                
                 for (User u : responsibles) {
                     m.get(u).add(d.getNodeRef());
                 }

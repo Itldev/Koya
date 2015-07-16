@@ -148,69 +148,18 @@
         <property name="spaceService" ref="spaceService" />
         
     </bean>
-           
-    
-    
+         
     <!--
     ==================================================================
     ========================== Dossiers ==============================
     ==================================================================
     -->
-    
-           
-    <!--list dossier responsibles-->
-    <bean id="webscript.fr.itldev.koya.dossier.listresponsible.get" 
-          class="fr.itldev.koya.webscript.dossier.ListResponsible"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceCollaboratorsAclService" ref="spaceCollaboratorsAclService"/>
-    </bean>
-    
-    
-    <!-- add dossier responsibles-->
-    <bean id="webscript.fr.itldev.koya.dossier.addresponsible.get" 
-          class="fr.itldev.koya.webscript.dossier.AddResponsible"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceCollaboratorsAclService" ref="spaceCollaboratorsAclService"/>
-        <property name="userService" ref="userService"/>
-    </bean>
-    
-    
-    <!--list dossier members-->
-    <bean id="webscript.fr.itldev.koya.dossier.listmember.get" 
-          class="fr.itldev.koya.webscript.dossier.ListMember"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceCollaboratorsAclService" ref="spaceCollaboratorsAclService"/>
-    </bean>
-    
-    
-    <!-- add dossier responsibles-->
-    <bean id="webscript.fr.itldev.koya.dossier.addmember.get" 
-          class="fr.itldev.koya.webscript.dossier.AddMember"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceCollaboratorsAclService" ref="spaceCollaboratorsAclService"/>
-        <property name="userService" ref="userService"/>
-    </bean>
-    
-    <!--del dossier responsibles or members -->
-    <bean id="webscript.fr.itldev.koya.dossier.delresponsible.get" 
-          class="fr.itldev.koya.webscript.dossier.DelResponsible"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceCollaboratorsAclService" ref="spaceCollaboratorsAclService"/>
-        <property name="userService" ref="userService"/>
-
-    </bean>
-
     <!--Toogle confidentialty status -->
     <bean id="webscript.fr.itldev.koya.dossier.confidential.post" 
           class="fr.itldev.koya.webscript.dossier.ToggleConfidential"
           parent="webscript">                
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceAclService" ref="spaceCollaboratorsAclService"/>
+        <property name="spaceAclService" ref="spaceAclService"/>
         <property name="userService" ref="userService"/>
         <property name="authenticationService" ref="authenticationService" />
     </bean>
@@ -222,7 +171,7 @@
           class="fr.itldev.koya.webscript.dossier.IsConfidential"
           parent="webscript">                
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceAclService" ref="spaceCollaboratorsAclService"/>        
+        <property name="spaceAclService" ref="spaceAclService"/>        
     </bean>
     
     <!--generate summary document -->
@@ -555,41 +504,32 @@
     -->
     
     <!-- share secured item -->
-    <bean id="webscript.fr.itldev.koya.share.doshare.post" 
-          class="fr.itldev.koya.webscript.share.ShareItem"
+    <bean id="webscript.fr.itldev.koya.security.clientshare.doshare.post" 
+          class="fr.itldev.koya.webscript.security.clientshare.ShareItem"
           parent="webscript">                
-        <property name="spaceConsumersAclService" ref="spaceConsumersAclService" />   
+        <property name="spaceAclService" ref="spaceAclService" />   
         <property name="koyaNodeService" ref="koyaNodeService" />   
     </bean>
     
     <!-- unshare secured item -->
-    <bean id="webscript.fr.itldev.koya.share.undoshare.post" 
-          class="fr.itldev.koya.webscript.share.UnshareItem"
+    <bean id="webscript.fr.itldev.koya.security.clientshare.undoshare.post" 
+          class="fr.itldev.koya.webscript.security.clientshare.UnshareItem"
           parent="webscript">                
-        <property name="spaceConsumersAclService" ref="spaceConsumersAclService" />   
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-    
-    <!-- items shared with users -->
-    <bean id="webscript.fr.itldev.koya.share.sharedusers.get" 
-          class="fr.itldev.koya.webscript.share.SharedUsers"
-          parent="webscript">
         <property name="spaceAclService" ref="spaceAclService" />   
         <property name="koyaNodeService" ref="koyaNodeService" />   
-
     </bean>
-    
-    <bean id="webscript.fr.itldev.koya.share.listusershares.get" 
-          class="fr.itldev.koya.webscript.share.ListUserShares"
+       
+    <bean id="webscript.fr.itldev.koya.security.clientshare.listusershares.get" 
+          class="fr.itldev.koya.webscript.security.clientshare.ListUserShares"
           parent="webscript">
-        <property name="spaceConsumersAclService" ref="spaceConsumersAclService" />   
+        <property name="spaceAclService" ref="spaceAclService" />   
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="userService" ref="userService"/>
     </bean>
     
     
-    <bean id="webscript.fr.itldev.koya.share.consumer.get" 
-          class="fr.itldev.koya.webscript.share.IsSharedConsumer"
+    <bean id="webscript.fr.itldev.koya.security.clientshare.clientmember.get" 
+          class="fr.itldev.koya.webscript.security.clientshare.HasKoyaClientMember"
           parent="webscript">
         <property name="spaceAclService" ref="spaceAclService" />   
         <property name="koyaNodeService" ref="koyaNodeService"/>
@@ -681,6 +621,50 @@
 		class="fr.itldev.koya.webscript.sysadmin.activities.FireNotifier"
 		parent="webscript">
 		<property name="feedNotifier" ref="feedNotifier" />
+	</bean>
+   
+	<!--
+    ==================================================================
+    ========================== Koya Security ==============================
+    ==================================================================
+    -->
+
+	<!--list Koya Membership with given role on node -->
+	<bean id="webscript.fr.itldev.koya.security.membership.get" class="fr.itldev.koya.webscript.security.ListMembership"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="spaceAclService" ref="spaceAclService" />
+	</bean>
+
+
+	<!-- Modify koya membership on node -->
+	<bean id="webscript.fr.itldev.koya.security.membership.post"
+		class="fr.itldev.koya.webscript.security.ModifyMembership" parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="userService" ref="userService" />
+	</bean>
+	
+	<!--
+    ==================================================================
+    ========================== Tmp Patch ==============================
+    ==================================================================
+    -->
+	
+	
+	
+	 <!-- Converts existing permissions on dossiers in new group based permissions scheme -->
+	<bean id="webscript.fr.itldev.koya.meta.convertpermissions.get" 
+	class="fr.itldev.koya.patch.ConvertPermissionsv010"
+		parent="webscript">
+		<property name="companyService" ref="companyService" />
+		<property name="spaceService" ref="spaceService" />
+		<property name="dossierService" ref="dossierService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="permissionService" ref="PermissionService" />
+		<property name="authorityService" ref="authorityService" />
+		<property name="ownableService" ref="ownableService" />
+		<property name="transactionService" ref="transactionService" />
 	</bean>
    
 </beans>

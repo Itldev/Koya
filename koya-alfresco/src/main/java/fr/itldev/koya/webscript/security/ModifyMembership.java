@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.dossier;
+package fr.itldev.koya.webscript.security;
 
 import java.io.IOException;
 import java.util.Map;
 
-import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -33,31 +33,28 @@ import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * 
- * Toggle confidentiality
+ * Add or Del user user membership on node
+ * 
+ * if roleName = "any" with del method, removes on any rolename
  * 
  */
-public class ToggleConfidential extends AbstractWebScript {
+public class ModifyMembership extends AbstractWebScript {
 
-	private SpaceAclService spaceAclService;
 	private KoyaNodeService koyaNodeService;
-	private AuthenticationService authenticationService;
+	private SpaceAclService spaceAclService;
 	private UserService userService;
-
-	public void setSpaceAclService(SpaceAclService spaceAclService) {
-		this.spaceAclService = spaceAclService;
-	}
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
 	}
 
-	public void setAuthenticationService(
-			AuthenticationService authenticationService) {
-		this.authenticationService = authenticationService;
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
 	}
 
 	public void setUserService(UserService userService) {
@@ -67,24 +64,41 @@ public class ToggleConfidential extends AbstractWebScript {
 	@Override
 	public void execute(WebScriptRequest req, WebScriptResponse res)
 			throws IOException {
-
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 		Map<String, Object> postParams = KoyaWebscript.getJsonMap(req);
 
-		Boolean isConfidential = false;
+		String response = "";
 		try {
-			Space space = koyaNodeService.getKoyaNode(koyaNodeService
-					.getNodeRef((String) urlParams
-							.get(KoyaWebscript.WSCONST_NODEREF)), Space.class);
 
-			isConfidential = spaceAclService.toggleConfidential( space,
-					Boolean.valueOf(postParams.get("confidential").toString()));
+			NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams
+					.get(KoyaWebscript.WSCONST_NODEREF));
+			Space space = koyaNodeService.getKoyaNode(nodeRef, Space.class);
+			String roleName = (String) urlParams.get("rolename");
+			String method = (String) urlParams.get("method");
+			String userName = (String) postParams.get("userName");
+
+			User u = userService.getUserByUsername(userName);
+			if (method.equals("add")) {
+				spaceAclService.addKoyaAuthority(space,
+						KoyaPermission.valueOf(roleName), u);
+			} else if (method.equals("del")) {
+				if ("any".equals(roleName)) {
+					// Delete on any KOYA Group
+					spaceAclService.removeAnyKoyaAuthority(space, u);
+				} else {
+					spaceAclService.removeKoyaAuthority(space,
+							KoyaPermission.valueOf(roleName), u);
+				}
+
+			} else {
+				// TODO error unknown method
+			}
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
 					+ ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
-		res.getWriter().write(isConfidential.toString());
+		res.getWriter().write(response);
 	}
 }

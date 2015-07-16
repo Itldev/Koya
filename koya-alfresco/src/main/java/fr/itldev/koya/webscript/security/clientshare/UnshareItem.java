@@ -16,36 +16,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.dossier;
+package fr.itldev.koya.webscript.security.clientshare;
 
 import java.io.IOException;
 import java.util.Map;
 
-import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
- * 
- * Toggle confidentiality
+ * unShare secured items webscript.
  * 
  */
-public class ToggleConfidential extends AbstractWebScript {
+public class UnshareItem extends AbstractWebScript {
 
 	private SpaceAclService spaceAclService;
 	private KoyaNodeService koyaNodeService;
-	private AuthenticationService authenticationService;
-	private UserService userService;
 
 	public void setSpaceAclService(SpaceAclService spaceAclService) {
 		this.spaceAclService = spaceAclService;
@@ -55,36 +52,38 @@ public class ToggleConfidential extends AbstractWebScript {
 		this.koyaNodeService = koyaNodeService;
 	}
 
-	public void setAuthenticationService(
-			AuthenticationService authenticationService) {
-		this.authenticationService = authenticationService;
-	}
-
-	public void setUserService(UserService userService) {
-		this.userService = userService;
-	}
-
+	/**
+	 * 
+	 * @param req
+	 * @param res
+	 * @throws IOException
+	 */
 	@Override
 	public void execute(WebScriptRequest req, WebScriptResponse res)
 			throws IOException {
 
-		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-		Map<String, Object> postParams = KoyaWebscript.getJsonMap(req);
+		Map<String, Object> params = KoyaWebscript.getJsonMap(req);
 
-		Boolean isConfidential = false;
 		try {
-			Space space = koyaNodeService.getKoyaNode(koyaNodeService
-					.getNodeRef((String) urlParams
-							.get(KoyaWebscript.WSCONST_NODEREF)), Space.class);
+			NodeRef n = koyaNodeService.getNodeRef((String) params
+					.get(KoyaWebscript.WSCONST_NODEREF));
+			Space s;
+			KoyaNode si = koyaNodeService.getKoyaNode(n);
+			if (Space.class.isAssignableFrom(si.getClass())) {
+				s = (Space) si;
+			} else {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
+			}
 
-			isConfidential = spaceAclService.toggleConfidential( space,
-					Boolean.valueOf(postParams.get("confidential").toString()));
-
+			spaceAclService.clientUnshare(s,
+					(String) params.get(KoyaWebscript.WSCONST_EMAIL));
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
 					+ ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
-		res.getWriter().write(isConfidential.toString());
+		res.getWriter().write("");
 	}
+
 }

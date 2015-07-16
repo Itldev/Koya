@@ -185,8 +185,7 @@ public class DossierService {
 	 * @return
 	 * @throws fr.itldev.koya.exception.KoyaServiceException
 	 */
-	public Dossier getDossier(final Company company, final String reference)
-			throws KoyaServiceException {
+	public Dossier getDossier(final Company company, final String reference){
 		String luceneRequest = "TYPE:\"koya:dossier\" AND @koya\\:reference:\""
 				+ reference + "\" AND PATH:\" /app:company_home/st:sites/cm:"
 				+ company.getName() + "/cm:documentLibrary/*/*\"";
@@ -195,22 +194,25 @@ public class DossierService {
 		try {
 			rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					SearchService.LANGUAGE_LUCENE, luceneRequest);
-			switch (rs.length()) {
-			case 0:
-				throw new KoyaServiceException(
-						KoyaErrorCodes.NO_SUCH_DOSSIER_REFERENCE, reference);
-			case 1:
+
+			if (rs.length() == 1) {
 				return koyaNodeService.getKoyaNode(rs.iterator().next()
 						.getNodeRef(), Dossier.class);
-			default:
-				throw new KoyaServiceException(
-						KoyaErrorCodes.MANY_DOSSIERS_REFERENCE, reference);
+			}
+
+			if (rs.length() == 0) {
+				return null;
+			}
+
+			if (rs.length() > 1) {
+				logger.error(rs.length()+ " dossiers match reference "+ reference);
 			}
 		} finally {
 			if (rs != null) {
 				rs.close();
 			}
 		}
+		return null;
 	}
 
 	public List<Dossier> getInactiveDossier(final Space space,
@@ -223,7 +225,7 @@ public class DossierService {
 				+ LuceneUtils.getLuceneDateString(inactiveFrom) + "\"]";
 		if (notNotifiedOnly) {
 			luceneRequest += " +@koya\\:notified:false";
-		}		
+		}
 		ResultSet rs = null;
 		try {
 			rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
@@ -274,9 +276,10 @@ public class DossierService {
 							transaction.commit();
 							logger.debug("Updated lastModificationDate of dossier : "
 									+ d.getTitle());
-						}catch(ConcurrencyFailureException cex){
-							/**silent concurency exception
-							 * If occurs, then node have update
+						} catch (ConcurrencyFailureException cex) {
+							/**
+							 * silent concurency exception If occurs, then node
+							 * have update
 							 */
 							transaction.rollback();
 						} catch (InvalidNodeRefException ie) {

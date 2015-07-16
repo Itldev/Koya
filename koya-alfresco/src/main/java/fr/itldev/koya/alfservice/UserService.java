@@ -479,9 +479,15 @@ public class UserService {
 	/**
 	 * List all User's Koya Nodes. company filter is optionnal
 	 * 
+	 * Duplicates SpacesAclService.getKoyaUserSpaces
+	 * 
+	 *  TODO remove KoyaModel.ASSOC_USER_SHAREDNODES from model
+	 * 
 	 * @param u
 	 * @return
+	 * 
 	 */
+	@Deprecated
 	public List<Space> getSharedKoyaNodes(String userName, Company c) {
 		List<Space> sharedKoyaNodes = new ArrayList<Space>();
 		try {

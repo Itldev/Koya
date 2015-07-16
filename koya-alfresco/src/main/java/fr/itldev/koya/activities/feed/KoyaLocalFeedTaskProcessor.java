@@ -391,7 +391,6 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 						KoyaPermissionCollaborator.RESPONSIBLE,
 						KoyaPermissionCollaborator.MEMBER,
 						KoyaPermissionConsumer.CLIENT,
-						KoyaPermissionConsumer.CLIENTCONTRIBUTOR,
 						KoyaPermissionConsumer.PARTNER);
 			}
 		}
