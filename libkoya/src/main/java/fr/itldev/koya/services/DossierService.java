@@ -146,16 +146,6 @@ public interface DossierService extends AlfrescoService {
     void addResponsible(User user, Dossier dossier, List<User> responsibles)
             throws AlfrescoServiceException;
 
-    /**
-     * Removes any collaborator role set on dossier.
-     * 
-     * @param user
-     * @param dossier
-     * @param collaborator
-     * @throws AlfrescoServiceException
-     */
-    void removeKoyaCollaboratorRole(User user, Dossier dossier,
-            User collaborator) throws AlfrescoServiceException;
 
     /**
      * Remove user member or responsible of specified Dossier.

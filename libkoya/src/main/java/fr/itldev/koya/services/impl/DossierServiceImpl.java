@@ -32,6 +32,7 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.PaginatedContentList;
+import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.cache.CacheManager;
@@ -39,17 +40,10 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public class DossierServiceImpl extends AlfrescoRestService implements
         DossierService {
-	
-	
-    private static final String REST_GET_LISTRESP = "/s/fr/itldev/koya/dossier/resp/list/{nodeRef}";
-
-    private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/dossier/member/list/{nodeRef}";
-
-    private static final String REST_GET_ADDRESP = "/s/fr/itldev/koya/dossier/resp/add/{userName}/{nodeRef}";
-    private static final String REST_GET_ADDMEMBER = "/s/fr/itldev/koya/dossier/member/add/{userName}/{nodeRef}";
-
-    private static final String REST_GET_DELRESP = "/s/fr/itldev/koya/dossier/resp/del/{userName}/{nodeRef}";
-
+		
+	public static final String REST_GET_LISTMEMBERSHIP = "/s/fr/itldev/koya/security/membership/{rolename}/{noderef}";
+	private static final String REST_POST_MODIFYMEMBERSHIP = "/s/fr/itldev/koya/security/membership/{method}/{rolename}/{noderef}";
+    
     private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}";
     
     private static final String REST_SUMMARY = "/s/fr/itldev/koya/dossier/summary/{nodeRef}?documentName={documentName}";
@@ -165,8 +159,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements
                 new TypeReference<List<User>>() {
                 },
                 user.getRestTemplate().getForObject(
-                        getAlfrescoServerUrl() + REST_GET_LISTRESP,
-                        String.class, dossier.getNodeRef()));
+                        getAlfrescoServerUrl() + REST_GET_LISTMEMBERSHIP,
+                        String.class, KoyaPermissionCollaborator.RESPONSIBLE, dossier.getNodeRef()));
     }
 
     /**
@@ -184,8 +178,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements
                 new TypeReference<List<User>>() {
                 },
                 user.getRestTemplate().getForObject(
-                        getAlfrescoServerUrl() + REST_GET_LISTMEMBERS,
-                        String.class, dossier.getNodeRef()));
+                        getAlfrescoServerUrl() + REST_GET_LISTMEMBERSHIP,
+                        String.class, KoyaPermissionCollaborator.MEMBER, dossier.getNodeRef()));
     }
 
     /**
@@ -198,11 +192,12 @@ public class DossierServiceImpl extends AlfrescoRestService implements
      */
     @Override
     public void addResponsible(User user, Dossier dossier, User responsible)
-            throws AlfrescoServiceException {
-        user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_ADDRESP, String.class,
-                responsible.getUserName(), dossier.getNodeRef());
-        
+			throws AlfrescoServiceException {
+		user.getRestTemplate().postForObject(
+				getAlfrescoServerUrl() + REST_POST_MODIFYMEMBERSHIP,
+				responsible, String.class, "add",
+				KoyaPermissionCollaborator.RESPONSIBLE, dossier.getNodeRef());
+
         //invalidate user cache
         cacheManager.revokePermission(responsible, dossier.getNodeRef());
         
@@ -211,10 +206,12 @@ public class DossierServiceImpl extends AlfrescoRestService implements
     @Override
     public void addMember(User user, Dossier dossier, User member)
             throws AlfrescoServiceException {
-        user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_ADDMEMBER, String.class,
-                member.getUserName(), dossier.getNodeRef());
-        
+    	
+    	user.getRestTemplate().postForObject(
+				getAlfrescoServerUrl() + REST_POST_MODIFYMEMBERSHIP,
+				member, String.class, "add",
+				KoyaPermissionCollaborator.MEMBER, dossier.getNodeRef());
+    	
         //invalidate user cache
         cacheManager.revokePermission(member, dossier.getNodeRef());      
     }
@@ -236,23 +233,6 @@ public class DossierServiceImpl extends AlfrescoRestService implements
     }
 
     /**
-     * Removes any collaborator role set on dossier.
-     * 
-     * @param user
-     * @param dossier
-     * @param collaborator
-     * @throws AlfrescoServiceException
-     */
-    @Override
-    public void removeKoyaCollaboratorRole(User user, Dossier dossier,
-            User collaborator) throws AlfrescoServiceException {
-        user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
-                dossier.getNodeRef(), collaborator.getUserName());
-        cacheManager.revokePermission(collaborator, dossier.getNodeRef());
-    }
-
-    /**
      * Remove user member or responsible of specified Dossier.
      * 
      * @param user
@@ -263,9 +243,11 @@ public class DossierServiceImpl extends AlfrescoRestService implements
     @Override
     public void removeMembership(User user, Dossier dossier,
             User memberOrResp) throws AlfrescoServiceException {
-        user.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_DELRESP, String.class,
-                memberOrResp.getUserName(), dossier.getNodeRef());               
+    	String rolename = "any";
+    	user.getRestTemplate().postForObject(
+				getAlfrescoServerUrl() + REST_POST_MODIFYMEMBERSHIP,
+				memberOrResp, String.class, "del",
+				rolename, dossier.getNodeRef());    	 
         cacheManager.revokePermission(memberOrResp, dossier.getNodeRef());
 
     }
