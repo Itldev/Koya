@@ -106,6 +106,7 @@ public class ConvertPermissionsv010 extends AbstractWebScript {
 	public void execute(WebScriptRequest req, WebScriptResponse res)
 			throws IOException {
 		for (Company c : companyService.list()) {
+			logger.error("start convert for company " + c.getName());
 			for (Space s : spaceService.list(c)) {
 				// deployed versions only contains one space so ignore with log
 				// spaces not 'defaultSpace'
@@ -132,7 +133,9 @@ public class ConvertPermissionsv010 extends AbstractWebScript {
 							+ c.getName() + " : IGNORED");
 				}
 			}
+			logger.error("end convert for company " + c.getName());
 		}
+		logger.error("Permissions convert process finished");
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write("");
 	}
@@ -156,14 +159,7 @@ public class ConvertPermissionsv010 extends AbstractWebScript {
 		}
 	};
 
-	private void log(Space s, String message) {
-		logger.error("Convert " + s.getKtype() + " " + s.getName() + " : "
-				+ message);
-	}
-
 	private void convertDossierAcl(final Dossier dossier) {
-
-		log(dossier, " ======= Start");
 
 		// getKoyaNodes Hierachy
 		List<KoyaNode> parents = koyaNodeService.getParentsList(
@@ -245,9 +241,6 @@ public class ConvertPermissionsv010 extends AbstractWebScript {
 					GROUP_KOYA_PERMISSIONS_DOSSIER.get(permissionGroupName),
 					true);
 
-			log(dossier, "set permission " + "GROUP_" + authorityName + " > "
-					+ GROUP_KOYA_PERMISSIONS_DOSSIER.get(permissionGroupName));
-
 		}
 
 		// convert old permissions to new ones
@@ -260,8 +253,6 @@ public class ConvertPermissionsv010 extends AbstractWebScript {
 				String groupName = "GROUP_"
 						+ dossier.getAuthorityName(ap.getPermission());
 
-				log(dossier, "add user " + ap.getAuthority() + " to "
-						+ groupName);
 				authorityService.addAuthority(groupName, ap.getAuthority());
 			}
 
@@ -271,12 +262,9 @@ public class ConvertPermissionsv010 extends AbstractWebScript {
 		removeOwner(dossier);
 		removeAllUserPermissions(dossier);
 
-		log(dossier, " ======= End");
-
 	}
 
 	private void convertDefaultSpaceAcl(final Space space) {
-		log(space, " ======= Start");
 
 		List<KoyaNode> parents = koyaNodeService.getParentsList(
 				space.getNodeRef(), KoyaNodeService.NB_ANCESTOR_INFINTE);
@@ -336,14 +324,11 @@ public class ConvertPermissionsv010 extends AbstractWebScript {
 							"GROUP_" + authorityName,
 							GROUP_KOYA_PERMISSIONS_SPACE
 									.get(permissionGroupName), true);
-			log(space, "set permission " + "GROUP_" + authorityName + " > "
-					+ GROUP_KOYA_PERMISSIONS_SPACE.get(permissionGroupName));
+
 		}
 
 		removeOwner(space);
 		removeAllUserPermissions(space);
-
-		log(space, " ======= End");
 
 	}
 
