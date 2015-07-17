@@ -429,10 +429,12 @@
         <property name="userService" ref="userService" /> 
     </bean>
     
-    <bean id="webscript.fr.itldev.koya.user.changepassword.get" 
+    <bean id="webscript.fr.itldev.koya.user.changepassword.post" 
           class="fr.itldev.koya.webscript.user.ChangePassword"
           parent="webscript">                
-        <property name="userService" ref="userService" /> 
+        <property name="userService" ref="userService" />
+        <property name="authenticationService" ref="AuthenticationService"/>
+		<property name="authorityService" ref="authorityService" />
     </bean>
     
     <bean id="webscript.fr.itldev.koya.user.getbyauthkey.post" 
