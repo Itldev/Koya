@@ -555,17 +555,7 @@
           parent="webscript">
     </bean>
     
-    
-    <!-- Dump company all spaces node permissions
-    for debug 
-    -->
-    <bean id="webscript.fr.itldev.koya.meta.dumpPermissions.get" 
-          class="fr.itldev.koya.webscript.meta.DumpPermissions"
-          parent="webscript">
-        <property name="debuggerService" ref="debuggerService" />   
-        <property name="spaceService" ref="spaceService" />   
-    </bean>
-    
+       
     <!--
     ==================================================================
     ========================== Reset Password Workflow ===============
