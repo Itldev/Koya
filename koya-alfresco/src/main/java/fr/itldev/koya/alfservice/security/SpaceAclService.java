@@ -50,11 +50,9 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 
 import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaActivityPoster;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.ModelService;
-import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
@@ -90,8 +88,6 @@ public class SpaceAclService {
 	protected UserService userService;
 	protected PolicyComponent policyComponent;
 	protected CompanyService companyService;
-	protected SpaceService spaceService;
-	protected DossierService dossierService;
 	protected CompanyAclService companyAclService;
 	protected TransactionService transactionService;
 	protected FileFolderService fileFolderService;
@@ -149,14 +145,6 @@ public class SpaceAclService {
 
 	public void setCompanyService(CompanyService companyService) {
 		this.companyService = companyService;
-	}
-
-	public void setSpaceService(SpaceService spaceService) {
-		this.spaceService = spaceService;
-	}
-
-	public void setDossierService(DossierService dossierService) {
-		this.dossierService = dossierService;
 	}
 
 	public void setCompanyAclService(CompanyAclService companyAclService) {
