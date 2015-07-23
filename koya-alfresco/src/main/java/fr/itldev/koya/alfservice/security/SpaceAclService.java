@@ -805,6 +805,11 @@ public class SpaceAclService {
 				.getSiteRoleGroup(company.getName(),
 						SitePermission.COLLABORATOR.toString()),
 				SitePermission.CONTRIBUTOR.toString(), true);
+		
+		permissionService.setPermission(companyKoyaClientDir, siteService
+				.getSiteRoleGroup(company.getName(),
+						SitePermission.CONSUMER.toString()),
+				SitePermission.CONSUMER.toString(), true);
 	}
 
 	/**
