@@ -166,6 +166,26 @@
 					</view:properties>
 					<view:associations></view:associations>
 				</cm:content>
+				
+				
+				<cm:content view:childName="cm:clientdoc-upload.html.ftl">
+					<view:aspects>
+						<cm:titled />
+						<cm:author />
+						<app:inlineeditable />
+					</view:aspects>
+					<view:properties>
+						<sys:node-uuid>a61ce4cd-6006-4f0b-ad09-6e6b5d3435a4</sys:node-uuid>
+						<app:editInline>true</app:editInline>
+						<cm:description></cm:description>
+						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/clientdoc-upload.html.ftl|mimetype=text/plain|size=|encoding=UTF-8</cm:content>
+						<cm:title>clientdoc-upload.html.ftl</cm:title>
+						<cm:author>Me</cm:author>
+						<cm:name>clientdoc-upload.html.ftl</cm:name>
+					</view:properties>
+					<view:associations></view:associations>
+				</cm:content>
+				
 				            </cm:contains>
         </view:associations>
     </cm:folder>

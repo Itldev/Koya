@@ -73,16 +73,22 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="companyService" ref="companyService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
-    </bean> 
-    
-    <!--Dossiers handling service-->
-    <bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
-        <property name="nodeService" ref="NodeService"/>
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="searchService" ref="searchService"/>
-        <property name="prefixResolver" ref="namespaceService" />
-        <property name="transactionService" ref="transactionService"/>
     </bean>
+
+	<!--Dossiers handling service -->
+	<bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
+		<property name="nodeService" ref="NodeService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="searchService" ref="searchService" />
+		<property name="prefixResolver" ref="namespaceService" />
+		<property name="transactionService" ref="transactionService" />
+		<property name="koyaContentService" ref="koyaContentService" />
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="koyaMailService" ref="koyaMailService" />
+		<property name="userService" ref="userService" />
+		<property name="authenticationService" ref="AuthenticationService" />
+		<property name="companyAclService" ref="companyAclService" />
+	</bean>
 
     <!--Contents handling service-->
     <bean name="koyaContentService" class="fr.itldev.koya.alfservice.KoyaContentService">

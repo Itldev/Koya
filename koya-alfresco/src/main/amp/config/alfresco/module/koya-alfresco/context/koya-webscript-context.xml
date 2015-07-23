@@ -189,6 +189,14 @@
         <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
         <property name="versionService" ref="versionService" />    
     </bean>
+
+	<!--List available client uploaded documents -->
+	<bean id="webscript.fr.itldev.koya.dossier.clientdocuments.get"
+		class="fr.itldev.koya.webscript.dossier.ListClientDocuments" parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="dossierService" ref="dossierService" />
+
+	</bean>
        
     <!--
     ==================================================================
@@ -252,6 +260,7 @@
         <property name="koyaContentService" ref="koyaContentService" />
         <property name="koyaNodeService" ref="koyaNodeService" />         
         <property name="companyPropertiesService" ref="companyPropertiesService" />         
+        <property name="dossierService" ref="dossierService" />   
     </bean>
     
     <!--

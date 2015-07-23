@@ -762,6 +762,52 @@ public class SpaceAclService {
 	}
 
 	/**
+	 * 
+	 * @param dossier
+	 * @param koyaClientDir
+	 */
+	public void initSingleDossierKoyaClientDirAcl(Dossier dossier,
+			NodeRef koyaClientDir) {
+		permissionService.setPermission(koyaClientDir,
+				"GROUP_" + dossier.getAuthorityName(KoyaPermissionCollaborator.MEMBER.toString()),
+				KoyaPermissionCollaborator.MEMBER.toString(), true);
+		
+		permissionService.setPermission(koyaClientDir,
+				"GROUP_" + dossier.getAuthorityName(KoyaPermissionCollaborator.RESPONSIBLE.toString()),
+				KoyaPermissionCollaborator.RESPONSIBLE.toString(), true);
+		
+		permissionService.setPermission(koyaClientDir,
+				"GROUP_" + dossier.getAuthorityName("KoyaClient"),
+				"SiteContributor", true);
+
+	}
+
+	/**
+	 * 
+	 * @param dossier
+	 * @param koyaClientDir
+	 */
+	public void initCompanyKoyaClientDirAcl(Company company,
+			NodeRef companyKoyaClientDir) {
+
+		// Clear the node inherited permissions
+		permissionService.setInheritParentPermissions(companyKoyaClientDir,
+				false);
+		permissionService.setPermission(companyKoyaClientDir, siteService
+				.getSiteRoleGroup(company.getName(),
+						SitePermission.MANAGER.toString()),
+				SitePermission.MANAGER.toString(), true);
+		permissionService.setPermission(companyKoyaClientDir, siteService
+				.getSiteRoleGroup(company.getName(),
+						SitePermission.CONTRIBUTOR.toString()),
+				SitePermission.CONTRIBUTOR.toString(), true);
+		permissionService.setPermission(companyKoyaClientDir, siteService
+				.getSiteRoleGroup(company.getName(),
+						SitePermission.COLLABORATOR.toString()),
+				SitePermission.CONTRIBUTOR.toString(), true);
+	}
+
+	/**
 	 * Remove all koya Specific authorities Group setted on space
 	 * 
 	 * TODO chained deletion if deleted item is a Space.class Object and have

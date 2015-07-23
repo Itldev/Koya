@@ -237,7 +237,7 @@ public class KoyaContentService {
             throws KoyaServiceException {
 
         return createContentNode(parent, fileName, null, content.getMimetype(),
-                content.getEncoding(), content.getInputStream());
+                content.getEncoding(), content.getInputStream(),true);
     }
 
     public Map<String, String> createContentNode(NodeRef parent,
@@ -250,12 +250,12 @@ public class KoyaContentService {
             String fileName, String name, InputStream contentInputStream)
             throws KoyaServiceException {
         return createContentNode(parent, fileName, name, null, null,
-                contentInputStream);
+                contentInputStream,true);
     }
 
     public Map<String, String> createContentNode(NodeRef parent,
             String fileName, String name, String mimetype, String encoding,
-            InputStream contentInputStream) throws KoyaServiceException {
+            InputStream contentInputStream,Boolean postActivity) throws KoyaServiceException {
         Boolean rename = false;
         if (name == null) {
             name = koyaNodeService.getUniqueValidFileNameFromTitle(fileName);
@@ -278,7 +278,7 @@ public class KoyaContentService {
 
             createdNode = car.getChildRef();
 
-            activityPoster.postFileFolderAdded(createdNode);
+            
         } catch (DuplicateChildNodeNameException ex) {
             throw new KoyaServiceException(
                     KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS, fileName);
@@ -310,7 +310,11 @@ public class KoyaContentService {
         retMap.put("originalFilename", fileName);
         retMap.put("rename", rename.toString());
         retMap.put("size", Long.toString(writer.getSize()));
+		retMap.put("nodeRef", createdNode.toString());
 
+		if(postActivity){
+			activityPoster.postFileFolderAdded(createdNode);
+		}
         return retMap;
     }
 

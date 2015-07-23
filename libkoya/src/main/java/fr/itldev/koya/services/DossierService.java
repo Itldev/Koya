@@ -24,6 +24,7 @@ import java.util.Map;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.core.io.Resource;
 
+import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
@@ -32,154 +33,154 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public interface DossierService extends AlfrescoService {
 
-    /**
-     * Creates a new Dossier
-     * 
-     * @param user
-     * @param title
-     * @param parentSpace
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    Dossier create(User user, Space parentSpace, String title)
-            throws AlfrescoServiceException;
-    /**
-     * 
-     * @param user
-     * @param dossier
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    Dossier edit(User user, Dossier dossier) throws AlfrescoServiceException;
+	/**
+	 * Creates a new Dossier
+	 * 
+	 * @param user
+	 * @param title
+	 * @param parentSpace
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Dossier create(User user, Space parentSpace, String title)
+			throws AlfrescoServiceException;
 
-    
-    /**
-     * List all Space Dossiers
-     * 
-     * @param user
-     * @param space
-     * @param skipCount
-     * @param maxItems
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    PaginatedContentList list(User user, Space space, int skipCount, int maxItems) throws AlfrescoServiceException;
-    
-    /**
-     * List all Space Dossiers
-     * with filter and sort options
-     * 
-     * @param user
-     * @param space
-     * @param skipCount
-     * @param maxItems
-     * @param filter
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    PaginatedContentList list(User user, Space space, int skipCount, int maxItems,
-            String filter,String sort) throws AlfrescoServiceException;
+	/**
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Dossier edit(User user, Dossier dossier) throws AlfrescoServiceException;
 
-    /**
-     * Count all Space Dossiers
-     * 
-     * @param user
-     * @param space
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    Integer countChildren(User user, Space space)
-            throws AlfrescoServiceException;
+	/**
+	 * List all Space Dossiers
+	 * 
+	 * @param user
+	 * @param space
+	 * @param skipCount
+	 * @param maxItems
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	PaginatedContentList list(User user, Space space, int skipCount,
+			int maxItems) throws AlfrescoServiceException;
 
-    /**
-     * List all users in charge of specified Dossier.
-     * 
-     * @param user
-     * @param dossier
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    List<User> listResponsibles(User user, Dossier dossier)
-            throws AlfrescoServiceException;
+	/**
+	 * List all Space Dossiers with filter and sort options
+	 * 
+	 * @param user
+	 * @param space
+	 * @param skipCount
+	 * @param maxItems
+	 * @param filter
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	PaginatedContentList list(User user, Space space, int skipCount,
+			int maxItems, String filter, String sort)
+			throws AlfrescoServiceException;
 
-    /**
-     * List all users members of specified Dossier.
-     * 
-     * @param user
-     * @param dossier
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    List<User> listMembers(User user, Dossier dossier)
-            throws AlfrescoServiceException;
+	/**
+	 * Count all Space Dossiers
+	 * 
+	 * @param user
+	 * @param space
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Integer countChildren(User user, Space space)
+			throws AlfrescoServiceException;
 
-    /**
-     * Adds a user in charge of specified Dossier.
-     * 
-     * @param user
-     * @param dossier
-     * @param responsible
-     * @throws AlfrescoServiceException
-     */
-    void addResponsible(User user, Dossier dossier, User responsible)
-            throws AlfrescoServiceException;
+	/**
+	 * List all users in charge of specified Dossier.
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<User> listResponsibles(User user, Dossier dossier)
+			throws AlfrescoServiceException;
 
-    /**
-     * Adds a user member of specified Dossier.
-     * 
-     * @param user
-     * @param dossier
-     * @param responsible
-     * @throws AlfrescoServiceException
-     */
-    void addMember(User user, Dossier dossier, User member)
-            throws AlfrescoServiceException;
+	/**
+	 * List all users members of specified Dossier.
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<User> listMembers(User user, Dossier dossier)
+			throws AlfrescoServiceException;
 
-    /**
-     * Add a list of users in charge of specified Dossier.
-     * 
-     * @param user
-     * @param dossier
-     * @param responsibles
-     * @throws AlfrescoServiceException
-     */
-    void addResponsible(User user, Dossier dossier, List<User> responsibles)
-            throws AlfrescoServiceException;
+	/**
+	 * Adds a user in charge of specified Dossier.
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @param responsible
+	 * @throws AlfrescoServiceException
+	 */
+	void addResponsible(User user, Dossier dossier, User responsible)
+			throws AlfrescoServiceException;
 
+	/**
+	 * Adds a user member of specified Dossier.
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @param responsible
+	 * @throws AlfrescoServiceException
+	 */
+	void addMember(User user, Dossier dossier, User member)
+			throws AlfrescoServiceException;
 
-    /**
-     * Remove user member or responsible of specified Dossier.
-     * 
-     * @param user
-     * @param dossier
-     * @param memberOrResp
-     * @throws AlfrescoServiceException
-     */
-    void removeMembership(User user, Dossier dossier, User memberOrResp)
-            throws AlfrescoServiceException;
+	/**
+	 * Add a list of users in charge of specified Dossier.
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @param responsibles
+	 * @throws AlfrescoServiceException
+	 */
+	void addResponsible(User user, Dossier dossier, List<User> responsibles)
+			throws AlfrescoServiceException;
 
-    /**
-     * checks if dossier is confidential
-     * 
-     * @param user
-     * @param dossier
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    Boolean isConfidential(User user, Dossier dossier)
-            throws AlfrescoServiceException;
+	/**
+	 * Remove user member or responsible of specified Dossier.
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @param memberOrResp
+	 * @throws AlfrescoServiceException
+	 */
+	void removeMembership(User user, Dossier dossier, User memberOrResp)
+			throws AlfrescoServiceException;
 
-    /**
-     * change dossier confidentiality status
-     * 
-     * @param user
-     * @param dossier
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    Boolean setConfidentiality(User user, Dossier dossier, Boolean confidential)
-            throws AlfrescoServiceException;
-    
+	/**
+	 * checks if dossier is confidential
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Boolean isConfidential(User user, Dossier dossier)
+			throws AlfrescoServiceException;
+
+	/**
+	 * change dossier confidentiality status
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Boolean setConfidentiality(User user, Dossier dossier, Boolean confidential)
+			throws AlfrescoServiceException;
+
 	/**
 	 * Creates dossier summary descriptors files.
 	 * 
@@ -193,5 +194,16 @@ public interface DossierService extends AlfrescoService {
 	 */
 	Map<String, NodeRef> createSummary(User user, Dossier dossier,
 			String summaryFileName) throws AlfrescoServiceException;
+
+	/**
+	 * return the client document uploaded list
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<Document> listClientUploadedDocuments(User user, Dossier dossier)
+			throws AlfrescoServiceException;
 
 }
