@@ -20,11 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Generates Dossier's Summary Document</shortname>
+    <shortname>used for compatibility</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/dossier/summary/{nodeId}?documentName={documentName}</url>
-    <authentication>user</authentication>
-    <format default="json"/>
+    <url>/fr/itldev/koya/company/logo/{companyName}</url>
+    <authentication runas="admin">none</authentication>    
 </webscript>
 
 	

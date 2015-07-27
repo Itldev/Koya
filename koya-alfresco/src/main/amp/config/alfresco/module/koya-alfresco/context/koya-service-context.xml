@@ -54,6 +54,7 @@
         <property name="fileFolderService" ref="FileFolderService" />      
         <property name="searchService" ref="SearchService"/>  
         <property name="companyPropertiesService" ref="companyPropertiesService"/>          
+        <property name="permissionService" ref="PermissionService"/>
     </bean>     
     
      <!--Companies handling service-->

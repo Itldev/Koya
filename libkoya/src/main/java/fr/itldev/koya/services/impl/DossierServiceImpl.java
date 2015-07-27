@@ -48,7 +48,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 
 	private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}";
 
-	private static final String REST_SUMMARY = "/s/fr/itldev/koya/dossier/summary/{nodeRef}?documentName={documentName}";
+	private static final String REST_SUMMARY = "/s/fr/itldev/koya/dossier/summary/{nodeId}?documentName={documentName}";
 
 	private KoyaContentService KoyaContentService;
 	private CacheManager cacheManager;
@@ -293,7 +293,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 		// extract map
 		Map<String, String> returnValues = user.getRestTemplate().getForObject(
 				getAlfrescoServerUrl() + REST_SUMMARY, Map.class,
-				dossier.getNodeRef(), summaryFileName);
+				dossier.getNodeRef().getId(), summaryFileName);
 
 		Map<String, NodeRef> nodes = new HashMap<String, NodeRef>();
 		for (String k : returnValues.keySet()) {

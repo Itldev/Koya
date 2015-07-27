@@ -1,15 +1,18 @@
 package fr.itldev.koya.webscript.dossier;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.content.transform.ContentTransformer;
 import org.alfresco.repo.dictionary.RepositoryLocation;
-import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.template.TemplateNode;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -30,8 +33,11 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.CompanyPropertiesService;
+import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
@@ -57,8 +63,9 @@ public class GenerateSummary extends AbstractWebScript implements
 	protected ServiceRegistry serviceRegistry;
 	private ContentService contentService;
 	private VersionService versionService;
-
-	private BehaviourFilter policyBehaviourFilter;
+	private CompanyService companyService;
+	private CompanyPropertiesService companyPropertiesService;
+	private SysAdminParams sysAdminParams;
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
@@ -92,12 +99,21 @@ public class GenerateSummary extends AbstractWebScript implements
 		this.contentService = contentService;
 	}
 
-	public void setPolicyBehaviourFilter(BehaviourFilter policyBehaviourFilter) {
-		this.policyBehaviourFilter = policyBehaviourFilter;
-	}
-
 	public void setVersionService(VersionService versionService) {
 		this.versionService = versionService;
+	}
+
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
+
+	public void setCompanyPropertiesService(
+			CompanyPropertiesService companyPropertiesService) {
+		this.companyPropertiesService = companyPropertiesService;
+	}
+
+	public void setSysAdminParams(SysAdminParams sysAdminParams) {
+		this.sysAdminParams = sysAdminParams;
 	}
 
 	protected RepositoryLocation templateLocation;
@@ -123,23 +139,12 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * 
 			 * Find Dossier
 			 */
-			Dossier d = koyaNodeService
-					.getKoyaNode(koyaNodeService.getNodeRef((String) urlParams
-							.get(KoyaWebscript.WSCONST_NODEREF)), Dossier.class);
-			/**
-			 * =================================================
-			 * 
-			 * Build Summary doc name
-			 */
-			String documentName = urlParams.get("documentName");
-			if (documentName == null || documentName.isEmpty()) {
-				documentName = DEFAULT_DOCNAME;
-			}
+			Dossier d = koyaNodeService.getKoyaNode(
+					koyaNodeService.getNodeRef("workspace://SpacesStore/"
+							+ (String) urlParams.get("nodeId")), Dossier.class);
 
-			/**
-			 * TODO generated document extra arguments : * types :
-			 * pdf,html,xlsx,docx, etc
-			 */
+			Company c = (Company) koyaNodeService.getFirstParentOfType(
+					d.getNodeRef(), Company.class);
 
 			/**
 			 * =================================================
@@ -173,6 +178,35 @@ public class GenerateSummary extends AbstractWebScript implements
 			Map<String, Serializable> paramsTemplate = new HashMap<>();
 			paramsTemplate.put("dossier", new TemplateNode(d.getNodeRef(),
 					serviceRegistry, null));
+
+			// logo parameters
+			paramsTemplate.put("dossier", new TemplateNode(d.getNodeRef(),
+					serviceRegistry, null));
+
+			final String logoUrl = sysAdminParams.getAlfrescoProtocol() + "://"
+					+ sysAdminParams.getAlfrescoHost() + ":"
+					+ sysAdminParams.getAlfrescoPort() + "/"
+					+ sysAdminParams.getAlfrescoContext()
+					+ "/s/fr/itldev/koya/company/logo/" + c.getName();
+
+			NodeRef logo = companyPropertiesService.getLogo(c);
+			ContentReader contentReader = contentService.getReader(logo,
+					ContentModel.PROP_CONTENT);
+
+			// scale image
+			final BufferedImage bimg = ImageIO.read(contentReader
+					.getContentInputStream());
+			final int heigth = 80;
+			final int width = (heigth * bimg.getWidth()) / bimg.getHeight();
+
+			paramsTemplate.put("logo", new HashMap() {
+				{
+					put("url", logoUrl);
+					put("height", Integer.valueOf(heigth).toString());
+					put("width", Integer.valueOf(width).toString());
+				}
+			});
+
 			try {
 				htmlText = templateService.processTemplate("freemarker",
 						summarytemplate.toString(), paramsTemplate);
@@ -181,41 +215,22 @@ public class GenerateSummary extends AbstractWebScript implements
 						KoyaErrorCodes.SUMMARY_TEMPLATE_PROCESS_ERROR);
 			}
 
-			/**
-			 * ==================================================
-			 * 
-			 * Disable behaviours: last modification update on parent dossier
-			 * mail sending
-			 */
-
-			policyBehaviourFilter
-					.disableBehaviour(ContentModel.ASPECT_AUDITABLE);
-
-			/**
-			 * ===================================================
-			 * 
-			 * TODO Disable new content notification rule applied
-			 * documentLibrary > no mail sent
-			 * 
-			 * 
-			 * NodeRef should a different type that doesn't triggers
-			 * notification
-			 * 
-			 */
-
+			NodeRef companyTmpSummaryDir = companyService.getTmpSummaryDir(c);
+			String summaryFileName = getDossierSummaryFileName(d);
 			/**
 			 * =================================================
 			 * 
 			 * Write html file
 			 */
 
-			htmlSummaryNodeRef = nodeService.getChildByName(d.getNodeRef(),
-					ContentModel.ASSOC_CONTAINS, documentName + ".html");
+			htmlSummaryNodeRef = nodeService.getChildByName(
+					companyTmpSummaryDir, ContentModel.ASSOC_CONTAINS,
+					summaryFileName + ".html");
 
 			if (htmlSummaryNodeRef == null) {
-				htmlSummaryNodeRef = fileFolderService.create(d.getNodeRef(),
-						documentName + ".html", ContentModel.TYPE_CONTENT)
-						.getNodeRef();
+				htmlSummaryNodeRef = fileFolderService.create(
+						companyTmpSummaryDir, summaryFileName + ".html",
+						ContentModel.TYPE_CONTENT).getNodeRef();
 			}
 
 			ContentWriter fileWriter = fileFolderService
@@ -231,13 +246,14 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * Convert html to pdf
 			 */
 
-			pdfSummaryNodeRef = nodeService.getChildByName(d.getNodeRef(),
-					ContentModel.ASSOC_CONTAINS, documentName + ".pdf");
+			pdfSummaryNodeRef = nodeService.getChildByName(
+					companyTmpSummaryDir, ContentModel.ASSOC_CONTAINS,
+					summaryFileName + ".pdf");
 
 			if (pdfSummaryNodeRef == null) {
-				pdfSummaryNodeRef = fileFolderService.create(d.getNodeRef(),
-						documentName + ".pdf", ContentModel.TYPE_CONTENT)
-						.getNodeRef();
+				pdfSummaryNodeRef = fileFolderService.create(
+						companyTmpSummaryDir, summaryFileName + ".pdf",
+						ContentModel.TYPE_CONTENT).getNodeRef();
 			}
 
 			ContentReader htmlSummaryReader = fileFolderService
@@ -251,8 +267,7 @@ public class GenerateSummary extends AbstractWebScript implements
 
 			ContentTransformer transformer = contentService.getTransformer(
 					"text/html", "application/pdf");
-			logger.debug("convert html to pdf with :" + transformer.getName());
-			// TODO use appropriate transformer
+
 			transformer.transform(htmlSummaryReader, pdfSummaryWriter);
 			// creates new revision
 			versionService.createVersion(pdfSummaryNodeRef, null);
@@ -263,19 +278,21 @@ public class GenerateSummary extends AbstractWebScript implements
 		}
 
 		res.setContentEncoding("UTF-8");
-		res.setContentType("application/json;charset=UTF-8");
-
 		/**
-		 * Write summary nodeRefs on response
+		 * Stream pdf summary as response
 		 */
-		Map<String, String> response = new HashMap<String, String>();
-		if (htmlSummaryNodeRef != null) {
-			response.put("htmlSummaryNodeRef", htmlSummaryNodeRef.toString());
+		try {
+			ContentReader reader = contentService.getReader(pdfSummaryNodeRef,
+					ContentModel.PROP_CONTENT);
+			reader.getContent(res.getOutputStream());
+		} catch (Exception ex) {
+			throw new WebScriptException("Unable to stream output");
 		}
-		if (pdfSummaryNodeRef != null) {
-			response.put("pdfSummaryNodeRef", pdfSummaryNodeRef.toString());
-		}
-		res.getWriter().write(KoyaWebscript.getObjectAsJson(response));
 
 	}
+
+	private String getDossierSummaryFileName(Dossier d) {
+		return "dossier-summary-" + d.getNodeRef().getId();
+	}
+
 }

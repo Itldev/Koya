@@ -186,8 +186,10 @@
         <property name="nodeService" ref="nodeService"/>
         <property name="serviceRegistry" ref="ServiceRegistry"/>  
         <property name="contentService" ref="contentService" />  
-        <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
         <property name="versionService" ref="versionService" />    
+        <property name="companyService" ref="companyService" />  
+        <property name="companyPropertiesService" ref="companyPropertiesService" />  
+        <property name="sysAdminParams" ref="sysAdminParams"/>  
     </bean>
 
 	<!--List available client uploaded documents -->
