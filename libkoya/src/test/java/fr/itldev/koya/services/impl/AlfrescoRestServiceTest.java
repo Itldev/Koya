@@ -1,13 +1,16 @@
 package fr.itldev.koya.services.impl;
 
-import fr.itldev.koya.model.impl.Notification;
 import java.util.List;
+
 import junit.framework.TestCase;
+
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import fr.itldev.koya.model.impl.Activity;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
@@ -59,7 +62,7 @@ public class AlfrescoRestServiceTest extends TestCase {
                 + "]";
         Object expResult = null;
 
-        Object result = AlfrescoRestService.fromJSON(new TypeReference<List<Notification>>() {
+        Object result = AlfrescoRestService.fromJSON(new TypeReference<List<Activity>>() {
         }, notificationJsonStr);
 
     }

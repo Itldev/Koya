@@ -129,7 +129,6 @@
     
     
     <bean id="searchService" class="fr.itldev.koya.services.impl.SearchServiceImpl" parent="abstractRestService"/>
-    <bean id="notificationService" class="fr.itldev.koya.services.impl.NotificationServiceImpl" parent="abstractRestService"/>
     
     <bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl" parent="abstractRestService">
     <property name="cacheManager" ref="cacheManager" />

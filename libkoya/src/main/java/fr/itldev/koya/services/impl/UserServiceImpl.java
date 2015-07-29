@@ -51,8 +51,8 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import fr.itldev.koya.model.impl.Activity;
 import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
@@ -83,6 +83,9 @@ public class UserServiceImpl extends AlfrescoRestService implements
 	private static final String REST_POST_RESET_PASSWORD_REQUEST = "/s/fr/itldev/koya/resetpassword/request";
 	private static final String REST_POST_RESET_PASSWORD_VALIDATION = "/s/fr/itldev/koya/resetpassword/validation";
 
+	// ====== user activities
+	private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?format=json";
+	
 	private BeanFactory beanFactory;
 
 	@Override
@@ -323,22 +326,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
 						String.class, query, maxResults, companyName, roles));
 
 	}
-
-	@Override
-	public List<Notification> getNotifications(User userLog) {
-		throw new UnsupportedOperationException("Not supported yet."); // To
-																		// change
-																		// body
-																		// of
-																		// generated
-																		// methods,
-																		// choose
-																		// Tools
-																		// |
-																		// Templates.
-		// cf alfresco activity service
-	}
-
+	
 	/**
 	 * Get user Object from email.
 	 * 
@@ -483,4 +471,21 @@ public class UserServiceImpl extends AlfrescoRestService implements
 						getAlfrescoServerUrl() + REST_GET_GROUPS, String.class));
 
 	}
+	
+	/**
+	 * List available activities for user
+	 * 
+	 * @param user
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	public List<Activity> listActivities(User user) throws AlfrescoServiceException {
+		return fromJSON(
+				new TypeReference<List<Activity>>() {
+				},
+				user.getRestTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_ACTIVITIES,
+						String.class));
+	}
+
 }
