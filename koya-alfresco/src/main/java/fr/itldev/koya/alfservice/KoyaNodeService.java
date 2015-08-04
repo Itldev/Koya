@@ -422,7 +422,7 @@ public class KoyaNodeService {
 					KoyaErrorCodes.MOVE_CYCLIC_RELATIONSHIP_DETECTED);
 		}
 		activityPoster.postFileFolderUpdated(fileFolderService
-				.getFileInfo(dest).isFolder(), dest);
+				.getFileInfo(toMove).isFolder(), toMove);
 		// TODO update KoyaNodes cache
 		return getKoyaNode(fInfo.getNodeRef());
 	}
