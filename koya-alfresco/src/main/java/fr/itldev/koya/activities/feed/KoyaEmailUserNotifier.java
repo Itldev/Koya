@@ -23,7 +23,7 @@ import org.json.JSONException;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.model.NotificationType;
+import fr.itldev.koya.model.KoyaActivityType;
 
 public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
@@ -39,19 +39,19 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 	}
 
 	private static List<String> ALLOWED_ACTIVITIES = new ArrayList<String>(
-			Arrays.asList(NotificationType.KOYA_SPACESHARED,
-					NotificationType.KOYA_SPACEUNUNSHARED,
+			Arrays.asList(KoyaActivityType.KOYA_SPACESHARED,
+					KoyaActivityType.KOYA_SPACEUNUNSHARED,
 					ActivityType.FOLDER_ADDED, ActivityType.FILE_ADDED,
 					ActivityType.FILE_DELETED, ActivityType.FOLDER_DELETED,
-					ActivityType.FILE_UPDATED, ActivityType.SITE_USER_JOINED));
+					ActivityType.FILE_UPDATED, ActivityType.SITE_USER_JOINED,
+					KoyaActivityType.FOLDER_UPDATED));
 
 	/**
 	 * 
-	 * TODO process ignored activities 
+	 * TODO process ignored activities
 	 * 
-	 * ActivityType.SITE_USER_REMOVED
-	 *  ActivityType.FILES_ADDED,
-					ActivityType.FOLDERS_ADDED,
+	 * ActivityType.SITE_USER_REMOVED ActivityType.FILES_ADDED,
+	 * ActivityType.FOLDERS_ADDED,
 	 * 
 	 */
 

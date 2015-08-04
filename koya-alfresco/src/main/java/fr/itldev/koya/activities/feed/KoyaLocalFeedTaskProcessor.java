@@ -34,7 +34,7 @@ import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.model.KoyaNode;
-import fr.itldev.koya.model.NotificationType;
+import fr.itldev.koya.model.KoyaActivityType;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
@@ -109,7 +109,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 		selector.setJobTaskNode(jobTaskNode);
 		selector.setMinId(minSeq);
 		selector.setMaxId(maxSeq);
-		selector.setAppTool(NotificationType.KOYA_APPTOOL);
+		selector.setAppTool(KoyaActivityType.KOYA_APPTOOL);
 		selector.setStatus(ActivityPostEntity.STATUS.POSTED.toString());
 
 		List<ActivityPostEntity> activityPosts = null;
@@ -269,13 +269,14 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	}
 
 	private static String[] SHARING_ACTIVITIES = {
-			NotificationType.KOYA_SPACESHARED,
-			NotificationType.KOYA_SPACEUNUNSHARED };
+			KoyaActivityType.KOYA_SPACESHARED,
+			KoyaActivityType.KOYA_SPACEUNUNSHARED };
 
 	private static String[] FILEFOLDER_ACTIVITIES = { ActivityType.FILE_ADDED,
 			ActivityType.FOLDER_ADDED, ActivityType.FILES_ADDED,
 			ActivityType.FOLDERS_ADDED, ActivityType.FILE_DELETED,
-			ActivityType.FOLDER_DELETED, ActivityType.FILE_UPDATED };
+			ActivityType.FOLDER_DELETED, ActivityType.FILE_UPDATED,
+			KoyaActivityType.FOLDER_UPDATED };
 
 	private static String[] COMPANYMEMBERSHIP_ACTIVITIES = {
 			ActivityType.SITE_USER_JOINED, ActivityType.SITE_USER_REMOVED };
