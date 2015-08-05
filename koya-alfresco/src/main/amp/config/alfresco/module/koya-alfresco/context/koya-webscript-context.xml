@@ -595,13 +595,14 @@
     ==================================================================
     -->
        <!-- Activity User Feed - to get activities feed for logged in user -->
-   <bean id="webscript.fr.itldev.koya.activities.feed.userfeed.get" 
-         class="fr.itldev.koya.webscript.activities.UserFeedRetrieverWebScript"
-         parent="webscript">
-      <property name="activityService" ref="activityService"/>
-      <property name="subscriptionService" ref="SubscriptionService"/>
-   <property name="userNamesAreCaseSensitive" value="${user.name.caseSensitive}"/>
-   </bean>
+   <bean id="webscript.fr.itldev.koya.activities.feed.userfeed.get"
+	class="fr.itldev.koya.webscript.activities.UserFeedRetrieverWebScript"
+	parent="webscript">
+		<property name="activityService" ref="activityService" />
+		<property name="subscriptionService" ref="SubscriptionService" />
+		<property name="userNamesAreCaseSensitive" value="${user.name.caseSensitive}" />
+		<property name="companyService" ref="companyService" />
+	</bean>
   
    <!-- Activity Admin Feed - to get activities feed for specified user -->
    <bean id="webscript.fr.itldev.koya.activities.feed.userfeed-admin.get"

@@ -14,6 +14,7 @@ import org.alfresco.repo.domain.activities.ActivityFeedEntity;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.activities.ActivityService;
+import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.subscriptions.PagingFollowingResults;
 import org.alfresco.service.cmr.subscriptions.SubscriptionService;
 import org.alfresco.util.JSONtoFmModel;
@@ -24,164 +25,211 @@ import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.model.impl.Company;
+
 /**
  * Java-backed WebScript to retrieve Activity User Feed
  */
 public class UserFeedRetrieverWebScript extends DeclarativeWebScript {
 
-    private static final Log logger = LogFactory.getLog(UserFeedRetrieverWebScript.class);
+	private static final Log logger = LogFactory
+			.getLog(UserFeedRetrieverWebScript.class);
 
-    // URL request parameter names
-    public static final String PARAM_SITE_ID = "s";
-    public static final String PARAM_EXCLUDE_THIS_USER = "exclUser";
-    public static final String PARAM_EXCLUDE_OTHER_USERS = "exclOthers";
-    public static final String PARAM_ONLY_FOLLOWING = "following";
-    public static final String PARAM_ACTIVITY_FILTER = "activityFilter";
-    public static final String PARAM_MIN_FEED_ID = "minFeedId";
+	// URL request parameter names
+	public static final String PARAM_SITE_ID = "s";
+	public static final String PARAM_EXCLUDE_THIS_USER = "exclUser";
+	public static final String PARAM_EXCLUDE_OTHER_USERS = "exclOthers";
+	public static final String PARAM_ONLY_FOLLOWING = "following";
+	public static final String PARAM_ACTIVITY_FILTER = "activityFilter";
+	public static final String PARAM_MIN_FEED_ID = "minFeedId";
 
-    private ActivityService activityService;
-    private SubscriptionService subscriptionService;
+	private ActivityService activityService;
+	private SubscriptionService subscriptionService;
+	private CompanyService companyService;
 
-    private boolean userNamesAreCaseSensitive = false;
+	private boolean userNamesAreCaseSensitive = false;
 
-    public void setActivityService(ActivityService activityService) {
-        this.activityService = activityService;
-    }
+	public void setActivityService(ActivityService activityService) {
+		this.activityService = activityService;
+	}
 
-    public void setSubscriptionService(SubscriptionService subscriptionService) {
-        this.subscriptionService = subscriptionService;
-    }
+	public void setSubscriptionService(SubscriptionService subscriptionService) {
+		this.subscriptionService = subscriptionService;
+	}
 
-    public void setUserNamesAreCaseSensitive(boolean userNamesAreCaseSensitive) {
-        this.userNamesAreCaseSensitive = userNamesAreCaseSensitive;
-    }
+	public void setUserNamesAreCaseSensitive(boolean userNamesAreCaseSensitive) {
+		this.userNamesAreCaseSensitive = userNamesAreCaseSensitive;
+	}
 
-    /* (non-Javadoc)
-     * @see org.alfresco.web.scripts.DeclarativeWebScript#executeImpl(org.alfresco.web.scripts.WebScriptRequest, org.alfresco.web.scripts.WebScriptResponse)
-     */
-    @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status) {
-        // retrieve requested format
-        String format = req.getFormat();
-        if (format == null || format.length() == 0) {
-            format = getDescription().getDefaultFormat();
-        }
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
 
-        // process extension
-        String extensionPath = req.getExtensionPath();
-        String[] extParts = extensionPath == null ? new String[1] : extensionPath.split("/");
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.alfresco.web.scripts.DeclarativeWebScript#executeImpl(org.alfresco
+	 * .web.scripts.WebScriptRequest,
+	 * org.alfresco.web.scripts.WebScriptResponse)
+	 */
 
-        String feedUserId = null;
-        if (extParts.length == 1) {
-            feedUserId = extParts[0];
-        } else if (extParts.length > 1) {
-            throw new AlfrescoRuntimeException("Unexpected extension: " + extensionPath);
-        }
+	@Override
+	protected Map<String, Object> executeImpl(WebScriptRequest req,
+			Status status) {
+		// retrieve requested format
+		String format = req.getFormat();
+		if (format == null || format.length() == 0) {
+			format = getDescription().getDefaultFormat();
+		}
 
-        // process arguments
-        String siteId = req.getParameter(PARAM_SITE_ID); // optional
-        String exclThisUserStr = req.getParameter(PARAM_EXCLUDE_THIS_USER); // optional
-        String exclOtherUsersStr = req.getParameter(PARAM_EXCLUDE_OTHER_USERS); // optional
-        String onlyFollowingStr = req.getParameter(PARAM_ONLY_FOLLOWING); // optional
-        String activityFilterStr = req.getParameter(PARAM_ACTIVITY_FILTER); // optional
-        String minFeedIdStr = req.getParameter(PARAM_MIN_FEED_ID);
+		// process extension
+		String extensionPath = req.getExtensionPath();
+		String[] extParts = extensionPath == null ? new String[1]
+				: extensionPath.split("/");
 
-        if (siteId != null && siteId.trim().isEmpty()) {
-            siteId = null;
-        }
+		String feedUserId = null;
+		if (extParts.length == 1) {
+			feedUserId = extParts[0];
+		} else if (extParts.length > 1) {
+			throw new AlfrescoRuntimeException("Unexpected extension: "
+					+ extensionPath);
+		}
 
-        boolean exclThisUser = false;
-        if ((exclThisUserStr != null) && (exclThisUserStr.equalsIgnoreCase("true") || exclThisUserStr.equalsIgnoreCase("t"))) {
-            exclThisUser = true;
-        }
+		// process arguments
+		String siteId = req.getParameter(PARAM_SITE_ID); // optional
+		String exclThisUserStr = req.getParameter(PARAM_EXCLUDE_THIS_USER); // optional
+		String exclOtherUsersStr = req.getParameter(PARAM_EXCLUDE_OTHER_USERS); // optional
+		String onlyFollowingStr = req.getParameter(PARAM_ONLY_FOLLOWING); // optional
+		String activityFilterStr = req.getParameter(PARAM_ACTIVITY_FILTER); // optional
+		String minFeedIdStr = req.getParameter(PARAM_MIN_FEED_ID);
 
-        boolean exclOtherUsers = false;
-        if ((exclOtherUsersStr != null) && (exclOtherUsersStr.equalsIgnoreCase("true") || exclOtherUsersStr.equalsIgnoreCase("t"))) {
-            exclOtherUsers = true;
-        }
+		if (siteId != null && siteId.trim().isEmpty()) {
+			siteId = null;
+		}
 
-        Set<String> userFilter = null;
-        if ((onlyFollowingStr != null) && (onlyFollowingStr.equalsIgnoreCase("true") || onlyFollowingStr.equalsIgnoreCase("t"))) {
-            userFilter = new HashSet<String>();
-            if (subscriptionService.isActive()) {
-                PagingFollowingResults following = subscriptionService.getFollowing(AuthenticationUtil.getRunAsUser(), new PagingRequest(-1, null));
-                if (following.getPage() != null) {
-                    for (String userName : following.getPage()) {
-                        userFilter.add(this.userNamesAreCaseSensitive ? userName : userName.toLowerCase());
-                    }
-                }
-            }
-        }
+		boolean exclThisUser = false;
+		if ((exclThisUserStr != null)
+				&& (exclThisUserStr.equalsIgnoreCase("true") || exclThisUserStr
+						.equalsIgnoreCase("t"))) {
+			exclThisUser = true;
+		}
 
-        Set<String> activityFilter = null;
-        if (activityFilterStr != null) {
-            activityFilter = new HashSet<String>();
-            String[] activities = activityFilterStr.split(",");
-            for (String s : activities) {
-                if (s.trim().length() > 0) {
-                    activityFilter.add(s.trim());
-                }
-            }
-            if (activityFilter.size() == 0) {
-                activityFilter = null;
-            }
-        }
+		boolean exclOtherUsers = false;
+		if ((exclOtherUsersStr != null)
+				&& (exclOtherUsersStr.equalsIgnoreCase("true") || exclOtherUsersStr
+						.equalsIgnoreCase("t"))) {
+			exclOtherUsers = true;
+		}
 
-        if ((feedUserId == null) || (feedUserId.length() == 0)) {
-            feedUserId = AuthenticationUtil.getFullyAuthenticatedUser();
-        }
+		Set<String> userFilter = null;
+		if ((onlyFollowingStr != null)
+				&& (onlyFollowingStr.equalsIgnoreCase("true") || onlyFollowingStr
+						.equalsIgnoreCase("t"))) {
+			userFilter = new HashSet<String>();
+			if (subscriptionService.isActive()) {
+				PagingFollowingResults following = subscriptionService
+						.getFollowing(AuthenticationUtil.getRunAsUser(),
+								new PagingRequest(-1, null));
+				if (following.getPage() != null) {
+					for (String userName : following.getPage()) {
+						userFilter
+								.add(this.userNamesAreCaseSensitive ? userName
+										: userName.toLowerCase());
+					}
+				}
+			}
+		}
 
-        Long minFeedId = Long.valueOf(-1);
-        if (minFeedIdStr != null && !minFeedIdStr.trim().isEmpty()) {
-            try {
-                minFeedId = Long.valueOf(minFeedIdStr);
-            } catch (NumberFormatException nfe) {
-            }
-        }
+		Set<String> activityFilter = null;
+		if (activityFilterStr != null) {
+			activityFilter = new HashSet<String>();
+			String[] activities = activityFilterStr.split(",");
+			for (String s : activities) {
+				if (s.trim().length() > 0) {
+					activityFilter.add(s.trim());
+				}
+			}
+			if (activityFilter.size() == 0) {
+				activityFilter = null;
+			}
+		}
 
-        // map feed collection format to feed entry format (if not the same), eg.
-        //     atomfeed -> atomentry
-        //     atom     -> atomentry
-        if (format.equals("atomfeed") || format.equals("atom")) {
-            format = "atomentry";
-        }
+		if ((feedUserId == null) || (feedUserId.length() == 0)) {
+			feedUserId = AuthenticationUtil.getFullyAuthenticatedUser();
+		}
 
-        Map<String, Object> model = new HashMap<String, Object>();
+		Long minFeedId = Long.valueOf(-1);
+		if (minFeedIdStr != null && !minFeedIdStr.trim().isEmpty()) {
+			try {
+				minFeedId = Long.valueOf(minFeedIdStr);
+			} catch (NumberFormatException nfe) {
+			}
+		}
 
-        try {
+		// map feed collection format to feed entry format (if not the same),
+		// eg.
+		// atomfeed -> atomentry
+		// atom -> atomentry
+		if (format.equals("atomfeed") || format.equals("atom")) {
+			format = "atomentry";
+		}
 
-            List<ActivityFeedEntity> activityFeeds = activityService.getUserFeedEntries(feedUserId, siteId, exclThisUser, exclOtherUsers, userFilter, activityFilter, minFeedId);
+		Map<String, Object> model = new HashMap<String, Object>();
 
-            List<String> feedEntries = new ArrayList<>();
-            try {
-                if (activityFeeds != null) {
-                    for (ActivityFeedEntity activityFeed : activityFeeds) {
-                        feedEntries.add(activityFeed.getJSONString());
-                    }
-                }
-                if (format.equals(FeedTaskProcessor.FEED_FORMAT_JSON)) {
-                    model.put("feedEntries", feedEntries);
-                    model.put("siteId", siteId);
-                } else {
-                    List<Map<String, Object>> activityFeedModels = new ArrayList<Map<String, Object>>();
+		try {
 
-                    for (String feedEntry : feedEntries) {
-                        activityFeedModels.add(JSONtoFmModel.convertJSONObjectToMap(feedEntry));
-                    }
+			List<String> allowedCompaniesForUser = new ArrayList<String>();
 
-                    model.put("feedEntries", activityFeedModels);
-                    model.put("feedUserId", feedUserId);
-                }
-            } catch (JSONException je) {
-                throw new AlfrescoRuntimeException("Unable to get user feed entries: " + je.getMessage());
-            }
-        } catch (AccessDeniedException ade) {
-            status.setCode(Status.STATUS_UNAUTHORIZED);
-            logger.warn("Unable to get user feed entries for '" + feedUserId + "' - currently logged in as '" + AuthenticationUtil.getFullyAuthenticatedUser() + "'");
-            return null;
-        }
+			for (Company c : companyService.list()) {
+				allowedCompaniesForUser.add(c.getName());
+				logger.error(c.getName());
+			}
 
-        return model;
-    }
+			List<ActivityFeedEntity> activityFeeds = activityService
+					.getUserFeedEntries(feedUserId, siteId, exclThisUser,
+							exclOtherUsers, userFilter, activityFilter,
+							minFeedId);
+
+			List<String> feedEntries = new ArrayList<>();
+			try {
+				if (activityFeeds != null) {
+					for (ActivityFeedEntity activityFeed : activityFeeds) {
+
+						// filter on allowed companies
+						if (allowedCompaniesForUser.contains(activityFeed
+								.getSiteNetwork())) {
+							feedEntries.add(activityFeed.getJSONString());
+						}
+					}
+				}
+				if (format.equals(FeedTaskProcessor.FEED_FORMAT_JSON)) {
+					model.put("feedEntries", feedEntries);
+					model.put("siteId", siteId);
+				} else {
+					List<Map<String, Object>> activityFeedModels = new ArrayList<Map<String, Object>>();
+
+					for (String feedEntry : feedEntries) {
+						activityFeedModels.add(JSONtoFmModel
+								.convertJSONObjectToMap(feedEntry));
+					}
+
+					model.put("feedEntries", activityFeedModels);
+					model.put("feedUserId", feedUserId);
+				}
+			} catch (JSONException je) {
+				throw new AlfrescoRuntimeException(
+						"Unable to get user feed entries: " + je.getMessage());
+			}
+		} catch (AccessDeniedException ade) {
+			status.setCode(Status.STATUS_UNAUTHORIZED);
+			logger.warn("Unable to get user feed entries for '" + feedUserId
+					+ "' - currently logged in as '"
+					+ AuthenticationUtil.getFullyAuthenticatedUser() + "'");
+			return null;
+		}
+
+		return model;
+	}
 }
