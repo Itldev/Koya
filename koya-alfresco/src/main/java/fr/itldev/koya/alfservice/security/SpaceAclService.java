@@ -454,6 +454,31 @@ public class SpaceAclService {
 	}
 
 	/**
+	 * Get all spaces a user can access with any permission. Limited to
+	 * company scope
+	 * 
+	 * @param u
+	 * @return
+	 */
+	public List<Space> getKoyaUserSpaces(User u, Company c) {
+		List<Space> spaces = new ArrayList<>();
+
+		Set<String> authorities = authorityService.getAuthoritiesForUser(u
+				.getUserName());
+
+		for (String a : authorities) {
+
+			Space s = getKoyaNodeFromGroupName(a);
+			if (s != null
+					&& koyaNodeService.getFirstParentOfType(s.getNodeRef(),
+							Company.class).equals(c)) {
+				spaces.add(s);
+			}
+		}
+		return spaces;
+	}
+
+	/**
 	 * Build KoyaNode that matches group name. Node Id is contained in koya
 	 * Groups string
 	 * 
@@ -768,14 +793,24 @@ public class SpaceAclService {
 	 */
 	public void initSingleDossierKoyaClientDirAcl(Dossier dossier,
 			NodeRef koyaClientDir) {
-		permissionService.setPermission(koyaClientDir,
-				"GROUP_" + dossier.getAuthorityName(KoyaPermissionCollaborator.MEMBER.toString()),
-				KoyaPermissionCollaborator.MEMBER.toString(), true);
-		
-		permissionService.setPermission(koyaClientDir,
-				"GROUP_" + dossier.getAuthorityName(KoyaPermissionCollaborator.RESPONSIBLE.toString()),
-				KoyaPermissionCollaborator.RESPONSIBLE.toString(), true);
-		
+		permissionService
+				.setPermission(
+						koyaClientDir,
+						"GROUP_"
+								+ dossier
+										.getAuthorityName(KoyaPermissionCollaborator.MEMBER
+												.toString()),
+						KoyaPermissionCollaborator.MEMBER.toString(), true);
+
+		permissionService
+				.setPermission(
+						koyaClientDir,
+						"GROUP_"
+								+ dossier
+										.getAuthorityName(KoyaPermissionCollaborator.RESPONSIBLE
+												.toString()),
+						KoyaPermissionCollaborator.RESPONSIBLE.toString(), true);
+
 		permissionService.setPermission(koyaClientDir,
 				"GROUP_" + dossier.getAuthorityName("KoyaClient"),
 				"SiteContributor", true);
@@ -805,7 +840,7 @@ public class SpaceAclService {
 				.getSiteRoleGroup(company.getName(),
 						SitePermission.COLLABORATOR.toString()),
 				SitePermission.CONTRIBUTOR.toString(), true);
-		
+
 		permissionService.setPermission(companyKoyaClientDir, siteService
 				.getSiteRoleGroup(company.getName(),
 						SitePermission.CONSUMER.toString()),

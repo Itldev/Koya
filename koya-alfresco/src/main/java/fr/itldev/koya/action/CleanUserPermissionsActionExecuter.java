@@ -20,6 +20,7 @@
 package fr.itldev.koya.action;
 
 import java.util.List;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.ParameterDefinitionImpl;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
@@ -27,97 +28,84 @@ import org.alfresco.repo.site.SiteModel;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.User;
+
 /**
- * This action cleans all permission references to user defined by username in
- * company.
- *
+ * This action cleans removes all user's groups member ship if groups belong to
+ * defined company
+ * 
+ * 
  */
-public class CleanUserPermissionsActionExecuter extends ActionExecuterAbstractBase {
+public class CleanUserPermissionsActionExecuter extends
+		ActionExecuterAbstractBase {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	private Logger logger = Logger.getLogger(this.getClass());
 
-    public static final String PARAM_USERNAME = "userName";
+	public static final String NAME = "cleanPermissions";
 
-    private NodeService nodeService;
-    protected PermissionService permissionService;
-    protected SearchService searchService;
+	public static final String PARAM_USERNAME = "userName";
 
-    public void setNodeService(NodeService nodeService) {
-        this.nodeService = nodeService;
-    }
+	private SpaceAclService spaceAclService;
+	private NodeService nodeService;
+	private CompanyService companyService;
+	private UserService userService;
 
-    public void setPermissionService(PermissionService permissionService) {
-        this.permissionService = permissionService;
-    }
+	public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
 
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
-    }
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
+	}
 
-    @Override
-    protected void executeImpl(Action ruleAction, NodeRef actionedUponNodeRef) {
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
 
-        String userName = (String) ruleAction.getParameterValue(PARAM_USERNAME);
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-        if (!nodeService.getType(actionedUponNodeRef).equals(SiteModel.TYPE_SITE)) {
-            //if node is not a site then abort action
-            return;
-        }
-        delPermissionsDossiers(actionedUponNodeRef, userName);
+	@Override
+	protected void executeImpl(Action ruleAction, NodeRef actionedUponNodeRef) {
 
-    }
+		if (!nodeService.getType(actionedUponNodeRef).equals(
+				SiteModel.TYPE_SITE)) {
+			// if node is not a site then abort action
+			return;
+		}
+		String siteName = (String) nodeService.getProperty(actionedUponNodeRef,
+				ContentModel.PROP_NAME);
+		Company c = companyService.getCompany(siteName);
 
-    private void delPermissionsDossiers(NodeRef companyNodeRef, String userName) {
-        String siteName = (String) nodeService.getProperty(companyNodeRef, ContentModel.PROP_NAME);
-        String luceneRequest = "TYPE:\"koya:dossier\" AND PATH:\"/app:company_home/st:sites/cm:" + siteName + "//*\"";
+		User u = userService.getUser((String) ruleAction
+				.getParameterValue(PARAM_USERNAME));
 
-        ResultSet rs = null;
-        try {
-            rs = searchService.query(
-                    StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-                    SearchService.LANGUAGE_LUCENE, luceneRequest);
-            for (ResultSetRow r : rs) {
-                try {
-                    permissionService.deletePermission(r.getNodeRef(), userName, PermissionService.READ);
-                } catch (Exception ex) {
-                    logger.error("error revoke permission on " + nodeService.getProperty(r.getNodeRef(), ContentModel.PROP_NAME) + " -- " + ex.getMessage());
-                }
-            }
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-        }
-    }
+		// removes any koya autority membership for user on spaces groups he
+		// belongs to
+		List<Space> spaceToRemovePermissions = spaceAclService
+				.getKoyaUserSpaces(u, c);
+		for (Space s : spaceToRemovePermissions) {
+			spaceAclService.removeAnyKoyaAuthority(s, u);
+		}
 
-    private void delPermissionsRecursive(NodeRef n, String userName) {
+	}
 
-        try {
-            permissionService.deletePermission(n, userName, PermissionService.READ);
-        } catch (Exception ex) {
-            logger.error("err delete on " + nodeService.getProperty(n, ContentModel.PROP_NAME) + " -- " + ex.getMessage());
-        }
+	@Override
+	protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
 
-        for (ChildAssociationRef car : nodeService.getChildAssocs(n)) {
-            delPermissionsRecursive(car.getChildRef(), userName);
-        }
-    }
-
-    @Override
-    protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
-
-        paramList.add(new ParameterDefinitionImpl(PARAM_USERNAME, DataTypeDefinition.NODE_REF,
-                true, getParamDisplayLabel(PARAM_USERNAME)));
-    }
+		paramList.add(new ParameterDefinitionImpl(PARAM_USERNAME,
+				DataTypeDefinition.NODE_REF, true,
+				getParamDisplayLabel(PARAM_USERNAME)));
+	}
 
 }
