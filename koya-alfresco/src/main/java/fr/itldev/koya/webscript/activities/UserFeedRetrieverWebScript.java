@@ -184,7 +184,6 @@ public class UserFeedRetrieverWebScript extends DeclarativeWebScript {
 
 			for (Company c : companyService.list()) {
 				allowedCompaniesForUser.add(c.getName());
-				logger.error(c.getName());
 			}
 
 			List<ActivityFeedEntity> activityFeeds = activityService
