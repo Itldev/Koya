@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.activities.feed.RepoCtx;
@@ -19,10 +21,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteDoesNotExistException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.security.AccessPermission;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.AuthorityType;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,11 +28,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
-import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.KoyaActivityType;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
@@ -53,19 +50,16 @@ import fr.itldev.koya.model.permissions.SitePermission;
 public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 	private static final Log logger = LogFactory
 			.getLog(KoyaLocalFeedTaskProcessor.class);
+
+	private final static Pattern MEMBERUSERNAME_PATTERN = Pattern
+			.compile(".*memberUserName\\\":\\\"([^\\\"]+)\\\".*");
+
 	private SiteService siteService;
-	private PermissionService permissionService;
 	private KoyaMailService koyaMailService;
 	private KoyaNodeService koyaNodeService;
 	private NodeService nodeService;
 	private UserService userService;
 	private SpaceAclService spaceAclService;
-
-	@Override
-	public void setPermissionService(PermissionService permissionService) {
-		super.setPermissionService(permissionService);
-		this.permissionService = permissionService;
-	}
 
 	@Override
 	public void setSiteService(SiteService siteService) {
@@ -145,24 +139,25 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 
 				if (activityPost.getActivityType().equals(
 						ActivityType.SITE_USER_JOINED)) {
+
+					activitySummary = addMemberEmailForCompanyMemberShipActivities(
+							activitySummary, activityPost.getUserId());
+
+				}
+
+				if (activityPost.getActivityType().equals(
+						ActivityType.SITE_USER_REMOVED)) {
 					try {
 
-						User u = AuthenticationUtil
-								.runAsSystem(new AuthenticationUtil.RunAsWork<User>() {
-									@Override
-									public User doWork() throws Exception {
-										return userService.getUser(activityPost
-												.getUserId());
-									}
-								});
-						// add user email to activitySummary
-						if (activitySummary.endsWith("}")) {
-							activitySummary = activitySummary.substring(0,
-									activitySummary.length() - 1)
-									+ ",\"memberEmail\":\""
-									+ u.getEmail()
-									+ "\"}";
+						// extract user removed userName from activitySummary
+						Matcher m = MEMBERUSERNAME_PATTERN
+								.matcher(activitySummary);
+
+						if (m.find()) {
+							activitySummary = addMemberEmailForCompanyMemberShipActivities(
+									activitySummary, m.group(1));
 						}
+
 					} catch (Exception e) {
 						// silently continue
 					}
@@ -232,6 +227,24 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 					.append(" msecs)");
 			logger.info(sb.toString());
 		}
+	}
+
+	private String addMemberEmailForCompanyMemberShipActivities(
+			String activitySummary, final String memberUserName) {
+		User u = AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<User>() {
+					@Override
+					public User doWork() throws Exception {
+						return userService.getUser(memberUserName);
+					}
+				});
+		// add user email to activitySummary
+		if (activitySummary.endsWith("}")) {
+			activitySummary = activitySummary.substring(0,
+					activitySummary.length() - 1)
+					+ ",\"memberEmail\":\"" + u.getEmail() + "\"}";
+		}
+		return activitySummary;
 	}
 
 	private void sendShareNotificationMail(final ActivityPostEntity activityPost) {
@@ -341,8 +354,14 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 		 */
 		if (Arrays.asList(COMPANYMEMBERSHIP_ACTIVITIES).contains(
 				activityPost.getActivityType())) {
-			return listCompanyMembers(activityPost.getSiteNetwork(),
-					SitePermission.MANAGER);
+
+			// exclude import user
+			if (!activityPost.getUserId().equals(
+					activityPost.getSiteNetwork() + "_import")) {
+				return listCompanyMembers(activityPost.getSiteNetwork(),
+						SitePermission.MANAGER);
+			}
+
 		}
 
 		logger.warn("Unhandled Activity type : "
