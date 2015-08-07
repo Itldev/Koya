@@ -46,33 +46,6 @@
 		</property>
 	</bean> 
     
-	<!-- deletes xpath defined nodes if exists : clear before correct uuid bootstrap import -->
-    <bean id="patch.deleteNodesTemplates0.7.2" class="fr.itldev.koya.patch.DeleteXpathNodes"
-          parent="basePatch">
-        <property name="id">
-            <value>patch.deleteNodesTemplates0.7.2</value>
-        </property>       
-        <property name="description">
-            <value>Delete specifid nodes for version 0.7.2 if exists</value>
-        </property>    
-        <property name="fixesFromSchema">
-            <value>0</value>
-        </property>
-        <property name="fixesToSchema">
-            <value>${version.schema}</value>
-        </property>
-        <property name="targetSchema">
-            <value>10000</value>
-        </property>
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="xPathNodes">
-            <list>
-                <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/cm:koya</value>                
-                <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/cm:koya_templates</value>                
-            </list>
-        </property>                      
-    </bean>
-    
     <!-- Boostrap scripts -->
     <bean id="koya.scripts-bootstrap" class="org.alfresco.repo.module.ImporterModuleComponent" 
         parent="module.baseComponent">

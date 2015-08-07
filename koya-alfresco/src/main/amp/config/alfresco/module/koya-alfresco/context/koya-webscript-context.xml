@@ -355,13 +355,6 @@
     </bean>
     
     
-    <!--Get used disk size-->
-    <bean id="webscript.fr.itldev.koya.global.xpath2noderef.get" 
-          class="fr.itldev.koya.webscript.global.XPath2NodeRef"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />  
-    </bean>
-    
     <!--count Children of given type-->
     <bean id="webscript.fr.itldev.koya.global.countchildren.post" 
           class="fr.itldev.koya.webscript.global.CountChildren"

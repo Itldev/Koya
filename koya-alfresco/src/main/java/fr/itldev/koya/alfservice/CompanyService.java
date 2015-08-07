@@ -430,11 +430,10 @@ public class CompanyService {
 	public NodeRef getTmpSummaryDir(final Company company) {
 
 		NodeRef tmpSummaryDir = null;
-		String xpath = "//app:company_home/st:sites/cm:" + company.getName()
-				+ "/cm:" + TMP_SUMMARY_DIR;
-
+		
 		try {
-			tmpSummaryDir = koyaNodeService.xPath2NodeRef(xpath);
+			tmpSummaryDir = nodeService.getChildByName(company.getNodeRef(),
+					ContentModel.ASSOC_CONTAINS, TMP_SUMMARY_DIR);
 		} catch (Exception e) {
 		}
 

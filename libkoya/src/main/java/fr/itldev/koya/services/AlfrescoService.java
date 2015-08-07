@@ -22,82 +22,60 @@ import java.util.Set;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
-import org.springframework.core.io.Resource;
 
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-
 public interface AlfrescoService {
 
-    /**
-     * Checks if library version match with server one.
-     *
-     * @return
-     */
-    Boolean checkLibVersionMatch();
+	/**
+	 * Checks if library version match with server one.
+	 * 
+	 * @return
+	 */
+	Boolean checkLibVersionMatch();
 
-    /**
-     * Get Informations about server and modules.
-     *
-     * @param user
-     * @return
-     * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
-     */
-    MetaInfos getServerInfos(User user) throws AlfrescoServiceException;
+	/**
+	 * Get Informations about server and modules.
+	 * 
+	 * @param user
+	 * @return
+	 * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
+	 */
+	MetaInfos getServerInfos(User user) throws AlfrescoServiceException;
 
-    /**
-     *
-     * @param user
-     * @param wrapper
-     * @throws AlfrescoServiceException
-     */
-    void sendMail(User user, MailWrapper wrapper) throws AlfrescoServiceException;
+	/**
+	 * 
+	 * @param user
+	 * @param wrapper
+	 * @throws AlfrescoServiceException
+	 */
+	void sendMail(User user, MailWrapper wrapper)
+			throws AlfrescoServiceException;
 
-    /**
-     * Get koyaNode from noderef reference.
-     *
-     * @param user
-     * @param nodeRef
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    KoyaNode getKoyaNode(User user, NodeRef nodeRef) throws AlfrescoServiceException;
+	/**
+	 * Get koyaNode from noderef reference.
+	 * 
+	 * @param user
+	 * @param nodeRef
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	KoyaNode getKoyaNode(User user, NodeRef nodeRef)
+			throws AlfrescoServiceException;
 
-    /**
-     * Get NodeRef reference from xpath expression.
-     *
-     * @param user
-     * @param nodeRef
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    String xPathToNodeRef(User user, String nodeRef) throws AlfrescoServiceException;
-
-    /**
-     * Upload a file to parentXpath.
-     *
-     * @param user
-     * @param resource
-     * @param parentXPath
-     * @return
-     * @throws AlfrescoServiceException
-     */
-    AlfrescoUploadReturn uploadToXpathNode(User user, Resource resource, String parentXPath) throws AlfrescoServiceException;
-
-    /**
-     * Count all Children of type
-     *
-     * @param user
-     * @param parent
-     * @param qNameFilter
-     * @return
-     * @throws AlfrescoServiceException
-     */
+	/**
+	 * Count all Children of type
+	 * 
+	 * @param user
+	 * @param parent
+	 * @param qNameFilter
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
 	Integer countChildren(User user, KoyaNode parent, Set<QName> qNameFilter)
 			throws AlfrescoServiceException;
 
