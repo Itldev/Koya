@@ -373,7 +373,7 @@ public class DossierService {
 
 		Map<String, String> upResult = koyaContentService.createContentNode(
 				upDir, finalFileName, null, content.getMimetype(),
-				content.getEncoding(), content.getInputStream(),false);
+				content.getEncoding(), content.getInputStream(), false);
 
 		//
 		List<User> usersNotified = spaceAclService.listMembership(dossier,
@@ -411,9 +411,9 @@ public class DossierService {
 
 	public List<Document> listKoyaClientDocuments(final Dossier dossier) {
 		NodeRef upDir = getPublicUploadFolder(dossier);
-
 		if (upDir != null) {
 			List<Document> docs = new ArrayList<>();
+
 			for (KoyaNode k : koyaNodeService.listChildrenPaginated(upDir, 0,
 					Integer.MAX_VALUE, false, null).getFirst()) {
 				if (Document.class.isAssignableFrom(k.getClass())) {
@@ -434,13 +434,18 @@ public class DossierService {
 		Company c = koyaNodeService.getFirstParentOfType(dossier.getNodeRef(),
 				Company.class);
 
-		// build xpath ref from dossier name
-		String xpath = "//app:company_home/st:sites/cm:" + c.getName() + "/cm:"
-				+ KOYACLIENT_UPLOADDIR_NAME + "/cm:"
-				+ publicUploadFolderName(dossier);
-
 		try {
-			publicUploadFolder = koyaNodeService.xPath2NodeRef(xpath);
+
+			NodeRef koyaClientUpDir = nodeService.getChildByName(
+					c.getNodeRef(), ContentModel.ASSOC_CONTAINS,
+					KOYACLIENT_UPLOADDIR_NAME);
+
+			if (koyaClientUpDir != null) {
+				publicUploadFolder = nodeService.getChildByName(
+						koyaClientUpDir, ContentModel.ASSOC_CONTAINS,
+						publicUploadFolderName(dossier));
+			}
+
 		} catch (Exception e) {
 
 		}

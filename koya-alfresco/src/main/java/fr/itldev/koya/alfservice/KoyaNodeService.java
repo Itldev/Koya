@@ -421,8 +421,8 @@ public class KoyaNodeService {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.MOVE_CYCLIC_RELATIONSHIP_DETECTED);
 		}
-		activityPoster.postFileFolderUpdated(fileFolderService
-				.getFileInfo(toMove).isFolder(), toMove);
+		activityPoster.postFileFolderUpdated(
+				fileFolderService.getFileInfo(toMove).isFolder(), toMove);
 		// TODO update KoyaNodes cache
 		return getKoyaNode(fInfo.getNodeRef());
 	}
@@ -710,6 +710,14 @@ public class KoyaNodeService {
 		return props;
 	}
 
+	/**
+	 * Avoid using this : performances killer !
+	 * 
+	 * @param xpath
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	@Deprecated
 	public NodeRef xPath2NodeRef(String xpath) throws KoyaServiceException {
 
 		RepositoryLocation templateLoc = new RepositoryLocation();// defaultQuery
