@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +52,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 	private static final String REST_SUMMARY = "/s/fr/itldev/koya/dossier/summary/{nodeId}?documentName={documentName}";
 
 	private KoyaContentService KoyaContentService;
+
 	private CacheManager cacheManager;
 
 	public void setKoyaContentService(KoyaContentService KoyaContentService) {
@@ -311,5 +313,46 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 				user.getRestTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_CLIENT_DOC_LIST,
 						String.class, dossier.getNodeRef()));
+
+	}
+
+	/**
+	 * Workflow methods
+	 * 
+	 */
+
+	private static final String REST_POST_START_WORKFLOW = "/s/fr/itldev/koya/workflow/start/{workflowId}/{nodeRef}";
+	private static final String REST_POST_VALIDATE_STEP = "/s/api/task/{workflowInstanceId}/formprocessor";
+	private static final String REST_GET_WORKFLOW_STATUS = "/s/api/workflow-instances/{workflowInstanceId}?includeTasks=true";
+
+	@Override
+	public Dossier startWorkflow(User user, Dossier d, String workflowId,
+			Map<String, String> properties) throws AlfrescoServiceException {
+		return fromJSON(
+				new TypeReference<Dossier>() {
+				},
+				user.getRestTemplate().postForObject(
+						getAlfrescoServerUrl() + REST_POST_START_WORKFLOW,
+						properties, String.class, workflowId, d.getNodeRef()));
+	}
+
+	@Override
+	public void endTask(User user, String taskId, Map<String, String> properties)
+			throws AlfrescoServiceException {
+		user.getRestTemplate().postForObject(
+				getAlfrescoServerUrl() + REST_POST_VALIDATE_STEP, properties,
+				String.class, taskId);
+
+	}
+
+	@Override
+	public Map<String, Serializable> getWorkflowStatus(User user,
+			String workflowInstanceId) throws AlfrescoServiceException {
+
+		Map<String, Serializable> returnValues = user.getRestTemplate()
+				.getForObject(
+						getAlfrescoServerUrl() + REST_GET_WORKFLOW_STATUS,
+						Map.class, workflowInstanceId);
+		return returnValues;
 	}
 }

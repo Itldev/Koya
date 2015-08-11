@@ -617,12 +617,6 @@
 		parent="webscript">
 		<property name="feedNotifier" ref="feedNotifier" />
 	</bean>
-   
-	<!--
-    ==================================================================
-    ========================== Koya Security ==============================
-    ==================================================================
-    -->
 
 	<!--list Koya Membership with given role on node -->
 	<bean id="webscript.fr.itldev.koya.security.membership.get" class="fr.itldev.koya.webscript.security.ListMembership"
@@ -660,6 +654,26 @@
 		<property name="authorityService" ref="authorityService" />
 		<property name="ownableService" ref="ownableService" />
 		<property name="transactionService" ref="transactionService" />
+	</bean>
+		
+   <!--
+    ==================================================================
+    ========================== WorkFlows ==============================
+    ==================================================================
+    -->
+    
+    <bean id="webscript.fr.itldev.koya.workflow.start.post"
+		class="fr.itldev.koya.webscript.workflow.Start"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService"/>
+		<property name="formService" ref="FormService"/>
+		<property name="nodeService" ref="nodeService"/>
+	</bean>
+	
+	<bean id="webscript.fr.itldev.koya.workflow.deploy.post"
+		class="fr.itldev.koya.webscript.workflow.Deploy"
+		parent="webscript">
+		<property name="workflowService" ref="WorkflowService"/>
 	</bean>
    
 </beans>

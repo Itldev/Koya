@@ -129,6 +129,9 @@ public class KoyaModel {
 
 	public static final QName PROP_REFERENCE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "reference");
+	
+	public static final QName PROP_ACTIVITIIDS = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "activitiIds");
 
 	// ================= Type associations
 	// ===========================================

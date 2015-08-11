@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- reset Password Workflow Model -->
+
+<model name="koyares:realestatesale-workflow-model" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+	<imports>
+		<import uri="http://www.alfresco.org/model/dictionary/1.0"
+			prefix="d" />
+		<import uri="http://www.alfresco.org/model/bpm/1.0" prefix="bpm" />
+		<import uri="http://www.alfresco.org/model/workflow/1.0"
+			prefix="wf" />
+	</imports>
+
+	<namespaces>
+		<namespace uri="http://www.itldev.fr/model/workflow/realEstateSale/1.0"
+			prefix="koyares" />
+	</namespaces>
+
+	<types>
+
+		<!-- Custom Tasks -->
+		<type name="koyares:startTask">
+			<parent>bpm:startTask</parent>
+			<properties>
+				<property name="koyares:seller">
+					<type>d:text</type>
+				</property>
+				<property name="koyares:buyer">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<!-- assignee a virer ? dynamique fct du role ? -->
+				<aspect>bpm:assignee</aspect>
+			</mandatory-aspects>
+		</type>
+
+		<type name="koyares:validateDocumentsTask">
+			<parent>bpm:task</parent>			
+		</type>
+
+
+		<type name="koyares:dateSignTask">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:dateSign">
+					<type>d:date</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>bpm:assignee</aspect>
+			</mandatory-aspects>
+		</type>
+		<type name="koyares:validateSignTask">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:needLoan">
+					<type>d:boolean</type>
+					<default>true</default>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>bpm:assignee</aspect>
+			</mandatory-aspects>
+		</type>
+		
+		<type name="koyares:loanRequestTask">
+			<parent>bpm:task</parent>			
+		</type>
+
+	</types>
+</model>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.itldev.fr/model/workflow/realEstateSale/1.0">
+  <process id="koyaRes" name="Real Estate Sale" isExecutable="true">
+    <extensionElements>
+      <activiti:executionListener event="start" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
+        <activiti:field name="script">
+          <activiti:string><![CDATA[logger.log("Init Koya Real Estate Sale Workflow");
+                      
+                      // === Get Related Dossier 
+			  		  var dossier = search.findNode(execution.getVariable('wf_relatednode'));
+                      
+                      // === Set taskValidators Group                    
+                       var taskValidatorGroup = "GROUP_dossier_" + dossier.id + "_KoyaResponsible";
+
+
+                          execution.setVariable('taskValidatorGroup', taskValidatorGroup);                              
+                          logger.log("+Groupe des taskValidators : " +taskValidatorGroup);	
+                          
+                          var buyer_isclient = true;
+                          var seller_isclient = false;
+                          
+                          if(execution.getVariable('koyares_buyer_isclient') != null){
+                          	buyer_isclient = execution.getVariable('koyares_buyer_isclient') == "true";
+                          }
+                          if(execution.getVariable('koyares_seller_isclient') != null){
+                          	seller_isclient = execution.getVariable('koyares_seller_isclient') == "true";
+                          }
+                          
+					  // === Other	  
+						  
+						  //find buyer and sellers
+						  logger.log("+buyer = "+execution.getVariable('koyares_buyer'));
+						  logger.log("+seller = "+execution.getVariable('koyares_seller'));
+						  logger.log("+buyer is client ? = "+ buyer_isclient);
+						  logger.log("+seller is client ? = "+ seller_isclient);
+						  			
+						  logger.log("+dossier = "+dossier.name);]]></activiti:string>
+        </activiti:field>
+      </activiti:executionListener>
+    </extensionElements>
+    <startEvent id="startRes" name="Start" activiti:formKey="koyares:startTask">
+      <documentation>Start real estate sale Dossier</documentation>
+    </startEvent>
+    <userTask id="validateDocsTask" name="Validate Documents" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:validateDocumentsTask">
+      <documentation>Validate needed documents have been added to current dossier</documentation>
+      <extensionElements>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string><![CDATA[logger.log('fin validation des documents par '+person.properties.userName );
+            //TODO parrallel pooled review on doc list supplied on workflow start
+              
+              //TODO inscription de qui a validé, quelle date etc              
+              
+              //TODO propriété obligatoire
+              var docvalid_outcome =  task.getVariable('koyares_docvalid_outcome');
+              if(docvalid_outcome == null){
+              	  docvalid_outcome = "validate";                 
+              }
+              execution.setVariable('koyares_docvalid_outcome',docvalid_outcome);
+              
+              //Set reject message message if doc validation rejected
+              if(docvalid_outcome == 'reject'){
+              	if(task.getVariable('koyares_reject_message') != null){
+              	//TODO changer variable de destination bpm_workflowDescription ne corresponds pas bien ....
+              		execution.setVariable('bpm_workflowDescription',task.getVariable('koyares_reject_message'));
+              	}else{
+              	    execution.setVariable('bpm_workflowDescription', "documents validation rejected");
+              	}              	   
+              }]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <userTask id="defineSignatureDateTask" name="Define Signature Date" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:dateSignTask">
+      <documentation>Define Signature Date
+				TODO date legal constraints</documentation>
+      <extensionElements>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string><![CDATA[logger.log("fin def date de signature");
+logger.log("date de signature" + execution.getVariable("koyares_dateSign"));]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <userTask id="validateSignatureTask" name="Validate sale agreement signature" activiti:formKey="koyares:validateSignTask">
+      <extensionElements>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string><![CDATA[execution.setVariable('loan',task.getVariable('koyares_needLoan'));
+logger.log('fin validation de la signature');]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <userTask id="loanRequestTask" name="validate loan Request" activiti:formKey="koyares:loanRequestTask">
+      <extensionElements>
+        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string><![CDATA[logger.log('creation tache loanRequest');]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow6" sourceRef="defineSignatureDateTask" targetRef="validateSignatureTask"></sequenceFlow>
+    <endEvent id="endRes" name="End">
+      <documentation>TODO remove workflow reference on selected node
+				(Dossier)</documentation>
+    </endEvent>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow17" sourceRef="validateSignatureTask" targetRef="exclusivegateway1"></sequenceFlow>
+    <sequenceFlow id="needLoan" name="With Loan" sourceRef="exclusivegateway1" targetRef="loanRequestTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${loan == 'True'}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="endScripttask1" name="Remove Dossier Reference" activiti:class="org.alfresco.repo.workflow.activiti.script.AlfrescoScriptDelegate">
+      <extensionElements>
+        <activiti:field name="script">
+          <activiti:string><![CDATA[logger.log('remove this workflow reference in associatd dossier');]]></activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow23" sourceRef="exclusivegateway1" targetRef="endScripttask1"></sequenceFlow>
+    <sequenceFlow id="flow24" sourceRef="loanRequestTask" targetRef="endScripttask1"></sequenceFlow>
+    <sequenceFlow id="flow25" sourceRef="endScripttask1" targetRef="endRes"></sequenceFlow>
+    <sequenceFlow id="flow26" sourceRef="startRes" targetRef="validateDocsTask"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow27" sourceRef="validateDocsTask" targetRef="exclusivegateway2"></sequenceFlow>
+    <sequenceFlow id="flow28" sourceRef="exclusivegateway2" targetRef="defineSignatureDateTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${koyares_docvalid_outcome == "validate"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow29" sourceRef="exclusivegateway2" targetRef="endRes">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${koyares_docvalid_outcome == "reject"}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_koyaRes">
+    <bpmndi:BPMNPlane bpmnElement="koyaRes" id="BPMNPlane_koyaRes">
+      <bpmndi:BPMNShape bpmnElement="startRes" id="BPMNShape_startRes">
+        <omgdc:Bounds height="35.0" width="35.0" x="40.0" y="70.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="validateDocsTask" id="BPMNShape_validateDocsTask">
+        <omgdc:Bounds height="55.0" width="105.0" x="151.0" y="60.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="defineSignatureDateTask" id="BPMNShape_defineSignatureDateTask">
+        <omgdc:Bounds height="73.0" width="105.0" x="140.0" y="331.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="validateSignatureTask" id="BPMNShape_validateSignatureTask">
+        <omgdc:Bounds height="91.0" width="105.0" x="280.0" y="322.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="loanRequestTask" id="BPMNShape_loanRequestTask">
+        <omgdc:Bounds height="75.0" width="105.0" x="570.0" y="185.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endRes" id="BPMNShape_endRes">
+        <omgdc:Bounds height="35.0" width="35.0" x="900.0" y="225.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="460.0" y="347.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endScripttask1" id="BPMNShape_endScripttask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="570.0" y="340.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="320.0" y="67.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="245.0" y="367.0"></omgdi:waypoint>
+        <omgdi:waypoint x="280.0" y="367.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow17" id="BPMNEdge_flow17">
+        <omgdi:waypoint x="385.0" y="367.0"></omgdi:waypoint>
+        <omgdi:waypoint x="460.0" y="367.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="needLoan" id="BPMNEdge_needLoan">
+        <omgdi:waypoint x="480.0" y="347.0"></omgdi:waypoint>
+        <omgdi:waypoint x="480.0" y="222.0"></omgdi:waypoint>
+        <omgdi:waypoint x="570.0" y="222.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="12.0" width="48.0" x="460.0" y="291.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow23" id="BPMNEdge_flow23">
+        <omgdi:waypoint x="500.0" y="367.0"></omgdi:waypoint>
+        <omgdi:waypoint x="570.0" y="367.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow24" id="BPMNEdge_flow24">
+        <omgdi:waypoint x="622.0" y="260.0"></omgdi:waypoint>
+        <omgdi:waypoint x="622.0" y="340.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow25" id="BPMNEdge_flow25">
+        <omgdi:waypoint x="675.0" y="367.0"></omgdi:waypoint>
+        <omgdi:waypoint x="917.0" y="367.0"></omgdi:waypoint>
+        <omgdi:waypoint x="917.0" y="260.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow26" id="BPMNEdge_flow26">
+        <omgdi:waypoint x="75.0" y="87.0"></omgdi:waypoint>
+        <omgdi:waypoint x="151.0" y="87.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow27" id="BPMNEdge_flow27">
+        <omgdi:waypoint x="256.0" y="87.0"></omgdi:waypoint>
+        <omgdi:waypoint x="320.0" y="87.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow28" id="BPMNEdge_flow28">
+        <omgdi:waypoint x="340.0" y="107.0"></omgdi:waypoint>
+        <omgdi:waypoint x="339.0" y="174.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="174.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="331.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow29" id="BPMNEdge_flow29">
+        <omgdi:waypoint x="360.0" y="87.0"></omgdi:waypoint>
+        <omgdi:waypoint x="917.0" y="87.0"></omgdi:waypoint>
+        <omgdi:waypoint x="917.0" y="225.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

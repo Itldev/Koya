@@ -18,11 +18,11 @@
  */
 package fr.itldev.koya.services;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.springframework.core.io.Resource;
 
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
@@ -194,6 +194,25 @@ public interface DossierService extends AlfrescoService {
 	 */
 	Map<String, NodeRef> createSummary(User user, Dossier dossier,
 			String summaryFileName) throws AlfrescoServiceException;
+	
+	
+	
+	/**
+     * Start a workflow
+     * 
+     */
+	Dossier startWorkflow(User user, Dossier d, String workflowId,
+			Map<String, String> properties) throws AlfrescoServiceException;
+	
+	/**
+	 * Validate workflow step
+	 * @param user
+	 * @param taskId
+	 * @param properties
+	 * @throws AlfrescoServiceException
+	 */
+	void endTask(User user,String taskId,
+			Map<String, String> properties)throws AlfrescoServiceException;
 
 	/**
 	 * return the client document uploaded list
@@ -206,4 +225,7 @@ public interface DossierService extends AlfrescoService {
 	List<Document> listClientUploadedDocuments(User user, Dossier dossier)
 			throws AlfrescoServiceException;
 
+	Map<String,Serializable> getWorkflowStatus(User user, String workflowInstanceId)
+			throws AlfrescoServiceException;
+	
 }

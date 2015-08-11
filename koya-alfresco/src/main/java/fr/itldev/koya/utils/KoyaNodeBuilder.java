@@ -1,6 +1,7 @@
 package fr.itldev.koya.utils;
 
 import java.util.Date;
+import java.util.List;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -91,6 +92,13 @@ public class KoyaNodeBuilder {
             d.setLastModifiedDate((Date) nodeService.getProperty(
                     dossierNodeRef, ContentModel.PROP_MODIFIED));
         }
+        
+        if (nodeService.getProperty(dossierNodeRef,
+                KoyaModel.PROP_ACTIVITIIDS) != null) {
+        	d.setActivitiIds((List<String>) nodeService.getProperty(dossierNodeRef,
+                    KoyaModel.PROP_ACTIVITIIDS));
+        }
+        
 
         d.setTitle((String) nodeService.getProperty(dossierNodeRef,
                 ContentModel.PROP_TITLE));

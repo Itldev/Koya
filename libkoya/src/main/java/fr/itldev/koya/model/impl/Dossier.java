@@ -27,7 +27,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import fr.itldev.koya.model.KoyaNode;
 
-public final class Dossier extends Space {
+public class Dossier extends Space {
 
 	@JsonProperty("childdir")
 	private List<Directory> childDir = new ArrayList<>();
@@ -36,6 +36,8 @@ public final class Dossier extends Space {
 	private List<Document> childDoc = new ArrayList<>();
 
 	private Date lastModifiedDate;
+
+	private List<String> activitiIds;
 
 	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 	@JsonIgnore
@@ -80,18 +82,32 @@ public final class Dossier extends Space {
 		this.lastModifiedDate = lastModifiedDate;
 	}
 
+	public List<String> getActivitiIds() {
+
+		if (activitiIds == null) {
+			activitiIds = new ArrayList<>();
+		}
+
+		return activitiIds;
+	}
+
+	public void setActivitiIds(List<String> activitiIds) {
+		this.activitiIds = activitiIds;
+	}
+		
+
 	// </editor-fold>
 
-	private Dossier() {
+	protected Dossier() {
 		super();
 	}
 
 	public static Dossier newInstance() {
 		return new Dossier();
 	}
-	
+
 	public static Dossier newInstance(String title) {
-		Dossier d= new Dossier();
+		Dossier d = new Dossier();
 		d.setTitle(title);
 		return d;
 	}
