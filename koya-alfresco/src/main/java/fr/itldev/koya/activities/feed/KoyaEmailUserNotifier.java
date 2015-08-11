@@ -12,6 +12,7 @@ import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.activities.feed.ActivitiesFeedModelBuilder;
 import org.alfresco.repo.activities.feed.EmailUserNotifier;
 import org.alfresco.repo.domain.activities.ActivityFeedEntity;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.TemplateService;
@@ -21,14 +22,18 @@ import org.alfresco.util.ModelUtil;
 import org.alfresco.util.Pair;
 import org.json.JSONException;
 
+import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.model.NotificationType;
+import fr.itldev.koya.model.KoyaActivityType;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.User;
 
 public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
 	protected KoyaMailService koyaMailService;
 	protected CompanyAclService companyAclService;
+	protected CompanyService companyService;
 
 	public void setKoyaMailService(KoyaMailService koyaMailService) {
 		this.koyaMailService = koyaMailService;
@@ -38,20 +43,25 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 		this.companyAclService = companyAclService;
 	}
 
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
+
 	private static List<String> ALLOWED_ACTIVITIES = new ArrayList<String>(
-			Arrays.asList(NotificationType.KOYA_SPACESHARED,
-					NotificationType.KOYA_SPACEUNUNSHARED,
+			Arrays.asList(KoyaActivityType.KOYA_SPACESHARED,
+					KoyaActivityType.KOYA_SPACEUNUNSHARED,
 					ActivityType.FOLDER_ADDED, ActivityType.FILE_ADDED,
 					ActivityType.FILE_DELETED, ActivityType.FOLDER_DELETED,
-					ActivityType.FILE_UPDATED, ActivityType.SITE_USER_JOINED));
+					ActivityType.FILE_UPDATED, ActivityType.SITE_USER_JOINED,
+					ActivityType.SITE_USER_REMOVED,
+					KoyaActivityType.FOLDER_UPDATED));
 
 	/**
 	 * 
-	 * TODO process ignored activities 
+	 * TODO process ignored activities
 	 * 
-	 * ActivityType.SITE_USER_REMOVED
-	 *  ActivityType.FILES_ADDED,
-					ActivityType.FOLDERS_ADDED,
+	 * ActivityType.SITE_USER_REMOVED ActivityType.FILES_ADDED,
+	 * ActivityType.FOLDERS_ADDED,
 	 * 
 	 */
 
@@ -97,6 +107,19 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
 		if (feedEntries.size() > 0) {
 
+			List<String> allowedCompaniesForUser = AuthenticationUtil.runAs(
+					new AuthenticationUtil.RunAsWork<List<String>>() {
+						@Override
+						public List<String> doWork() throws Exception {
+							List<String> companiesNames = new ArrayList<String>();
+
+							for (Company c : companyService.list()) {
+								companiesNames.add(c.getName());
+							}
+							return companiesNames;
+						}
+					}, feedUserId);
+		
 			Map<String, ActivitiesFeedModelBuilder> companyModelBuilder = new HashMap<>();
 			Map<String, Boolean> skipUserPendingInvite = new HashMap<>();
 
@@ -112,6 +135,18 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 							skipUserOnCompany(companyName, feedUserId));
 				}
 
+				boolean allowedCompany = true;
+				/*
+				 * Filter if company is not allowed for user
+				 */
+				if (!allowedCompaniesForUser.contains(feedEntry
+						.getSiteNetwork())) {
+					allowedCompany = false;
+					if (feedEntry.getId() > skippedMaxId) {
+						skippedMaxId = feedEntry.getId();
+					}
+				}
+
 				/*
 				 * Filter on activity type
 				 * 
@@ -125,6 +160,7 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 							+ " - Ignored activity type for email template composition : "
 							+ feedEntry.getActivityType() + " -> "
 							+ feedEntry.getId());
+					allowedActivity = false;
 					if (feedEntry.getId() > skippedMaxId) {
 						skippedMaxId = feedEntry.getId();
 					}
@@ -133,7 +169,8 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
 				// Add activity to model if user is not skiped because of
 				// pending invite
-				if (!skipUserPendingInvite.get(companyName) && allowedActivity) {
+				if (!skipUserPendingInvite.get(companyName) && allowedActivity
+						&& allowedCompany) {
 					// select company model builder. Creates if not exists
 
 					if (!companyModelBuilder.containsKey(companyName)) {

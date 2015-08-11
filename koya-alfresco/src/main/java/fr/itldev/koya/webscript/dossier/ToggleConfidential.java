@@ -31,7 +31,7 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -73,13 +73,11 @@ public class ToggleConfidential extends AbstractWebScript {
 
 		Boolean isConfidential = false;
 		try {
-			KoyaNode item = koyaNodeService.getKoyaNode(koyaNodeService
+			Space space = koyaNodeService.getKoyaNode(koyaNodeService
 					.getNodeRef((String) urlParams
-							.get(KoyaWebscript.WSCONST_NODEREF)));
-			User u = userService.getUserByUsername(authenticationService
-					.getCurrentUserName());
+							.get(KoyaWebscript.WSCONST_NODEREF)), Space.class);
 
-			isConfidential = spaceAclService.toggleConfidential(u, item,
+			isConfidential = spaceAclService.toggleConfidential( space,
 					Boolean.valueOf(postParams.get("confidential").toString()));
 
 		} catch (KoyaServiceException ex) {

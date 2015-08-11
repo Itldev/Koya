@@ -22,7 +22,6 @@ import org.alfresco.repo.search.SearcherException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.workflow.WorkflowModel;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -44,6 +43,8 @@ import org.springframework.beans.factory.InitializingBean;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
@@ -61,6 +62,7 @@ public class KoyaMailService implements InitializingBean {
 	private final static String RESET_PASSWORD_SUBJECT = "koya.reset-password.subject";
 	private final static String INACTIVEDOSSIER_NOTIFICATION_SUBJECT = "koya.inactivedossier-notification.subject";
 	private final static String ACTIVITIESEMAIL_SUBJECT = "koya.activities-email.subject";
+	private final static String CLIENT_UPLOADALERT_EMAIL_SUBJECT = "koya.clientdoc-upload.subject";
 
 	// templates locations
 	private final static String TPL_MAIL_KOYAROOT = "//app:company_home/app:dictionary/app:email_templates/cm:koya_templates";
@@ -69,6 +71,8 @@ public class KoyaMailService implements InitializingBean {
 			+ "/cm:koyamail.properties";
 	private final static String TPL_MAIL_SHARENOTIF = TPL_MAIL_KOYAROOT
 			+ "/cm:share-notification.html.ftl";
+	private final static String TPL_MAIL_CLIENTUPLOADALERT = TPL_MAIL_KOYAROOT
+			+ "/cm:clientdoc-upload.html.ftl";
 	private final static String TPL_MAIL_RESET_PWD = TPL_MAIL_KOYAROOT
 			+ "/cm:reset-password.html.ftl";
 	public final static String TPL_MAIL_INVITATION = TPL_MAIL_KOYAROOT
@@ -98,6 +102,7 @@ public class KoyaMailService implements InitializingBean {
 
 	// Share Notification Template
 	protected RepositoryLocation shareNotificationTemplateLocation;
+	protected RepositoryLocation clientUploadAlertTemplateLocation;
 	protected RepositoryLocation resetPasswordTemplateLocation;
 	protected RepositoryLocation inactiveDossierNoficationTemplateLocation;
 
@@ -200,6 +205,10 @@ public class KoyaMailService implements InitializingBean {
 		shareNotificationTemplateLocation = new RepositoryLocation(
 				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, TPL_MAIL_SHARENOTIF,
 				"xpath");
+
+		clientUploadAlertTemplateLocation = new RepositoryLocation(
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_MAIL_CLIENTUPLOADALERT, "xpath");
 		resetPasswordTemplateLocation = new RepositoryLocation(
 				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, TPL_MAIL_RESET_PWD,
 				"xpath");
@@ -273,6 +282,81 @@ public class KoyaMailService implements InitializingBean {
 
 	}
 
+	public void sendClientUploadAlertMail(final Dossier dossier,
+			final Document document, User clientUploader,
+			List<User> notifiedUsers, Boolean notifyCompanyManagers)
+			throws KoyaServiceException {
+
+		final Company c = koyaNodeService.getFirstParentOfType(
+				dossier.getNodeRef(), Company.class);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Alert Email - Client file Upload : dossier "
+					+ dossier.getTitle() + ";client "
+					+ clientUploader.getEmail());
+		}
+
+		// set mail dest
+		Map<String, Serializable> paramsMail = new HashMap<>();
+		ArrayList<String> mailDest = new ArrayList<>();
+		for (User u : notifiedUsers) {
+			mailDest.add(u.getEmail());
+		}
+		paramsMail.put(MailActionExecuter.PARAM_TO_MANY, mailDest);
+
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE,
+				getFileTemplateRef(clientUploadAlertTemplateLocation));
+
+		Map<String, Object> templateModel = new HashMap<>();
+
+		/**
+		 * Model Objects
+		 */
+
+		
+		templateModel.put("notifyCompanyManagers", notifyCompanyManagers);
+
+		templateModel.put("clientUploader",
+				new ScriptNode(clientUploader.getNodeRef(), serviceRegistry));
+
+		templateModel.put("uploadedDoc", new HashMap() {
+			{
+				put("title", document.getTitle());
+				put("name", document.getName());
+			}
+		});
+
+		templateModel.put("referenceDossier", new HashMap() {
+			{
+				put("url", getDirectLinkUrl(dossier.getNodeRef()));
+				put("nodeRef", dossier.getNodeRef());
+				put("title", dossier.getTitle());
+			}
+		});
+		templateModel.put("koyaClient", koyaClientParams);
+
+		templateModel.put(TemplateService.KEY_COMPANY_HOME,
+				repositoryHelper.getCompanyHome());
+		templateModel.put("company", companyPropertiesService.getProperties(c)
+				.toHashMap());
+
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,
+				(Serializable) templateModel);
+
+		/**
+		 * Get subject from properties file in repository
+		 */
+		paramsMail
+				.put(MailActionExecuter.PARAM_SUBJECT,
+						getI18nSubject(CLIENT_UPLOADALERT_EMAIL_SUBJECT,
+								templateModel));
+
+		actionService
+				.executeAction(actionService.createAction(
+						MailActionExecuter.NAME, paramsMail), null, false, true);
+
+	}
+
 	public void sendUserNotifMail(NodeRef personNodeRef,
 			Map<String, Object> model, String templateNodeRef,
 			String companyName) {
@@ -284,7 +368,7 @@ public class KoyaMailService implements InitializingBean {
 		String emailAddress = (String) personProps.get(ContentModel.PROP_EMAIL);
 
 		Map<String, Serializable> paramsMail = new HashMap<>();
-		logger.debug("send user notification to '" + emailAddress+"'");
+		logger.debug("send user notification to '" + emailAddress + "'");
 		paramsMail.put(MailActionExecuter.PARAM_TO, emailAddress);
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, templateNodeRef);
 
@@ -292,8 +376,8 @@ public class KoyaMailService implements InitializingBean {
 		model.put("koyaClient", koyaClientParams);
 		model.put("company", companyPropertiesService
 				.getProperties(companyName).toHashMap());
-				
-		logger.trace("User Notification mail model =" +model.toString());
+
+		logger.trace("User Notification mail model =" + model.toString());
 
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL,
 				(Serializable) model);

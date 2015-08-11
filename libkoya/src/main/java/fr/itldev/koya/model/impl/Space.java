@@ -48,13 +48,24 @@ public class Space extends KoyaNode {
 	protected Space() {
 	}
 
-	
+	public String getAuthorityName(String roleName) {
+
+		String authorityName = getKtype().toLowerCase() + "_"
+				+ getNodeRef().getId();
+
+		if (roleName != null && !roleName.isEmpty()) {
+			return authorityName + "_" + roleName;
+		} else {
+			return authorityName;
+		}
+	}
+
 	public static Space newInstance() {
-		return  new Space();		
+		return new Space();
 	}
 
 	public static Space newInstance(String title) {
-		Space s= new Space();
+		Space s = new Space();
 		s.setTitle(title);
 		return s;
 	}

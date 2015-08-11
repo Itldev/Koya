@@ -54,6 +54,7 @@
         <property name="fileFolderService" ref="FileFolderService" />      
         <property name="searchService" ref="SearchService"/>  
         <property name="companyPropertiesService" ref="companyPropertiesService"/>          
+        <property name="permissionService" ref="PermissionService"/>
     </bean>     
     
      <!--Companies handling service-->
@@ -73,16 +74,22 @@
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="companyService" ref="companyService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
-    </bean> 
-    
-    <!--Dossiers handling service-->
-    <bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
-        <property name="nodeService" ref="NodeService"/>
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="searchService" ref="searchService"/>
-        <property name="prefixResolver" ref="namespaceService" />
-        <property name="transactionService" ref="transactionService"/>
     </bean>
+
+	<!--Dossiers handling service -->
+	<bean name="dossierService" class="fr.itldev.koya.alfservice.DossierService">
+		<property name="nodeService" ref="NodeService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="searchService" ref="searchService" />
+		<property name="prefixResolver" ref="namespaceService" />
+		<property name="transactionService" ref="transactionService" />
+		<property name="koyaContentService" ref="koyaContentService" />
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="koyaMailService" ref="koyaMailService" />
+		<property name="userService" ref="userService" />
+		<property name="authenticationService" ref="AuthenticationService" />
+		<property name="companyAclService" ref="companyAclService" />
+	</bean>
 
     <!--Contents handling service-->
     <bean name="koyaContentService" class="fr.itldev.koya.alfservice.KoyaContentService">
@@ -169,17 +176,7 @@
 
 
     <bean id="nameBasedUserNameGenerator" class="fr.itldev.koya.repo.security.authentication.EmailBasedNameGenerator" />
-    
-    
-    
-    <!--Service used for debugging-->
-    <bean id="debuggerService" class="fr.itldev.koya.alfservice.DebuggerService">
-        <property name="serviceRegistry" ref="ServiceRegistry"/>        
-        <property name="nodeService" ref="NodeService"/>
-        <property name="permissionService" ref="permissionService"/>
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="companyAclService" ref="companyAclService"/>
-    </bean>
+      
     
     
     <bean name="koyaMailService" class="fr.itldev.koya.alfservice.KoyaMailService">

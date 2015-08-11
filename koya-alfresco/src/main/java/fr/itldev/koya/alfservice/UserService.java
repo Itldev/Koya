@@ -91,7 +91,6 @@ public class UserService {
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
 	}
-	
 
 	// </editor-fold>
 	/**
@@ -150,8 +149,8 @@ public class UserService {
 					userToModify.getEmailFeedDisabled());
 
 			if (!nodeService.hasAspect(userNr, KoyaModel.ASPECT_CIVILTITLED)) {
-				nodeService
-						.addAspect(userNr, KoyaModel.ASPECT_CIVILTITLED, null);
+				nodeService.addAspect(userNr, KoyaModel.ASPECT_CIVILTITLED,
+						null);
 			}
 
 			nodeService.setProperty(userNr, KoyaModel.PROP_CIVILTITLE,
@@ -179,6 +178,24 @@ public class UserService {
 			authenticationService.updateAuthentication(
 					authenticationService.getCurrentUserName(),
 					oldPassword.toCharArray(), newPassword.toCharArray());
+		} catch (AuthenticationException aex) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.CANT_MODIFY_USER_PASSWORD);
+		}
+	}
+
+	/**
+	 * Admin force Change users password
+	 * 
+	 * @param oldPassword
+	 * @param newPassword
+	 * @throws fr.itldev.koya.exception.KoyaServiceException
+	 */
+	public void adminForceChangePassword(String userName, String newPassword)
+			throws KoyaServiceException {
+		try {
+			authenticationService.setAuthentication(userName,
+					newPassword.toCharArray());
 		} catch (AuthenticationException aex) {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.CANT_MODIFY_USER_PASSWORD);
@@ -392,7 +409,7 @@ public class UserService {
 		return nodeService.getAspects(u.getNodeRef()).contains(
 				ContentModel.ASPECT_PERSON_DISABLED);
 	}
-	
+
 	/**
 	 * Add Node to user SharedElements List
 	 * 
@@ -427,7 +444,8 @@ public class UserService {
 			if (!exists) {
 				nodeService.createAssociation(u.getNodeRef(), n,
 						KoyaModel.ASSOC_USER_SHAREDNODES);
-				logger.trace("Add userShares Association between "+userMail + " and "+name);
+				logger.trace("Add userShares Association between " + userMail
+						+ " and " + name);
 			}
 		} catch (Exception e) {
 		}
@@ -448,10 +466,11 @@ public class UserService {
 					KoyaModel.ASPECT_USERSHARES)) {
 				nodeService.addAspect(u.getNodeRef(),
 						KoyaModel.ASPECT_USERSHARES, null);
-			}		
+			}
 			nodeService.removeAssociation(u.getNodeRef(), n,
 					KoyaModel.ASSOC_USER_SHAREDNODES);
-			logger.trace("Removes userShares Association between "+userMail + " and "+name);
+			logger.trace("Removes userShares Association between " + userMail
+					+ " and " + name);
 
 		} catch (Exception e) {
 		}
@@ -460,9 +479,15 @@ public class UserService {
 	/**
 	 * List all User's Koya Nodes. company filter is optionnal
 	 * 
+	 * Duplicates SpacesAclService.getKoyaUserSpaces
+	 * 
+	 *  TODO remove KoyaModel.ASSOC_USER_SHAREDNODES from model
+	 * 
 	 * @param u
 	 * @return
+	 * 
 	 */
+	@Deprecated
 	public List<Space> getSharedKoyaNodes(String userName, Company c) {
 		List<Space> sharedKoyaNodes = new ArrayList<Space>();
 		try {
@@ -481,8 +506,8 @@ public class UserService {
 										.getFirstParentOfType(
 												ar.getTargetRef(),
 												Company.class))) {
-							sharedKoyaNodes.add(koyaNodeService
-									.getKoyaNode(ar.getTargetRef(),Space.class));
+							sharedKoyaNodes.add(koyaNodeService.getKoyaNode(
+									ar.getTargetRef(), Space.class));
 						}
 					} catch (KoyaServiceException e) {
 					}
@@ -494,5 +519,5 @@ public class UserService {
 		}
 		return sharedKoyaNodes;
 	}
-	
+
 }

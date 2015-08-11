@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentWriter;
@@ -34,6 +35,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.site.SiteVisibility;
@@ -46,6 +48,7 @@ import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.SalesOffer;
+import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 /**
@@ -71,6 +74,7 @@ public class CompanyService {
 	protected FileFolderService fileFolderService;
 	protected SearchService searchService;
 	protected CompanyPropertiesService companyPropertiesService;
+	protected PermissionService permissionService;
 
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setSiteService(SiteService siteService) {
@@ -101,7 +105,6 @@ public class CompanyService {
 	public void setFileFolderService(FileFolderService fileFolderService) {
 		this.fileFolderService = fileFolderService;
 	}
-	
 
 	public void setSearchService(SearchService searchService) {
 		this.searchService = searchService;
@@ -110,6 +113,10 @@ public class CompanyService {
 	public void setCompanyPropertiesService(
 			CompanyPropertiesService companyPropertiesService) {
 		this.companyPropertiesService = companyPropertiesService;
+	}
+
+	public void setPermissionService(PermissionService permissionService) {
+		this.permissionService = permissionService;
 	}
 
 	// </editor-fold>
@@ -154,7 +161,7 @@ public class CompanyService {
 
 		modelService.companyInitTemplate(shortName, spaceTemplate);
 
-		modelService.companyInitImports(shortName);		
+		modelService.companyInitImports(shortName);
 
 		// TODO copy config files to the koya-config directory
 		return created;
@@ -418,4 +425,50 @@ public class CompanyService {
 		return koyaConfigRef;
 	}
 
+	private static String TMP_SUMMARY_DIR = "tmpDossierSummary";
+
+	public NodeRef getTmpSummaryDir(final Company company) {
+
+		NodeRef tmpSummaryDir = null;
+		
+		try {
+			tmpSummaryDir = nodeService.getChildByName(company.getNodeRef(),
+					ContentModel.ASSOC_CONTAINS, TMP_SUMMARY_DIR);
+		} catch (Exception e) {
+		}
+
+		if (tmpSummaryDir == null) {
+			// create tmp summary dir
+			tmpSummaryDir = AuthenticationUtil
+					.runAsSystem(new AuthenticationUtil.RunAsWork<NodeRef>() {
+						@Override
+						public NodeRef doWork() throws Exception {
+
+							final Map<QName, Serializable> properties = new HashMap<>();
+							properties.put(ContentModel.PROP_NAME,
+									TMP_SUMMARY_DIR);
+							properties.put(ContentModel.PROP_TITLE,
+									TMP_SUMMARY_DIR);
+
+							ChildAssociationRef car = nodeService.createNode(
+									company.getNodeRef(),
+									ContentModel.ASSOC_CONTAINS,
+									QName.createQName(
+											NamespaceService.CONTENT_MODEL_1_0_URI,
+											TMP_SUMMARY_DIR),
+									ContentModel.TYPE_FOLDER, properties);
+
+							permissionService.setPermission(
+									car.getChildRef(),
+									siteService.getSiteRoleGroup(
+											company.getName(),
+											SitePermission.CONSUMER.toString()),
+									SitePermission.CONTRIBUTOR.toString(), true);
+							return car.getChildRef();
+						}
+					});
+		}
+
+		return tmpSummaryDir;
+	}
 }

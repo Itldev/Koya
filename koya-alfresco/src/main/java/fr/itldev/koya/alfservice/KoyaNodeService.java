@@ -30,10 +30,8 @@ import java.util.Set;
 import org.alfresco.model.ContentModel;
 import org.alfresco.query.PagingRequest;
 import org.alfresco.query.PagingResults;
-import org.alfresco.repo.dictionary.RepositoryLocation;
 import org.alfresco.repo.node.getchildren.GetChildrenCannedQuery;
 import org.alfresco.repo.nodelocator.AncestorNodeLocator;
-import org.alfresco.repo.search.SearcherException;
 import org.alfresco.service.cmr.favourites.FavouritesService;
 import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -48,7 +46,6 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteService;
@@ -421,8 +418,8 @@ public class KoyaNodeService {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.MOVE_CYCLIC_RELATIONSHIP_DETECTED);
 		}
-		activityPoster.postFileFolderUpdated(fileFolderService
-				.getFileInfo(dest).isFolder(), dest);
+		activityPoster.postFileFolderUpdated(
+				fileFolderService.getFileInfo(toMove).isFolder(), toMove);
 		// TODO update KoyaNodes cache
 		return getKoyaNode(fInfo.getNodeRef());
 	}
@@ -708,30 +705,6 @@ public class KoyaNodeService {
 			}
 		}
 		return props;
-	}
-
-	public NodeRef xPath2NodeRef(String xpath) throws KoyaServiceException {
-
-		RepositoryLocation templateLoc = new RepositoryLocation();// defaultQuery
-		// language
-		// = xpath
-		templateLoc.setPath(xpath);
-		StoreRef store = templateLoc.getStoreRef();
-
-		try {
-			List<NodeRef> nodeRefs = searchService.selectNodes(
-					nodeService.getRootNode(store), xpath, null,
-					namespaceService, false);
-			if (nodeRefs.size() != 1) {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.INVALID_XPATH_NODE, nodeRefs.size()
-								+ " nodes match search");
-			}
-			return nodeRefs.get(0);
-		} catch (SearcherException e) {
-			throw new KoyaServiceException(
-					KoyaErrorCodes.CANNOT_FIND_XPATH_NODE, e);
-		}
 	}
 
 	/**

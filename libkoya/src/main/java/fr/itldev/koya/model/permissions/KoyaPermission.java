@@ -1,6 +1,5 @@
 package fr.itldev.koya.model.permissions;
 
-import static fr.itldev.koya.model.permissions.KoyaPermissionCollaborator.getAll;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +21,6 @@ public class KoyaPermission extends AlfrescoPermission {
 
         all.add(KoyaPermissionConsumer.CLIENT);
         all.add(KoyaPermissionConsumer.PARTNER);
-        all.add(KoyaPermissionConsumer.CLIENTCONTRIBUTOR);
 
         return all;
 

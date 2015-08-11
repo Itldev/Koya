@@ -110,6 +110,7 @@
       <property name="koyaMailService" ref="koyaMailService"/>
        <property name="koyaNodeService" ref="koyaNodeService"/>
        <property name="userService" ref="userService"/>
+        <property name="spaceAclService" ref="spaceAclService"/> 
    </bean>
    
    <bean id="feedNotifier" class="org.alfresco.repo.activities.feed.FeedNotifierImpl">
@@ -147,7 +148,9 @@
 		</property>
 		<property name="koyaMailService" ref="koyaMailService" />
 		<property name="companyAclService" ref="companyAclService"/>
+		<property name="companyService" ref="companyService"/>
 	</bean>
+	
    
    <bean id="feedModelBuilderFactory" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
       <property name="targetBeanName" value="feedModelBuilderPrototype"/>

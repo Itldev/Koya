@@ -52,4 +52,10 @@ public class GeoPos {
         this.longitude = longitude;
     }
 
+    @Override
+    public String toString() {
+        return latitude + "," + longitude;
+    }
+
+    
 }

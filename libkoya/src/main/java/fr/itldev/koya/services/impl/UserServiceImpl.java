@@ -51,8 +51,8 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import fr.itldev.koya.model.impl.Activity;
 import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Notification;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.AuthTicket;
@@ -71,19 +71,21 @@ public class UserServiceImpl extends AlfrescoRestService implements
 	private static final String REST_POST_MODIFYDETAILS = "/s/fr/itldev/koya/user/modifydetails";
 	private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find?"
 			+ "query={query}&maxResults={maxresults}&companyName={companyName}&roleFilter={roleFilter}";
-	private static final String REST_GET_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword/{oldpwd}/{newpwd}";
+	private static final String REST_POST_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword";
 	private static final String REST_GET_GROUPS = "/s/fr/itldev/koya/user/groups";
 
 	// ===== Preferences
 	private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
 	private static final String REST_POST_PREFERENCES = "/s/api/people/{userid}/preferences";
 	private static final String REST_DELETE_PREFERENCES = "/s/api/people/{userid}/preferences?pf={preferencefilter?}";
-	
 
 	// ====== reset password BPM
 	private static final String REST_POST_RESET_PASSWORD_REQUEST = "/s/fr/itldev/koya/resetpassword/request";
 	private static final String REST_POST_RESET_PASSWORD_VALIDATION = "/s/fr/itldev/koya/resetpassword/validation";
 
+	// ====== user activities
+	private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?format=json";
+	
 	private BeanFactory beanFactory;
 
 	@Override
@@ -108,14 +110,14 @@ public class UserServiceImpl extends AlfrescoRestService implements
 			throws RestClientException, AlfrescoServiceException {
 
 		AuthTicket ticket = getTemplate().getForObject(
-						getAlfrescoServerUrl() + REST_GET_LOGIN, AuthTicket.class,
-						authKey, password);
+				getAlfrescoServerUrl() + REST_GET_LOGIN, AuthTicket.class,
+				authKey, password);
 		// Get User Object
 		Map emailPostWrapper = new HashMap();
 		emailPostWrapper.put("authKey", authKey);
 		User user = getTemplate().postForObject(
-						getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL,
-						emailPostWrapper, User.class, ticket);
+				getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL,
+				emailPostWrapper, User.class, ticket);
 
 		// Authentication ticket integration
 		user.setTicketAlfresco(ticket.toString());
@@ -193,8 +195,8 @@ public class UserServiceImpl extends AlfrescoRestService implements
 	@Override
 	public void loadPreferences(User userLog, User userToGetPrefs) {
 		Preferences preferences = userLog.getRestTemplate().getForObject(
-						getAlfrescoServerUrl() + REST_GET_PREFERENCES,
-						Preferences.class, userToGetPrefs.getUserName());
+				getAlfrescoServerUrl() + REST_GET_PREFERENCES,
+				Preferences.class, userToGetPrefs.getUserName());
 		userToGetPrefs.setPreferences(preferences);
 	}
 
@@ -267,9 +269,14 @@ public class UserServiceImpl extends AlfrescoRestService implements
 	public void changePassword(User userLog, String oldPassword,
 			String newPassword) throws AlfrescoServiceException,
 			MalformedURLException {
-		userLog.getRestTemplate().getForObject(
-				getAlfrescoServerUrl() + REST_GET_CHANGEPASSWORD, String.class,
-				oldPassword, newPassword);
+
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("oldPwd", oldPassword);
+		params.put("newPwd", newPassword);
+
+		userLog.getRestTemplate().postForObject(
+				getAlfrescoServerUrl() + REST_POST_CHANGEPASSWORD, params,
+				String.class);
 
 		userLog.setRestTemplate(getAuthenticatedRestTemplate(
 				userLog.getUserName(), newPassword));
@@ -319,22 +326,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
 						String.class, query, maxResults, companyName, roles));
 
 	}
-
-	@Override
-	public List<Notification> getNotifications(User userLog) {
-		throw new UnsupportedOperationException("Not supported yet."); // To
-																		// change
-																		// body
-																		// of
-																		// generated
-																		// methods,
-																		// choose
-																		// Tools
-																		// |
-																		// Templates.
-		// cf alfresco activity service
-	}
-
+	
 	/**
 	 * Get user Object from email.
 	 * 
@@ -424,7 +416,6 @@ public class UserServiceImpl extends AlfrescoRestService implements
 			this.httpContext = httpContext;
 		}
 	}
-	
 
 	/**
 	 * Send Reset password request to alfresco server.
@@ -480,4 +471,21 @@ public class UserServiceImpl extends AlfrescoRestService implements
 						getAlfrescoServerUrl() + REST_GET_GROUPS, String.class));
 
 	}
+	
+	/**
+	 * List available activities for user
+	 * 
+	 * @param user
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	public List<Activity> listActivities(User user) throws AlfrescoServiceException {
+		return fromJSON(
+				new TypeReference<List<Activity>>() {
+				},
+				user.getRestTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_ACTIVITIES,
+						String.class));
+	}
+
 }

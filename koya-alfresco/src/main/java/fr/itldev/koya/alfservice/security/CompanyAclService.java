@@ -319,14 +319,6 @@ public class CompanyAclService {
 		}
 	}
 
-	public SitePermission getSitePermission(Company c, String userMail) {
-		User u = userService.getUserByEmailFailOver(userMail);
-		if (u != null) {
-			return getSitePermission(c, u);
-		}
-		return null;
-	}
-
 	/**
 	 * Returns SitePermission of user on Company if exists.
 	 * 
@@ -364,9 +356,9 @@ public class CompanyAclService {
 	 * @return
 	 * @throws KoyaServiceException
 	 */
-	public NominatedInvitation inviteMember(final Company c, final String userMail,
-			final SitePermission permission, final KoyaNode sharedItem)
-			throws KoyaServiceException {
+	public NominatedInvitation inviteMember(final Company c,
+			final String userMail, final SitePermission permission,
+			final KoyaNode sharedItem) throws KoyaServiceException {
 
 		User u = userService.getUserByEmailFailOver(userMail);
 
@@ -385,8 +377,7 @@ public class CompanyAclService {
 			 * 
 			 * 
 			 */
-			
-			
+
 			NominatedInvitation invitation = AuthenticationUtil
 					.runAsSystem(new AuthenticationUtil.RunAsWork<NominatedInvitation>() {
 						@Override
@@ -398,7 +389,7 @@ public class CompanyAclService {
 											koyaClientServerPath,
 											koyaClientAcceptUrl,
 											koyaClientRejectUrl);
-							
+
 							// Force addSharedNode Before sending invite mail if
 							// sharedItem exists
 							if (sharedItem != null) {
@@ -481,16 +472,16 @@ public class CompanyAclService {
 	 * @param u
 	 * @throws KoyaServiceException
 	 */
-	public void removeFromMembers(Company c, User u)
+	public void removeFromMembers(final Company c, final User u)
 			throws KoyaServiceException {
 		List<Invitation> invitations = getPendingInvite(c.getName(), null,
 				u.getUserName());
 		if (invitations.isEmpty()) {
 			siteService.removeMembership(c.getName(), u.getUserName());
 
-			// Launch backend action that cleans all users specific permissions
-			// in company
-			// Only delete specific permissions on dossiers
+			// run backend action that cleans all users koya specific
+			// permissions
+			// on company spaces he can access
 			try {
 				Map<String, Serializable> paramsClean = new HashMap<>();
 				paramsClean.put("userName", u.getUserName());
@@ -500,33 +491,31 @@ public class CompanyAclService {
 				actionService.executeAction(cleanUserAuth,
 						siteService.getSite(c.getName()).getNodeRef());
 			} catch (InvalidNodeRefException ex) {
-				throw new KoyaServiceException(0, "");// TODO
+				logger.error("Error cleaning user " + u.getUserName()
+						+ " permissions on spaces while revoking "
+						+ c.getName() + "access - " + ex.toString());
 			}
 		} else {
-			List<Exception> exceptions = new ArrayList<>();
 			for (final Invitation i : invitations) {
-				Exception eCancel = AuthenticationUtil
-						.runAsSystem(new AuthenticationUtil.RunAsWork<Exception>() {
+				AuthenticationUtil
+						.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
 
 							@Override
-							public Exception doWork() throws Exception {
+							public Void doWork() throws Exception {
 								try {
 									invitationService.cancel(i.getInviteId());
 								} catch (Exception e) {
-									logger.error(e.getMessage(), e);
-									return e;
+									logger.error("Error removing user "
+											+ u.getUserName()
+											+ " invitation while revoking "
+											+ c.getName() + "access - "
+											+ e.toString());
 								}
 								return null;
 							}
 						});
-				if (eCancel != null) {
-					exceptions.add(eCancel);
-				}
+			}
 
-			}
-			if (!exceptions.isEmpty()) {
-				throw new KoyaServiceException(0, "");// TODO
-			}
 		}
 	}
 

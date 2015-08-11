@@ -29,18 +29,11 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.MailWrapper;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
@@ -58,7 +51,8 @@ public class AlfrescoRestService implements AlfrescoService {
 	private static final String REST_GET_KOYANODE = "/s/fr/itldev/koya/global/node/{nodeRef}";
 	private static final String REST_GET_LIBVERSION = "/s/fr/itldev/koya/meta/libversion";
 	protected static final String REST_POST_UPLOAD = "/s/api/upload";
-	private static final String REST_GET_XPATH2NODEREF = "/s/fr/itldev/koya/global/xpath2noderef/{xPath}";
+	// private static final String REST_GET_XPATH2NODEREF =
+	// "/s/fr/itldev/koya/global/xpath2noderef/{xPath}";
 
 	protected static final String REST_GET_LISTCHILD_PAGINATED = "/s/fr/itldev/koya/content/list/{nodeRef}"
 			+ "?skipCount={skipCount}"
@@ -190,44 +184,6 @@ public class AlfrescoRestService implements AlfrescoService {
 				user.getRestTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_KOYANODE,
 						String.class, nodeRef.toString()));
-	}
-
-	/**
-	 * Get NodeRef reference from xpath expression.
-	 * 
-	 * @param user
-	 * @param nodeRef
-	 * @return
-	 * @throws AlfrescoServiceException
-	 */
-	@Override
-	public String xPathToNodeRef(User user, String nodeRef)
-			throws AlfrescoServiceException {
-		return user.getRestTemplate().getForObject(
-				getAlfrescoServerUrl() + REST_GET_XPATH2NODEREF, String.class,
-				nodeRef);
-
-	}
-
-	@Override
-	public AlfrescoUploadReturn uploadToXpathNode(User user, Resource resource,
-			String parentXPath) throws AlfrescoServiceException {
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-
-		parts.add("filedata", resource);
-		parts.add("destination", xPathToNodeRef(user, parentXPath));
-		parts.add("overwrite", "true");
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-		HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(
-				parts, headers);
-
-		return fromJSON(
-				new TypeReference<AlfrescoUploadReturn>() {
-				},
-				user.getRestTemplate().postForObject(
-						getAlfrescoServerUrl() + REST_POST_UPLOAD, request,
-						String.class));
 	}
 
 	@Override

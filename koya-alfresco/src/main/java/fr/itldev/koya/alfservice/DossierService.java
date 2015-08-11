@@ -38,6 +38,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.namespace.NamespacePrefixResolver;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -47,11 +48,18 @@ import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.springframework.dao.ConcurrencyFailureException;
 
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
+import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 /**
@@ -68,6 +76,12 @@ public class DossierService {
 	protected SearchService searchService;
 	private NamespacePrefixResolver prefixResolver;
 	private TransactionService transactionService;
+	private SpaceAclService spaceAclService;
+	private CompanyAclService companyAclService;
+	private KoyaContentService koyaContentService;
+	private KoyaMailService koyaMailService;
+	private UserService userService;
+	private AuthenticationService authenticationService;
 
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setNodeService(NodeService nodeService) {
@@ -88,6 +102,31 @@ public class DossierService {
 
 	public void setTransactionService(TransactionService transactionService) {
 		this.transactionService = transactionService;
+	}
+
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
+	}
+
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
+
+	public void setKoyaContentService(KoyaContentService koyaContentService) {
+		this.koyaContentService = koyaContentService;
+	}
+
+	public void setKoyaMailService(KoyaMailService koyaMailService) {
+		this.koyaMailService = koyaMailService;
+	}
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+
+	public void setAuthenticationService(
+			AuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
 	}
 
 	// </editor-fold>
@@ -185,8 +224,7 @@ public class DossierService {
 	 * @return
 	 * @throws fr.itldev.koya.exception.KoyaServiceException
 	 */
-	public Dossier getDossier(final Company company, final String reference)
-			throws KoyaServiceException {
+	public Dossier getDossier(final Company company, final String reference) {
 		String luceneRequest = "TYPE:\"koya:dossier\" AND @koya\\:reference:\""
 				+ reference + "\" AND PATH:\" /app:company_home/st:sites/cm:"
 				+ company.getName() + "/cm:documentLibrary/*/*\"";
@@ -195,22 +233,26 @@ public class DossierService {
 		try {
 			rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					SearchService.LANGUAGE_LUCENE, luceneRequest);
-			switch (rs.length()) {
-			case 0:
-				throw new KoyaServiceException(
-						KoyaErrorCodes.NO_SUCH_DOSSIER_REFERENCE, reference);
-			case 1:
+
+			if (rs.length() == 1) {
 				return koyaNodeService.getKoyaNode(rs.iterator().next()
 						.getNodeRef(), Dossier.class);
-			default:
-				throw new KoyaServiceException(
-						KoyaErrorCodes.MANY_DOSSIERS_REFERENCE, reference);
+			}
+
+			if (rs.length() == 0) {
+				return null;
+			}
+
+			if (rs.length() > 1) {
+				logger.error(rs.length() + " dossiers match reference "
+						+ reference);
 			}
 		} finally {
 			if (rs != null) {
 				rs.close();
 			}
 		}
+		return null;
 	}
 
 	public List<Dossier> getInactiveDossier(final Space space,
@@ -224,8 +266,6 @@ public class DossierService {
 		if (notNotifiedOnly) {
 			luceneRequest += " +@koya\\:notified:false";
 		}
-		logger.debug(luceneRequest);
-
 		ResultSet rs = null;
 		try {
 			rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
@@ -276,9 +316,10 @@ public class DossierService {
 							transaction.commit();
 							logger.debug("Updated lastModificationDate of dossier : "
 									+ d.getTitle());
-						}catch(ConcurrencyFailureException cex){
-							/**silent concurency exception
-							 * If occurs, then node have update
+						} catch (ConcurrencyFailureException cex) {
+							/**
+							 * silent concurency exception If occurs, then node
+							 * have update
 							 */
 							transaction.rollback();
 						} catch (InvalidNodeRefException ie) {
@@ -302,4 +343,172 @@ public class DossierService {
 
 	}
 
+	/*
+	 * ========== Koya Client Upload in specific upload directory ==========
+	 */
+
+	public Map<String, String> uploadKoyaClientDocument(Dossier dossier,
+			String fileName,
+			org.springframework.extensions.surf.util.Content content,
+			String clientMessage) throws KoyaServiceException {
+
+		NodeRef upDir = getPublicUploadFolder(dossier);
+		if (upDir == null) {
+			upDir = createPublicUploadFolder(dossier);
+		}
+
+		String finalFileName = fileName;
+		boolean exists = true;
+		int uniqueFileCounter = 0;
+		while (exists) {
+			exists = nodeService.getChildByName(upDir,
+					ContentModel.ASSOC_CONTAINS, finalFileName) != null;
+			if (exists) {
+				// build new filename
+				int dot = fileName.lastIndexOf('.');
+				finalFileName = fileName.substring(0, dot) + "-"
+						+ ++uniqueFileCounter + fileName.substring(dot);
+			}
+		}
+
+		Map<String, String> upResult = koyaContentService.createContentNode(
+				upDir, finalFileName, null, content.getMimetype(),
+				content.getEncoding(), content.getInputStream(), false);
+
+		//
+		List<User> usersNotified = spaceAclService.listMembership(dossier,
+				KoyaPermissionCollaborator.RESPONSIBLE);
+		Boolean notifyCompanyManager = Boolean.FALSE;
+
+		if (usersNotified.isEmpty()) {
+			// if selected dossier has no responsibles, notify company manager
+			notifyCompanyManager = Boolean.TRUE;
+			Company c = koyaNodeService.getFirstParentOfType(
+					dossier.getNodeRef(), Company.class);
+			usersNotified = companyAclService.listMembers(c.getName(),
+					new ArrayList() {
+						{
+							add(SitePermission.MANAGER);
+						}
+					});
+
+			if (usersNotified.isEmpty()) {
+				logger.warn("No responsible nor Company manager notifiable for client document add. Company :  "
+						+ c.getTitle() + " Dossier " + dossier.getTitle());
+				return upResult;
+			}
+		}
+
+		Document d = koyaNodeService.getKoyaNode(
+				new NodeRef(upResult.get("nodeRef")), Document.class);
+		User uploader = userService.getUser(authenticationService
+				.getCurrentUserName());
+		koyaMailService.sendClientUploadAlertMail(dossier, d, uploader,
+				usersNotified, notifyCompanyManager);
+
+		return upResult;
+	}
+
+	public List<Document> listKoyaClientDocuments(final Dossier dossier) {
+		NodeRef upDir = getPublicUploadFolder(dossier);
+		if (upDir != null) {
+			List<Document> docs = new ArrayList<>();
+
+			for (KoyaNode k : koyaNodeService.listChildrenPaginated(upDir, 0,
+					Integer.MAX_VALUE, false, null).getFirst()) {
+				if (Document.class.isAssignableFrom(k.getClass())) {
+					docs.add((Document) k);
+				}
+			}
+			return docs;
+		} else {
+			return new ArrayList<>();
+		}
+	}
+
+	private static String KOYACLIENT_UPLOADDIR_NAME = "koyaClientUpload";
+
+	private NodeRef getPublicUploadFolder(Dossier dossier) {
+		NodeRef publicUploadFolder = null;
+
+		Company c = koyaNodeService.getFirstParentOfType(dossier.getNodeRef(),
+				Company.class);
+
+		try {
+
+			NodeRef koyaClientUpDir = nodeService.getChildByName(
+					c.getNodeRef(), ContentModel.ASSOC_CONTAINS,
+					KOYACLIENT_UPLOADDIR_NAME);
+
+			if (koyaClientUpDir != null) {
+				publicUploadFolder = nodeService.getChildByName(
+						koyaClientUpDir, ContentModel.ASSOC_CONTAINS,
+						publicUploadFolderName(dossier));
+			}
+
+		} catch (Exception e) {
+
+		}
+		return publicUploadFolder;
+	}
+
+	private NodeRef createPublicUploadFolder(final Dossier dossier) {
+		// create folder if not exists
+		NodeRef upDir = AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<NodeRef>() {
+					@Override
+					public NodeRef doWork() throws Exception {
+
+						Company c = koyaNodeService.getFirstParentOfType(
+								dossier.getNodeRef(), Company.class);
+						// create public client upload dir if not exists
+						NodeRef companyClientUpDir = nodeService
+								.getChildByName(c.getNodeRef(),
+										ContentModel.ASSOC_CONTAINS,
+										KOYACLIENT_UPLOADDIR_NAME);
+
+						if (companyClientUpDir == null) {
+							final Map<QName, Serializable> properties = new HashMap<>();
+							properties.put(ContentModel.PROP_NAME,
+									KOYACLIENT_UPLOADDIR_NAME);
+							properties.put(ContentModel.PROP_TITLE,
+									KOYACLIENT_UPLOADDIR_NAME);
+
+							ChildAssociationRef car = nodeService.createNode(
+									c.getNodeRef(),
+									ContentModel.ASSOC_CONTAINS,
+									QName.createQName(
+											NamespaceService.CONTENT_MODEL_1_0_URI,
+											KOYACLIENT_UPLOADDIR_NAME),
+									ContentModel.TYPE_FOLDER, properties);
+							spaceAclService.initCompanyKoyaClientDirAcl(c,
+									car.getChildRef());
+							companyClientUpDir = car.getChildRef();
+						}
+
+						// create dossier public upload client dir
+						final Map<QName, Serializable> properties = new HashMap<>();
+						properties.put(ContentModel.PROP_NAME,
+								publicUploadFolderName(dossier));
+						properties.put(ContentModel.PROP_TITLE,
+								dossier.getName());
+
+						ChildAssociationRef car = nodeService.createNode(
+								companyClientUpDir,
+								ContentModel.ASSOC_CONTAINS, QName.createQName(
+										NamespaceService.CONTENT_MODEL_1_0_URI,
+										publicUploadFolderName(dossier)),
+								ContentModel.TYPE_FOLDER, properties);
+
+						spaceAclService.initSingleDossierKoyaClientDirAcl(
+								dossier, car.getChildRef());
+						return car.getChildRef();
+					}
+				});
+		return upDir;
+	}
+
+	private String publicUploadFolderName(Dossier dossier) {
+		return "dossier-" + dossier.getNodeRef().getId();
+	}
 }

@@ -28,34 +28,24 @@
     
     <!-- ============== Permissions Behaviours ================ -->
     <!--Initialize default acl on dossier or space node creation-->
-    <bean id="ApplyDefaultAclOnCreate" class="fr.itldev.koya.behaviour.security.ApplyDefaultAclOnCreate" 
-          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
-        <property name="spaceAclService" ref="spaceAclService" />
-        <property name="koyaNodeService" ref="koyaNodeService" />
-        <property name="policyComponent" ref="policyComponent" />
-    </bean>
-    
-    <!-- Give KoyaResponsible Permission to owner on node creation-->
-    <bean id="SetOwnerAsResponsibleOnCreate" class="fr.itldev.koya.behaviour.security.SetOwnerAsResponsibleOnCreate" 
-          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
-        <property name="spaceCollaboratorsAclService" ref="spaceCollaboratorsAclService" />
-        <property name="modelService" ref="modelService" />
-        <property name="koyaNodeService" ref="koyaNodeService" />
-        <property name="nodeService" ref="NodeService" />
-        <property name="policyComponent" ref="policyComponent" />
-        <property name="siteService" ref="siteService" />
-    </bean>
+	<bean id="ApplyDefaultAclOnCreate"
+		class="fr.itldev.koya.behaviour.security.ApplyDefaultAclOnCreate"
+		init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="policyComponent" ref="policyComponent" />
+	</bean>
     
     <!--revoke Koya specific permissions on dossier or space before delete -->
-    <bean id="RevokeKoyaPermissionsBeforeDelete"
-          class="fr.itldev.koya.behaviour.security.RevokeKoyaPermissionsBeforeDelete" 
-          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
-        <property name="spaceAclService" ref="spaceAclService" />
-        <property name="policyComponent" ref="policyComponent" />
-        <property name="koyaNodeService" ref="koyaNodeService" />
-    </bean>
-    
-    
+	<bean id="DeleteKoyaGroupsBeforeDelete"
+		class="fr.itldev.koya.behaviour.security.DeleteKoyaGroupsBeforeDelete"
+		init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="policyComponent" ref="policyComponent" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+	
+      <!-- ====================================================== -->
     
     <bean id="PersonMailUnicityBehaviour" class="fr.itldev.koya.behaviour.PersonMailUnicityBehaviour" 
           init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
@@ -81,5 +71,6 @@
         <property name="nodeService" ref="NodeService" />
         <property name="koyaNodeService" ref="koyaNodeService" />       
         <property name="dossierService" ref="dossierService" />
+        <property name="lastModifiedSharedCache" ref="node.lastModifiedSharedCache" />
     </bean>
 </beans>

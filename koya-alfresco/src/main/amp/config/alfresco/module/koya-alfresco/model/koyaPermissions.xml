@@ -56,14 +56,7 @@
             <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
             <!--<requiredPermission on="node" type="st:site" name="SiteConsumer" />-->
         </permissionGroup>
-        
-        <permissionGroup name="KoyaClientContributor" allowFullControl="false" expose="true">           
-            <includePermissionGroup permissionGroup="Consumer" type="cm:cmobject" />
-            <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
-            <!--<requiredPermission on="node" type="st:site" name="SiteConsumer" />-->
-        </permissionGroup>
-        
-        
+             
         <permissionGroup name="KoyaPartner" allowFullControl="false" expose="true">            
             <includePermissionGroup permissionGroup="AddChildren" type="sys:base"/>
             <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />

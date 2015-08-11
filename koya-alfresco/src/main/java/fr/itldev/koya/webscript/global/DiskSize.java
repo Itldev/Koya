@@ -22,7 +22,6 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.json.DiskSizeWrapper;
 import fr.itldev.koya.webscript.KoyaWebscript;
-import static fr.itldev.koya.webscript.dossier.ListResponsible.permissions;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

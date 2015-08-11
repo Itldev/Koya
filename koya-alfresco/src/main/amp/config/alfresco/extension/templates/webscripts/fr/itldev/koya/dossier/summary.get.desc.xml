@@ -22,7 +22,7 @@
 <webscript>
     <shortname>Generates Dossier's Summary Document</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/dossier/summary/{nodeRef}?documentName={documentName}</url>
+    <url>/fr/itldev/koya/dossier/summary/{nodeId}?documentName={documentName}</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>

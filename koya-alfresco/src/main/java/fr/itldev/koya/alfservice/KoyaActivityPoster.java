@@ -27,7 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.NotificationType;
+import fr.itldev.koya.model.KoyaActivityType;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
@@ -110,9 +110,9 @@ public class KoyaActivityPoster implements InitializingBean {
 
 				if (invitations.isEmpty()) {
 					activityService.postActivity(
-							NotificationType.KOYA_SPACESHARED,
+							KoyaActivityType.KOYA_SPACESHARED,
 							siteShortName,
-							NotificationType.KOYA_APPTOOL,
+							KoyaActivityType.KOYA_APPTOOL,
 							getShareActivityData(user, inviterUserName,
 									sharedSpace), user.getUserName());
 
@@ -142,9 +142,9 @@ public class KoyaActivityPoster implements InitializingBean {
 					// TODO call action
 					// Posting the according activity
 					activityService.postActivity(
-							NotificationType.KOYA_SPACEUNUNSHARED,
+							KoyaActivityType.KOYA_SPACEUNUNSHARED,
 							siteShortName,
-							NotificationType.KOYA_APPTOOL,
+							KoyaActivityType.KOYA_APPTOOL,
 							getShareActivityData(user, revokerUserName,
 									unsharedSpace), user.getUserName());
 
@@ -230,7 +230,10 @@ public class KoyaActivityPoster implements InitializingBean {
 				} catch (KoyaServiceException kse) {
 				}
 
-				postFileFolderActivity(ActivityType.FILE_UPDATED, null, null,
+				// add new event folder-updated
+				postFileFolderActivity(
+						isFolder ? "org.alfresco.documentlibrary.folder-updated"
+								: ActivityType.FILE_UPDATED, null, null,
 						nodeRef, siteId, fileName, c, d);
 			}
 		}
@@ -305,7 +308,7 @@ public class KoyaActivityPoster implements InitializingBean {
 				name, parentCompany, parentDossier);
 
 		activityService.postActivity(activityType, siteId,
-				NotificationType.KOYA_APPTOOL, json.toString());
+				KoyaActivityType.KOYA_APPTOOL, json.toString());
 	}
 
 	/**
@@ -363,9 +366,9 @@ public class KoyaActivityPoster implements InitializingBean {
 		try {
 
 			JSONObject activityData = new JSONObject();
-			activityData.put("email", invitee.getEmail());				
+			activityData.put("email", invitee.getEmail());
 			activityData.put("spaceTitle", space.getTitle());
-			
+
 			activityData.put("spaceNodeRef", space.getNodeRef());
 			activityData.put("inviter", inviter);
 			return activityData.toString();

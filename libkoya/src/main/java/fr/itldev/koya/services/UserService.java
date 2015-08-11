@@ -18,13 +18,15 @@
  */
 package fr.itldev.koya.services;
 
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Notification;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.net.MalformedURLException;
 import java.util.List;
+
 import org.springframework.web.client.RestClientException;
+
+import fr.itldev.koya.model.impl.Activity;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public interface UserService {
 
@@ -111,8 +113,6 @@ public interface UserService {
     List<User> find(User userLog, String query, Integer maxResults,
             Company company, List<String> rolesFilter) throws AlfrescoServiceException;
 
-    List<Notification> getNotifications(User userLog);
-
     /**
      * Get user Object from email.
      *
@@ -164,5 +164,14 @@ public interface UserService {
      * @return
      */
     List<String> getGroups(User user);
+    
+	/**
+	 * List available activities for user
+	 * 
+	 * @param user
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<Activity> listActivities(User user) throws AlfrescoServiceException;
 
 }

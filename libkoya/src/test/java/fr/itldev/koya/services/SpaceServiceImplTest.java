@@ -133,23 +133,6 @@ public class SpaceServiceImplTest extends TestCase {
 	}
 
 	@Test
-	public void testMoveSpaces() throws RestClientException,
-			AlfrescoServiceException {
-
-		Space parentSpace = spaceService.create(admin,
-				 companyTests,"parentSpace");
-
-		Space childSpace = spaceService.create(admin, 
-				parentSpace,"childSpace");
-		// 1 created + defaultspace automaticly created on company creation
-		assertEquals(2, spaceService.list(admin, companyTests).size());
-		// move
-		spaceService.move(admin, childSpace, companyTests);
-		// TODO check this test
-		// assertEquals(3, spaceService.list(admin, companyTests).size());
-	}
-
-	@Test
 	public void testDelSpace() throws RestClientException,
 			AlfrescoServiceException {
 

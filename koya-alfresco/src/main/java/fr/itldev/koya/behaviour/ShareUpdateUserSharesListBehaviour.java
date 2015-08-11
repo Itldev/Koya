@@ -14,6 +14,7 @@ import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.policies.SharePolicies;
 
+@Deprecated
 public class ShareUpdateUserSharesListBehaviour implements
 		SharePolicies.AfterSharePolicy, SharePolicies.AfterUnsharePolicy {
 
@@ -45,7 +46,7 @@ public class ShareUpdateUserSharesListBehaviour implements
 
 	@Override
 	public void afterShareItem(final NodeRef nodeRef, final String userMail,
-			User inviter, Boolean sharedByImporter) {
+			User inviter) {
 		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
 			@Override
 			public Object doWork() throws Exception {

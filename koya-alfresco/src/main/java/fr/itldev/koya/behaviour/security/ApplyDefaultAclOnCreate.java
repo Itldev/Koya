@@ -14,7 +14,12 @@ import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Space;
 
 /**
- * Apply default ACL on objects of type Space or Dossier on node creation
+ * Apply default ACL on objects of type Space or Dossier on node creation.
+ * 
+ * Creates Node Specific Groups and set Permissions.
+ * 
+ * Add Creator Authority to Responsibles Group if not belongs blacklist nor
+ * importer user
  * 
  */
 public class ApplyDefaultAclOnCreate implements
@@ -30,12 +35,12 @@ public class ApplyDefaultAclOnCreate implements
 		this.policyComponent = policyComponent;
 	}
 
-	public void setSpaceAclService(SpaceAclService spaceAclService) {
-		this.spaceAclService = spaceAclService;
-	}
-
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
+	}
+
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
 	}
 
 	public void init() {
@@ -54,12 +59,19 @@ public class ApplyDefaultAclOnCreate implements
 
 	@Override
 	public void onCreateNode(ChildAssociationRef childAssocRef) {
+
+		Space space;
 		try {
-			Space s = koyaNodeService.getKoyaNode(childAssocRef.getChildRef(),
+			space = koyaNodeService.getKoyaNode(childAssocRef.getChildRef(),
 					Space.class);
-			spaceAclService.initSpaceWithDefaultPermissions(s);
 		} catch (KoyaServiceException ex) {
-			logger.error(ex.toString());
+			logger.error("Error Applying default permissions on node creation : "
+					+ ex.toString());
+			return;
 		}
+
+		spaceAclService.initSpaceAcl(space);
+
 	}
+
 }
