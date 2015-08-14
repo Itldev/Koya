@@ -77,8 +77,12 @@
       <extensionElements>
         <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
           <activiti:field name="script">
-            <activiti:string><![CDATA[logger.log("fin def date de signature");
-logger.log("date de signature" + execution.getVariable("koyares_dateSign"));]]></activiti:string>
+            <activiti:string><![CDATA[logger.log("date de signature" + task.getVariable("koyares_dateSign"));
+
+var dateSign =  task.getVariable('koyares_dateSign');
+//constraints test on defined signature date (eg must be in the future !)
+
+execution.setVariable('koyares_dateSign',dateSign);]]></activiti:string>
           </activiti:field>
         </activiti:taskListener>
       </extensionElements>
