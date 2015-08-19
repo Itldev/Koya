@@ -675,5 +675,16 @@
 		parent="webscript">
 		<property name="workflowService" ref="WorkflowService"/>
 	</bean>
+
+	<bean id="webscript.fr.itldev.koya.workflow.workflow-instance.get" 
+		  class="fr.itldev.koya.webscript.workflow.WorkflowInstanceGet"
+	      parent="abstractWorkflowWebScript">	
+	      <property name="permissionService" ref="PermissionService"/>
+	</bean>
+ 	<bean id="webscript.fr.itldev.koya.workflow.task-isassignee.get" 
+		  class="fr.itldev.koya.webscript.workflow.TaskIsAssignee"
+	      parent="abstractWorkflowWebScript">
+	</bean>
+ 
    
 </beans>

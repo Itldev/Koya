@@ -84,15 +84,13 @@
         </activiti:taskListener>
       </extensionElements>
     </userTask>
-    <userTask id="validateSignatureTask" name="Validate sale agreement signature" activiti:formKey="koyares:validateSignTask">
+    <userTask id="validateSignatureTask" name="Validate sale agreement signature" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:validateSignTask">
       <extensionElements>
         <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
           <activiti:field name="script">
-            <activiti:string><![CDATA[
-            //Set sign date defined in previous task as due Date
+            <activiti:string><![CDATA[//Set sign date defined in previous task as due Date
             var signDate = execution.getVariable('dateSign');
-            task.dueDate = signDate;
-            ]]></activiti:string>
+            task.dueDate = signDate;]]></activiti:string>
           </activiti:field>
         </activiti:taskListener>
         <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
@@ -103,7 +101,7 @@
         </activiti:taskListener>
       </extensionElements>
     </userTask>
-    <userTask id="loanRequestTask" name="validate loan Request" activiti:formKey="koyares:loanRequestTask">
+    <userTask id="loanRequestTask" name="validate loan Request" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:loanRequestTask">
       <extensionElements>
         <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
           <activiti:field name="script">

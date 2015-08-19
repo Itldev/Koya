@@ -323,7 +323,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 
 	private static final String REST_POST_START_WORKFLOW = "/s/fr/itldev/koya/workflow/start/{workflowId}/{nodeRef}";
 	private static final String REST_POST_VALIDATE_STEP = "/s/api/task/{workflowInstanceId}/formprocessor";
-	private static final String REST_GET_WORKFLOW_STATUS = "/s/api/workflow-instances/{workflowInstanceId}?includeTasks=true";
+	private static final String REST_GET_WORKFLOW_STATUS = "/s/fr/itldev/koya/workflow/workflow-instance/{workflowInstanceId}?includeTasks=true";
+	private static final String REST_GET_TASK_STATUS = "/s/fr/itldev/koya/workflow/task-isassignee/{taskInstanceId}";
 
 	@Override
 	public Dossier startWorkflow(User user, Dossier d, String workflowId,
@@ -355,4 +356,14 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 						Map.class, workflowInstanceId);
 		return returnValues;
 	}
+
+	@Override
+	public Boolean taskIsAssignee(User user, String taskInstanceId)
+			throws AlfrescoServiceException {
+		Map<String, Serializable> map = user.getRestTemplate().getForObject(
+				getAlfrescoServerUrl() + REST_GET_TASK_STATUS, Map.class,
+				taskInstanceId);		
+		return Boolean.valueOf(map.get("isassignee").toString());
+	}
+
 }

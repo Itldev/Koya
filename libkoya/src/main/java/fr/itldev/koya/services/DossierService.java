@@ -194,25 +194,24 @@ public interface DossierService extends AlfrescoService {
 	 */
 	Map<String, NodeRef> createSummary(User user, Dossier dossier,
 			String summaryFileName) throws AlfrescoServiceException;
-	
-	
-	
+
 	/**
-     * Start a workflow
-     * 
-     */
+	 * Start a workflow
+	 * 
+	 */
 	Dossier startWorkflow(User user, Dossier d, String workflowId,
 			Map<String, String> properties) throws AlfrescoServiceException;
-	
+
 	/**
 	 * Validate workflow step
+	 * 
 	 * @param user
 	 * @param taskId
 	 * @param properties
 	 * @throws AlfrescoServiceException
 	 */
-	void endTask(User user,String taskId,
-			Map<String, String> properties)throws AlfrescoServiceException;
+	void endTask(User user, String taskId, Map<String, String> properties)
+			throws AlfrescoServiceException;
 
 	/**
 	 * return the client document uploaded list
@@ -225,7 +224,24 @@ public interface DossierService extends AlfrescoService {
 	List<Document> listClientUploadedDocuments(User user, Dossier dossier)
 			throws AlfrescoServiceException;
 
-	Map<String,Serializable> getWorkflowStatus(User user, String workflowInstanceId)
+	/**
+	 * 
+	 * @param user
+	 * @param workflowInstanceId
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Map<String, Serializable> getWorkflowStatus(User user,
+			String workflowInstanceId) throws AlfrescoServiceException;
+
+	/**
+	 * 
+	 * @param user
+	 * @param taskInstanceId
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Boolean taskIsAssignee(User user, String taskInstanceId)
 			throws AlfrescoServiceException;
-	
+
 }

@@ -122,5 +122,9 @@ public interface KoyaErrorCodes {
     public static final Integer KOYAMAIL_CANNOT_FIND_TEMPLATE = 901;
     public static final Integer KOYAMAIL_UNSUPPORTED_TEMPLATE_LOCATION_TYPE = 902;
     public static final Integer KOYAMAIL_SUBJECT_KEY_NOT_EXISTS_IN_PROPERTIES = 903;
+    
+    //950 -> workflow
+    public static final Integer WF_NO_OR_TOO_MANY_REFERENCE_ITEM = 950;
+    public static final Integer WF_NO_READ_PERMISSION_ON_REFERENCE_ITEM = 951;
 
 }
