@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.alfservice;
 
+import com.google.common.base.Joiner;
 import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -302,10 +303,7 @@ public class CompanyService {
 		ContentWriter writer = fileFolderService.getWriter(prefFileNodeRef);
 
 		// placeholder = write comment first line
-		// writer.putContent(" ");
-		for (String key : prefsToCommit.keySet()) {
-			writer.putContent(key + "=" + prefsToCommit.get(key));
-		}
+                writer.putContent(Joiner.on("\n").withKeyValueSeparator("=").join(prefsToCommit));
 	}
 
 	/**
