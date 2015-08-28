@@ -10,7 +10,7 @@
                       // === Get Related Dossier 
 			  		  var dossier = search.findNode(execution.getVariable('wf_relatednode'));                      
                       // === Set taskValidators Group                    
-                      var taskValidatorGroup = "GROUP_dossier_" + dossier.id + "_KoyaResponsible";
+		      var taskValidatorGroup = "GROUP_dossier_" + dossier.id + "_KoyaResponsible," + "GROUP_dossier_" + dossier.id + "_KoyaMember"; 
                       execution.setVariable('taskValidatorGroup', taskValidatorGroup);                              
                          
                       // === process inputs 
