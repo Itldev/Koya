@@ -2,6 +2,10 @@
 
 <!-- reset Password Workflow Model -->
 
+<!-- SAP : Sale Agreement Process -->
+<!-- LP : Loan Process -->
+<!-- SP : Sale Process -->
+
 <model name="koyares:realestatesale-workflow-model" xmlns="http://www.alfresco.org/model/dictionary/1.0">
 
 	<imports>
@@ -19,7 +23,16 @@
 
 	<types>
 
-		<!-- Custom Tasks -->
+		<!-- DueDateDefintion abstract Generic Type -->
+
+		<type name="koyares:SetDueDateTask">
+			<parent>bpm:task</parent>
+		</type>
+
+
+
+		<!-- -->
+
 		<type name="koyares:startTask">
 			<parent>bpm:startTask</parent>
 			<properties>
@@ -30,44 +43,158 @@
 					<type>d:text</type>
 				</property>
 			</properties>
-			<mandatory-aspects>
-				<!-- assignee a virer ? dynamique fct du role ? -->
-				<aspect>bpm:assignee</aspect>
-			</mandatory-aspects>
-		</type>
-
-		<type name="koyares:validateDocumentsTask">
-			<parent>bpm:task</parent>			
 		</type>
 
 
-		<type name="koyares:dateSignTask">
+		<!-- Sale Open Process : SO -->
+
+		<type name="koyares:SOpersonalDocs">
 			<parent>bpm:task</parent>
 			<properties>
-				<property name="koyares:dateSign">
+				<property name="koyares:SOpersonalDocsOutcome">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
+
+		<type name="koyares:SOmortgageDocs">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:SOmortgageDocsOutcome">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
+
+		<type name="koyares:SOallurDocs">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:SOallurDocsOutcome">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
+
+
+
+		<!-- Sale Agreement Process : SAP -->
+
+
+		<type name="koyares:SAPdoSignatureSetDueDate">
+			<parent>koyares:SetDueDateTask</parent>
+		</type>
+
+		<type name="koyares:SAPdoSignature">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:SAPdoSignatureCompletionDate">
+					<type>d:date</type>
+				</property>
+				<property name="koyares:SAPneedLoan">
+					<type>d:boolean</type>
+					<default>true</default>
+				</property>
+				<property name="koyares:SAPloanRequestDelay">
+					<type>d:int</type>
+				</property>
+				<property name="koyares:SAPloanOfferDelay">
+					<type>d:int</type>
+				</property>
+				<property name="koyares:SAPloanAcceptDelay">
+					<type>d:int</type>
+				</property>
+			</properties>
+		</type>
+
+
+		<!-- /// Sale Agreement Process : SAP -->
+
+		<!-- Loan Process : LP -->
+
+		<type name="koyares:LPrequestSetDueDate">
+			<parent>koyares:SetDueDateTask</parent>
+		</type>
+		<type name="koyares:LPrequest">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:LPrequestCompletionDate">
+					<type>d:date</type>
+				</property>
+				<property name="koyares:LPrequestOutcome">
+					<type>d:boolean</type>
+				</property>
+			</properties>
+
+		</type>
+
+		<type name="koyares:LPreceiveOfferSetDueDate">
+			<parent>koyares:SetDueDateTask</parent>
+		</type>
+
+		<type name="koyares:LPreceiveOffer">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:LPreceiveOfferCompletionDate">
+					<type>d:date</type>
+				</property>
+				<property name="koyares:LPreceiveOfferOutcome">
+					<type>d:boolean</type>
+				</property>
+			</properties>
+
+		</type>
+
+		<type name="koyares:LPbuyerAcceptSetDueDate">
+			<parent>koyares:SetDueDateTask</parent>
+		</type>
+		<type name="koyares:LPbuyerAccept">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:LPbuyerAcceptCompletionDate">
+					<type>d:date</type>
+				</property>
+				<property name="koyares:LPbuyerAcceptOutcome">
+					<type>d:boolean</type>
+				</property>
+			</properties>
+		</type>
+
+
+		<!--///// Loan Process : LP -->
+
+
+		<!-- Sale Process : SP -->
+
+		<type name="koyares:SPcollectDocs">
+			<parent>bpm:task</parent>
+		</type>
+
+		<type name="koyares:SPdoSignatureSetDueDate">
+			<parent>koyares:SetDueDateTask</parent>
+		</type>
+
+		<type name="koyares:SPdoSignature">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:SPdoSignatureCompletionDate">
 					<type>d:date</type>
 				</property>
 			</properties>
-			<mandatory-aspects>
-				<aspect>bpm:assignee</aspect>
-			</mandatory-aspects>
 		</type>
-		<type name="koyares:validateSignTask">
+		<type name="koyares:SPpublishMortgage">
+			<parent>bpm:task</parent>
+
+		</type>
+		<type name="koyares:SPaccountsSettlement">
 			<parent>bpm:task</parent>
 			<properties>
-				<property name="koyares:needLoan">
+				<property name="koyares:SPaccountsSettlementNotifyBuyer">
 					<type>d:boolean</type>
 					<default>true</default>
 				</property>
 			</properties>
-			<mandatory-aspects>
-				<aspect>bpm:assignee</aspect>
-			</mandatory-aspects>
-		</type>
-		
-		<type name="koyares:loanRequestTask">
-			<parent>bpm:task</parent>			
 		</type>
 
+		<!-- ///Sale Process : SP -->
 	</types>
 </model>
