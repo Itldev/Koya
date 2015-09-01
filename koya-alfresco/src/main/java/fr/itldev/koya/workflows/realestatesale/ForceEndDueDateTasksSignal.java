@@ -39,11 +39,10 @@ public class ForceEndDueDateTasksSignal extends BaseJavaDelegate {
 		});
 
 		if (executions.size() == 1) {
-					runtimeService.signalEventReceived("forceEndDueDateTasks",
+			runtimeService.signalEventReceived("forceEndDueDateTasks",
 					executionId);
 		} else {
-			logger.error("error send signal : exec size = "
-					+ executions.size());
+			logger.error("error send signal : exec size = " + executions.size());
 		}
 
 	}

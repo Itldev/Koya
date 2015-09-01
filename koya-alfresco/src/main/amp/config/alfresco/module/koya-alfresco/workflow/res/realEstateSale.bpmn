@@ -280,21 +280,17 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
     <sequenceFlow id="flow61" sourceRef="exclusivegateway6" targetRef="saleProcess">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${needLoan == 'False'}]]></conditionExpression>
     </sequenceFlow>
-    <endEvent id="endevent5" name="End"></endEvent>
     <sequenceFlow id="flow67" sourceRef="loanProcess" targetRef="saleProcess"></sequenceFlow>
     <exclusiveGateway id="exclusivegateway6" name="Exclusive Gateway"></exclusiveGateway>
     <boundaryEvent id="boundaryerror2" name="Error" attachedToRef="loanProcess">
       <errorEventDefinition errorRef="invalidLoanRequest"></errorEventDefinition>
     </boundaryEvent>
-    <boundaryEvent id="boundaryerror3" name="Error" attachedToRef="loanProcess">
-      <errorEventDefinition errorRef="notReceivedLoanOffer"></errorEventDefinition>
-    </boundaryEvent>
-    <boundaryEvent id="boundaryerror4" name="Error" attachedToRef="loanProcess">
-      <errorEventDefinition errorRef="loanNotAccepted"></errorEventDefinition>
-    </boundaryEvent>
-    <sequenceFlow id="flow84" sourceRef="boundaryerror3" targetRef="endevent5"></sequenceFlow>
     <endEvent id="endevent7" name="End"></endEvent>
-    <endEvent id="endevent9" name="End"></endEvent>
+    <endEvent id="endevent9" name="End">
+      <extensionElements>
+        <activiti:executionListener event="end" delegateExpression="${ForceEndDueDateTasksSignal}"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
     <sequenceFlow id="flow96" sourceRef="saleProcess" targetRef="endevent9"></sequenceFlow>
     <endEvent id="endevent10" name="End">
       <extensionElements>
@@ -307,10 +303,12 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
     <sequenceFlow id="flow119" sourceRef="boundarysignal1" targetRef="endevent7"></sequenceFlow>
     <endEvent id="endevent11" name="End"></endEvent>
     <sequenceFlow id="flow120" sourceRef="DueDateAssignationProcess" targetRef="endevent11"></sequenceFlow>
-    <endEvent id="endevent12" name="End"></endEvent>
-    <endEvent id="endevent13" name="End"></endEvent>
+    <endEvent id="endevent12" name="End">
+      <extensionElements>
+        <activiti:executionListener event="end" delegateExpression="${ForceEndDueDateTasksSignal}"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
     <sequenceFlow id="flow121" sourceRef="boundaryerror2" targetRef="endevent12"></sequenceFlow>
-    <sequenceFlow id="flow122" sourceRef="boundaryerror4" targetRef="endevent13"></sequenceFlow>
     <parallelGateway id="parallelgateway3" name="Parallel Gateway"></parallelGateway>
     <sequenceFlow id="flow125" sourceRef="startRes" targetRef="parallelgateway3"></sequenceFlow>
     <subProcess id="saleOpeningProcess" name="Sale Opening">
@@ -419,6 +417,14 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
     </userTask>
     <sequenceFlow id="flow150" sourceRef="saleOpeningProcess" targetRef="validateSignTask"></sequenceFlow>
     <sequenceFlow id="flow151" sourceRef="validateSignTask" targetRef="exclusivegateway6"></sequenceFlow>
+    <boundaryEvent id="boundaryerror6" name="Error" attachedToRef="loanProcess">
+      <errorEventDefinition errorRef="notReceivedLoanOffer"></errorEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="flow152" sourceRef="boundaryerror6" targetRef="endevent12"></sequenceFlow>
+    <boundaryEvent id="boundaryerror7" name="Error" attachedToRef="loanProcess">
+      <errorEventDefinition errorRef="loanNotAccepted"></errorEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="flow153" sourceRef="boundaryerror7" targetRef="endevent12"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_koyaRes">
     <bpmndi:BPMNPlane bpmnElement="koyaRes" id="BPMNPlane_koyaRes">
@@ -512,11 +518,11 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <bpmndi:BPMNShape bpmnElement="boundaryerror2" id="BPMNShape_boundaryerror2">
         <omgdc:Bounds height="30.0" width="30.0" x="1307.0" y="-170.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="boundaryerror3" id="BPMNShape_boundaryerror3">
+      <bpmndi:BPMNShape bpmnElement="boundaryerror6" id="BPMNShape_boundaryerror6">
         <omgdc:Bounds height="30.0" width="30.0" x="1305.0" y="-112.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="boundaryerror4" id="BPMNShape_boundaryerror4">
-        <omgdc:Bounds height="30.0" width="30.0" x="1305.0" y="-60.0"></omgdc:Bounds>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror7" id="BPMNShape_boundaryerror7">
+        <omgdc:Bounds height="30.0" width="30.0" x="1307.0" y="-42.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="saleProcess" id="BPMNShape_saleProcess">
         <omgdc:Bounds height="145.0" width="652.0" x="630.0" y="46.0"></omgdc:Bounds>
@@ -539,9 +545,6 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <bpmndi:BPMNShape bpmnElement="accountsSettlementTask" id="BPMNShape_accountsSettlementTask">
         <omgdc:Bounds height="55.0" width="105.0" x="1081.0" y="96.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="endevent5" id="BPMNShape_endevent5">
-        <omgdc:Bounds height="35.0" width="35.0" x="1350.0" y="-115.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="exclusivegateway6" id="BPMNShape_exclusivegateway6">
         <omgdc:Bounds height="40.0" width="40.0" x="566.0" y="-9.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
@@ -559,9 +562,6 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent12" id="BPMNShape_endevent12">
         <omgdc:Bounds height="35.0" width="35.0" x="1350.0" y="-173.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="endevent13" id="BPMNShape_endevent13">
-        <omgdc:Bounds height="35.0" width="35.0" x="1350.0" y="-63.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="parallelgateway3" id="BPMNShape_parallelgateway3">
         <omgdc:Bounds height="40.0" width="40.0" x="-60.0" y="169.0"></omgdc:Bounds>
@@ -802,10 +802,6 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdi:waypoint x="975.0" y="-7.0"></omgdi:waypoint>
         <omgdi:waypoint x="956.0" y="46.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow84" id="BPMNEdge_flow84">
-        <omgdi:waypoint x="1335.0" y="-97.0"></omgdi:waypoint>
-        <omgdi:waypoint x="1350.0" y="-98.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow96" id="BPMNEdge_flow96">
         <omgdi:waypoint x="1282.0" y="118.0"></omgdi:waypoint>
         <omgdi:waypoint x="1350.0" y="110.0"></omgdi:waypoint>
@@ -821,10 +817,6 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <bpmndi:BPMNEdge bpmnElement="flow121" id="BPMNEdge_flow121">
         <omgdi:waypoint x="1337.0" y="-155.0"></omgdi:waypoint>
         <omgdi:waypoint x="1350.0" y="-156.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow122" id="BPMNEdge_flow122">
-        <omgdi:waypoint x="1335.0" y="-45.0"></omgdi:waypoint>
-        <omgdi:waypoint x="1350.0" y="-46.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow125" id="BPMNEdge_flow125">
         <omgdi:waypoint x="-105.0" y="188.0"></omgdi:waypoint>
@@ -911,6 +903,16 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <bpmndi:BPMNEdge bpmnElement="flow151" id="BPMNEdge_flow151">
         <omgdi:waypoint x="541.0" y="11.0"></omgdi:waypoint>
         <omgdi:waypoint x="566.0" y="11.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow152" id="BPMNEdge_flow152">
+        <omgdi:waypoint x="1335.0" y="-97.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1367.0" y="-98.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1367.0" y="-138.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow153" id="BPMNEdge_flow153">
+        <omgdi:waypoint x="1337.0" y="-27.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1367.0" y="-28.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1367.0" y="-138.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
