@@ -121,7 +121,7 @@
 					<type>d:date</type>
 				</property>
 				<property name="koyares:LPrequestOutcome">
-					<type>d:boolean</type>
+					<type>d:text</type>
 				</property>
 			</properties>
 
@@ -138,7 +138,7 @@
 					<type>d:date</type>
 				</property>
 				<property name="koyares:LPreceiveOfferOutcome">
-					<type>d:boolean</type>
+					<type>d:text</type>
 				</property>
 			</properties>
 
@@ -154,7 +154,7 @@
 					<type>d:date</type>
 				</property>
 				<property name="koyares:LPbuyerAcceptOutcome">
-					<type>d:boolean</type>
+					<type>d:text</type>
 				</property>
 			</properties>
 		</type>

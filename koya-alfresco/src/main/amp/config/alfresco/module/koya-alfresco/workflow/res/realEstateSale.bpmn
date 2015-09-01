@@ -187,7 +187,8 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
           </activiti:taskListener>
           <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
             <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('LPrequestOutcome',task.getVariable('koyares_LPrequestOutcome'));]]></activiti:string>
+              <activiti:string><![CDATA[execution.setVariable('LPrequestOutcome',task.getVariable('koyares_LPrequestOutcome'));
+]]></activiti:string>
             </activiti:field>
           </activiti:taskListener>
         </extensionElements>
@@ -214,28 +215,28 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
       <sequenceFlow id="flow38" sourceRef="buyerLoanAccept" targetRef="exclusivegateway4"></sequenceFlow>
       <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
       <sequenceFlow id="flow35" sourceRef="exclusivegateway3" targetRef="buyerLoanAccept">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPreceiveOfferOutcome == 'True'}]]></conditionExpression>
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPreceiveOfferOutcome == 'validate'}]]></conditionExpression>
       </sequenceFlow>
       <exclusiveGateway id="exclusivegateway4" name="Exclusive Gateway"></exclusiveGateway>
       <exclusiveGateway id="exclusivegateway5" name="Exclusive Gateway"></exclusiveGateway>
       <sequenceFlow id="flow50" sourceRef="loanRequestTask" targetRef="exclusivegateway5"></sequenceFlow>
       <sequenceFlow id="flow51" sourceRef="exclusivegateway5" targetRef="receiveLoanOfferTask">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPrequestOutcome  == 'True'}]]></conditionExpression>
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPrequestOutcome  == 'validate'}]]></conditionExpression>
       </sequenceFlow>
       <startEvent id="startevent1" name="Start"></startEvent>
       <sequenceFlow id="flow53" sourceRef="startevent1" targetRef="loanRequestTask"></sequenceFlow>
       <endEvent id="endevent4" name="End"></endEvent>
       <sequenceFlow id="flow57" sourceRef="exclusivegateway4" targetRef="endevent4">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPbuyerAcceptOutcome == 'True'}]]></conditionExpression>
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPbuyerAcceptOutcome == 'validate'}]]></conditionExpression>
       </sequenceFlow>
       <sequenceFlow id="flow68" sourceRef="exclusivegateway5" targetRef="errorendevent2">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPrequestOutcome == 'False'}]]></conditionExpression>
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPrequestOutcome == 'reject'}]]></conditionExpression>
       </sequenceFlow>
       <sequenceFlow id="flow69" sourceRef="exclusivegateway3" targetRef="errorendevent3">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPreceiveOfferOutcome == 'False'}]]></conditionExpression>
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPreceiveOfferOutcome == 'reject'}]]></conditionExpression>
       </sequenceFlow>
       <sequenceFlow id="flow70" sourceRef="exclusivegateway4" targetRef="errorendevent4">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPbuyerAcceptOutcome == 'False'}]]></conditionExpression>
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${LPbuyerAcceptOutcome == 'reject'}]]></conditionExpression>
       </sequenceFlow>
       <endEvent id="errorendevent2" name="ErrorEnd">
         <errorEventDefinition errorRef="invalidLoanRequest"></errorEventDefinition>
