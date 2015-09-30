@@ -81,17 +81,6 @@ public class Create extends AbstractWebScript {
 		try {
 			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap
 					.get(KoyaWebscript.WSCONST_PARENTNODEREF));
-
-			/**
-			 * Attention chaine de car recue : name ou title ?? title pour les
-			 * dossiers
-			 * 
-			 * TODO 1 seul service en backend !
-			 * 
-			 * TODO deserialisation complete de l'espace en argument
-			 */
-
-			
 			
 			if (ktype.equals(Dossier.class.getSimpleName())) {
 				response = KoyaWebscript.getObjectAsJson(dossierService.create(

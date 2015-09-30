@@ -360,6 +360,8 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 					activityPost.getSiteNetwork() + "_import")) {
 				return listCompanyMembers(activityPost.getSiteNetwork(),
 						SitePermission.MANAGER);
+			} else {
+				return new HashSet<>();
 			}
 
 		}

@@ -73,8 +73,13 @@
                 <property name="koya:reference">
                     <type>d:text</type>
                 </property>
-            </properties>        
+            	 <property name="koya:activitiIds">
+                    <type>d:text</type>
+                    <multiple>true</multiple>                    
+                </property>            
+            </properties> 
         </type> 
+        
         
         
         <!--

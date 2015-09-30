@@ -362,7 +362,7 @@ public class CompanyAclService {
 
 		User u = userService.getUserByEmailFailOver(userMail);
 
-		if (u == null) {
+                if (u == null || getSitePermission(c, u) == null) {
 			/**
 			 * Workaround to resolve invite by user bug :
 			 * 
@@ -406,28 +406,8 @@ public class CompanyAclService {
 			return invitation;
 
 		} else {
-			/**
-			 * 
-			 * TODO check if this behaviour is compatible with invitation
-			 * workflow user should be invited for each company
-			 * 
-			 * User exist so we've to check if he has already a role on company
-			 * 
-			 * 
-			 */
-			SitePermission sitePermission = getSitePermission(c, u);
-
-			if (sitePermission == null) {
-				// no setted permission -> do it
-				siteService.setMembership(c.getName(), u.getUserName(),
-						permission.toString());
-			} else {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.SECU_USER_CANT_BE_INVITED_ALREADY_EXISTS_IN_COMPANY_WITH_OTHER_ROLE);
-			}
-		}
-
-		return null;
+                    throw new KoyaServiceException(KoyaErrorCodes.INVITATION_USER_ALREADY_INVITED, "User allready invited for this company");
+                }
 	}
 
 	/**
