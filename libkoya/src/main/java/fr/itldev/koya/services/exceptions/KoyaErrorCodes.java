@@ -95,6 +95,7 @@ public interface KoyaErrorCodes {
     public static final Integer INVITATION_ALREADY_COMPLETED = 554;
     public static final Integer INVITATION_PROCESS_POST_ACTIVITY_ERROR = 555;
     public static final Integer INVITATION_PROCESS_NOT_ALLOWED_RESEND_MAIL = 556;
+    public static final Integer INVITATION_USER_ALREADY_INVITED = 557;
 
     //570 -> Reset Password process errors
     public static final Integer INVALID_RESETPASSWORD_TICKET = 570;
