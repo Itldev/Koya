@@ -78,6 +78,6 @@ if [ -n "$ALFRESCO_HOME" ];then
 else
         OPTS="$OPTS -Dalfresco.home="
 fi
-
+echo "MAVEN_OPTS=$OPTS mvn $MT_OPT clean install -P $PROFILES $MVNOPTS"
 MAVEN_OPTS="$OPTS" mvn $MT_OPT clean install -P $PROFILES $MVNOPTS
 
