@@ -52,6 +52,24 @@
         <property name="policyComponent" ref="policyComponent" />
         <property name="nodeService" ref="NodeService"/>
     </bean>
+
+
+
+	<bean name="automaticUserJoinGroupBehaviour"
+		class="fr.itldev.koya.behaviour.AutomaticUserJoinGroupBehaviour"
+		init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
+		<property name="policyComponent" ref="policyComponent" />
+		<property name="siteService" ref="SiteService" />
+		<property name="active">
+			<value>${koya.autouserjoin.active}</value>
+		</property>
+		<property name="companyName">
+			<value>${koya.autouserjoin.companyname}</value>
+		</property>
+		<property name="groupName">
+			<value>${koya.autouserjoin.groupname}</value>
+		</property>
+	</bean>
     
          
     
