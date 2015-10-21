@@ -36,8 +36,8 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class FavouriteServiceImpl extends AlfrescoRestService implements
 		FavouriteService {
 
-	private static final String REST_GET_LISTFAVOURITES = "/s/fr/itldev/koya/favourites/list";
-	private static final String REST_POST_FAVOURITE_STATUS = "/s/fr/itldev/koya/favourites/set";
+	private static final String REST_GET_LISTFAVOURITES = "/s/fr/itldev/koya/favourites/list?alf_ticket={alf_ticket}";
+	private static final String REST_POST_FAVOURITE_STATUS = "/s/fr/itldev/koya/favourites/set?alf_ticket={alf_ticket}";
 
 	@Autowired
 	UserService userService;
@@ -64,9 +64,9 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements
 		userFavourites = fromJSON(
 				new TypeReference<List<KoyaNode>>() {
 				},
-				user.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_LISTFAVOURITES,
-						String.class));
+						String.class, user.getTicketAlfresco()));
 		cacheManager.setUserFavourites(user, userFavourites);
 		return userFavourites;
 	}
@@ -84,9 +84,9 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements
 		Boolean status = fromJSON(
 				new TypeReference<Boolean>() {
 				},
-				user.getRestTemplate().postForObject(
+				getTemplate().postForObject(
 						getAlfrescoServerUrl() + REST_POST_FAVOURITE_STATUS,
-						postParams, String.class));
+						postParams, String.class, user.getTicketAlfresco()));
 		// Automaticly reload user's preferences
 		userService.loadPreferences(user);
 		return status;

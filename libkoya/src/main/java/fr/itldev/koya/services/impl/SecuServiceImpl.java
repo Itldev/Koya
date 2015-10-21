@@ -34,14 +34,14 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public class SecuServiceImpl extends AlfrescoRestService implements SecuService {
 
-	private static final String REST_GET_AVAILABLEROLES = "/s/fr/itldev/koya/company/roles/{companyName}";
-	private static final String REST_GET_USERROLE = "/s/fr/itldev/koya/user/role/{companyName}/{userName}";
-	private static final String REST_GET_SETUSERROLE = "/s/fr/itldev/koya/user/setrole/{companyName}/{userName}/{roleName}";
+	private static final String REST_GET_AVAILABLEROLES = "/s/fr/itldev/koya/company/roles/{companyName}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_USERROLE = "/s/fr/itldev/koya/user/role/{companyName}/{userName}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_SETUSERROLE = "/s/fr/itldev/koya/user/setrole/{companyName}/{userName}/{roleName}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_LISTUSERCONNECTIONS = "/s/fr/itldev/koya/user/listconnect/{userName}?"
-			+ "companiesFilter={companiesFilter}&maxResults={maxResults}";
-	private static final String REST_GET_REVOKEUSERACCESS = "/s/fr/itldev/koya/user/revoke/{companyName}/{userName}";
-	private static final String REST_GET_ISCOMPANYMANAGER = "/s/fr/itldev/koya/company/ismanager/{companyName}";
-	private static final String REST_GET_PERMISSIONS = "/s/fr/itldev/koya/global/secu/permissions/{nodeRef}";
+			+ "companiesFilter={companiesFilter}&maxResults={maxResults}&alf_ticket={alf_ticket}";
+	private static final String REST_GET_REVOKEUSERACCESS = "/s/fr/itldev/koya/user/revoke/{companyName}/{userName}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_ISCOMPANYMANAGER = "/s/fr/itldev/koya/company/ismanager/{companyName}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_PERMISSIONS = "/s/fr/itldev/koya/global/secu/permissions/{nodeRef}?alf_ticket={alf_ticket}";
 
 	private CacheManager cacheManager;
 
@@ -55,9 +55,9 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
 		return fromJSON(
 				new TypeReference<List<UserRole>>() {
 				},
-				userLogged.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_AVAILABLEROLES,
-						String.class, c.getName()));
+						String.class, c.getName(),userLogged.getTicketAlfresco()));
 	}
 
 	@Override
@@ -66,17 +66,17 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
 		return fromJSON(
 				new TypeReference<UserRole>() {
 				},
-				userLogged.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_USERROLE,
-						String.class, c.getName(), userToGetRole.getUserName()));
+						String.class, c.getName(), userToGetRole.getUserName(),userLogged.getTicketAlfresco()));
 	}
 
 	@Override
 	public void setUserRole(User userLogged, Company c, String userNameSetRole,
 			String roleName) throws AlfrescoServiceException {
-		userLogged.getRestTemplate().getForObject(
+		getTemplate().getForObject(
 				getAlfrescoServerUrl() + REST_GET_SETUSERROLE, String.class,
-				c.getName(), userNameSetRole, roleName);
+				c.getName(), userNameSetRole, roleName,userLogged.getTicketAlfresco());
 	}
 
 	/**
@@ -110,10 +110,10 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
 		return fromJSON(
 				new TypeReference<List<UserConnection>>() {
 				},
-				userLogged.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_LISTUSERCONNECTIONS,
 						String.class, userToGetConnections.getUserName(),
-						companiesFilter, maxRes));
+						companiesFilter, maxRes,userLogged.getTicketAlfresco()));
 
 	}
 
@@ -128,9 +128,9 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
 	@Override
 	public void revokeAccess(User userLogged, Company c, User u)
 			throws AlfrescoServiceException {
-		userLogged.getRestTemplate().getForObject(
+		getTemplate().getForObject(
 				getAlfrescoServerUrl() + REST_GET_REVOKEUSERACCESS,
-				String.class, c.getName(), u.getUserName());
+				String.class, c.getName(), u.getUserName(),userLogged.getTicketAlfresco());
 	}
 
 	/**
@@ -145,9 +145,9 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
 	public Boolean isCompanyManager(User userLogged, Company c)
 			throws AlfrescoServiceException {
 
-		return userLogged.getRestTemplate().getForObject(
+		return getTemplate().getForObject(
 				getAlfrescoServerUrl() + REST_GET_ISCOMPANYMANAGER,
-				Boolean.class, c.getName(), c.getName());
+				Boolean.class, c.getName(),userLogged.getTicketAlfresco());
 
 	}
 
@@ -174,9 +174,9 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService 
 		p = fromJSON(
 				new TypeReference<Permissions>() {
 				},
-				user.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_PERMISSIONS,
-						String.class, s.getNodeRef()));
+						String.class, s.getNodeRef(),user.getTicketAlfresco()));
 
 		cacheManager.setPermission(user, s.getNodeRef(), p);
 		return p;

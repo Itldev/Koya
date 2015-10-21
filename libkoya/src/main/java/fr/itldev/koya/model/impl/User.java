@@ -51,9 +51,6 @@ public final class User extends KoyaNode {
 	@JsonIgnore
 	private Preferences preferences;
 
-	@JsonIgnore
-	private RestTemplate restTemplate;
-
 	public String getUserName() {
 		return userName;
 	}
@@ -151,14 +148,6 @@ public final class User extends KoyaNode {
 		this.preferences = preferences;
 	}
 
-	public RestTemplate getRestTemplate() {
-		return restTemplate;
-	}
-
-	public void setRestTemplate(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
-
 	@Override
 	public String toString() {
 		return userName + "(" + email + ")";
@@ -184,6 +173,6 @@ public final class User extends KoyaNode {
 			return false;
 		}
 		return true;
-	}	
+	}
 
 }

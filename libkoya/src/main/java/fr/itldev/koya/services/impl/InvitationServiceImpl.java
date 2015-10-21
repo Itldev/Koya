@@ -33,11 +33,11 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class InvitationServiceImpl extends AlfrescoRestService implements
 		InvitationService {
 
-	private static final String REST_GET_INVITATION = "/s/fr/itldev/koya/invitation/invitation/{userName}/{companyName}";
+	private static final String REST_GET_INVITATION = "/s/fr/itldev/koya/invitation/invitation/{userName}/{companyName}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_INVITATIONPENDING = "/s/fr/itldev/koya/invitation/pending/{inviteId}";
-	private static final String REST_POST_INVITATION = "/s/fr/itldev/koya/invitation/sendmail";
+	private static final String REST_POST_INVITATION = "/s/fr/itldev/koya/invitation/sendmail?alf_ticket={alf_ticket}";
 	private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/invitation/validate";
-	private static final String REST_POST_INVITEUSER = "/s/fr/itldev/koya/invitation/invite";
+	private static final String REST_POST_INVITEUSER = "/s/fr/itldev/koya/invitation/invite?alf_ticket={alf_ticket}";
 
 	private CacheManager cacheManager;
 
@@ -65,9 +65,9 @@ public class InvitationServiceImpl extends AlfrescoRestService implements
 		iw.setEmail(userEmail);
 		iw.setRoleName(roleName);
 
-		return userLogged.getRestTemplate()
+		return getTemplate()
 				.postForObject(getAlfrescoServerUrl() + REST_POST_INVITEUSER,
-						iw, KoyaInvite.class);
+						iw, KoyaInvite.class,userLogged.getTicketAlfresco());
 	}
 
 	/**
@@ -122,10 +122,10 @@ public class InvitationServiceImpl extends AlfrescoRestService implements
 		m = fromJSON(
 				new TypeReference<Map>() {
 				},
-				user.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_INVITATION,
 						String.class, userToGetInvitaion.getUserName(),
-						c.getName()));
+						c.getName(),user.getTicketAlfresco()));
 
 		Map<String, String> value;
 		if (m == null) {
@@ -163,8 +163,8 @@ public class InvitationServiceImpl extends AlfrescoRestService implements
 	@Override
 	public void reSendInviteMail(User user, String inviteId)
 			throws AlfrescoServiceException {
-		user.getRestTemplate().postForObject(
+		getTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_INVITATION, inviteId,
-				String.class);
+				String.class,user.getTicketAlfresco());
 	}
 }

@@ -36,22 +36,22 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService {
 
-    private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add";
-    private static final String REST_POST_SHAREPRESET_COMPANY = "/page/fr/itldev/koya/company/apply-preset";
+    private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add?alf_ticket={alf_ticket}";
+    private static final String REST_POST_SHAREPRESET_COMPANY = "/s/fr/itldev/koya/company/apply-preset?alf_ticket={alf_ticket}";
     
-    private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json";
-    private static final String REST_GET_COMPANY = "/s/fr/itldev/koya/company/get/{companyName}";
+    private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json?alf_ticket={alf_ticket}";
+    private static final String REST_GET_COMPANY = "/s/fr/itldev/koya/company/get/{companyName}?alf_ticket={alf_ticket}";
 
-    private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/company/members/{companyName}";
-    private static final String REST_GET_LISTMEMBERS_ROLEFILTER = "/s/fr/itldev/koya/company/members/{companyName}/{roleFilter}";
+    private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/company/members/{companyName}?alf_ticket={alf_ticket}";
+    private static final String REST_GET_LISTMEMBERS_ROLEFILTER = "/s/fr/itldev/koya/company/members/{companyName}/{roleFilter}?alf_ticket={alf_ticket}";
 
-    private static final String REST_DEL_DELCOMPANY = "/s/api/sites/{shortname}";
-    private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}";
-    private static final String REST_GET_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
-    private static final String REST_POST_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}";
+    private static final String REST_DEL_DELCOMPANY = "/s/api/sites/{shortname}?alf_ticket={alf_ticket}";
+    private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}&alf_ticket={alf_ticket}";
+    private static final String REST_GET_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}?alf_ticket={alf_ticket}";
+    private static final String REST_POST_PREFERENCES = "/s/fr/itldev/koya/company/preferences/{companyName}?alf_ticket={alf_ticket}";
 
-    private static final String REST_GET_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
-    private static final String REST_POST_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}";
+    private static final String REST_GET_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}?alf_ticket={alf_ticket}";
+    private static final String REST_POST_PROPERTIES = "/s/fr/itldev/koya/company/properties/{companyName}?alf_ticket={alf_ticket}";
 
     private CacheManager cacheManager;
     
@@ -81,33 +81,33 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 		companyParams.put("salesoffer", salesOfferName);
 		companyParams.put("spacetemplate", spaceTemplate);
 
-		Company c = admin.getRestTemplate().postForObject(
+		Company c = getTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_ADDCOMPANY, companyParams,
-				Company.class);
+				Company.class,admin.getTicketAlfresco());
 
 		Map<String, String> initPresetsParams = new HashMap<>();
 		initPresetsParams.put("companyName", c.getName());
 		initPresetsParams.put("sitePreset", "site-dashboard");
 
-		admin.getRestTemplate().postForObject(
+		getTemplate().postForObject(
 				getShareWebappUrl() + REST_POST_SHAREPRESET_COMPANY,
-				initPresetsParams, String.class);
+				initPresetsParams, String.class, admin.getTicketAlfresco());
 		return c;
 	}
 
     @Override
     public List<Company> list(User admin) throws RestClientException, AlfrescoServiceException {//TODO search filter
         return fromJSON(new TypeReference<List<Company>>() {
-        }, admin.getRestTemplate()
-                .getForObject(getAlfrescoServerUrl() + REST_GET_LISTCOMPANY, String.class));
+        }, getTemplate()
+                .getForObject(getAlfrescoServerUrl() + REST_GET_LISTCOMPANY, String.class,admin.getTicketAlfresco()));
     }
     
     
     public Company get(User user, String shortName) throws RestClientException, AlfrescoServiceException{
      
-        return  user.getRestTemplate().
+        return  getTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_COMPANY,
-                        Company.class, shortName);
+                        Company.class, shortName,user.getTicketAlfresco());
     }
 
 
@@ -118,13 +118,13 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
      *
      *
      * @param admin
-     * @param comapny
+     * @param company
      * @throws RestClientException
      * @throws AlfrescoServiceException
      */
     @Override
-    public void delete(User admin, Company comapny) throws RestClientException, AlfrescoServiceException {
-        admin.getRestTemplate().delete(getAlfrescoServerUrl() + REST_DEL_DELCOMPANY, comapny.getName());
+    public void delete(User admin, Company company) throws RestClientException, AlfrescoServiceException {
+        getTemplate().delete(getAlfrescoServerUrl() + REST_DEL_DELCOMPANY, company.getName(),admin.getTicketAlfresco());
     }
 
     /**
@@ -141,8 +141,8 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
         if (rolesFilter == null) {
             return fromJSON(new TypeReference<List<User>>() {
-            }, userLogged.getRestTemplate().getForObject(
-                    getAlfrescoServerUrl() + REST_GET_LISTMEMBERS, String.class, company.getName()));
+            }, getTemplate().getForObject(
+                    getAlfrescoServerUrl() + REST_GET_LISTMEMBERS, String.class, company.getName(),userLogged.getTicketAlfresco()));
         } else {
 
             String filterString = "";
@@ -153,8 +153,8 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
             }
 
             return fromJSON(new TypeReference<List<User>>() {
-            }, userLogged.getRestTemplate().getForObject(
-                    getAlfrescoServerUrl() + REST_GET_LISTMEMBERS_ROLEFILTER, String.class, company.getName(), filterString));
+            }, getTemplate().getForObject(
+                    getAlfrescoServerUrl() + REST_GET_LISTMEMBERS_ROLEFILTER, String.class, company.getName(), filterString,userLogged.getTicketAlfresco()));
         }
 
     }
@@ -166,8 +166,8 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
             filterActif = active[0];
         }
         return fromJSON(new TypeReference<List<SalesOffer>>() {
-        }, admin.getRestTemplate().getForObject(
-                getAlfrescoServerUrl() + REST_GET_LISTOFFERS, String.class, filterActif));
+        },getTemplate().getForObject(
+                getAlfrescoServerUrl() + REST_GET_LISTOFFERS, String.class, filterActif,admin.getTicketAlfresco()));
 
     }
 
@@ -193,8 +193,8 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 		}
 
         p = fromJSON(new TypeReference<Preferences>() {
-        }, user.getRestTemplate().
-                getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, String.class, c.getName()));
+        }, getTemplate().
+                getForObject(getAlfrescoServerUrl() + REST_GET_PREFERENCES, String.class, c.getName(),user.getTicketAlfresco()));
         cacheManager.setCompanyPreferences(c, p);
         return p;
     }
@@ -221,23 +221,23 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
     @Override
     public void commitPreferences(User user, Company c, Preferences p) throws AlfrescoServiceException {
-        user.getRestTemplate().
+        getTemplate().
                 postForObject(getAlfrescoServerUrl() + REST_POST_PREFERENCES,
-                        p, String.class, c.getName());
+                        p, String.class, c.getName(),user.getTicketAlfresco());
 
     }
 
     @Override
     public CompanyProperties getProperties(User user, Company c) throws AlfrescoServiceException {
         return fromJSON(new TypeReference<CompanyProperties>() {
-        }, user.getRestTemplate().
+        }, getTemplate().
                 getForObject(getAlfrescoServerUrl() + REST_GET_PROPERTIES,
-                        String.class, c.getName()));
+                        String.class, c.getName(),user.getTicketAlfresco()));
     }
 
     @Override
     public void commitProperties(User user, Company c, CompanyProperties p) throws AlfrescoServiceException {
-        user.getRestTemplate().
-                postForObject(getAlfrescoServerUrl() + REST_POST_PROPERTIES, p, String.class, c.getName());
+        getTemplate().
+                postForObject(getAlfrescoServerUrl() + REST_POST_PROPERTIES, p, String.class, c.getName(),user.getTicketAlfresco());
     }
 }

@@ -20,13 +20,11 @@ package fr.itldev.koya.services.impl;
 
 import java.util.List;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.NotImplementedException;
 import org.codehaus.jackson.type.TypeReference;
 
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.SpaceService;
@@ -35,8 +33,8 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class SpaceServiceImpl extends AlfrescoRestService implements
 		SpaceService {
 
-	private static final String REST_POST_LISTSPACE = "/s/fr/itldev/koya/space/list";
-	private static final String REST_POST_LISTSPACE_DEPTH_OPTION = "/s/fr/itldev/koya/space/list?maxdepth={maxdepth}";
+	private static final String REST_POST_LISTSPACE = "/s/fr/itldev/koya/space/list?alf_ticket={alf_ticket}";
+	private static final String REST_POST_LISTSPACE_DEPTH_OPTION = "/s/fr/itldev/koya/space/list?maxdepth={maxdepth}&alf_ticket={alf_ticket}";
 
 	/**
 	 * Create a new space
@@ -48,9 +46,9 @@ public class SpaceServiceImpl extends AlfrescoRestService implements
 	 * @throws AlfrescoServiceException
 	 */
 	@Override
-	public Space create(User user, KoyaNode parent,String title)
+	public Space create(User user, KoyaNode parent, String title)
 			throws AlfrescoServiceException {
-		return (Space) super.create(user, parent, Space.newInstance(title)); 			
+		return (Space) super.create(user, parent, Space.newInstance(title));
 	}
 
 	@Override
@@ -71,19 +69,19 @@ public class SpaceServiceImpl extends AlfrescoRestService implements
 			return fromJSON(
 					new TypeReference<List<Space>>() {
 					},
-					user.getRestTemplate().postForObject(
+					getTemplate().postForObject(
 							getAlfrescoServerUrl()
 									+ REST_POST_LISTSPACE_DEPTH_OPTION,
-							company, String.class, depth[0]));
+							company, String.class, depth[0],
+							user.getTicketAlfresco()));
 		} else {
 			return fromJSON(
 					new TypeReference<List<Space>>() {
 					},
-					user.getRestTemplate().postForObject(
+					getTemplate().postForObject(
 							getAlfrescoServerUrl() + REST_POST_LISTSPACE,
-							company, String.class));
+							company, String.class, user.getTicketAlfresco()));
 		}
 	}
-
 
 }

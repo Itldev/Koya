@@ -26,10 +26,10 @@ import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.InvitationService;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.SecuService;
-import fr.itldev.koya.services.ShareService;
 import fr.itldev.koya.services.SpaceService;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import fr.itldev.koya.services.impl.ShareServiceImpl;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:koya-services-tests.xml")
@@ -55,7 +55,8 @@ public class CompanyPermissionsScenarioTest extends TestCase {
 	@Autowired
 	private ApplicationContext applicationContext;
 	@Autowired
-	private ShareService shareService;
+	private ShareServiceImpl shareService;
+	
 
 	private Company companyTests;
 	private Space spaceTests;
@@ -190,7 +191,7 @@ public class CompanyPermissionsScenarioTest extends TestCase {
 	private Boolean canDownload(User u, String getLink) {
 
 		try {
-			u.getRestTemplate().getForObject(getLink, String.class);
+			shareService.getTemplate().getForObject(getLink, String.class);
 		} catch (Exception e) {
 			return false;
 		}

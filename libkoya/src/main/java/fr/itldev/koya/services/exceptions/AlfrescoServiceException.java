@@ -23,6 +23,10 @@ import org.springframework.web.client.RestClientException;
 
 public class AlfrescoServiceException extends RestClientException {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer koyaErrorCode;
 	private Integer httpErrorCode;
 

@@ -59,17 +59,17 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
         KoyaContentService {
 
 
-    private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}";
-    private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}";
+    private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
+    private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
 
     //
-    private static final String REST_GET_LISTCONTENTTREE = "/s/fr/itldev/koya/content/tree/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}";
+    private static final String REST_GET_LISTCONTENTTREE = "/s/fr/itldev/koya/content/tree/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}&alf_ticket={alf_ticket}";
 
-    private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}";
-    private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}";
+    private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}?alf_ticket={alf_ticket}";
+    private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}?alf_ticket={alf_ticket}";
     private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
 
-    private static final String POST_PDFS_RENDER = "/s/fr/itldev/koya/render/pdfrender";
+    private static final String POST_PDFS_RENDER = "/s/fr/itldev/koya/render/pdfrender?alf_ticket={alf_ticket}";
 
     @Override
     public Directory createDir(User user, KoyaNode parent, String title)
@@ -101,9 +101,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
         AlfrescoUploadReturn upReturn = fromJSON(
                 new TypeReference<AlfrescoUploadReturn>() {
                 },
-                user.getRestTemplate().postForObject(
+                getTemplate().postForObject(
                         getAlfrescoServerUrl() + REST_POST_UPLOAD, request,
-                        String.class));
+                        String.class,user.getTicketAlfresco()));
 
         return (Document) getKoyaNode(user, upReturn.getNodeRef());
 
@@ -116,9 +116,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
         return (KoyaContent) fromJSON(
                 new TypeReference<KoyaNode>() {
                 },
-                user.getRestTemplate().getForObject(
+                getTemplate().getForObject(
                         getAlfrescoServerUrl() + REST_GET_MOVECONTENT,
-                        String.class, contentToMove, destination));
+                        String.class, contentToMove, destination,user.getTicketAlfresco()));
     }
 
     @Override
@@ -128,9 +128,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
         return (KoyaContent) fromJSON(
                 new TypeReference<KoyaNode>() {
                 },
-                user.getRestTemplate().getForObject(
+                getTemplate().getForObject(
                         getAlfrescoServerUrl() + REST_GET_COPYCONTENT,
-                        String.class, contentToCopy, destination));
+                        String.class, contentToCopy, destination,user.getTicketAlfresco()));
     }
 
     // TODO merge with a generic listing service
@@ -143,9 +143,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
         List contents = fromJSON(
                 new TypeReference<List<KoyaNode>>() {
                 },
-                user.getRestTemplate().getForObject(
+                getTemplate().getForObject(
                         getAlfrescoServerUrl() + REST_GET_LISTCONTENTTREE,
-                        String.class, containerToList, onlyFolders, depth));
+                        String.class, containerToList, onlyFolders, depth,user.getTicketAlfresco()));
 
         return contents;
     }
@@ -165,11 +165,11 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
             NodeRef containerToList, Integer skipCount, Integer maxItems,
             Boolean onlyFolders) throws AlfrescoServiceException {
 
-        PaginatedContentList pcl = user.getRestTemplate().getForObject(
+        PaginatedContentList pcl = getTemplate().getForObject(
                 getAlfrescoServerUrl()
                 + AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
                 PaginatedContentList.class, containerToList, skipCount,
-                maxItems, onlyFolders, "", "", "");
+                maxItems, onlyFolders, "", "", "",user.getTicketAlfresco());
         return pcl;
     }
 
@@ -192,9 +192,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
         DiskSizeWrapper ret = fromJSON(
                 new TypeReference<DiskSizeWrapper>() {
                 },
-                user.getRestTemplate().getForObject(
+                getTemplate().getForObject(
                         getAlfrescoServerUrl() + REST_GET_DISKSIZE,
-                        String.class, KoyaNode.getNodeRef()));
+                        String.class, KoyaNode.getNodeRef(),user.getTicketAlfresco()));
         return ret.getSize();
     }
 
@@ -235,9 +235,9 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
     @Override
     public void importZipedContent(User user, Document zipFile)
             throws AlfrescoServiceException {
-        user.getRestTemplate().getForObject(
+        getTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_IMPORTZIP, String.class,
-                zipFile.getNodeRef());
+                zipFile.getNodeRef(),user.getTicketAlfresco());
     }
 
     @Override
@@ -247,14 +247,13 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
         params.put("nodeRef", koyaNode.getNodeRef().toString());
         JSONObject postParams = new JSONObject(params);
 
-        @SuppressWarnings("rawtypes")
         PdfRendition rendition = fromJSON(
                 new TypeReference<PdfRendition>() {
                 },
-                user.getRestTemplate().postForObject(
+                getTemplate().postForObject(
                         getAlfrescoServerUrl() + POST_PDFS_RENDER,
                         postParams,
-                        String.class));
+                        String.class,user.getTicketAlfresco()));
 
         KoyaNode node = getKoyaNode(user, rendition.getNodeRef());
         node.setTitle(rendition.getTitle());

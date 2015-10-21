@@ -50,6 +50,7 @@
 			<list>
 				<ref bean="stringHttpMessageConverter" />
 				<ref bean="jsonHttpMessageConverter" />
+				<ref bean="formHttpMessageConverter"/>    
 			</list>
 		</property>
 		<property name="errorHandler" ref="alfrescoRestErrorHandler" />
@@ -181,7 +182,6 @@
 
 	<bean id="dossierService" class="fr.itldev.koya.services.impl.DossierServiceImpl"
 		parent="abstractRestService">
-		<property name="koyaContentService" ref="koyaContentService" />
 		<property name="cacheManager" ref="cacheManager" />
 	</bean>
 

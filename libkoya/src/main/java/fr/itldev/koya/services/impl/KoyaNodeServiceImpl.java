@@ -33,10 +33,10 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public class KoyaNodeServiceImpl extends AlfrescoRestService implements KoyaNodeService {
 
-    protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}";
-    protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{nodeRef}";
-    private static final String REST_GET_PARENTS = "/s/fr/itldev/koya/global/parents/{nodeRef}?nbAncestor={nbAncestor}";
-    private static final String REST_GET_PARENTS_INFINITE = "/s/fr/itldev/koya/global/parents/{nodeRef}";
+    protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}?alf_ticket={alf_ticket}";
+    protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{nodeRef}?alf_ticket={alf_ticket}";
+    private static final String REST_GET_PARENTS = "/s/fr/itldev/koya/global/parents/{nodeRef}?nbAncestor={nbAncestor}&alf_ticket={alf_ticket}";
+    private static final String REST_GET_PARENTS_INFINITE = "/s/fr/itldev/koya/global/parents/{nodeRef}?alf_ticket={alf_ticket}";
 
     private String alfrescoServerUrl;
 
@@ -94,9 +94,9 @@ public class KoyaNodeServiceImpl extends AlfrescoRestService implements KoyaNode
             favouriteService.setFavouriteValue(user, KoyaNode, Boolean.FALSE);
         }
 
-        user.getRestTemplate().getForObject(
+        getTemplate().getForObject(
                 alfrescoServerUrl + REST_GET_DELITEM,
-                String.class, KoyaNode.getNodeRef());
+                String.class, KoyaNode.getNodeRef(),user.getTicketAlfresco());
     }
 
     /**
@@ -108,14 +108,14 @@ public class KoyaNodeServiceImpl extends AlfrescoRestService implements KoyaNode
      */
     @Override
     public void rename(User user, KoyaNode KoyaNode, String newName) throws AlfrescoServiceException {
-        Map<String, String> postParams = new HashMap();
+        Map<String, String> postParams = new HashMap<>();
 
         postParams.put("newName", newName);
 
-        user.getRestTemplate().postForObject(
+        getTemplate().postForObject(
                 alfrescoServerUrl + REST_GET_RENAMEITEM, postParams,
                 String.class,
-                KoyaNode.getNodeRef());
+                KoyaNode.getNodeRef(),user.getTicketAlfresco());
     }
 
     /**
@@ -131,9 +131,9 @@ public class KoyaNodeServiceImpl extends AlfrescoRestService implements KoyaNode
             throws AlfrescoServiceException {
 
         List<KoyaNode> parents = fromJSON(new TypeReference<List<KoyaNode>>() {
-        }, user.getRestTemplate().getForObject(
+        }, getTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_PARENTS,
-                String.class, KoyaNode.getNodeRef(), 1));
+                String.class, KoyaNode.getNodeRef(), 1,user.getTicketAlfresco()));
 
         if (parents.isEmpty()) {
             return null;
@@ -151,15 +151,14 @@ public class KoyaNodeServiceImpl extends AlfrescoRestService implements KoyaNode
      * @return
      * @throws AlfrescoServiceException
      */
-    @SuppressWarnings("unchecked")
     @Override
     public List<KoyaNode> getParents(User user, KoyaNode KoyaNode)
             throws AlfrescoServiceException {
 
         return fromJSON(new TypeReference<List<KoyaNode>>() {
-        }, user.getRestTemplate().getForObject(
+        }, getTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_PARENTS_INFINITE,
-                String.class, KoyaNode.getNodeRef()));
+                String.class, KoyaNode.getNodeRef(),user.getTicketAlfresco()));
     }
 
 }
