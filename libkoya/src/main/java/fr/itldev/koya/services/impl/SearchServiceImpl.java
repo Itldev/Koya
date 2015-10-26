@@ -39,7 +39,7 @@ public class SearchServiceImpl extends AlfrescoRestService implements
 
 	private static final String REST_GET_SEARCH = "/s/slingshot/search?"
 			+ "term={term}&maxResults={maxResults}"
-			+ "&sort=&repo=true&rootNode={rootNode}&query={query}";
+			+ "&sort=&repo=true&rootNode={rootNode}&query={query}&alf_ticket={alf_ticket}";
 
 	private static final String SEARCHRESULTKEY_ITEMS = "items";
 
@@ -76,10 +76,10 @@ public class SearchServiceImpl extends AlfrescoRestService implements
 		Map result = fromJSON(
 				new TypeReference<Map>() {
 				},
-				user.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_SEARCH, String.class,
 						processSearchExpr(searchexpr), DEFAULT_MAXITEMS,
-						rootNode, ""));
+						rootNode, "",user.getTicketAlfresco()));
 
 		for (Map itemMap : (List<Map>) result.get(SEARCHRESULTKEY_ITEMS)) {
 

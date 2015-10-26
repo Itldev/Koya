@@ -54,6 +54,15 @@ do
         MT_OPT="-T 1C"
     fi
 
+    if [ "$var" == "jproxyloader" ];then
+	#
+	# Jproxy loader jar has to be installed in maven MVN_HOME/boot http://jproxyloader.sourceforge.net/examples/custom_proxy_for_maven.html      	
+	#
+	OPTS="$OPTS -DforkMode=never -Djava.system.class.loader=net.sf.jproxyloader.JProxyLoader -DjplConfigFile=$HOME/.proxy/jproxyloader.properties"
+    fi
+
+
+
     if [ "$var" == "mysql" ];then
         PROFILES="$PROFILES,mysql"
     fi
@@ -78,6 +87,6 @@ if [ -n "$ALFRESCO_HOME" ];then
 else
         OPTS="$OPTS -Dalfresco.home="
 fi
-
+echo "MAVEN_OPTS=$OPTS mvn $MT_OPT clean install -P $PROFILES $MVNOPTS"
 MAVEN_OPTS="$OPTS" mvn $MT_OPT clean install -P $PROFILES $MVNOPTS
 

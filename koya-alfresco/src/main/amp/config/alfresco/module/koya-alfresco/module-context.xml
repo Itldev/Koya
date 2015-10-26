@@ -39,5 +39,6 @@
 
 	<!-- Workflows -->
 	<import resource="classpath:alfresco/module/${project.artifactId}/workflow/res/koya-res-context.xml" />
+	
 
 </beans>

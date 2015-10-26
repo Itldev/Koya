@@ -18,38 +18,14 @@
  */
 package fr.itldev.koya.services.impl;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.type.TypeReference;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 import fr.itldev.koya.model.impl.Activity;
 import fr.itldev.koya.model.impl.Company;
@@ -61,37 +37,28 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 public class UserServiceImpl extends AlfrescoRestService implements
-        UserService, BeanFactoryAware {
-
-    private Logger logger = Logger.getLogger(this.getClass());
+        UserService {
 
     private static final String REST_GET_LOGIN = "/s/api/login.json?u={username}&pw={password}";
     private static final String REST_POST_PERSONFROMMAIL = "/s/fr/itldev/koya/user/getbyauthkey?alf_ticket={alf_ticket}";
-    private static final String REST_DEL_LOGOUT = "/s/api/login/ticket/{ticket}";
-    private static final String REST_POST_MODIFYDETAILS = "/s/fr/itldev/koya/user/modifydetails";
+    private static final String REST_DEL_LOGOUT = "/s/api/login/ticket/{ticket}?alf_ticket={alf_ticket}";
+    private static final String REST_POST_MODIFYDETAILS = "/s/fr/itldev/koya/user/modifydetails?alf_ticket={alf_ticket}";
     private static final String REST_GET_FINDUSERS = "/s/fr/itldev/koya/user/find?"
-            + "query={query}&maxResults={maxresults}&companyName={companyName}&roleFilter={roleFilter}";
-    private static final String REST_POST_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword";
-    private static final String REST_GET_GROUPS = "/s/fr/itldev/koya/user/groups";
+            + "query={query}&maxResults={maxresults}&companyName={companyName}&roleFilter={roleFilter}&alf_ticket={alf_ticket}";
+    private static final String REST_POST_CHANGEPASSWORD = "/s/fr/itldev/koya/user/changepassword?alf_ticket={alf_ticket}";
+    private static final String REST_GET_GROUPS = "/s/fr/itldev/koya/user/groups?alf_ticket={alf_ticket}";
 
     // ===== Preferences
-    private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences";
-    private static final String REST_POST_PREFERENCES = "/s/api/people/{userid}/preferences";
-    private static final String REST_DELETE_PREFERENCES = "/s/api/people/{userid}/preferences?pf={preferencefilter?}";
+    private static final String REST_GET_PREFERENCES = "/s/api/people/{userid}/preferences?alf_ticket={alf_ticket}";
+    private static final String REST_POST_PREFERENCES = "/s/api/people/{userid}/preferences?alf_ticket={alf_ticket}";
+    private static final String REST_DELETE_PREFERENCES = "/s/api/people/{userid}/preferences?pf={preferencefilter?}&alf_ticket={alf_ticket}";
 
     // ====== reset password BPM
     private static final String REST_POST_RESET_PASSWORD_REQUEST = "/s/fr/itldev/koya/resetpassword/request";
     private static final String REST_POST_RESET_PASSWORD_VALIDATION = "/s/fr/itldev/koya/resetpassword/validation";
 
     // ====== user activities
-    private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?format=json";
-
-    private BeanFactory beanFactory;
-
-    @Override
-    public void setBeanFactory(BeanFactory bf) throws BeansException {
-        this.beanFactory = bf;
-    }
+    private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?format=json&alf_ticket={alf_ticket}";
 
     /**
      * Authenticates user with authentication key that could be his login or
@@ -117,7 +84,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
             throw ex;
         }
         // Get User Object
-        Map emailPostWrapper = new HashMap();
+        Map<String,Serializable> emailPostWrapper = new HashMap<>();
         emailPostWrapper.put("authKey", authKey);
         User user = getTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_PERSONFROMMAIL,
@@ -125,13 +92,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
 
         // Authentication ticket integration
         user.setTicketAlfresco(ticket.toString());
-        try {
-            // set users authenticated rest template
-            user.setRestTemplate(getAuthenticatedRestTemplate(
-                    user.getUserName(), password));
-        } catch (MalformedURLException ex) {
-            throw new AlfrescoServiceException(ex.toString());
-        }
+       
         // load users rest prefrences
         loadPreferences(user);
         //
@@ -142,9 +103,9 @@ public class UserServiceImpl extends AlfrescoRestService implements
     @Override
     public Boolean logout(User user) throws AlfrescoServiceException {
         try {
-            user.getRestTemplate().delete(
+            getTemplate().delete(
                     getAlfrescoServerUrl() + REST_DEL_LOGOUT,
-                    user.getTicketAlfresco());
+                    user.getTicketAlfresco(),user.getTicketAlfresco());
         } catch (RestClientException rce) {
             throw new AlfrescoServiceException(rce.getMessage(),
                     KoyaErrorCodes.CANNOT_LOGOUT_USER);
@@ -160,31 +121,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
         // exception if doesn't work
     }
 
-    /**
-     * Authenticated RestTemplate Factory.
-     *
-     * @return
-     */
-    private RestTemplate getAuthenticatedRestTemplate(String login,
-            String password) throws MalformedURLException {
-        URL url = new URL(getAlfrescoServerUrl());
-
-        RestTemplate userRestTemplate = new RestClient(login, password,
-                url.getHost(), url.getPort(), url.getProtocol());
-        List<HttpMessageConverter<?>> msgConverters = new ArrayList<>();
-        msgConverters.add((HttpMessageConverter<?>) beanFactory
-                .getBean("stringHttpMessageConverter"));
-        msgConverters.add((HttpMessageConverter<?>) beanFactory
-                .getBean("jsonHttpMessageConverter"));
-        msgConverters.add((HttpMessageConverter<?>) beanFactory
-                .getBean("formHttpMessageConverter"));
-        userRestTemplate.setMessageConverters(msgConverters);
-        userRestTemplate.setErrorHandler((ResponseErrorHandler) beanFactory
-                .getBean("alfrescoRestErrorHandler"));
-
-        return userRestTemplate;
-    }
-
+  
     /**
      * Updates users preferences from alfresco server. Erases unsaved local
      * preferences.
@@ -198,9 +135,9 @@ public class UserServiceImpl extends AlfrescoRestService implements
 
     @Override
     public void loadPreferences(User userLog, User userToGetPrefs) {
-        Preferences preferences = userLog.getRestTemplate().getForObject(
+        Preferences preferences = getTemplate().getForObject(
                 getAlfrescoServerUrl() + REST_GET_PREFERENCES,
-                Preferences.class, userToGetPrefs.getUserName());
+                Preferences.class, userToGetPrefs.getUserName(),userLog.getTicketAlfresco());
         userToGetPrefs.setPreferences(preferences);
     }
 
@@ -221,10 +158,10 @@ public class UserServiceImpl extends AlfrescoRestService implements
 
         if (userToCommitPrefs.getPreferences() != null) {
             // 1 - send new and modified keys
-            userLog.getRestTemplate().postForObject(
+            getTemplate().postForObject(
                     getAlfrescoServerUrl() + REST_POST_PREFERENCES,
                     userToCommitPrefs.getPreferences(), Preferences.class,
-                    userToCommitPrefs.getUserName());
+                    userToCommitPrefs.getUserName(),userLog.getTicketAlfresco());
 
             // 2 - updates preferences from server
             Preferences prefsToCommit = userToCommitPrefs.getPreferences();
@@ -243,9 +180,9 @@ public class UserServiceImpl extends AlfrescoRestService implements
                         sep = ",";
                     }
                 }
-                userLog.getRestTemplate().delete(
+                getTemplate().delete(
                         getAlfrescoServerUrl() + REST_DELETE_PREFERENCES,
-                        userToCommitPrefs.getUserName(), deleteFilter);
+                        userToCommitPrefs.getUserName(), deleteFilter,userLog.getTicketAlfresco());
                 loadPreferences(userLog, userToCommitPrefs);
             }
 
@@ -264,9 +201,9 @@ public class UserServiceImpl extends AlfrescoRestService implements
     @Override
     public void commitProperties(User userLog, User userToCommitProps)
             throws AlfrescoServiceException {
-        userLog.getRestTemplate().postForObject(
+        getTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_MODIFYDETAILS,
-                userToCommitProps, String.class);
+                userToCommitProps, String.class,userLog.getTicketAlfresco());
     }
 
     @Override
@@ -278,12 +215,11 @@ public class UserServiceImpl extends AlfrescoRestService implements
         params.put("oldPwd", oldPassword);
         params.put("newPwd", newPassword);
 
-        userLog.getRestTemplate().postForObject(
+        getTemplate().postForObject(
                 getAlfrescoServerUrl() + REST_POST_CHANGEPASSWORD, params,
-                String.class);
+                String.class,userLog.getTicketAlfresco());
 
-        userLog.setRestTemplate(getAuthenticatedRestTemplate(
-                userLog.getUserName(), newPassword));
+      
 
     }
 
@@ -325,9 +261,9 @@ public class UserServiceImpl extends AlfrescoRestService implements
         return fromJSON(
                 new TypeReference<List<User>>() {
                 },
-                userLog.getRestTemplate().getForObject(
+                getTemplate().getForObject(
                         getAlfrescoServerUrl() + REST_GET_FINDUSERS,
-                        String.class, query, maxResults, companyName, roles));
+                        String.class, query, maxResults, companyName, roles,userLog.getTicketAlfresco()));
 
     }
 
@@ -342,7 +278,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
     @Override
     public User getUserFromEmail(User user, String email)
             throws AlfrescoServiceException {
-        Map emailPostWrapper = new HashMap();
+        Map<String,Serializable> emailPostWrapper = new HashMap<>();
         emailPostWrapper.put("authKey", email);
         return fromJSON(
                 new TypeReference<User>() {
@@ -355,7 +291,7 @@ public class UserServiceImpl extends AlfrescoRestService implements
 
     @Override
     public User getUserFromEmailFailProof(User user, String email) {
-        Map emailPostWrapper = new HashMap();
+        Map<String,Serializable> emailPostWrapper = new HashMap<>();
         emailPostWrapper.put("authKey", email);
         emailPostWrapper.put("failProof", true);
         try {
@@ -371,55 +307,6 @@ public class UserServiceImpl extends AlfrescoRestService implements
         }
     }
 
-    private class RestClient extends RestTemplate {
-        // http://forum.spring.io/forum/spring-projects/web/114029-preemptive-basic-authentication-with-resttemplate
-
-        public RestClient(String username, String password, String host,
-                int port, String protocol) {
-            CredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(new AuthScope(null, -1),
-                    new UsernamePasswordCredentials(username, password));
-            HttpClient httpClient = HttpClients.custom()
-                    .setDefaultCredentialsProvider(credsProvider).build();
-
-            ContextAwareHttpComponentsClientHttpRequestFactory customFactory = new ContextAwareHttpComponentsClientHttpRequestFactory(
-                    httpClient);
-            HttpHost targetHost = new HttpHost(host, port, protocol);
-
-            // Create AuthCache instance
-            AuthCache authCache = new BasicAuthCache();
-            authCache.put(targetHost, new BasicScheme());
-
-            // Add AuthCache to the execution context
-            BasicHttpContext localContext = new BasicHttpContext();
-            localContext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-
-            customFactory.setHttpContext(localContext);
-
-            setRequestFactory(customFactory);
-        }
-    }
-
-    private class ContextAwareHttpComponentsClientHttpRequestFactory extends
-            HttpComponentsClientHttpRequestFactory {
-
-        private HttpContext httpContext;
-
-        public ContextAwareHttpComponentsClientHttpRequestFactory(
-                HttpClient httpClient) {
-            super(httpClient);
-        }
-
-        @Override
-        protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
-            // Ignoring the URI and method.
-            return httpContext;
-        }
-
-        public void setHttpContext(HttpContext httpContext) {
-            this.httpContext = httpContext;
-        }
-    }
 
     /**
      * Send Reset password request to alfresco server.
@@ -471,8 +358,8 @@ public class UserServiceImpl extends AlfrescoRestService implements
         return fromJSON(
                 new TypeReference<List<String>>() {
                 },
-                user.getRestTemplate().getForObject(
-                        getAlfrescoServerUrl() + REST_GET_GROUPS, String.class));
+                getTemplate().getForObject(
+                        getAlfrescoServerUrl() + REST_GET_GROUPS, String.class,user.getTicketAlfresco()));
 
     }
 
@@ -487,9 +374,9 @@ public class UserServiceImpl extends AlfrescoRestService implements
         return fromJSON(
                 new TypeReference<List<Activity>>() {
                 },
-                user.getRestTemplate().getForObject(
+                getTemplate().getForObject(
                         getAlfrescoServerUrl() + REST_GET_ACTIVITIES,
-                        String.class));
+                        String.class,user.getTicketAlfresco()));
     }
 
 }

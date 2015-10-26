@@ -44,24 +44,22 @@ public class AlfrescoRestService implements AlfrescoService {
 	private static final Logger logger = Logger
 			.getLogger(AlfrescoRestService.class);
 
-	private static final String REST_POST_CREATE = "/s/fr/itldev/koya/global/create/{parentNodeRef}";
+	private static final String REST_POST_CREATE = "/s/fr/itldev/koya/global/create/{parentNodeRef}?alf_ticket={alf_ticket}";
 
-	private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos";
-	private static final String REST_POST_MAIL = "/s/fr/itldev/koya/global/mail";
-	private static final String REST_GET_KOYANODE = "/s/fr/itldev/koya/global/node/{nodeRef}";
+	private static final String REST_GET_SERVERINFOS = "/s/fr/itldev/koya/meta/infos?alf_ticket={alf_ticket}";
+	private static final String REST_POST_MAIL = "/s/fr/itldev/koya/global/mail?alf_ticket={alf_ticket}";
+	private static final String REST_GET_KOYANODE = "/s/fr/itldev/koya/global/node/{nodeRef}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_LIBVERSION = "/s/fr/itldev/koya/meta/libversion";
-	protected static final String REST_POST_UPLOAD = "/s/api/upload";
-	// private static final String REST_GET_XPATH2NODEREF =
-	// "/s/fr/itldev/koya/global/xpath2noderef/{xPath}";
+	protected static final String REST_POST_UPLOAD = "/s/api/upload?alf_ticket={alf_ticket}";
 
 	protected static final String REST_GET_LISTCHILD_PAGINATED = "/s/fr/itldev/koya/content/list/{nodeRef}"
 			+ "?skipCount={skipCount}"
 			+ "&maxItems={maxItems}"
 			+ "&onlyFolders={onlyFolders}"
 			+ "&filterExpr={filterExpr}"
-			+ "&sortExpr={sortExpr}" + "&typeFilter={typeFilter}";
+			+ "&sortExpr={sortExpr}" + "&typeFilter={typeFilter}&alf_ticket={alf_ticket}";
 
-	private static final String REST_POST_COUNTCHILDREN = "/s/fr/itldev/koya/global/countchildren/{parentNodeRef}";
+	private static final String REST_POST_COUNTCHILDREN = "/s/fr/itldev/koya/global/countchildren/{parentNodeRef}?alf_ticket={alf_ticket}";
 
 	private String alfrescoServerUrl;
 	private String shareWebappUrl;
@@ -107,9 +105,9 @@ public class AlfrescoRestService implements AlfrescoService {
 		return fromJSON(
 				new TypeReference<KoyaNode>() {
 				},
-				user.getRestTemplate().postForObject(
+				getTemplate().postForObject(
 						getAlfrescoServerUrl() + REST_POST_CREATE, toCreate,
-						String.class, parent.getNodeRef()));
+						String.class, parent.getNodeRef(),user.getTicketAlfresco()));
 	}
 
 	/**
@@ -142,9 +140,9 @@ public class AlfrescoRestService implements AlfrescoService {
 		return fromJSON(
 				new TypeReference<MetaInfos>() {
 				},
-				user.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_SERVERINFOS,
-						String.class));
+						String.class,user.getTicketAlfresco()));
 	}
 
 	/**
@@ -161,8 +159,8 @@ public class AlfrescoRestService implements AlfrescoService {
 					alfrescoServerUrl + REST_POST_MAIL + "?guest=true",
 					wrapper, String.class);
 		} else {
-			user.getRestTemplate().postForObject(
-					alfrescoServerUrl + REST_POST_MAIL, wrapper, String.class);
+			getTemplate().postForObject(
+					alfrescoServerUrl + REST_POST_MAIL, wrapper, String.class,user.getTicketAlfresco());
 		}
 
 	}
@@ -181,17 +179,17 @@ public class AlfrescoRestService implements AlfrescoService {
 		return fromJSON(
 				new TypeReference<KoyaNode>() {
 				},
-				user.getRestTemplate().getForObject(
+				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_KOYANODE,
-						String.class, nodeRef.toString()));
+						String.class, nodeRef.toString(),user.getTicketAlfresco()));
 	}
 
 	@Override
 	public Integer countChildren(User user, KoyaNode parent,
 			Set<QName> qNameFilter) throws AlfrescoServiceException {
-		return user.getRestTemplate().postForObject(
+		return getTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_COUNTCHILDREN, qNameFilter,
-				Integer.class, parent.getNodeRef());
+				Integer.class, parent.getNodeRef(),user.getTicketAlfresco());
 	}
 
 	/*
