@@ -23,7 +23,7 @@
     <shortname>List Companies</shortname>
     <description>List Companies</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/company/list</url>
+    <url>/fr/itldev/koya/company/list?adminMode={adminMode}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>

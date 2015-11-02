@@ -34,6 +34,9 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -47,6 +50,7 @@ import org.apache.log4j.Logger;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.permissions.SitePermission;
@@ -180,19 +184,47 @@ public class CompanyService {
 	 * @throws fr.itldev.koya.exception.KoyaServiceException
 	 */
 	public List<Company> list() throws KoyaServiceException {
+		return list(false);
+	}
+
+	public List<Company> list(Boolean adminMode) throws KoyaServiceException {
 		// TODO limit user's available sites only
-		List<Company> socs = new ArrayList<>();
+		List<Company> companies = new ArrayList<>();
 
-		for (SiteInfo s : siteService.listSites(authenticationService
-				.getCurrentUserName())) {
+		List<SiteInfo> sites = null;
+		/**
+		 * If admin, return all available companies else return
+		 * only accessible companies
+		 */
 
-			if (nodeService.hasAspect(s.getNodeRef(),
-					KoyaModel.ASPECT_COMPANYSITE)) {
-				socs.add(koyaNodeService.getKoyaNode(s.getNodeRef(),
-						Company.class));
+		if (adminMode) {
+			ResultSet rs = null;
+			try {
+				rs = searchService.query(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						SearchService.LANGUAGE_LUCENE, "TYPE:\"st:site\" ASPECT:\"koya:companySite\"");
+				for (ResultSetRow r : rs) {
+					companies.add(koyaNodeService.getKoyaNode(r.getNodeRef(),
+							Company.class));
+				}
+			} finally {
+				if (rs != null) {
+					rs.close();
+				}
 			}
+		} else {			
+			for (SiteInfo s : siteService.listSites(authenticationService
+					.getCurrentUserName())) {//filter koya site aspect
+				if (nodeService.hasAspect(s.getNodeRef(),
+						KoyaModel.ASPECT_COMPANYSITE)) {
+					companies.add(koyaNodeService.getKoyaNode(s.getNodeRef(),
+							Company.class));
+				}
+			}
+
 		}
-		return socs;
+
+		return companies;
 	}
 
 	public SiteInfo getSiteInfo(String shortName) {
@@ -303,7 +335,8 @@ public class CompanyService {
 		ContentWriter writer = fileFolderService.getWriter(prefFileNodeRef);
 
 		// placeholder = write comment first line
-                writer.putContent(Joiner.on("\n").withKeyValueSeparator("=").join(prefsToCommit));
+		writer.putContent(Joiner.on("\n").withKeyValueSeparator("=")
+				.join(prefsToCommit));
 	}
 
 	/**
@@ -428,7 +461,7 @@ public class CompanyService {
 	public NodeRef getTmpSummaryDir(final Company company) {
 
 		NodeRef tmpSummaryDir = null;
-		
+
 		try {
 			tmpSummaryDir = nodeService.getChildByName(company.getNodeRef(),
 					ContentModel.ASSOC_CONTAINS, TMP_SUMMARY_DIR);
