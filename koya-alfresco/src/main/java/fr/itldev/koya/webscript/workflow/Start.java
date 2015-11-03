@@ -27,9 +27,14 @@ import org.alfresco.repo.forms.FormData;
 import org.alfresco.repo.forms.FormService;
 import org.alfresco.repo.forms.Item;
 import org.alfresco.repo.workflow.WorkflowModel;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.CopyService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.workflow.WorkflowInstance;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -58,6 +63,11 @@ public class Start extends AbstractWebScript {
 	private KoyaNodeService koyaNodeService;
 	private FormService formService;
 	private NodeService nodeService;
+	private SearchService searchService;
+	private CopyService copyService;
+	private NamespaceService namespaceService;
+
+	private String xpathTemplatesRoot;
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
@@ -69,6 +79,22 @@ public class Start extends AbstractWebScript {
 
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
+	}
+
+	public void setSearchService(SearchService searchService) {
+		this.searchService = searchService;
+	}
+
+	public void setNamespaceService(NamespaceService namespaceService) {
+		this.namespaceService = namespaceService;
+	}
+
+	public void setCopyService(CopyService copyService) {
+		this.copyService = copyService;
+	}
+
+	public void setXpathTemplatesRoot(String xpathTemplatesRoot) {
+		this.xpathTemplatesRoot = xpathTemplatesRoot;
 	}
 
 	@Override
@@ -113,6 +139,32 @@ public class Start extends AbstractWebScript {
 					.addChild(workflow.getWorkflowPackage(), d.getNodeRef(),
 							WorkflowModel.ASSOC_PACKAGE_CONTAINS,
 							workflowPackageItemId);
+
+			/*
+			 * Apply template to dossier if any exists
+			 */
+			List<NodeRef> nodeRefs = searchService
+					.selectNodes(
+							nodeService
+									.getRootNode(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE),
+							xpathTemplatesRoot + "/cm:"
+									+ urlParamsMap.get("workflowId"), null,
+							namespaceService, false);
+
+			/**
+			 * If template rootNode exists, then copy in target dossier
+			 */
+			if (nodeRefs.size() == 1) {
+				logger.info("Apply template on "
+						+ urlParamsMap.get("workflowId")
+						+ " workflow creation dossier " + d.getName());
+				for (ChildAssociationRef associationRef : nodeService
+						.getChildAssocs(nodeRefs.get(0))) {
+					copyService.copyAndRename(associationRef.getChildRef(),
+							d.getNodeRef(), associationRef.getTypeQName(),
+							associationRef.getQName(), true);
+				}
+			}
 
 			response = KoyaWebscript.getObjectAsJson(d);
 
