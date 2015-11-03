@@ -4,6 +4,7 @@ import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.security.authority.UnknownAuthorityException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 
@@ -53,6 +54,8 @@ public class DeleteKoyaGroupsBeforeDelete implements
 			spaceAclService.removeAllKoyaGroups(s);
 		} catch (KoyaServiceException ex) {
 			logger.error("before delete node error : " + ex.toString());
+		} catch (UnknownAuthorityException e) {
+			logger.error("Unknown authority trying to del group : " + e.toString());
 		}
 	}
 
