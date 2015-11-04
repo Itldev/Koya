@@ -28,6 +28,22 @@
 		<type name="koyares:SetDueDateTask">
 			<parent>bpm:task</parent>
 		</type>
+		
+		
+		<type name="koyares:asyncGlobalTask">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:targetTask">
+					<type>d:text</type>
+				</property>				
+			</properties>
+		</type>
+		
+		
+		<!-- Edit Comment Task -->
+		<type name="koyares:editComment">
+			<parent>koyares:asyncGlobalTask</parent>			
+		</type>
 
 
 

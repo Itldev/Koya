@@ -176,6 +176,28 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
       <sequenceFlow id="flow116" sourceRef="exclusivegateway11" targetRef="usertask2">
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${true}]]></conditionExpression>
       </sequenceFlow>
+      <userTask id="usertask7" name="Modify Task Comment" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:editComment">
+        <extensionElements>
+          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+            <activiti:field name="script">
+              <activiti:string><![CDATA[
+				var varName = task.getVariable('koyares_targetTask').replace(":","_") + "_comment";
+				//logger.error(varName + "=" + task.getVariable('koyares_comment'));
+				execution.setVariable(varName,task.getVariable('koyares_comment'));				
+		]]></activiti:string>
+            </activiti:field>
+          </activiti:taskListener>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="flow154" sourceRef="parallelgateway1" targetRef="usertask7"></sequenceFlow>
+      <exclusiveGateway id="exclusivegateway15" name="Exclusive Gateway"></exclusiveGateway>
+      <sequenceFlow id="flow155" sourceRef="usertask7" targetRef="exclusivegateway15"></sequenceFlow>
+      <sequenceFlow id="flow157" sourceRef="exclusivegateway15" targetRef="parallelgateway2">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${false}]]></conditionExpression>
+      </sequenceFlow>
+      <sequenceFlow id="flow158" sourceRef="exclusivegateway15" targetRef="usertask7">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${true}]]></conditionExpression>
+      </sequenceFlow>
     </subProcess>
     <subProcess id="loanProcess" name="Loan Process">
       <userTask id="loanRequestTask" name="validate loan Request" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPrequest">
@@ -187,8 +209,7 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
           </activiti:taskListener>
           <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
             <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('LPrequestOutcome',task.getVariable('koyares_LPrequestOutcome'));
-]]></activiti:string>
+              <activiti:string><![CDATA[execution.setVariable('LPrequestOutcome',task.getVariable('koyares_LPrequestOutcome'));]]></activiti:string>
             </activiti:field>
           </activiti:taskListener>
         </extensionElements>
@@ -433,7 +454,7 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdc:Bounds height="35.0" width="35.0" x="-140.0" y="171.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="DueDateAssignationProcess" id="BPMNShape_DueDateAssignationProcess">
-        <omgdc:Bounds height="501.0" width="521.0" x="90.0" y="229.0"></omgdc:Bounds>
+        <omgdc:Bounds height="622.0" width="517.0" x="90.0" y="229.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="defineSaleAgreementDateTask" id="BPMNShape_defineSaleAgreementDateTask">
         <omgdc:Bounds height="73.0" width="105.0" x="220.0" y="249.0"></omgdc:Bounds>
@@ -477,8 +498,14 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <bpmndi:BPMNShape bpmnElement="exclusivegateway11" id="BPMNShape_exclusivegateway11">
         <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="633.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask7" id="BPMNShape_usertask7">
+        <omgdc:Bounds height="55.0" width="105.0" x="220.0" y="730.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway15" id="BPMNShape_exclusivegateway15">
+        <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="737.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="boundarysignal1" id="BPMNShape_boundarysignal1">
-        <omgdc:Bounds height="30.0" width="30.0" x="597.0" y="388.0"></omgdc:Bounds>
+        <omgdc:Bounds height="30.0" width="30.0" x="597.0" y="509.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="loanProcess" id="BPMNShape_loanProcess">
         <omgdc:Bounds height="163.0" width="691.0" x="630.0" y="-170.0"></omgdc:Bounds>
@@ -550,7 +577,7 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdc:Bounds height="40.0" width="40.0" x="566.0" y="-9.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent7" id="BPMNShape_endevent7">
-        <omgdc:Bounds height="35.0" width="35.0" x="660.0" y="385.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="680.0" y="531.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent9" id="BPMNShape_endevent9">
         <omgdc:Bounds height="35.0" width="35.0" x="1350.0" y="93.0"></omgdc:Bounds>
@@ -726,6 +753,28 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdi:waypoint x="273.0" y="707.0"></omgdi:waypoint>
         <omgdi:waypoint x="272.0" y="681.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow154" id="BPMNEdge_flow154">
+        <omgdi:waypoint x="188.0" y="419.0"></omgdi:waypoint>
+        <omgdi:waypoint x="188.0" y="528.0"></omgdi:waypoint>
+        <omgdi:waypoint x="188.0" y="759.0"></omgdi:waypoint>
+        <omgdi:waypoint x="220.0" y="757.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow155" id="BPMNEdge_flow155">
+        <omgdi:waypoint x="325.0" y="757.0"></omgdi:waypoint>
+        <omgdi:waypoint x="350.0" y="757.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow157" id="BPMNEdge_flow157">
+        <omgdi:waypoint x="390.0" y="757.0"></omgdi:waypoint>
+        <omgdi:waypoint x="448.0" y="757.0"></omgdi:waypoint>
+        <omgdi:waypoint x="448.0" y="528.0"></omgdi:waypoint>
+        <omgdi:waypoint x="448.0" y="422.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow158" id="BPMNEdge_flow158">
+        <omgdi:waypoint x="370.0" y="777.0"></omgdi:waypoint>
+        <omgdi:waypoint x="370.0" y="819.0"></omgdi:waypoint>
+        <omgdi:waypoint x="272.0" y="819.0"></omgdi:waypoint>
+        <omgdi:waypoint x="272.0" y="785.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow32" id="BPMNEdge_flow32">
         <omgdi:waypoint x="985.0" y="-79.0"></omgdi:waypoint>
         <omgdi:waypoint x="1008.0" y="-79.0"></omgdi:waypoint>
@@ -808,12 +857,12 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdi:waypoint x="1350.0" y="110.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow119" id="BPMNEdge_flow119">
-        <omgdi:waypoint x="627.0" y="403.0"></omgdi:waypoint>
-        <omgdi:waypoint x="660.0" y="402.0"></omgdi:waypoint>
+        <omgdi:waypoint x="627.0" y="524.0"></omgdi:waypoint>
+        <omgdi:waypoint x="680.0" y="548.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow120" id="BPMNEdge_flow120">
-        <omgdi:waypoint x="611.0" y="479.0"></omgdi:waypoint>
-        <omgdi:waypoint x="660.0" y="484.0"></omgdi:waypoint>
+        <omgdi:waypoint x="607.0" y="540.0"></omgdi:waypoint>
+        <omgdi:waypoint x="677.0" y="502.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow121" id="BPMNEdge_flow121">
         <omgdi:waypoint x="1337.0" y="-155.0"></omgdi:waypoint>
@@ -891,7 +940,7 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <bpmndi:BPMNEdge bpmnElement="flow135" id="BPMNEdge_flow135">
         <omgdi:waypoint x="-40.0" y="209.0"></omgdi:waypoint>
         <omgdi:waypoint x="-40.0" y="472.0"></omgdi:waypoint>
-        <omgdi:waypoint x="90.0" y="479.0"></omgdi:waypoint>
+        <omgdi:waypoint x="90.0" y="540.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow149" id="BPMNEdge_flow149">
         <omgdi:waypoint x="437.0" y="-124.0"></omgdi:waypoint>
