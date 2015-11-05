@@ -23,26 +23,26 @@
 
 	<types>
 
-		<!-- DueDateDefintion abstract Generic Type -->
 
-		<type name="koyares:SetDueDateTask">
-			<parent>bpm:task</parent>
-		</type>
-		
-		
+	<!-- Async Process Tasks -->
 		<type name="koyares:asyncGlobalTask">
 			<parent>bpm:task</parent>
 			<properties>
 				<property name="koyares:targetTask">
 					<type>d:text</type>
-				</property>				
+				</property>
 			</properties>
 		</type>
-		
-		
+
+
 		<!-- Edit Comment Task -->
 		<type name="koyares:editComment">
-			<parent>koyares:asyncGlobalTask</parent>			
+			<parent>koyares:asyncGlobalTask</parent>
+		</type>
+
+
+		<type name="koyares:editDueDate">
+			<parent>koyares:asyncGlobalTask</parent>
 		</type>
 
 
@@ -96,9 +96,6 @@
 		<!-- Sale Agreement Process : SAP -->
 
 
-		<type name="koyares:SAPdoSignatureSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
 
 		<type name="koyares:SAPdoSignature">
 			<parent>bpm:task</parent>
@@ -127,9 +124,7 @@
 
 		<!-- Loan Process : LP -->
 
-		<type name="koyares:LPrequestSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
+
 		<type name="koyares:LPrequest">
 			<parent>bpm:task</parent>
 			<properties>
@@ -143,9 +138,6 @@
 
 		</type>
 
-		<type name="koyares:LPreceiveOfferSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
 
 		<type name="koyares:LPreceiveOffer">
 			<parent>bpm:task</parent>
@@ -160,9 +152,6 @@
 
 		</type>
 
-		<type name="koyares:LPbuyerAcceptSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
 		<type name="koyares:LPbuyerAccept">
 			<parent>bpm:task</parent>
 			<properties>
@@ -185,9 +174,6 @@
 			<parent>bpm:task</parent>
 		</type>
 
-		<type name="koyares:SPdoSignatureSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
 
 		<type name="koyares:SPdoSignature">
 			<parent>bpm:task</parent>

@@ -34,22 +34,8 @@
       </activiti:executionListener>
     </extensionElements>
     <startEvent id="startRes" name="Start" activiti:formKey="koyares:startTask"></startEvent>
-    <subProcess id="DueDateAssignationProcess" name="Due Dates Assignation Process">
-      <userTask id="defineSaleAgreementDateTask" name="Define Sale Agreement Signature Date" activiti:async="true" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SAPdoSignatureSetDueDate">
-        <extensionElements>
-          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[if(execution.getVariable('SAPSignatureDueDate') != null){
-								task.setDueDate(execution.getVariable('SAPSignatureDueDate'));
-							}]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('SAPSignatureDueDate',task.getDueDate());]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
+    <subProcess id="asyncAssignationProcess" name="Async Assignation Process">
+      <userTask id="editDueDateTask" name="Edit Due Date Task" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:editDueDate">
       </userTask>
       <endEvent id="endevent8" name="End"></endEvent>
       <startEvent id="startevent3" name="Start">
@@ -67,136 +53,25 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
       <parallelGateway id="parallelgateway2" name="Parallel Gateway"></parallelGateway>
       <sequenceFlow id="flow88" sourceRef="startevent3" targetRef="parallelgateway1"></sequenceFlow>
       <sequenceFlow id="flow89" sourceRef="parallelgateway2" targetRef="endevent8"></sequenceFlow>
-      <userTask id="defineSaleDateTask" name="Define Sale Signature Date" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SPdoSignatureSetDueDate">
-        <extensionElements>
-          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[if(execution.getVariable('SPSignatureDueDate') != null){
-								task.setDueDate(execution.getVariable('SPSignatureDueDate'));
-							}]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('SPSignatureDueDate',task.getDueDate());]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
-      </userTask>
-      <sequenceFlow id="flow90" sourceRef="parallelgateway1" targetRef="defineSaleAgreementDateTask"></sequenceFlow>
-      <sequenceFlow id="flow91" sourceRef="parallelgateway1" targetRef="defineSaleDateTask"></sequenceFlow>
+      <sequenceFlow id="flow90" sourceRef="parallelgateway1" targetRef="editDueDateTask"></sequenceFlow>
       <exclusiveGateway id="exclusivegateway7" name="Exclusive Gateway"></exclusiveGateway>
-      <sequenceFlow id="flow98" sourceRef="defineSaleAgreementDateTask" targetRef="exclusivegateway7"></sequenceFlow>
-      <sequenceFlow id="flow99" sourceRef="exclusivegateway7" targetRef="defineSaleAgreementDateTask">
+      <sequenceFlow id="flow98" sourceRef="editDueDateTask" targetRef="exclusivegateway7"></sequenceFlow>
+      <sequenceFlow id="flow99" sourceRef="exclusivegateway7" targetRef="editDueDateTask">
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${true}]]></conditionExpression>
       </sequenceFlow>
       <sequenceFlow id="flow101" sourceRef="exclusivegateway7" targetRef="parallelgateway2">
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${false}]]></conditionExpression>
       </sequenceFlow>
-      <exclusiveGateway id="exclusivegateway8" name="Exclusive Gateway"></exclusiveGateway>
-      <sequenceFlow id="flow102" sourceRef="defineSaleDateTask" targetRef="exclusivegateway8"></sequenceFlow>
-      <sequenceFlow id="flow103" sourceRef="exclusivegateway8" targetRef="parallelgateway2">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${false}]]></conditionExpression>
-      </sequenceFlow>
-      <sequenceFlow id="flow104" sourceRef="exclusivegateway8" targetRef="defineSaleDateTask">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${true}]]></conditionExpression>
-      </sequenceFlow>
-      <userTask id="usertask1" name="Define Validate Loan Request Due Date" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPrequestSetDueDate">
-        <extensionElements>
-          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[if(execution.getVariable('LPrequestDueDate') != null){
-								task.setDueDate(execution.getVariable('LPrequestDueDate'));
-							}]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('LPrequestDueDate',task.getDueDate());]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
+      <userTask id="editCommentTask" name="Edit Comment Task" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:editComment">
       </userTask>
-      <userTask id="usertask2" name="Define Receive Loan Offer Due Date" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPbuyerAcceptSetDueDate">
-        <extensionElements>
-          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[if(execution.getVariable('LPbuyerAcceptDueDate') != null){
-								task.setDueDate(execution.getVariable('LPbuyerAcceptDueDate'));
-							}]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('LPbuyerAcceptDueDate',task.getDueDate());]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
-      </userTask>
-      <userTask id="usertask3" name="Define Buyer Loan Accept Due Date" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPreceiveOfferSetDueDate">
-        <extensionElements>
-          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[if(execution.getVariable('LPreceiveOfferDueDate') != null){
-								task.setDueDate(execution.getVariable('LPreceiveOfferDueDate'));
-							}]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('LPreceiveOfferDueDate',task.getDueDate());]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
-      </userTask>
-      <sequenceFlow id="flow105" sourceRef="parallelgateway1" targetRef="usertask1"></sequenceFlow>
-      <sequenceFlow id="flow106" sourceRef="parallelgateway1" targetRef="usertask3"></sequenceFlow>
-      <sequenceFlow id="flow107" sourceRef="parallelgateway1" targetRef="usertask2"></sequenceFlow>
-      <exclusiveGateway id="exclusivegateway9" name="Exclusive Gateway"></exclusiveGateway>
-      <exclusiveGateway id="exclusivegateway10" name="Exclusive Gateway"></exclusiveGateway>
-      <exclusiveGateway id="exclusivegateway11" name="Exclusive Gateway"></exclusiveGateway>
-      <sequenceFlow id="flow108" sourceRef="exclusivegateway9" targetRef="parallelgateway2">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${false}]]></conditionExpression>
-      </sequenceFlow>
-      <sequenceFlow id="flow109" sourceRef="exclusivegateway10" targetRef="parallelgateway2">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${false}]]></conditionExpression>
-      </sequenceFlow>
-      <sequenceFlow id="flow110" sourceRef="exclusivegateway11" targetRef="parallelgateway2">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${false}]]></conditionExpression>
-      </sequenceFlow>
-      <sequenceFlow id="flow111" sourceRef="usertask1" targetRef="exclusivegateway9"></sequenceFlow>
-      <sequenceFlow id="flow112" sourceRef="usertask3" targetRef="exclusivegateway10"></sequenceFlow>
-      <sequenceFlow id="flow113" sourceRef="usertask2" targetRef="exclusivegateway11"></sequenceFlow>
-      <sequenceFlow id="flow114" sourceRef="exclusivegateway9" targetRef="usertask1">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${true}]]></conditionExpression>
-      </sequenceFlow>
-      <sequenceFlow id="flow115" sourceRef="exclusivegateway10" targetRef="usertask3">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${true}]]></conditionExpression>
-      </sequenceFlow>
-      <sequenceFlow id="flow116" sourceRef="exclusivegateway11" targetRef="usertask2">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${true}]]></conditionExpression>
-      </sequenceFlow>
-      <userTask id="usertask7" name="Modify Task Comment" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:editComment">
-        <extensionElements>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[
-				var varName = task.getVariable('koyares_targetTask').replace(":","_") + "_comment";
-				//logger.error(varName + "=" + task.getVariable('koyares_comment'));
-				execution.setVariable(varName,task.getVariable('koyares_comment'));				
-		]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
-      </userTask>
-      <sequenceFlow id="flow154" sourceRef="parallelgateway1" targetRef="usertask7"></sequenceFlow>
+      <sequenceFlow id="flow154" sourceRef="parallelgateway1" targetRef="editCommentTask"></sequenceFlow>
       <exclusiveGateway id="exclusivegateway15" name="Exclusive Gateway"></exclusiveGateway>
-      <sequenceFlow id="flow155" sourceRef="usertask7" targetRef="exclusivegateway15"></sequenceFlow>
-      <sequenceFlow id="flow157" sourceRef="exclusivegateway15" targetRef="parallelgateway2">
-        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${false}]]></conditionExpression>
-      </sequenceFlow>
-      <sequenceFlow id="flow158" sourceRef="exclusivegateway15" targetRef="usertask7">
+      <sequenceFlow id="flow155" sourceRef="editCommentTask" targetRef="exclusivegateway15"></sequenceFlow>
+      <sequenceFlow id="flow156" sourceRef="exclusivegateway15" targetRef="editCommentTask">
         <conditionExpression xsi:type="tFormalExpression"><![CDATA[${true}]]></conditionExpression>
+      </sequenceFlow>
+      <sequenceFlow id="flow158" sourceRef="exclusivegateway15" targetRef="parallelgateway2">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${false}]]></conditionExpression>
       </sequenceFlow>
     </subProcess>
     <subProcess id="loanProcess" name="Loan Process">
@@ -319,12 +194,12 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
         <activiti:executionListener event="end" delegateExpression="${ForceEndDueDateTasksSignal}"></activiti:executionListener>
       </extensionElements>
     </endEvent>
-    <boundaryEvent id="boundarysignal1" name="Signal" attachedToRef="DueDateAssignationProcess" cancelActivity="true">
+    <boundaryEvent id="boundarysignal1" name="Signal" attachedToRef="asyncAssignationProcess" cancelActivity="true">
       <signalEventDefinition signalRef="forceEndDueDateTasks"></signalEventDefinition>
     </boundaryEvent>
     <sequenceFlow id="flow119" sourceRef="boundarysignal1" targetRef="endevent7"></sequenceFlow>
     <endEvent id="endevent11" name="End"></endEvent>
-    <sequenceFlow id="flow120" sourceRef="DueDateAssignationProcess" targetRef="endevent11"></sequenceFlow>
+    <sequenceFlow id="flow120" sourceRef="asyncAssignationProcess" targetRef="endevent11"></sequenceFlow>
     <endEvent id="endevent12" name="End">
       <extensionElements>
         <activiti:executionListener event="end" delegateExpression="${ForceEndDueDateTasksSignal}"></activiti:executionListener>
@@ -417,7 +292,7 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <sequenceFlow id="flow148" sourceRef="parallelgateway5" targetRef="endevent14"></sequenceFlow>
     </subProcess>
     <sequenceFlow id="flow134" sourceRef="parallelgateway3" targetRef="saleOpeningProcess"></sequenceFlow>
-    <sequenceFlow id="flow135" sourceRef="parallelgateway3" targetRef="DueDateAssignationProcess"></sequenceFlow>
+    <sequenceFlow id="flow135" sourceRef="parallelgateway3" targetRef="asyncAssignationProcess"></sequenceFlow>
     <boundaryEvent id="boundaryerror5" name="Error" attachedToRef="saleOpeningProcess">
       <errorEventDefinition errorRef="invalidDocs"></errorEventDefinition>
     </boundaryEvent>
@@ -453,10 +328,10 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <bpmndi:BPMNShape bpmnElement="startRes" id="BPMNShape_startRes">
         <omgdc:Bounds height="35.0" width="35.0" x="-140.0" y="171.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="DueDateAssignationProcess" id="BPMNShape_DueDateAssignationProcess">
-        <omgdc:Bounds height="622.0" width="517.0" x="90.0" y="229.0"></omgdc:Bounds>
+      <bpmndi:BPMNShape bpmnElement="asyncAssignationProcess" id="BPMNShape_asyncAssignationProcess">
+        <omgdc:Bounds height="303.0" width="517.0" x="90.0" y="229.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="defineSaleAgreementDateTask" id="BPMNShape_defineSaleAgreementDateTask">
+      <bpmndi:BPMNShape bpmnElement="editDueDateTask" id="BPMNShape_editDueDateTask">
         <omgdc:Bounds height="73.0" width="105.0" x="220.0" y="249.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent8" id="BPMNShape_endevent8">
@@ -471,41 +346,17 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       <bpmndi:BPMNShape bpmnElement="parallelgateway2" id="BPMNShape_parallelgateway2">
         <omgdc:Bounds height="40.0" width="40.0" x="428.0" y="382.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="defineSaleDateTask" id="BPMNShape_defineSaleDateTask">
-        <omgdc:Bounds height="65.0" width="105.0" x="220.0" y="367.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="exclusivegateway7" id="BPMNShape_exclusivegateway7">
         <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="265.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="exclusivegateway8" id="BPMNShape_exclusivegateway8">
-        <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="382.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="usertask1" id="BPMNShape_usertask1">
-        <omgdc:Bounds height="55.0" width="105.0" x="220.0" y="469.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="usertask2" id="BPMNShape_usertask2">
-        <omgdc:Bounds height="55.0" width="105.0" x="220.0" y="626.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="usertask3" id="BPMNShape_usertask3">
-        <omgdc:Bounds height="55.0" width="105.0" x="220.0" y="549.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="exclusivegateway9" id="BPMNShape_exclusivegateway9">
-        <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="476.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="exclusivegateway10" id="BPMNShape_exclusivegateway10">
-        <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="556.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="exclusivegateway11" id="BPMNShape_exclusivegateway11">
-        <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="633.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="usertask7" id="BPMNShape_usertask7">
-        <omgdc:Bounds height="55.0" width="105.0" x="220.0" y="730.0"></omgdc:Bounds>
+      <bpmndi:BPMNShape bpmnElement="editCommentTask" id="BPMNShape_editCommentTask">
+        <omgdc:Bounds height="55.0" width="105.0" x="230.0" y="422.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="exclusivegateway15" id="BPMNShape_exclusivegateway15">
-        <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="737.0"></omgdc:Bounds>
+        <omgdc:Bounds height="40.0" width="40.0" x="350.0" y="436.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="boundarysignal1" id="BPMNShape_boundarysignal1">
-        <omgdc:Bounds height="30.0" width="30.0" x="597.0" y="509.0"></omgdc:Bounds>
+        <omgdc:Bounds height="30.0" width="30.0" x="590.0" y="249.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="loanProcess" id="BPMNShape_loanProcess">
         <omgdc:Bounds height="163.0" width="691.0" x="630.0" y="-170.0"></omgdc:Bounds>
@@ -577,7 +428,7 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdc:Bounds height="40.0" width="40.0" x="566.0" y="-9.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent7" id="BPMNShape_endevent7">
-        <omgdc:Bounds height="35.0" width="35.0" x="680.0" y="531.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="690.0" y="246.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent9" id="BPMNShape_endevent9">
         <omgdc:Bounds height="35.0" width="35.0" x="1350.0" y="93.0"></omgdc:Bounds>
@@ -586,7 +437,7 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdc:Bounds height="35.0" width="35.0" x="501.0" y="-142.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent11" id="BPMNShape_endevent11">
-        <omgdc:Bounds height="35.0" width="35.0" x="660.0" y="467.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="690.0" y="357.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent12" id="BPMNShape_endevent12">
         <omgdc:Bounds height="35.0" width="35.0" x="1350.0" y="-173.0"></omgdc:Bounds>
@@ -655,10 +506,6 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdi:waypoint x="187.0" y="286.0"></omgdi:waypoint>
         <omgdi:waypoint x="220.0" y="285.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow91" id="BPMNEdge_flow91">
-        <omgdi:waypoint x="208.0" y="399.0"></omgdi:waypoint>
-        <omgdi:waypoint x="220.0" y="399.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow98" id="BPMNEdge_flow98">
         <omgdi:waypoint x="325.0" y="285.0"></omgdi:waypoint>
         <omgdi:waypoint x="350.0" y="285.0"></omgdi:waypoint>
@@ -675,105 +522,25 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdi:waypoint x="448.0" y="285.0"></omgdi:waypoint>
         <omgdi:waypoint x="448.0" y="382.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow102" id="BPMNEdge_flow102">
-        <omgdi:waypoint x="325.0" y="399.0"></omgdi:waypoint>
-        <omgdi:waypoint x="350.0" y="402.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow103" id="BPMNEdge_flow103">
-        <omgdi:waypoint x="390.0" y="402.0"></omgdi:waypoint>
-        <omgdi:waypoint x="428.0" y="402.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow104" id="BPMNEdge_flow104">
-        <omgdi:waypoint x="370.0" y="422.0"></omgdi:waypoint>
-        <omgdi:waypoint x="371.0" y="455.0"></omgdi:waypoint>
-        <omgdi:waypoint x="273.0" y="455.0"></omgdi:waypoint>
-        <omgdi:waypoint x="272.0" y="432.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow105" id="BPMNEdge_flow105">
-        <omgdi:waypoint x="188.0" y="419.0"></omgdi:waypoint>
-        <omgdi:waypoint x="187.0" y="502.0"></omgdi:waypoint>
-        <omgdi:waypoint x="220.0" y="496.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow106" id="BPMNEdge_flow106">
-        <omgdi:waypoint x="188.0" y="419.0"></omgdi:waypoint>
-        <omgdi:waypoint x="187.0" y="575.0"></omgdi:waypoint>
-        <omgdi:waypoint x="220.0" y="576.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow107" id="BPMNEdge_flow107">
-        <omgdi:waypoint x="188.0" y="419.0"></omgdi:waypoint>
-        <omgdi:waypoint x="187.0" y="645.0"></omgdi:waypoint>
-        <omgdi:waypoint x="220.0" y="653.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow108" id="BPMNEdge_flow108">
-        <omgdi:waypoint x="390.0" y="496.0"></omgdi:waypoint>
-        <omgdi:waypoint x="448.0" y="495.0"></omgdi:waypoint>
-        <omgdi:waypoint x="448.0" y="422.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow109" id="BPMNEdge_flow109">
-        <omgdi:waypoint x="390.0" y="576.0"></omgdi:waypoint>
-        <omgdi:waypoint x="447.0" y="576.0"></omgdi:waypoint>
-        <omgdi:waypoint x="448.0" y="422.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow110" id="BPMNEdge_flow110">
-        <omgdi:waypoint x="390.0" y="653.0"></omgdi:waypoint>
-        <omgdi:waypoint x="447.0" y="645.0"></omgdi:waypoint>
-        <omgdi:waypoint x="448.0" y="422.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow111" id="BPMNEdge_flow111">
-        <omgdi:waypoint x="325.0" y="496.0"></omgdi:waypoint>
-        <omgdi:waypoint x="350.0" y="496.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow112" id="BPMNEdge_flow112">
-        <omgdi:waypoint x="325.0" y="576.0"></omgdi:waypoint>
-        <omgdi:waypoint x="350.0" y="576.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow113" id="BPMNEdge_flow113">
-        <omgdi:waypoint x="325.0" y="653.0"></omgdi:waypoint>
-        <omgdi:waypoint x="350.0" y="653.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow114" id="BPMNEdge_flow114">
-        <omgdi:waypoint x="370.0" y="516.0"></omgdi:waypoint>
-        <omgdi:waypoint x="367.0" y="539.0"></omgdi:waypoint>
-        <omgdi:waypoint x="289.0" y="539.0"></omgdi:waypoint>
-        <omgdi:waypoint x="272.0" y="524.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow115" id="BPMNEdge_flow115">
-        <omgdi:waypoint x="370.0" y="596.0"></omgdi:waypoint>
-        <omgdi:waypoint x="365.0" y="620.0"></omgdi:waypoint>
-        <omgdi:waypoint x="326.0" y="620.0"></omgdi:waypoint>
-        <omgdi:waypoint x="286.0" y="620.0"></omgdi:waypoint>
-        <omgdi:waypoint x="286.0" y="604.0"></omgdi:waypoint>
-        <omgdi:waypoint x="286.0" y="604.0"></omgdi:waypoint>
-        <omgdi:waypoint x="286.0" y="604.0"></omgdi:waypoint>
-        <omgdi:waypoint x="325.0" y="576.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow116" id="BPMNEdge_flow116">
-        <omgdi:waypoint x="370.0" y="673.0"></omgdi:waypoint>
-        <omgdi:waypoint x="370.0" y="707.0"></omgdi:waypoint>
-        <omgdi:waypoint x="273.0" y="707.0"></omgdi:waypoint>
-        <omgdi:waypoint x="272.0" y="681.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow154" id="BPMNEdge_flow154">
         <omgdi:waypoint x="188.0" y="419.0"></omgdi:waypoint>
-        <omgdi:waypoint x="188.0" y="528.0"></omgdi:waypoint>
-        <omgdi:waypoint x="188.0" y="759.0"></omgdi:waypoint>
-        <omgdi:waypoint x="220.0" y="757.0"></omgdi:waypoint>
+        <omgdi:waypoint x="187.0" y="458.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="449.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow155" id="BPMNEdge_flow155">
-        <omgdi:waypoint x="325.0" y="757.0"></omgdi:waypoint>
-        <omgdi:waypoint x="350.0" y="757.0"></omgdi:waypoint>
+        <omgdi:waypoint x="335.0" y="449.0"></omgdi:waypoint>
+        <omgdi:waypoint x="350.0" y="456.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow157" id="BPMNEdge_flow157">
-        <omgdi:waypoint x="390.0" y="757.0"></omgdi:waypoint>
-        <omgdi:waypoint x="448.0" y="757.0"></omgdi:waypoint>
-        <omgdi:waypoint x="448.0" y="528.0"></omgdi:waypoint>
-        <omgdi:waypoint x="448.0" y="422.0"></omgdi:waypoint>
+      <bpmndi:BPMNEdge bpmnElement="flow156" id="BPMNEdge_flow156">
+        <omgdi:waypoint x="370.0" y="476.0"></omgdi:waypoint>
+        <omgdi:waypoint x="369.0" y="513.0"></omgdi:waypoint>
+        <omgdi:waypoint x="282.0" y="513.0"></omgdi:waypoint>
+        <omgdi:waypoint x="282.0" y="477.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow158" id="BPMNEdge_flow158">
-        <omgdi:waypoint x="370.0" y="777.0"></omgdi:waypoint>
-        <omgdi:waypoint x="370.0" y="819.0"></omgdi:waypoint>
-        <omgdi:waypoint x="272.0" y="819.0"></omgdi:waypoint>
-        <omgdi:waypoint x="272.0" y="785.0"></omgdi:waypoint>
+        <omgdi:waypoint x="390.0" y="456.0"></omgdi:waypoint>
+        <omgdi:waypoint x="448.0" y="455.0"></omgdi:waypoint>
+        <omgdi:waypoint x="448.0" y="422.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow32" id="BPMNEdge_flow32">
         <omgdi:waypoint x="985.0" y="-79.0"></omgdi:waypoint>
@@ -857,12 +624,12 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
         <omgdi:waypoint x="1350.0" y="110.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow119" id="BPMNEdge_flow119">
-        <omgdi:waypoint x="627.0" y="524.0"></omgdi:waypoint>
-        <omgdi:waypoint x="680.0" y="548.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="264.0"></omgdi:waypoint>
+        <omgdi:waypoint x="690.0" y="263.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow120" id="BPMNEdge_flow120">
-        <omgdi:waypoint x="607.0" y="540.0"></omgdi:waypoint>
-        <omgdi:waypoint x="677.0" y="502.0"></omgdi:waypoint>
+        <omgdi:waypoint x="607.0" y="380.0"></omgdi:waypoint>
+        <omgdi:waypoint x="690.0" y="374.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow121" id="BPMNEdge_flow121">
         <omgdi:waypoint x="1337.0" y="-155.0"></omgdi:waypoint>
@@ -939,8 +706,8 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow135" id="BPMNEdge_flow135">
         <omgdi:waypoint x="-40.0" y="209.0"></omgdi:waypoint>
-        <omgdi:waypoint x="-40.0" y="472.0"></omgdi:waypoint>
-        <omgdi:waypoint x="90.0" y="540.0"></omgdi:waypoint>
+        <omgdi:waypoint x="-40.0" y="381.0"></omgdi:waypoint>
+        <omgdi:waypoint x="90.0" y="380.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow149" id="BPMNEdge_flow149">
         <omgdi:waypoint x="437.0" y="-124.0"></omgdi:waypoint>
