@@ -44,6 +44,10 @@
 		<type name="koyares:editDueDate">
 			<parent>koyares:asyncGlobalTask</parent>
 		</type>
+		
+		<type name="koyares:cancelTask">
+			<parent>koyares:asyncGlobalTask</parent>
+		</type>
 
 
 		<!-- Voidable abstract task -->
