@@ -32,9 +32,9 @@ import fr.itldev.koya.services.FavouriteService;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.Serializable;
 
-public class FavouriteServiceImpl extends AlfrescoRestService implements
-		FavouriteService {
+public class FavouriteServiceImpl extends AlfrescoRestService implements FavouriteService, Serializable {
 
 	private static final String REST_GET_LISTFAVOURITES = "/s/fr/itldev/koya/favourites/list?alf_ticket={alf_ticket}";
 	private static final String REST_POST_FAVOURITE_STATUS = "/s/fr/itldev/koya/favourites/set?alf_ticket={alf_ticket}";

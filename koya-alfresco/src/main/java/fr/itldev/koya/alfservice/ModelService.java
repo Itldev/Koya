@@ -56,7 +56,7 @@ import org.alfresco.util.PropertyMap;
 /**
  *
  */
-public class ModelService extends AlfrescoRestService {
+public class ModelService extends AlfrescoRestService implements Serializable {
 
     private static final String SPACE_TEMPLATE_PATH = "/app:company_home/app:dictionary/app:koya_space_templates";
     private static final String REST_GET_DOC_LIB_LIST = "/slingshot/doclib/containers/";

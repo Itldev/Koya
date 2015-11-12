@@ -55,8 +55,7 @@ import fr.itldev.koya.model.json.PdfRendition;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-public class KoyaContentServiceImpl extends AlfrescoRestService implements
-        KoyaContentService {
+public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService, Serializable {
 
 
     private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";

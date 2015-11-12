@@ -17,10 +17,11 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.impl.util.CacheConfig;
+import java.io.Serializable;
 
-public class CacheManager implements InitializingBean {
+public class CacheManager implements InitializingBean, Serializable {
 
-	private Logger logger = Logger.getLogger(this.getClass());
+	private static final Logger logger = Logger.getLogger(CacheManager.class);
 
 	private Cache<String, Permissions> permissionsCache;
 	private CacheConfig permissionsCacheConfig;

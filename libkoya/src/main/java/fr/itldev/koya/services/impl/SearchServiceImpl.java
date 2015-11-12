@@ -29,13 +29,13 @@ import org.springframework.web.client.RestClientException;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.SearchService;
+import java.io.Serializable;
 
 /**
  * Search service.
  * 
  */
-public class SearchServiceImpl extends AlfrescoRestService implements
-		SearchService {
+public class SearchServiceImpl extends AlfrescoRestService implements SearchService, Serializable {
 
 	private static final String REST_GET_SEARCH = "/s/slingshot/search?"
 			+ "term={term}&maxResults={maxResults}"

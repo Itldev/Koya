@@ -31,8 +31,9 @@ import fr.itldev.koya.model.impl.UserRole;
 import fr.itldev.koya.services.SecuService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.Serializable;
 
-public class SecuServiceImpl extends AlfrescoRestService implements SecuService {
+public class SecuServiceImpl extends AlfrescoRestService implements SecuService, Serializable {
 
 	private static final String REST_GET_AVAILABLEROLES = "/s/fr/itldev/koya/company/roles/{companyName}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_USERROLE = "/s/fr/itldev/koya/user/role/{companyName}/{userName}?alf_ticket={alf_ticket}";

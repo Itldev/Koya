@@ -30,8 +30,9 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.FavouriteService;
 import fr.itldev.koya.services.KoyaNodeService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.Serializable;
 
-public class KoyaNodeServiceImpl extends AlfrescoRestService implements KoyaNodeService {
+public class KoyaNodeServiceImpl extends AlfrescoRestService implements KoyaNodeService, Serializable {
 
     protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}?alf_ticket={alf_ticket}";
     protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{nodeRef}?alf_ticket={alf_ticket}";

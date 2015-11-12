@@ -33,9 +33,9 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.CompanyService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.Serializable;
 
-public class CompanyServiceImpl extends AlfrescoRestService implements
-		CompanyService {
+public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService, Serializable {
 
 	private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add?alf_ticket={alf_ticket}";
 	private static final String REST_POST_SHAREPRESET_COMPANY = "/s/fr/itldev/koya/company/apply-preset?alf_ticket={alf_ticket}";
