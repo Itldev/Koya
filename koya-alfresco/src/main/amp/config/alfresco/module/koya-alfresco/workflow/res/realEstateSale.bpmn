@@ -39,15 +39,6 @@
       <userTask id="editDueDateTask" name="Edit Due Date Task" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:editDueDate"></userTask>
       <endEvent id="endevent8" name="End"></endEvent>
       <startEvent id="startevent3" name="Start">
-        <extensionElements>
-          <activiti:executionListener event="start" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[logger.log('exec id due date' + execution.getId());
-//publish sub porcess execution id : used by messages or signals
-execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></activiti:string>
-            </activiti:field>
-          </activiti:executionListener>
-        </extensionElements>
       </startEvent>
       <parallelGateway id="parallelgateway1" name="Parallel Gateway"></parallelGateway>
       <parallelGateway id="parallelgateway2" name="Parallel Gateway"></parallelGateway>
@@ -97,37 +88,11 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
       <sequenceFlow id="flow183" sourceRef="boundarysignal8" targetRef="parallelgateway2"></sequenceFlow>
     </subProcess>
     <subProcess id="loanProcess" name="Loan Process">
-      <userTask id="loanRequestTask" name="validate loan Request" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPrequest">
-        <extensionElements>
-          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[task.dueDate = execution.getVariable('expectedSaleAgreementDateSign');]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('LPrequestOutcome',task.getVariable('koyares_LPrequestOutcome'));]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
+      <userTask id="loanRequestTask" name="validate loan Request" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPrequest">        
       </userTask>
-      <userTask id="receiveLoanOfferTask" name="Receive Loan Offer" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPreceiveOffer">
-        <extensionElements>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('LPreceiveOfferOutcome',task.getVariable('koyares_LPreceiveOfferOutcome'));]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
+      <userTask id="receiveLoanOfferTask" name="Receive Loan Offer" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPreceiveOffer">        
       </userTask>
       <userTask id="buyerLoanAccept" name="Buyer Loan Accept" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPbuyerAccept">
-        <extensionElements>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('LPbuyerAcceptOutcome',task.getVariable('koyares_LPbuyerAcceptOutcome'));]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
       </userTask>
       <startEvent id="startevent1" name="Start"></startEvent>
       <sequenceFlow id="flow53" sourceRef="startevent1" targetRef="loanRequestTask"></sequenceFlow>
@@ -140,20 +105,7 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
       <endEvent id="endevent3" name="End"></endEvent>
       <startEvent id="startevent2" name="Start"></startEvent>
       <userTask id="collectDocsTask" name="Collect Documents" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SPcollectDocs"></userTask>
-      <userTask id="signSaleTask" name="Sign Sale" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SPdoSignature">
-        <extensionElements>
-          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[logger.log("try set due date to "+execution.getVariable('SPexpectedDateSignature') );
-              					task.dueDate = execution.getVariable('SPexpectedDateSignature');]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[execution.setVariable('SPeffectiveSignDate',task.getVariable('koyares_SPeffectiveSignDate'));]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
+      <userTask id="signSaleTask" name="Sign Sale" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SPdoSignature">       
       </userTask>
       <sequenceFlow id="flow46" sourceRef="signSaleTask" targetRef="publishMortgageTask"></sequenceFlow>
       <userTask id="publishMortgageTask" name="publish mortgage" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SPpublishMortgage"></userTask>
@@ -181,44 +133,13 @@ execution.setVariable('koyares_globalDueDatesExecId',execution.getId());]]></act
     <sequenceFlow id="flow125" sourceRef="startRes" targetRef="parallelgateway3"></sequenceFlow>
     <subProcess id="saleOpeningProcess" name="Sale Opening">
       <startEvent id="startevent4" name="Start"></startEvent>
-      <userTask id="usertask4" name="Validate personal informations documents" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SOpersonalDocs">
-        <extensionElements>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[var outcome =  task.getVariable('koyares_SOpersonalDocsOutcome');
-execution.setVariable('SOpersonalDocsOutcome',outcome);
-				
-//Set reject message message if doc validation rej
-if(outcome == 'reject'){
-	execution.setVariable('SAstatus','canceled');
-	if(task.getVariable('koyares_rejectMessage') != null){
-		//TODO proces bpm_comment message as reject message
-      		execution.setVariable('koyares_InvalidDocsMessage',task.getVariable('koyares_SAPvalidateDocsRejectMessage'));
-         }            	   
-}]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
+      <userTask id="usertask4" name="Validate personal informations documents" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SOpersonalDocs">       
       </userTask>
       <userTask id="usertask5" name="Validate Mortgage State Documents" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SOmortgageDocs">
-        <extensionElements>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[var outcome =  task.getVariable('koyares_SOmortgageDocsOutcome');
-execution.setVariable('SOmortgageDocsOutcome',outcome);]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
+       
       </userTask>
       <userTask id="usertask6" name="Validate AllurLaw Documents" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SOallurDocs">
-        <extensionElements>
-          <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-            <activiti:field name="script">
-              <activiti:string><![CDATA[var outcome =  task.getVariable('koyares_SOallurDocsOutcome');
-execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
-            </activiti:field>
-          </activiti:taskListener>
-        </extensionElements>
+       
       </userTask>
       <parallelGateway id="parallelgateway4" name="Parallel Gateway"></parallelGateway>
       <sequenceFlow id="flow126" sourceRef="startevent4" targetRef="parallelgateway4"></sequenceFlow>
@@ -235,13 +156,7 @@ execution.setVariable('SOallurDocsOutcome',outcome);]]></activiti:string>
     <sequenceFlow id="flow134" sourceRef="parallelgateway3" targetRef="saleOpeningProcess"></sequenceFlow>
     <sequenceFlow id="flow135" sourceRef="parallelgateway3" targetRef="asyncAssignationProcess"></sequenceFlow>
     <userTask id="validateSignTask" name="Validate sale agreement signature" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SAPdoSignature">
-      <extensionElements>
-        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-          <activiti:field name="script">
-            <activiti:string><![CDATA[//TODO due date with effect 
-//task.dueDate = execution.getVariable('SAPexpectedDateSignature');]]></activiti:string>
-          </activiti:field>
-        </activiti:taskListener>
+      <extensionElements>       
         <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
           <activiti:field name="script">
             <activiti:string><![CDATA[execution.setVariable("needLoan",task.getVariable('koyares_SAPneedLoan'));]]></activiti:string>
