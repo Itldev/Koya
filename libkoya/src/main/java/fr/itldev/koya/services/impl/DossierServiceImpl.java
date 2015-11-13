@@ -39,8 +39,9 @@ import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-public class DossierServiceImpl extends AlfrescoRestService implements DossierService, Serializable {
-    
+public class DossierServiceImpl extends AlfrescoRestService implements
+		DossierService, Serializable {
+
 	public static final String REST_GET_LISTMEMBERSHIP = "/s/fr/itldev/koya/security/membership/{rolename}/{noderef}?alf_ticket={alf_ticket}";
 	private static final String REST_POST_MODIFYMEMBERSHIP = "/s/fr/itldev/koya/security/membership/{method}/{rolename}/{noderef}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_CLIENT_DOC_LIST = "/s/fr/itldev/koya/dossier/clientdocuments/{noderef}?alf_ticket={alf_ticket}";
@@ -48,7 +49,6 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 	private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}?alf_ticket={alf_ticket}";
 
 	private static final String REST_SUMMARY = "/s/fr/itldev/koya/dossier/summary/{nodeId}?documentName={documentName}?alf_ticket={alf_ticket}";
-
 
 	private CacheManager cacheManager;
 
@@ -73,7 +73,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 	@Override
 	public Dossier edit(User user, Dossier dossier)
 			throws AlfrescoServiceException {
-		throw new UnsupportedOperationException("Not supported yet."); 
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 				getAlfrescoServerUrl()
 						+ AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
 				PaginatedContentList.class, space.getNodeRef(), skipCount,
-				maxItems, true, filter, sort, "",user.getTicketAlfresco());
+				maxItems, true, filter, sort, "", user.getTicketAlfresco());
 		return pcl;
 	}
 
@@ -146,7 +146,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_LISTMEMBERSHIP,
 						String.class, KoyaPermissionCollaborator.RESPONSIBLE,
-						dossier.getNodeRef(),user.getTicketAlfresco()));
+						dossier.getNodeRef(), user.getTicketAlfresco()));
 	}
 
 	/**
@@ -166,7 +166,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_LISTMEMBERSHIP,
 						String.class, KoyaPermissionCollaborator.MEMBER,
-						dossier.getNodeRef(),user.getTicketAlfresco()));
+						dossier.getNodeRef(), user.getTicketAlfresco()));
 	}
 
 	/**
@@ -183,7 +183,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 		getTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_MODIFYMEMBERSHIP,
 				responsible, String.class, "add",
-				KoyaPermissionCollaborator.RESPONSIBLE, dossier.getNodeRef(),user.getTicketAlfresco());
+				KoyaPermissionCollaborator.RESPONSIBLE, dossier.getNodeRef(),
+				user.getTicketAlfresco());
 
 		// invalidate user cache
 		cacheManager.revokePermission(responsible, dossier.getNodeRef());
@@ -197,7 +198,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 		getTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_MODIFYMEMBERSHIP, member,
 				String.class, "add", KoyaPermissionCollaborator.MEMBER,
-				dossier.getNodeRef(),user.getTicketAlfresco());
+				dossier.getNodeRef(), user.getTicketAlfresco());
 
 		// invalidate user cache
 		cacheManager.revokePermission(member, dossier.getNodeRef());
@@ -234,7 +235,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 		getTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_MODIFYMEMBERSHIP,
 				memberOrResp, String.class, "del", rolename,
-				dossier.getNodeRef(),user.getTicketAlfresco());
+				dossier.getNodeRef(), user.getTicketAlfresco());
 		cacheManager.revokePermission(memberOrResp, dossier.getNodeRef());
 
 	}
@@ -250,9 +251,23 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 	@Override
 	public Boolean isConfidential(User user, Dossier dossier)
 			throws AlfrescoServiceException {
-		return Boolean.valueOf(getTemplate().getForObject(
+
+		if (dossier == null) {
+			return false;
+		}
+
+		Boolean confidential = cacheManager.getDossierConfidential(dossier);
+		if (confidential != null) {
+			return confidential;
+		}
+
+		confidential = Boolean.valueOf(getTemplate().getForObject(
 				getAlfrescoServerUrl() + REST_CONFIDENTIAL, String.class,
-				dossier.getNodeRef(),user.getTicketAlfresco()));
+				dossier.getNodeRef(), user.getTicketAlfresco()));
+
+		cacheManager.setDossierConfidential(dossier, confidential);
+
+		return confidential;
 	}
 
 	/**
@@ -268,9 +283,13 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 			Boolean confidential) throws AlfrescoServiceException {
 		Map<String, String> params = new HashMap<>();
 		params.put("confidential", confidential.toString());
-		return Boolean.valueOf(getTemplate().postForObject(
-				getAlfrescoServerUrl() + REST_CONFIDENTIAL, params,
-				String.class, dossier.getNodeRef(),user.getTicketAlfresco()));
+		cacheManager.revokeDossierConfidential(dossier);
+
+		getTemplate().postForObject(getAlfrescoServerUrl() + REST_CONFIDENTIAL,
+				params, String.class, dossier.getNodeRef(),
+				user.getTicketAlfresco());
+		return isConfidential(user, dossier);
+
 	}
 
 	@Override
@@ -279,7 +298,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 		// extract map
 		Map<String, String> returnValues = getTemplate().getForObject(
 				getAlfrescoServerUrl() + REST_SUMMARY, Map.class,
-				dossier.getNodeRef().getId(), summaryFileName,user.getTicketAlfresco());
+				dossier.getNodeRef().getId(), summaryFileName,
+				user.getTicketAlfresco());
 
 		Map<String, NodeRef> nodes = new HashMap<String, NodeRef>();
 		for (String k : returnValues.keySet()) {
@@ -296,7 +316,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 				},
 				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_CLIENT_DOC_LIST,
-						String.class, dossier.getNodeRef(),user.getTicketAlfresco()));
+						String.class, dossier.getNodeRef(),
+						user.getTicketAlfresco()));
 
 	}
 
@@ -318,7 +339,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 				},
 				getTemplate().postForObject(
 						getAlfrescoServerUrl() + REST_POST_START_WORKFLOW,
-						properties, String.class, workflowId, d.getNodeRef(),user.getTicketAlfresco()));
+						properties, String.class, workflowId, d.getNodeRef(),
+						user.getTicketAlfresco()));
 	}
 
 	@Override
@@ -326,7 +348,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 			throws AlfrescoServiceException {
 		getTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_VALIDATE_STEP, properties,
-				String.class, taskId,user.getTicketAlfresco());
+				String.class, taskId, user.getTicketAlfresco());
 
 	}
 
@@ -334,10 +356,9 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 	public Map<String, Serializable> getWorkflowStatus(User user,
 			String workflowInstanceId) throws AlfrescoServiceException {
 
-		Map<String, Serializable> returnValues = getTemplate()
-				.getForObject(
-						getAlfrescoServerUrl() + REST_GET_WORKFLOW_STATUS,
-						Map.class, workflowInstanceId,user.getTicketAlfresco());
+		Map<String, Serializable> returnValues = getTemplate().getForObject(
+				getAlfrescoServerUrl() + REST_GET_WORKFLOW_STATUS, Map.class,
+				workflowInstanceId, user.getTicketAlfresco());
 		return returnValues;
 	}
 
@@ -346,7 +367,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements DossierSe
 			throws AlfrescoServiceException {
 		Map<String, Serializable> map = getTemplate().getForObject(
 				getAlfrescoServerUrl() + REST_GET_TASK_STATUS, Map.class,
-				taskInstanceId,user.getTicketAlfresco());		
+				taskInstanceId, user.getTicketAlfresco());
 		return Boolean.valueOf(map.get("isassignee").toString());
 	}
 

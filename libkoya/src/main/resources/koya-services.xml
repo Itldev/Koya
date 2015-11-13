@@ -50,7 +50,7 @@
 			<list>
 				<ref bean="stringHttpMessageConverter" />
 				<ref bean="jsonHttpMessageConverter" />
-				<ref bean="formHttpMessageConverter"/>    
+				<ref bean="formHttpMessageConverter" />
 			</list>
 		</property>
 		<property name="errorHandler" ref="alfrescoRestErrorHandler" />
@@ -123,6 +123,34 @@
 			</bean>
 		</property>
 
+
+		<property name="isManagerCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${isManagerCache.enabled}" />
+				<property name="maxSize" value="${isManagerCache.maxSize}" />
+				<property name="expireAfterWriteSeconds" value="${isManagerCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+
+
+		<property name="userGroupsCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${userGroupsCache.enabled}" />
+				<property name="maxSize" value="${userGroupsCache.maxSize}" />
+				<property name="expireAfterWriteSeconds" value="${userGroupsCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+
+
+		<property name="dossierConfidentialCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${dossierConfidentialCache.enabled}" />
+				<property name="maxSize" value="${dossierConfidentialCache.maxSize}" />
+				<property name="expireAfterWriteSeconds"
+					value="${dossierConfidentialCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+
 	</bean>
 
 
@@ -170,7 +198,9 @@
 	</bean>
 
 	<bean id="userService" class="fr.itldev.koya.services.impl.UserServiceImpl"
-		parent="abstractRestService" />
+		parent="abstractRestService">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
 
 	<bean id="companyService" class="fr.itldev.koya.services.impl.CompanyServiceImpl"
 		parent="abstractRestService">
