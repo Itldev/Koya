@@ -35,6 +35,7 @@ import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import fr.itldev.koya.services.impl.util.KoyaUtil;
@@ -58,8 +59,10 @@ public class AlfrescoRestService implements AlfrescoService, Serializable {
 			+ "&maxItems={maxItems}"
 			+ "&onlyFolders={onlyFolders}"
 			+ "&filterExpr={filterExpr}"
-			+ "&sortExpr={sortExpr}" + "&typeFilter={typeFilter}&alf_ticket={alf_ticket}";
-
+			+ "&typeFilter={typeFilter}"
+			+ "&sortField={sortField}"
+			+ "&ascending={ascending}&alf_ticket={alf_ticket}";
+	
 	private static final String REST_POST_COUNTCHILDREN = "/s/fr/itldev/koya/global/countchildren/{parentNodeRef}?alf_ticket={alf_ticket}";
 
 	private String alfrescoServerUrl;

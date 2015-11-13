@@ -173,6 +173,14 @@ public class DossierService {
 
 		Dossier created = koyaNodeService.getKoyaNode(car.getChildRef(),
 				Dossier.class);
+		
+		// Add lastModified Aspect
+			Map<QName, Serializable> props = new HashMap<>();
+			props.put(KoyaModel.PROP_LASTMODIFICATIONDATE,
+				new Date());
+			nodeService.addAspect(created.getNodeRef(),
+					KoyaModel.ASPECT_LASTMODIFIED, props);
+		
 		logger.info("[Koya] Dossier creation : " + created.getTitle()
 				+ " created (" + created.getNodeRef() + ")");
 		return created;
@@ -415,7 +423,7 @@ public class DossierService {
 			List<Document> docs = new ArrayList<>();
 
 			for (KoyaNode k : koyaNodeService.listChildrenPaginated(upDir, 0,
-					Integer.MAX_VALUE, false, null).getFirst()) {
+					Integer.MAX_VALUE, false, null, null, null).getFirst()) {
 				if (Document.class.isAssignableFrom(k.getClass())) {
 					docs.add((Document) k);
 				}

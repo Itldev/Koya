@@ -162,13 +162,13 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     @Override
     public PaginatedContentList listPaginatedDirectChild(User user,
             NodeRef containerToList, Integer skipCount, Integer maxItems,
-            Boolean onlyFolders) throws AlfrescoServiceException {
+            Boolean onlyFolders, String sortField, Boolean ascending) throws AlfrescoServiceException {
 
         PaginatedContentList pcl = getTemplate().getForObject(
                 getAlfrescoServerUrl()
                 + AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
                 PaginatedContentList.class, containerToList, skipCount,
-                maxItems, onlyFolders, "", "", "",user.getTicketAlfresco());
+                maxItems, onlyFolders, null,"", sortField, ascending, user.getTicketAlfresco());
         return pcl;
     }
 

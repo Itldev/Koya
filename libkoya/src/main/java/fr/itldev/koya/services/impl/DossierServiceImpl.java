@@ -86,7 +86,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 	@Override
 	public PaginatedContentList list(User user, Space space, int skipCount,
 			int maxItems) throws AlfrescoServiceException {
-		return list(user, space, skipCount, maxItems, "", "");
+		return list(user, space, skipCount, maxItems, "", null, null);
 	}
 
 	/**
@@ -99,14 +99,14 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 	 */
 	@Override
 	public PaginatedContentList list(User user, Space space, int skipCount,
-			int maxItems, String filter, String sort)
+			int maxItems, String filter, String sortField, Boolean ascending)
 			throws AlfrescoServiceException {
 
 		PaginatedContentList pcl = getTemplate().getForObject(
 				getAlfrescoServerUrl()
 						+ AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
 				PaginatedContentList.class, space.getNodeRef(), skipCount,
-				maxItems, true, filter, sort, "", user.getTicketAlfresco());
+				maxItems, true, filter,"", sortField, ascending, user.getTicketAlfresco());
 		return pcl;
 	}
 
