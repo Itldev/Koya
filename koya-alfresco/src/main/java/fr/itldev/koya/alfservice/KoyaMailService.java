@@ -110,6 +110,7 @@ public class KoyaMailService implements InitializingBean {
 	 * Optional parameters, if not set, use clasic share url
 	 */
 	protected String koyaDirectLinkUrlTemplate;
+	protected String koyaClientServerPath;
 
 	/**
      *
@@ -152,6 +153,10 @@ public class KoyaMailService implements InitializingBean {
 
 	public void setKoyaDirectLinkUrlTemplate(String koyaDirectLinkUrlTemplate) {
 		this.koyaDirectLinkUrlTemplate = koyaDirectLinkUrlTemplate;
+	}
+
+	public void setKoyaClientServerPath(String koyaClientServerPath) {
+		this.koyaClientServerPath = koyaClientServerPath;
 	}
 
 	public void setCompanyAclService(CompanyAclService companyAclService) {
@@ -313,7 +318,6 @@ public class KoyaMailService implements InitializingBean {
 		 * Model Objects
 		 */
 
-		
 		templateModel.put("notifyCompanyManagers", notifyCompanyManagers);
 
 		templateModel.put("clientUploader",
@@ -723,11 +727,16 @@ public class KoyaMailService implements InitializingBean {
 	}
 
 	public String getDirectLinkUrl(NodeRef n) {
-		if (koyaDirectLinkUrlTemplate == null
-				|| koyaDirectLinkUrlTemplate.isEmpty()) {
+
+		if (koyaDirectLinkUrlTemplate == null || koyaClientServerPath == null
+				|| koyaDirectLinkUrlTemplate.isEmpty()
+				|| koyaClientServerPath.isEmpty()) {
 			return "#";// TODO build share url
 		} else {
-			return koyaDirectLinkUrlTemplate.replace("{nodeRef}", n.toString());
+
+					
+			return koyaClientServerPath
+					+ koyaDirectLinkUrlTemplate.replace("{nodeId}", n.getId());
 		}
 	}
 

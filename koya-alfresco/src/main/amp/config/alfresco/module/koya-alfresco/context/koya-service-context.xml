@@ -201,6 +201,9 @@
         <property name="koyaDirectLinkUrlTemplate" >
             <value>${koya.client.directLinkUrlTemplate}</value>
         </property>                  
+        <property name="koyaClientServerPath" >
+            <value>${koya.client.serverPath}</value>
+        </property>                  
     </bean>
 
    
