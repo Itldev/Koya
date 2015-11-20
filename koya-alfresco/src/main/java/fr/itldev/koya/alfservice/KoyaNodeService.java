@@ -161,6 +161,10 @@ public class KoyaNodeService {
 			for (String favStr : foldersFavourites.split(",")) {
 				try {
 					NodeRef n = getNodeRef(favStr);
+					/* 
+					 * try to get parent to exclude invalid node hierachy exceptions
+					 */
+					getParent(n);
 					favourites.add(getKoyaNode(n));
 				} catch (KoyaServiceException | NullPointerException e) {
 					logger.trace("Ignored Favourite nodeRef (FOLDERS) "
@@ -174,6 +178,10 @@ public class KoyaNodeService {
 			for (String favStr : docsFavourites.split(",")) {
 				try {
 					NodeRef n = getNodeRef(favStr);
+					/* 
+					 * try to get parent to exclude invalid node hierachy exceptions
+					 */
+					getParent(n);
 					favourites.add(getKoyaNode(n));
 				} catch (KoyaServiceException | NullPointerException e) {
 					logger.trace("Ignored Favourite nodeRef (DOCS) " + favStr
