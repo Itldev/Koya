@@ -72,7 +72,10 @@ public class ListContent extends AbstractWebScript {
 			 * TODO parameters not processed
 			 * 
 			 */
-			String sortExpr = urlParamsMap.get("sortExpr");
+			String sortField = urlParamsMap.get("sortField");
+                        sortField = (!sortField.isEmpty())?sortField.replaceFirst("-", ":"):null;
+                        String strAscending = urlParamsMap.get("ascending");
+                        Boolean ascending = (strAscending!=null)?Boolean.valueOf(strAscending):true;
 			String typeFilter = urlParamsMap.get("typeFilter");
 
 			/**
@@ -90,12 +93,12 @@ public class ListContent extends AbstractWebScript {
 
 			logger.trace("listContent arguments skipcount=" + skipCount
 					+ ";maxItems=" + maxItems + ";onlyFolders=" + onlyFolders
-					+ ";filterExpr=" + filterExpr + ";sortExpr=" + sortExpr
-					+ ";typeFilter=" + typeFilter);
+					+ ";filterExpr=" + filterExpr + ";sortField=" + sortField
+					+ ";ascending="+ascending+";typeFilter=" + typeFilter);
 
 			Pair<List<KoyaNode>, Pair<Integer, Integer>> listChildren = koyaNodeService
 					.listChildrenPaginated(parent, skipCount, maxItems,
-							onlyFolders, filterExpr);
+							onlyFolders, filterExpr, sortField, ascending);
 
 			Map<String, Object> result = new HashMap<String, Object>();
 			result.put("children", listChildren.getFirst());

@@ -29,9 +29,9 @@ import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.services.InvitationService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import java.io.Serializable;
 
-public class InvitationServiceImpl extends AlfrescoRestService implements
-		InvitationService {
+public class InvitationServiceImpl extends AlfrescoRestService implements InvitationService, Serializable {
 
 	private static final String REST_GET_INVITATION = "/s/fr/itldev/koya/invitation/invitation/{userName}/{companyName}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_INVITATIONPENDING = "/s/fr/itldev/koya/invitation/pending/{inviteId}";

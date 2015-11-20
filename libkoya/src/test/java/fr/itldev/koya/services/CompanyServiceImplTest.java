@@ -120,14 +120,14 @@ public class CompanyServiceImplTest extends TestCase {
 				"company_" + new Random().nextInt(1000000), sel.getName(),
 				"default");
 
-		List<Company> lst = companyService.list(admin);
+		List<Company> lst = companyService.list(admin,false);
 		assertTrue(lst.size() > 0);
 	}
 
 	@Test
 	public void testDelCompanies() throws RestClientException,
 			AlfrescoServiceException {
-		int sizeBefore = companyService.list(admin).size();
+		int sizeBefore = companyService.list(admin,false).size();
 
 		List<SalesOffer> offresCom = companyService.listSalesOffer(admin);
 		assertTrue(offresCom.size() > 0);
@@ -139,12 +139,12 @@ public class CompanyServiceImplTest extends TestCase {
 					"company_" + new Random().nextInt(1000000) + "_" + i,
 					sel.getName(), "default"));
 		}
-		assertEquals(sizeBefore + 10, companyService.list(admin).size());
+		assertEquals(sizeBefore + 10, companyService.list(admin,false).size());
 
 		for (Company s : comps) {
 			companyService.delete(admin, s);
 		}
-		assertEquals(sizeBefore, companyService.list(admin).size());
+		assertEquals(sizeBefore, companyService.list(admin,false).size());
 	}
 
 	@Test

@@ -1,14 +1,15 @@
 package fr.itldev.koya.services.impl.util;
 
+import java.io.Serializable;
 import org.apache.log4j.Logger;
 
 /**
  *
  *
  */
-public class CacheConfig {
+public class CacheConfig implements Serializable {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+    private static final Logger logger = Logger.getLogger(CacheConfig.class);
 
     private CacheConfig() {
 

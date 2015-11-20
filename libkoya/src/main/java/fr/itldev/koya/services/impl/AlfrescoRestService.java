@@ -35,14 +35,16 @@ import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import fr.itldev.koya.services.impl.util.KoyaUtil;
+import java.io.Serializable;
 
-public class AlfrescoRestService implements AlfrescoService {
 
-	private static final Logger logger = Logger
-			.getLogger(AlfrescoRestService.class);
+public class AlfrescoRestService implements AlfrescoService, Serializable {
+
+	private static final Logger logger = Logger.getLogger(AlfrescoRestService.class);
 
 	private static final String REST_POST_CREATE = "/s/fr/itldev/koya/global/create/{parentNodeRef}?alf_ticket={alf_ticket}";
 
@@ -57,8 +59,10 @@ public class AlfrescoRestService implements AlfrescoService {
 			+ "&maxItems={maxItems}"
 			+ "&onlyFolders={onlyFolders}"
 			+ "&filterExpr={filterExpr}"
-			+ "&sortExpr={sortExpr}" + "&typeFilter={typeFilter}&alf_ticket={alf_ticket}";
-
+			+ "&typeFilter={typeFilter}"
+			+ "&sortField={sortField}"
+			+ "&ascending={ascending}&alf_ticket={alf_ticket}";
+	
 	private static final String REST_POST_COUNTCHILDREN = "/s/fr/itldev/koya/global/countchildren/{parentNodeRef}?alf_ticket={alf_ticket}";
 
 	private String alfrescoServerUrl;

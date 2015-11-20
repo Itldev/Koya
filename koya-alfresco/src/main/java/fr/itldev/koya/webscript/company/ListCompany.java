@@ -23,6 +23,8 @@ import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
+import java.util.Map;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -33,22 +35,27 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class ListCompany extends AbstractWebScript {
 
-    private CompanyService companyService;
+	private CompanyService companyService;
 
-    public void setCompanyService(CompanyService companyService) {
-        this.companyService = companyService;
-    }
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        String response;
-        try {
-            response = KoyaWebscript.getObjectAsJson(companyService.list());
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		String response;
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+		Boolean adminMode = Boolean.valueOf(urlParams.get("adminMode"));		
+		try {
+			response = KoyaWebscript.getObjectAsJson(companyService
+					.list(adminMode));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 
 }

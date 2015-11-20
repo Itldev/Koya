@@ -647,7 +647,8 @@ public class KoyaNodeService {
 	 */
 	public Pair<List<KoyaNode>, Pair<Integer, Integer>> listChildrenPaginated(
 			NodeRef parent, final Integer skipCount, final Integer maxItems,
-			final boolean onlyFolders, final String namePattern)
+			final boolean onlyFolders, final String namePattern,
+			final String sortField, final Boolean ascending)
 			throws KoyaServiceException {
 
 		Integer skip = skipCount;
@@ -664,7 +665,10 @@ public class KoyaNodeService {
 			{
 				add(new Pair<>(
 						GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER, false));
-				add(new Pair<>(ContentModel.PROP_TITLE, true));
+				if (sortField != null) {
+					add(new Pair<>(QName.createQName(sortField,
+							namespaceService), ascending));
+				}
 			}
 		};
 

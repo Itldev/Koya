@@ -668,6 +668,12 @@
 		<property name="koyaNodeService" ref="koyaNodeService"/>
 		<property name="formService" ref="FormService"/>
 		<property name="nodeService" ref="nodeService"/>
+		<property name="searchService" ref="SearchService"/>	
+		<property name="namespaceService" ref="NamespaceService"/>
+		<property name="copyService" ref="copyService" />	
+		<property name="xpathTemplatesRoot" >
+            <value>${koya.workflow.templatesRoot}</value>
+        </property> 
 	</bean>
 	
 	<bean id="webscript.fr.itldev.koya.workflow.deploy.post"

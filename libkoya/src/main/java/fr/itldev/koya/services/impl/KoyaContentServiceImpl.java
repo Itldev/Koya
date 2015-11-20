@@ -55,8 +55,7 @@ import fr.itldev.koya.model.json.PdfRendition;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-public class KoyaContentServiceImpl extends AlfrescoRestService implements
-        KoyaContentService {
+public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService, Serializable {
 
 
     private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
@@ -163,13 +162,13 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements
     @Override
     public PaginatedContentList listPaginatedDirectChild(User user,
             NodeRef containerToList, Integer skipCount, Integer maxItems,
-            Boolean onlyFolders) throws AlfrescoServiceException {
+            Boolean onlyFolders, String sortField, Boolean ascending) throws AlfrescoServiceException {
 
         PaginatedContentList pcl = getTemplate().getForObject(
                 getAlfrescoServerUrl()
                 + AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
                 PaginatedContentList.class, containerToList, skipCount,
-                maxItems, onlyFolders, "", "", "",user.getTicketAlfresco());
+                maxItems, onlyFolders, null,"", sortField, ascending, user.getTicketAlfresco());
         return pcl;
     }
 

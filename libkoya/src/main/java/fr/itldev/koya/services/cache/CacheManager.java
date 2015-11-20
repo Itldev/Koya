@@ -1,5 +1,6 @@
 package fr.itldev.koya.services.cache;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -14,13 +15,19 @@ import com.google.common.cache.CacheBuilder;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.impl.util.CacheConfig;
 
-public class CacheManager implements InitializingBean {
+public class CacheManager implements InitializingBean, Serializable {
 
-	private Logger logger = Logger.getLogger(this.getClass());
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private static final Logger logger = Logger.getLogger(CacheManager.class);
 
 	private Cache<String, Permissions> permissionsCache;
 	private CacheConfig permissionsCacheConfig;
@@ -32,6 +39,12 @@ public class CacheManager implements InitializingBean {
 	private CacheConfig nodeSharedWithConsumerCacheConfig;
 	private Cache<String, Map<String, String>> invitationsCache;
 	private CacheConfig invitationsCacheConfig;
+	private Cache<String, Boolean> isManagerCache;
+	private CacheConfig isManagerCacheConfig;
+	private Cache<User, List<String>> userGroupsCache;
+	private CacheConfig userGroupsCacheConfig;
+	private Cache<Dossier, Boolean> dossierConfidentialCache;
+	private CacheConfig dossierConfidentialCacheConfig;
 
 	public void setPermissionsCacheConfig(CacheConfig permissionsCacheConfig) {
 		this.permissionsCacheConfig = permissionsCacheConfig;
@@ -54,6 +67,19 @@ public class CacheManager implements InitializingBean {
 
 	public void setInvitationsCacheConfig(CacheConfig invitationsCacheConfig) {
 		this.invitationsCacheConfig = invitationsCacheConfig;
+	}
+
+	public void setIsManagerCacheConfig(CacheConfig isManagerCacheConfig) {
+		this.isManagerCacheConfig = isManagerCacheConfig;
+	}
+
+	public void setUserGroupsCacheConfig(CacheConfig userGroupsCacheConfig) {
+		this.userGroupsCacheConfig = userGroupsCacheConfig;
+	}
+
+	public void setDossierConfidentialCacheConfig(
+			CacheConfig dossierConfidentialCacheConfig) {
+		this.dossierConfidentialCacheConfig = dossierConfidentialCacheConfig;
 	}
 
 	@Override
@@ -136,6 +162,53 @@ public class CacheManager implements InitializingBean {
 					.maximumSize(invitationsCacheConfig.getMaxSize())
 					.expireAfterWrite(
 							invitationsCacheConfig.getExpireAfterWriteSeconds(),
+							TimeUnit.SECONDS).build();
+		}
+
+		//
+		if (isManagerCacheConfig == null) {
+			isManagerCacheConfig = CacheConfig.noCache();
+		}
+		isManagerCacheConfig.debugLogConfig("isManagerCache");
+
+		if (isManagerCacheConfig.getEnabled()) {
+			isManagerCache = CacheBuilder
+					.newBuilder()
+					.maximumSize(isManagerCacheConfig.getMaxSize())
+					.expireAfterWrite(
+							isManagerCacheConfig.getExpireAfterWriteSeconds(),
+							TimeUnit.SECONDS).build();
+		}
+
+		//
+		if (userGroupsCacheConfig == null) {
+			userGroupsCacheConfig = CacheConfig.noCache();
+		}
+		userGroupsCacheConfig.debugLogConfig("userGroupsCache");
+
+		if (userGroupsCacheConfig.getEnabled()) {
+			userGroupsCache = CacheBuilder
+					.newBuilder()
+					.maximumSize(userGroupsCacheConfig.getMaxSize())
+					.expireAfterWrite(
+							userGroupsCacheConfig.getExpireAfterWriteSeconds(),
+							TimeUnit.SECONDS).build();
+		}
+
+		//
+		if (dossierConfidentialCacheConfig == null) {
+			dossierConfidentialCacheConfig = CacheConfig.noCache();
+		}
+		dossierConfidentialCacheConfig
+				.debugLogConfig("dossierConfidentialCache");
+
+		if (dossierConfidentialCacheConfig.getEnabled()) {
+			dossierConfidentialCache = CacheBuilder
+					.newBuilder()
+					.maximumSize(dossierConfidentialCacheConfig.getMaxSize())
+					.expireAfterWrite(
+							dossierConfidentialCacheConfig
+									.getExpireAfterWriteSeconds(),
 							TimeUnit.SECONDS).build();
 		}
 
@@ -289,6 +362,98 @@ public class CacheManager implements InitializingBean {
 
 	/**
 	 * 
+	 * ======= USER IS MANAGER ========
+	 * 
+	 */
+
+	public Boolean getIsManager(User u, Company c) {
+		Boolean isManager;
+
+		if (isManagerCacheConfig.getEnabled()) {
+			isManager = isManagerCache.getIfPresent(isManagerKey(u, c));
+			if (isManager != null) {
+				return isManager;
+			}
+		}
+		return null;
+	}
+
+	public void setIsManager(User u, Company c, Boolean isManager) {
+		if (isManagerCacheConfig.getEnabled()) {
+			isManagerCache.put(isManagerKey(u, c), isManager);
+		}
+	}
+
+	public void revokeIsManager(User u, Company c) {
+		if (isManagerCacheConfig.getEnabled()) {
+			isManagerCache.invalidate(isManagerKey(u, c));
+		}
+	}
+
+	private String isManagerKey(User u, Company c) {
+		return u.getUserName() + "-" + c.getNodeRef().getId();
+	}
+
+	/**
+	 * 
+	 * ======= User GROUPS ========
+	 * 
+	 */
+
+	public List<String> getUserGroups(User u) {
+		List<String> userGroups;
+		if (userGroupsCacheConfig.getEnabled()) {
+			userGroups = userGroupsCache.getIfPresent(u);
+			if (userGroups != null) {
+				return userGroups;
+			}
+		}
+		return null;
+	}
+
+	public void setUserGroups(User u, List<String> userGroups) {
+		if (userGroupsCacheConfig.getEnabled()) {
+			userGroupsCache.put(u, userGroups);
+		}
+	}
+
+	public void revokeUserGroups(User u) {
+		if (userGroupsCacheConfig.getEnabled()) {
+			userGroupsCache.invalidate(u);
+		}
+	}
+
+	/**
+	 * 
+	 * ======= Dossier Confidential ========
+	 * 
+	 */
+
+	public Boolean getDossierConfidential(Dossier d) {
+		Boolean confidential;
+		if (dossierConfidentialCacheConfig.getEnabled()) {
+			confidential = dossierConfidentialCache.getIfPresent(d);
+			if (confidential != null) {
+				return confidential;
+			}
+		}
+		return null;
+	}
+
+	public void setDossierConfidential(Dossier d, Boolean confidential) {
+		if (dossierConfidentialCacheConfig.getEnabled()) {
+			dossierConfidentialCache.put(d, confidential);
+		}
+	}
+
+	public void revokeDossierConfidential(Dossier d) {
+		if (dossierConfidentialCacheConfig.getEnabled()) {
+			dossierConfidentialCache.invalidate(d);
+		}
+	}
+
+	/**
+	 * 
 	 * =================== Cache Dump =======================
 	 * 
 	 */
@@ -304,6 +469,12 @@ public class CacheManager implements InitializingBean {
 				+ nodeSharedWithConsumerCache.stats().toString());
 		logger.info("[invitationsCache Stats] "
 				+ invitationsCache.stats().toString());
+		logger.info("[isManagerCache Stats] "
+				+ isManagerCache.stats().toString());
+		logger.info("[userGroupsCache Stats] "
+				+ userGroupsCache.stats().toString());
+		logger.info("[dossierConfidentialCache Stats] "
+				+ dossierConfidentialCache.stats().toString());
 
 	}
 

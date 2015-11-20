@@ -23,11 +23,45 @@
 
 	<types>
 
-		<!-- DueDateDefintion abstract Generic Type -->
 
-		<type name="koyares:SetDueDateTask">
+		<!-- Async Process Tasks -->
+		<type name="koyares:asyncGlobalTask">
 			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:targetTask">
+					<type>d:text</type>
+				</property>
+			</properties>
 		</type>
+
+
+		<!-- Edit Comment Task -->
+		<type name="koyares:editComment">
+			<parent>koyares:asyncGlobalTask</parent>
+		</type>
+
+
+		<type name="koyares:editDueDate">
+			<parent>koyares:asyncGlobalTask</parent>
+		</type>
+		
+		<type name="koyares:cancelTask">
+			<parent>koyares:asyncGlobalTask</parent>
+		</type>
+
+
+		<!-- Voidable abstract task -->
+		<type name="koyares:voidabletask">
+			<parent>bpm:task</parent>
+			<properties>
+				<property name="koyares:voidstatus">
+					<type>d:boolean</type>
+					<default>false</default>
+				</property>
+			</properties>
+		</type>
+
+
 
 
 
@@ -49,7 +83,7 @@
 		<!-- Sale Open Process : SO -->
 
 		<type name="koyares:SOpersonalDocs">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:SOpersonalDocsOutcome">
 					<type>d:text</type>
@@ -58,7 +92,7 @@
 		</type>
 
 		<type name="koyares:SOmortgageDocs">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:SOmortgageDocsOutcome">
 					<type>d:text</type>
@@ -67,7 +101,7 @@
 		</type>
 
 		<type name="koyares:SOallurDocs">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:SOallurDocsOutcome">
 					<type>d:text</type>
@@ -80,12 +114,9 @@
 		<!-- Sale Agreement Process : SAP -->
 
 
-		<type name="koyares:SAPdoSignatureSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
 
 		<type name="koyares:SAPdoSignature">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:SAPdoSignatureCompletionDate">
 					<type>d:date</type>
@@ -111,11 +142,9 @@
 
 		<!-- Loan Process : LP -->
 
-		<type name="koyares:LPrequestSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
+
 		<type name="koyares:LPrequest">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:LPrequestCompletionDate">
 					<type>d:date</type>
@@ -127,12 +156,9 @@
 
 		</type>
 
-		<type name="koyares:LPreceiveOfferSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
 
 		<type name="koyares:LPreceiveOffer">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:LPreceiveOfferCompletionDate">
 					<type>d:date</type>
@@ -144,11 +170,8 @@
 
 		</type>
 
-		<type name="koyares:LPbuyerAcceptSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
 		<type name="koyares:LPbuyerAccept">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:LPbuyerAcceptCompletionDate">
 					<type>d:date</type>
@@ -166,15 +189,12 @@
 		<!-- Sale Process : SP -->
 
 		<type name="koyares:SPcollectDocs">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 		</type>
 
-		<type name="koyares:SPdoSignatureSetDueDate">
-			<parent>koyares:SetDueDateTask</parent>
-		</type>
 
 		<type name="koyares:SPdoSignature">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:SPdoSignatureCompletionDate">
 					<type>d:date</type>
@@ -182,11 +202,11 @@
 			</properties>
 		</type>
 		<type name="koyares:SPpublishMortgage">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 
 		</type>
 		<type name="koyares:SPaccountsSettlement">
-			<parent>bpm:task</parent>
+			<parent>koyares:voidabletask</parent>
 			<properties>
 				<property name="koyares:SPaccountsSettlementNotifyBuyer">
 					<type>d:boolean</type>

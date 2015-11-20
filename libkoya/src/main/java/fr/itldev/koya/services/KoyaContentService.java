@@ -57,7 +57,7 @@ public interface KoyaContentService extends AlfrescoService {
 
     PaginatedContentList listPaginatedDirectChild(User user,
             NodeRef containerToList, Integer skipCount, Integer maxItems,
-            Boolean onlyFolders) throws AlfrescoServiceException;
+            Boolean onlyFolders, String sortField, Boolean ascending) throws AlfrescoServiceException;
 
     Integer countChildren(User user, KoyaNode parent, Boolean onlyFolders)
             throws AlfrescoServiceException;

@@ -14,8 +14,9 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import java.io.Serializable;
 
-public class AlfrescoRestTemplate extends RestTemplate {
+public class AlfrescoRestTemplate extends RestTemplate implements Serializable {
 	
 	public AlfrescoRestTemplate(ClientHttpRequestFactory requestFactory) {
 		super(requestFactory);

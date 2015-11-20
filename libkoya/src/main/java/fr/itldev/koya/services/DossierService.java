@@ -79,7 +79,7 @@ public interface DossierService extends AlfrescoService {
 	 * @throws AlfrescoServiceException
 	 */
 	PaginatedContentList list(User user, Space space, int skipCount,
-			int maxItems, String filter, String sort)
+			int maxItems, String filter, String sortField, Boolean ascending)
 			throws AlfrescoServiceException;
 
 	/**

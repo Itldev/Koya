@@ -22,7 +22,7 @@
 <webscript>
     <shortname>List Content Paginated</shortname>
     <family>Itldev</family>    
-    <url>/fr/itldev/koya/content/list/{nodeRef}?onlyFolders={onlyFolders}&amp;skipCount={skipCount}&amp;maxItems={maxItems}&amp;filterExpr={filterExpr}&amp;sortExpr={sortExpr}&amp;typeFilter={typeFilter}</url>
+    <url>/fr/itldev/koya/content/list/{nodeRef}?skipCount={skipCount}&amp;maxItems={maxItems}&amp;onlyFolders={onlyFolders}&amp;filterExpr={filterExpr}&amp;typeFilter={typeFilter}&amp;sortField={sortExpr}&amp;ascending={ascending}</url>
     <authentication>user</authentication>    
     <format default="json"/>
 </webscript>
