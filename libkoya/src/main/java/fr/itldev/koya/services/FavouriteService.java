@@ -26,6 +26,8 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public interface FavouriteService {
 
+	public void resetCache(User user);
+	
 	public List<KoyaNode> getFavourites(User user)
 			throws AlfrescoServiceException;
 
