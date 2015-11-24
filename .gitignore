@@ -21,6 +21,6 @@ nbproject
 *.log
 *.log.*
 
-alfresco/src/main/properties/dev
+alfresco-dev.properties
 
 temp

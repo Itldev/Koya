@@ -37,7 +37,7 @@ MVNOPTS="-DskipTests=true"
 for var in "$@"
 do
     if [ "$var" == "debug" ];then
-        OPTS="$OPTS -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
+        OPTS="$OPTS -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y"
     fi
 
     if [ "$var" == "jrebel" ];then
@@ -74,10 +74,10 @@ do
 
 done
 
-if [ -f alfresco/src/main/properties/dev/alfresco-global.properties ];then
-	MVNOPTS="$MVNOPTS -Denv=dev"
-	echo "ENV = DEV"
-fi
+#if [ -f alfresco/src/main/properties/dev/alfresco-global.properties ];then
+#	MVNOPTS="$MVNOPTS -Denv=dev"
+#	echo "ENV = DEV"
+#fi
 
 # Define Alfresco Home that is used as log dir base
 #
