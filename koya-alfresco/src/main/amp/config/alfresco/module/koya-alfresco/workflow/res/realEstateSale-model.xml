@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!-- reset Password Workflow Model -->
-
-<!-- SAP : Sale Agreement Process -->
-<!-- LP : Loan Process -->
-<!-- SP : Sale Process -->
-
 <model name="koyares:realestatesale-workflow-model" xmlns="http://www.alfresco.org/model/dictionary/1.0">
 
 	<imports>
@@ -22,8 +15,6 @@
 	</namespaces>
 
 	<types>
-
-
 		<!-- Async Process Tasks -->
 		<type name="koyares:asyncGlobalTask">
 			<parent>bpm:task</parent>
@@ -44,7 +35,7 @@
 		<type name="koyares:editDueDate">
 			<parent>koyares:asyncGlobalTask</parent>
 		</type>
-		
+
 		<type name="koyares:cancelTask">
 			<parent>koyares:asyncGlobalTask</parent>
 		</type>
@@ -61,10 +52,6 @@
 			</properties>
 		</type>
 
-
-
-
-
 		<!-- -->
 
 		<type name="koyares:startTask">
@@ -80,34 +67,35 @@
 		</type>
 
 
+
 		<!-- Sale Open Process : SO -->
 
-		<type name="koyares:SOpersonalDocs">
+
+		<type name="koyares:SOnotifPeer">
 			<parent>koyares:voidabletask</parent>
-			<properties>
-				<property name="koyares:SOpersonalDocsOutcome">
-					<type>d:text</type>
-				</property>
-			</properties>
 		</type>
 
-		<type name="koyares:SOmortgageDocs">
-			<parent>koyares:voidabletask</parent>
-			<properties>
-				<property name="koyares:SOmortgageDocsOutcome">
-					<type>d:text</type>
-				</property>
-			</properties>
+
+		<type name="koyares:SOpropTitle">
+			<parent>bpm:task</parent>
+		</type>
+
+		<type name="koyares:SOdiagDocs">
+			<parent>bpm:task</parent>
 		</type>
 
 		<type name="koyares:SOallurDocs">
 			<parent>koyares:voidabletask</parent>
-			<properties>
-				<property name="koyares:SOallurDocsOutcome">
-					<type>d:text</type>
-				</property>
-			</properties>
 		</type>
+
+		<type name="koyares:SOmortgageDocs">
+			<parent>bpm:task</parent>
+		</type>
+
+		<type name="koyares:SOurbanismDocs">
+			<parent>koyares:voidabletask</parent>
+		</type>
+
 
 
 
@@ -116,7 +104,7 @@
 
 
 		<type name="koyares:SAPdoSignature">
-			<parent>koyares:voidabletask</parent>
+			<parent>bpm:task</parent>
 			<properties>
 				<property name="koyares:SAPdoSignatureCompletionDate">
 					<type>d:date</type>
@@ -149,9 +137,6 @@
 				<property name="koyares:LPrequestCompletionDate">
 					<type>d:date</type>
 				</property>
-				<property name="koyares:LPrequestOutcome">
-					<type>d:text</type>
-				</property>
 			</properties>
 
 		</type>
@@ -163,9 +148,6 @@
 				<property name="koyares:LPreceiveOfferCompletionDate">
 					<type>d:date</type>
 				</property>
-				<property name="koyares:LPreceiveOfferOutcome">
-					<type>d:text</type>
-				</property>
 			</properties>
 
 		</type>
@@ -176,37 +158,75 @@
 				<property name="koyares:LPbuyerAcceptCompletionDate">
 					<type>d:date</type>
 				</property>
-				<property name="koyares:LPbuyerAcceptOutcome">
-					<type>d:text</type>
-				</property>
 			</properties>
 		</type>
 
 
 		<!--///// Loan Process : LP -->
 
+		<!-- Extra Documents Process : EDP -->
 
-		<!-- Sale Process : SP -->
 
-		<type name="koyares:SPcollectDocs">
+
+		<type name="koyares:EDPcivilStateDocs">
+			<parent>bpm:task</parent>
+		</type>
+
+
+		<type name="koyares:EDPurbanismDocs">
+			<parent>bpm:task</parent>
+		</type>
+
+		<type name="koyares:EDPdia">
+			<parent>koyares:voidabletask</parent>
+		</type>
+
+		<type name="koyares:EDPmortgageWrite">
+			<parent>koyares:voidabletask</parent>
+		</type>
+
+		<type name="koyares:EDPreleaseAgreement">
 			<parent>koyares:voidabletask</parent>
 		</type>
 
 
-		<type name="koyares:SPdoSignature">
-			<parent>koyares:voidabletask</parent>
+
+		<!-- Sale Process : SP -->
+
+		<type name="koyares:doSignature">
+			<parent>bpm:task</parent>
 			<properties>
-				<property name="koyares:SPdoSignatureCompletionDate">
+				<property name="koyares:doSignatureCompletionDate">
 					<type>d:date</type>
 				</property>
 			</properties>
 		</type>
-		<type name="koyares:SPpublishMortgage">
-			<parent>koyares:voidabletask</parent>
 
+
+		<!-- Post Sale Process : PS -->
+
+		<type name="koyares:PSpublication">
+			<parent>bpm:task</parent>
 		</type>
-		<type name="koyares:SPaccountsSettlement">
+
+		<type name="koyares:PSpublishMortgage">
 			<parent>koyares:voidabletask</parent>
+		</type>
+
+		<type name="koyares:PSsendCopies">
+			<parent>bpm:task</parent>
+		</type>
+
+		<type name="koyares:PSreleaseAct">
+			<parent>koyares:voidabletask</parent>
+		</type>
+
+
+
+		<!-- End Process : E -->
+
+		<type name="koyares:EaccountsSettlement">
+			<parent>bpm:task</parent>
 			<properties>
 				<property name="koyares:SPaccountsSettlementNotifyBuyer">
 					<type>d:boolean</type>
@@ -215,6 +235,5 @@
 			</properties>
 		</type>
 
-		<!-- ///Sale Process : SP -->
 	</types>
 </model>
