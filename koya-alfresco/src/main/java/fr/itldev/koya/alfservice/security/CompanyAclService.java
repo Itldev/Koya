@@ -362,7 +362,7 @@ public class CompanyAclService {
 
 		User u = userService.getUserByEmailFailOver(userMail);
 
-                if (u == null || getSitePermission(c, u) == null) {
+		if (u == null || getSitePermission(c, u) == null) {
 			/**
 			 * Workaround to resolve invite by user bug :
 			 * 
@@ -406,8 +406,10 @@ public class CompanyAclService {
 			return invitation;
 
 		} else {
-                    throw new KoyaServiceException(KoyaErrorCodes.INVITATION_USER_ALREADY_INVITED, "User allready invited for this company");
-                }
+			throw new KoyaServiceException(
+					KoyaErrorCodes.INVITATION_USER_ALREADY_INVITED,
+					"User allready invited for this company");
+		}
 	}
 
 	/**
@@ -431,16 +433,31 @@ public class CompanyAclService {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.SECU_USER_MUSTBE_COMPANY_MEMBER_TO_CHANGE_COMPANYROLE);
 		}
-		/**
-		 * TODO check if pending invitation exists
-		 */
+		final InvitationSearchCriteriaImpl criteria = new InvitationSearchCriteriaImpl();
+		criteria.setInvitationType(InvitationSearchCriteria.InvitationType.NOMINATED);
+		criteria.setResourceType(Invitation.ResourceType.WEB_SITE);
+		criteria.setResourceName(c.getName());
+		criteria.setInvitee(u.getUserName());
 
-		try {
-			siteService.setMembership(c.getName(), u.getUserName(),
-					role.toString());
-		} catch (SiteDoesNotExistException ex) {
+		List<Invitation> invitations = AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<List<Invitation>>() {
+					@Override
+					public List<Invitation> doWork() throws Exception {
+						return invitationService.searchInvitation(criteria);
+					}
+				});
+
+		if (!invitations.isEmpty()) {
 			throw new KoyaServiceException(
-					KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+					KoyaErrorCodes.SECU_CANT_MODIFY_USER_PENDING_INVITE_ROLE);
+		} else {
+			try {
+				siteService.setMembership(c.getName(), u.getUserName(),
+						role.toString());
+			} catch (SiteDoesNotExistException ex) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+			}
 		}
 
 	}
