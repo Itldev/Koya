@@ -99,8 +99,34 @@
     </subProcess>
     <subProcess id="saleProcess" name="Post Sale Administratives Tasks">
       <startEvent id="startevent2" name="Start"></startEvent>
-      <userTask id="publishMortgageTask" name="publish mortgage" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:PSpublishMortgage"></userTask>
-      <userTask id="usertask15" name="publish" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:PSpublication"></userTask>
+      <userTask id="publishMortgageTask" name="publish mortgage" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:PSpublishMortgage">
+        <extensionElements>
+          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+            <activiti:field name="script">
+              <activiti:string><![CDATA[try{
+                      var c = java.util.Calendar.getInstance();
+                      c.setTime(utils.fromISO8601(execution.getVariable("doSignatureCompletionDate")));
+                      c.add(java.util.Calendar.MONTH, 2);
+                      task.dueDate = c.getTime();
+                    }catch(e){logger.error("Error Setting publish mortgage task due date");}]]></activiti:string>
+            </activiti:field>
+          </activiti:taskListener>
+        </extensionElements>
+      </userTask>
+      <userTask id="usertask15" name="publish" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:PSpublication">
+        <extensionElements>
+          <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+            <activiti:field name="script">
+              <activiti:string><![CDATA[try{
+                      var c = java.util.Calendar.getInstance();
+                      c.setTime(utils.fromISO8601(execution.getVariable("doSignatureCompletionDate")));
+                      c.add(java.util.Calendar.MONTH, 1);
+                      task.dueDate = c.getTime();
+                    }catch(e){logger.error("Error Setting publish task due date"+e);}]]></activiti:string>
+            </activiti:field>
+          </activiti:taskListener>
+        </extensionElements>
+      </userTask>
       <sequenceFlow id="flow207" sourceRef="startevent2" targetRef="usertask15"></sequenceFlow>
       <sequenceFlow id="flow208" sourceRef="usertask15" targetRef="publishMortgageTask"></sequenceFlow>
       <userTask id="usertask16" name="Send Copies" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:PSsendCopies"></userTask>
@@ -134,7 +160,7 @@
       <userTask id="usertask7" name="Notif Peer" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SOnotifPeer"></userTask>
       <sequenceFlow id="flow184" sourceRef="startevent4" targetRef="usertask7"></sequenceFlow>
       <sequenceFlow id="flow185" sourceRef="usertask7" targetRef="parallelgateway4"></sequenceFlow>
-      <userTask id="usertask8" name="Validate PropertyTitlle" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SOpropTitle"></userTask>
+      <userTask id="usertask8" name="Validate PropertyTitle" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SOpropTitle"></userTask>
       <userTask id="usertask9" name="Validate Urbanism documents" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:SOurbanismDocs"></userTask>
       <sequenceFlow id="flow186" sourceRef="parallelgateway4" targetRef="usertask8"></sequenceFlow>
       <sequenceFlow id="flow187" sourceRef="parallelgateway4" targetRef="usertask9"></sequenceFlow>
@@ -174,7 +200,16 @@
       <signalEventDefinition signalRef="endRes"></signalEventDefinition>
     </boundaryEvent>
     <sequenceFlow id="flow181" sourceRef="boundarysignal6" targetRef="parallelgateway2"></sequenceFlow>
-    <userTask id="signSaleTask" name="Sign Sale" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:doSignature"></userTask>
+    <userTask id="signSaleTask" name="Sign Sale" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:doSignature">
+      <extensionElements>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string><![CDATA[try{
+execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariable('koyares_doSignatureCompletionDate')));}catch(e){}]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
     <sequenceFlow id="flow206" sourceRef="signSaleTask" targetRef="saleProcess"></sequenceFlow>
     <userTask id="accountsSettlementTask" name="Account Settlement" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:EaccountsSettlement"></userTask>
     <sequenceFlow id="flow179" sourceRef="accountsSettlementTask" targetRef="signalintermediatethrowevent2"></sequenceFlow>
