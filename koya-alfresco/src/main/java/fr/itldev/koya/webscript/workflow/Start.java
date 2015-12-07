@@ -19,7 +19,9 @@
 package fr.itldev.koya.webscript.workflow;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,14 +29,11 @@ import org.alfresco.repo.forms.FormData;
 import org.alfresco.repo.forms.FormService;
 import org.alfresco.repo.forms.Item;
 import org.alfresco.repo.workflow.WorkflowModel;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.CopyService;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.workflow.WorkflowInstance;
-import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -42,6 +41,7 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.action.CopyWorkflowTemplateActionExecuter;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
@@ -63,11 +63,7 @@ public class Start extends AbstractWebScript {
 	private KoyaNodeService koyaNodeService;
 	private FormService formService;
 	private NodeService nodeService;
-	private SearchService searchService;
-	private CopyService copyService;
-	private NamespaceService namespaceService;
-
-	private String xpathTemplatesRoot;
+	private ActionService actionService;
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
@@ -81,20 +77,8 @@ public class Start extends AbstractWebScript {
 		this.nodeService = nodeService;
 	}
 
-	public void setSearchService(SearchService searchService) {
-		this.searchService = searchService;
-	}
-
-	public void setNamespaceService(NamespaceService namespaceService) {
-		this.namespaceService = namespaceService;
-	}
-
-	public void setCopyService(CopyService copyService) {
-		this.copyService = copyService;
-	}
-
-	public void setXpathTemplatesRoot(String xpathTemplatesRoot) {
-		this.xpathTemplatesRoot = xpathTemplatesRoot;
+	public void setActionService(ActionService actionService) {
+		this.actionService = actionService;
 	}
 
 	@Override
@@ -120,14 +104,14 @@ public class Start extends AbstractWebScript {
 			fd.addFieldData("prop_wf_relatednode", d.getNodeRef().toString());
 
 			long start2 = System.nanoTime();
-			logger.info("T1 " + (start2 - start1));
+			logger.info("T1 " + ((start2 - start1) / 1000000000.0) + "s");
 
 			WorkflowInstance workflow = (WorkflowInstance) formService
 					.saveForm(
 							new Item("workflow", "activiti$"
 									+ urlParamsMap.get("workflowId")), fd);
 			long start3 = System.nanoTime();
-			logger.info("T2 " + (start3 - start2));
+			logger.info("T2 " + ((start3 - start2) / 1000000000.0) + "s");
 			// relationship between dossier node and activiti instance
 			List<String> activitiIds = d.getActivitiIds();
 			activitiIds.add(workflow.getId());
@@ -145,37 +129,33 @@ public class Start extends AbstractWebScript {
 							workflowPackageItemId);
 
 			long start4 = System.nanoTime();
-			logger.info("T3 " + (start4 - start3));
-			
-			/*
-			 * Apply template to dossier if any exists
-			 */
-			List<NodeRef> nodeRefs = searchService
-					.selectNodes(
-							nodeService
-									.getRootNode(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE),
-							xpathTemplatesRoot + "/cm:"
-									+ urlParamsMap.get("workflowId"), null,
-							namespaceService, false);
+			logger.info("T3 " + ((start4 - start3) / 1000000000.0) + "s");
 
-			/**
-			 * If template rootNode exists, then copy in target dossier
+			/*
+			 * Apply template to dossier if any exists : Do it in async action
+			 * !!
 			 */
-			if (nodeRefs.size() == 1) {
-				logger.info("Apply template on "
-						+ urlParamsMap.get("workflowId")
-						+ " workflow creation dossier " + d.getName());
-				for (ChildAssociationRef associationRef : nodeService
-						.getChildAssocs(nodeRefs.get(0))) {
-					copyService.copyAndRename(associationRef.getChildRef(),
-							d.getNodeRef(), associationRef.getTypeQName(),
-							associationRef.getQName(), true);
-				}
+			try {
+				Map<String, Serializable> paramsCopyWorkflowTemplate = new HashMap<>();
+				paramsCopyWorkflowTemplate.put(
+						CopyWorkflowTemplateActionExecuter.PARAM_WORKFLOWID,
+						urlParamsMap.get("workflowId"));
+
+				Action copyWf = actionService.createAction(
+						CopyWorkflowTemplateActionExecuter.NAME,
+						paramsCopyWorkflowTemplate);
+
+				// async exec
+				copyWf.setExecuteAsynchronously(true);
+				actionService.executeAction(copyWf, d.getNodeRef());
+			} catch (Exception e) {
+				logger.error("action  exception  " + e.toString());
 			}
+
 			long start5 = System.nanoTime();
-			logger.info("T4 " + (start5 - start5));
+			logger.info("T4 " + ((start5 - start4) / 1000000000.0) + "s");
 			response = KoyaWebscript.getObjectAsJson(d);
-			logger.info("Ttot " + (start5 - start1));
+			logger.info("Ttot " + ((start5 - start1) / 1000000000.0) + "s");
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
