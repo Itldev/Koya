@@ -88,7 +88,6 @@ public class Start extends AbstractWebScript {
 		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 
 		String response = "";
-		long start1 = System.nanoTime();
 		try {
 
 			NodeRef n = koyaNodeService.getNodeRef((String) urlParamsMap
@@ -103,15 +102,11 @@ public class Start extends AbstractWebScript {
 			// Add related dossier as workflow parameter
 			fd.addFieldData("prop_wf_relatednode", d.getNodeRef().toString());
 
-			long start2 = System.nanoTime();
-			logger.info("T1 " + ((start2 - start1) / 1000000000.0) + "s");
 
 			WorkflowInstance workflow = (WorkflowInstance) formService
 					.saveForm(
 							new Item("workflow", "activiti$"
 									+ urlParamsMap.get("workflowId")), fd);
-			long start3 = System.nanoTime();
-			logger.info("T2 " + ((start3 - start2) / 1000000000.0) + "s");
 			// relationship between dossier node and activiti instance
 			List<String> activitiIds = d.getActivitiIds();
 			activitiIds.add(workflow.getId());
@@ -128,8 +123,6 @@ public class Start extends AbstractWebScript {
 							WorkflowModel.ASSOC_PACKAGE_CONTAINS,
 							workflowPackageItemId);
 
-			long start4 = System.nanoTime();
-			logger.info("T3 " + ((start4 - start3) / 1000000000.0) + "s");
 
 			/*
 			 * Apply template to dossier if any exists : Do it in async action
@@ -151,11 +144,7 @@ public class Start extends AbstractWebScript {
 			} catch (Exception e) {
 				logger.error("action  exception  " + e.toString());
 			}
-
-			long start5 = System.nanoTime();
-			logger.info("T4 " + ((start5 - start4) / 1000000000.0) + "s");
 			response = KoyaWebscript.getObjectAsJson(d);
-			logger.info("Ttot " + ((start5 - start1) / 1000000000.0) + "s");
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
