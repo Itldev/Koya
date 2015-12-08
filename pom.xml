@@ -156,6 +156,7 @@
 		<profile>
 			<id>run</id>
 			<modules>
+				<module>solr</module>
 				<module>alfresco</module>
 				<module>share</module>
 				<module>runner</module>
