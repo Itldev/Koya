@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.alfresco.repo.forms.FormData;
@@ -108,11 +107,11 @@ public class Start extends AbstractWebScript {
 							new Item("workflow", "activiti$"
 									+ urlParamsMap.get("workflowId")), fd);
 			// relationship between dossier node and activiti instance
-			List<String> activitiIds = d.getActivitiIds();
+			ArrayList<String> activitiIds = new ArrayList<String>(d.getWorkflows().keySet());
+			
 			activitiIds.add(workflow.getId());
-			nodeService.setProperty(d.getNodeRef(), KoyaModel.PROP_ACTIVITIIDS,
-					new ArrayList<String>(activitiIds));
-			d.setActivitiIds(activitiIds);
+			nodeService.setProperty(d.getNodeRef(), KoyaModel.PROP_ACTIVITIIDS,activitiIds);
+
 
 			// Add bpm:packageContains relationship from package node to dossier
 			// node
@@ -122,7 +121,19 @@ public class Start extends AbstractWebScript {
 					.addChild(workflow.getWorkflowPackage(), d.getNodeRef(),
 							WorkflowModel.ASSOC_PACKAGE_CONTAINS,
 							workflowPackageItemId);
+			
+			
+			//set Workflow status Running
+				
 
+			 Map<QName, Serializable> props = new HashMap<QName, Serializable>() {
+                 {
+                     put(KoyaModel.PROP_BPMCURRENTSTATUS, KoyaModel.BpmStatusValues.RUNNING);
+                 }
+             };
+             
+             
+             nodeService.addAspect(workflow.getWorkflowPackage(), KoyaModel.ASPECT_BPMSTATUS, props);		
 
 			/*
 			 * Apply template to dossier if any exists : Do it in async action

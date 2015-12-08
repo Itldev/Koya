@@ -41,6 +41,7 @@
         <property name="activityPoster" ref="koyaActivityPoster" />
         <property name="searchService" ref="searchService"/>
         <property name="namespaceService" ref="namespaceService"/>
+        <property name="workflowService" ref="WorkflowService"/>
     </bean>
     
     <!--Companies handling service-->

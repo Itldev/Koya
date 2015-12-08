@@ -78,6 +78,9 @@ public class KoyaModel {
 
 	public static final QName ASPECT_USERSHARES = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "userShares");
+	
+	public static final QName ASPECT_BPMSTATUS = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "bpmStatus");
 
 	// ================= Aspects Properties
 
@@ -98,6 +101,9 @@ public class KoyaModel {
 
 	public static final QName PROP_NOTIFIED = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "notified");
+	
+	public static final QName PROP_BPMCURRENTSTATUS = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "currentBpmStatus");
 
 	// ================= Types Properties =========================
 	public static final QName PROP_CONTACTITEM_VALUE = QName.createQName(
@@ -129,7 +135,7 @@ public class KoyaModel {
 
 	public static final QName PROP_REFERENCE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "reference");
-	
+
 	public static final QName PROP_ACTIVITIIDS = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "activitiIds");
 
@@ -170,5 +176,15 @@ public class KoyaModel {
 					put(Dossier.class, TYPE_DOSSIER);
 				}
 			});
+
+	// ========= Constraints values
+
+	public static class BpmStatusValues {
+		public static String RUNNING = "RUNNING";
+		public static String CANCELED = "CANCELED";
+		public static String FINISHED = "FINISHED";
+		public static String UNKNOWN = "UNKNOWN";
+
+	}
 
 }

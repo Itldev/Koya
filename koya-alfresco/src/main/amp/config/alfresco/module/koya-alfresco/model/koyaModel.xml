@@ -42,19 +42,32 @@
     </namespaces>
 
     <constraints>
-        <constraint name="koya:mailUniqueConstraint" type="fr.itldev.koya.constraint.UniqueMailConstraint" />
-        
-        <constraint name="koya:contactItemsTypes" type="LIST">
-            <parameter name="allowedValues">
-                <list>
-                    <value>1</value>
-                    <value>2</value>
-                    <value>3</value>
-                    <value>4</value>                    
-                </list>
-            </parameter>
-        </constraint>
-    </constraints>
+		<constraint name="koya:mailUniqueConstraint"
+			type="fr.itldev.koya.constraint.UniqueMailConstraint" />
+
+		<constraint name="koya:contactItemsTypes" type="LIST">
+			<parameter name="allowedValues">
+				<list>
+					<value>1</value>
+					<value>2</value>
+					<value>3</value>
+					<value>4</value>
+				</list>
+			</parameter>
+		</constraint>
+
+
+		<constraint name="koya:bpmStatusValues" type="LIST">
+			<parameter name="allowedValues">
+				<list>
+					<value>RUNNING</value>
+					<value>CANCELED</value>
+					<value>FINISHED</value>
+					<value>UNKNOWN</value>
+				</list>
+			</parameter>
+		</constraint>
+	</constraints>
 
     <types>
         <type name="koya:container">
@@ -204,8 +217,8 @@
             </associations> 
                             
         </type>
-                                
-        
+
+		
     </types>
       
     <aspects>
@@ -294,7 +307,21 @@
                     </target>
                 </association>
              </associations>
-        </aspect>      
+        </aspect>                      
+        
+        
+        <aspect name="koya:bpmStatus">
+			<title>Koya bpm status</title>
+			<properties>
+				<property name="koya:currentBpmStatus">
+					<type>d:text</type>
+					<constraints>
+						<constraint ref="koya:bpmStatusValues" />
+					</constraints>
+				</property>
+			</properties>
+		</aspect>
+        
         
     </aspects>
     
