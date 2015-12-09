@@ -20,9 +20,7 @@ package fr.itldev.koya.model.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -39,7 +37,6 @@ public class Dossier extends Space {
 
 	private Date lastModifiedDate;
 
-	private Map<String, String> workflows = new HashMap<>();
 
 	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 	@JsonIgnore
@@ -84,14 +81,7 @@ public class Dossier extends Space {
 		this.lastModifiedDate = lastModifiedDate;
 	}
 
-	public Map<String, String> getWorkflows() {
-		return workflows;
-	}
-
-	public void setWorkflows(Map<String, String> workflows) {
-		this.workflows = workflows;
-	}
-
+	
 	// </editor-fold>
 
 	protected Dossier() {

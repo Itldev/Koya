@@ -1,5 +1,8 @@
 package fr.itldev.koya.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonSubTypes.Type;
@@ -35,6 +38,7 @@ public abstract class KoyaNode {
 
 	protected String name;
 	protected String title;
+	private Map<String, String> workflows = new HashMap<>();
 
 	/*
 	 * ======== Constructors
@@ -82,6 +86,14 @@ public abstract class KoyaNode {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public Map<String, String> getWorkflows() {
+		return workflows;
+	}
+
+	public void setWorkflows(Map<String, String> workflows) {
+		this.workflows = workflows;
 	}
 
 	/**
