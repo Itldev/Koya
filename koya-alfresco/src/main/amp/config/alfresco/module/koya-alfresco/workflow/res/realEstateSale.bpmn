@@ -68,8 +68,7 @@
         <extensionElements>
           <activiti:executionListener event="end" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
             <activiti:field name="script">
-              <activiti:string><![CDATA[
-                try{
+              <activiti:string><![CDATA[try{
                   var packageNodeRef = execution.getVariable('bpm_package');
                   packageNodeRef.properties["koya:currentBpmStatus"] = "CANCELED";
                   packageNodeRef.save();
@@ -229,7 +228,19 @@ execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariab
       <signalEventDefinition signalRef="endRes"></signalEventDefinition>
     </intermediateThrowEvent>
     <sequenceFlow id="flow180" sourceRef="signalintermediatethrowevent2" targetRef="endevent3"></sequenceFlow>
-    <endEvent id="endevent3" name="End"></endEvent>
+    <endEvent id="endevent3" name="End">
+      <extensionElements>
+        <activiti:executionListener event="start" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
+          <activiti:field name="script">
+            <activiti:string><![CDATA[try{
+              var packageNodeRef = execution.getVariable('bpm_package');
+              packageNodeRef.properties["koya:currentBpmStatus"] = "FINISHED";
+              packageNodeRef.save();
+            }catch(e){}]]></activiti:string>
+          </activiti:field>
+        </activiti:executionListener>
+      </extensionElements>
+    </endEvent>
     <sequenceFlow id="flow209" sourceRef="saleProcess" targetRef="accountsSettlementTask"></sequenceFlow>
     <endEvent id="endevent16" name="End"></endEvent>
     <subProcess id="subprocess1" name="Extra Documents">
@@ -273,20 +284,6 @@ execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariab
     <endEvent id="endevent23" name="End"></endEvent>
     <sequenceFlow id="flow224" sourceRef="boundarysignal10" targetRef="endevent22"></sequenceFlow>
     <sequenceFlow id="flow225" sourceRef="boundarysignal11" targetRef="endevent23"></sequenceFlow>
-    <endEvent id="endevent24" name="End">
-      <extensionElements>
-        <activiti:executionListener event="end" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
-          <activiti:field name="script">
-            <activiti:string><![CDATA[try{
-              var packageNodeRef = execution.getVariable('bpm_package');
-              packageNodeRef.properties["koya:currentBpmStatus"] = "FINISHED";
-              packageNodeRef.save();
-            }catch(e){}]]></activiti:string>
-          </activiti:field>
-        </activiti:executionListener>
-      </extensionElements>
-    </endEvent>
-    <sequenceFlow id="flow226" sourceRef="saleProcess" targetRef="endevent24"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_koyaRes">
     <bpmndi:BPMNPlane bpmnElement="koyaRes" id="BPMNPlane_koyaRes">
@@ -502,9 +499,6 @@ execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariab
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent23" id="BPMNShape_endevent23">
         <omgdc:Bounds height="35.0" width="35.0" x="720.0" y="710.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="endevent24" id="BPMNShape_endevent24">
-        <omgdc:Bounds height="35.0" width="35.0" x="1396.0" y="520.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="flow88" id="BPMNEdge_flow88">
         <omgdi:waypoint x="198.0" y="555.0"></omgdi:waypoint>
@@ -826,10 +820,6 @@ execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariab
       <bpmndi:BPMNEdge bpmnElement="flow225" id="BPMNEdge_flow225">
         <omgdi:waypoint x="725.0" y="685.0"></omgdi:waypoint>
         <omgdi:waypoint x="737.0" y="710.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow226" id="BPMNEdge_flow226">
-        <omgdi:waypoint x="1103.0" y="625.0"></omgdi:waypoint>
-        <omgdi:waypoint x="1413.0" y="555.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
