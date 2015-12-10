@@ -37,7 +37,7 @@ MVNOPTS="-DskipTests=true"
 for var in "$@"
 do
     if [ "$var" == "debug" ];then
-        OPTS="$OPTS -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y"
+        OPTS="$OPTS -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
     fi
 
     if [ "$var" == "jrebel" ];then

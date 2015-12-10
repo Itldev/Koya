@@ -58,6 +58,11 @@
         <property name="companyAclService" ref="companyAclService" />       
         <property name="koyaNodeService" ref="koyaNodeService" />        
     </bean>
+    <bean id="webscript.fr.itldev.koya.company.listMembersPaginated.get" 
+          class="fr.itldev.koya.webscript.company.ListMembersPaginated"
+          parent="webscript">                
+        <property name="companyAclService" ref="companyAclService" />       
+    </bean>
     
     
     <!-- get current preferences-->
