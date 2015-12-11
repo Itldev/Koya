@@ -70,7 +70,7 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 			// list user shares to post space shared activity
 			for (Space space : userService.getSharedKoyaNodes(
 					authenticationService.getCurrentUserName(), c)) {
-				koyaActivityPoster.postSpaceShared(user.getEmail(), "", space);
+				koyaActivityPoster.postSpaceShared(user.getUserName(), "", space);
 				// inviter is ommited
 			}
 		} catch (KoyaServiceException ex) {

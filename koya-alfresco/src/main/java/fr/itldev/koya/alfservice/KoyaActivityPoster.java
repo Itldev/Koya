@@ -93,11 +93,11 @@ public class KoyaActivityPoster implements InitializingBean {
 		PropertyCheck.mandatory(this, "companyAclService", companyAclService);
 	}
 
-	public void postSpaceShared(String inviteeEmail, String inviterUserName,
+	public void postSpaceShared(String inviteeUserName, String inviterUserName,
 			Space sharedSpace) {
 		try {
 
-			User user = userService.getUser(inviteeEmail);
+			User user = userService.getUser(inviteeUserName);
 			if (user != null && user.isEnabled() != null && user.isEnabled()) {
 				// TODO test if user still exists : treat invitation deletion
 				// case

@@ -242,7 +242,6 @@ public class SpaceAclService {
 			invitation = companyAclService.inviteMember(company, userMail,
 					SitePermission.CONSUMER, space);
 
-			logger.error("user ="+ invitation.getInviteeUserName() );
 			u = userService.getUser(invitation.getInviteeUserName());
 			userPermissionInCompany = companyAclService.getSitePermission(
 					company, u);
@@ -280,7 +279,7 @@ public class SpaceAclService {
 		/**
 		 * Post a Share activity using ShareSpaceActivityPoster
 		 */
-		koyaActivityPoster.postSpaceShared(userMail, inviter.getUserName(),
+		koyaActivityPoster.postSpaceShared(u.getUserName(), inviter.getUserName(),
 				space);
 
 		return invitation;
