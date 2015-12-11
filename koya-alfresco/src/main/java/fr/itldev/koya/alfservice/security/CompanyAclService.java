@@ -432,11 +432,7 @@ public class CompanyAclService {
 	public SitePermission getSitePermission(Company c, User u) {
 		// try with validated members
 
-		logger.error("company " + c);
-		logger.error("user " + u);
 		try {
-			logger.error("company name " + c.getName());
-			logger.error("user name " + u.getName());
 			String roleOfSite = siteService.getMembersRole(c.getName(),
 					u.getUserName());
 			if (roleOfSite != null) {
@@ -472,6 +468,8 @@ public class CompanyAclService {
 			final String userMail, final SitePermission permission,
 			final KoyaNode sharedItem) throws KoyaServiceException {
 
+		//TODO unique email unicity validation (if call inviteMember, 
+		// user should never already exist)
 		User u = userService.getUserByEmailFailOver(userMail);
 
 		if (u == null || getSitePermission(c, u) == null) {
@@ -520,7 +518,7 @@ public class CompanyAclService {
 		} else {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.INVITATION_USER_ALREADY_INVITED,
-					"User allready invited for this company");
+					"User already invited for this company");
 		}
 	}
 

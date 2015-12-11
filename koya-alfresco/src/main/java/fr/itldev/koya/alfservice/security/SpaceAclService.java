@@ -242,7 +242,8 @@ public class SpaceAclService {
 			invitation = companyAclService.inviteMember(company, userMail,
 					SitePermission.CONSUMER, space);
 
-			u = userService.getUserByEmailFailOver(userMail);
+			logger.error("user ="+ invitation.getInviteeUserName() );
+			u = userService.getUser(invitation.getInviteeUserName());
 			userPermissionInCompany = companyAclService.getSitePermission(
 					company, u);
 		}

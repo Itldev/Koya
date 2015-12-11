@@ -323,15 +323,19 @@ public class UserService {
 	/**
 	 * Get User by authenticationKey that could mail address or username.
 	 * 
+	 * 
+	 * TODO prefer username request : no index dependancy
+	 * 
 	 * @param authKey
 	 * @return
 	 * @throws fr.itldev.koya.exception.KoyaServiceException
 	 */
+	@Deprecated
 	public User getUser(final String authKey) throws KoyaServiceException {
 
 		if (personService.personExists(authKey)) {
 			return buildUser(personService.getPerson(authKey));
-		} else {
+		} else {			
 			String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\""
 					+ authKey + "\" ";
 			List<User> users = new ArrayList<>();
@@ -366,9 +370,12 @@ public class UserService {
 	 * Return user found by email. Return null if not found : no exception
 	 * thrown
 	 * 
+	 * TODO prefer username request : no index dependancy
+	 * 
 	 * @param authKey
 	 * @return
 	 */
+	@Deprecated
 	public User getUserByEmailFailOver(final String authKey) {
 		String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\""
 				+ authKey + "\" ";
