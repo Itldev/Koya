@@ -73,8 +73,8 @@ public class CompanyAclService {
 	protected AuthorityService authorityService;
 	protected AuthenticationService authenticationService;
 	protected ActionService actionService;
-    protected SearchService searchService;
-    protected PersonService personService;
+	protected SearchService searchService;
+	protected PersonService personService;
 
 	protected KoyaNodeService koyaNodeService;
 	protected KoyaMailService koyaMailService;
@@ -146,21 +146,21 @@ public class CompanyAclService {
 		return this.koyaClientRejectUrl;
 	}
 
-    public SearchService getSearchService() {
-        return searchService;
-    }
+	public SearchService getSearchService() {
+		return searchService;
+	}
 
-    public void setSearchService(SearchService searchService) {
-        this.searchService = searchService;
-    }
+	public void setSearchService(SearchService searchService) {
+		this.searchService = searchService;
+	}
 
-    public PersonService getPersonService() {
-        return personService;
-    }
+	public PersonService getPersonService() {
+		return personService;
+	}
 
-    public void setPersonService(PersonService personService) {
-        this.personService = personService;
-    }
+	public void setPersonService(PersonService personService) {
+		this.personService = personService;
+	}
 
 	// </editor-fold>
 	// TODO refine by userTypes : Collaborators Roles, Client Roles
@@ -194,82 +194,82 @@ public class CompanyAclService {
 		return members;
 	}
 
-    /**
-     *
-     * @param parent
-     * @param skipCount
-     * @param maxItems
-     * @param onlyFolders
-     * @return
-     * @throws KoyaServiceException
-     */
-    public Pair<List<User>, Pair<Long, Long>> listMembersPaginated(
-            String companyName, List<String> roles, final Integer skipCount,
-            final Integer maxItems, final boolean withAdmins,
-            final String sortField, final Boolean ascending)
-            throws KoyaServiceException {
+	/**
+	 * 
+	 * @param parent
+	 * @param skipCount
+	 * @param maxItems
+	 * @param onlyFolders
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	public Pair<List<User>, Pair<Long, Long>> listMembersPaginated(
+			String companyName, List<String> roles, final Integer skipCount,
+			final Integer maxItems, final boolean withAdmins,
+			final String sortField, final Boolean ascending)
+			throws KoyaServiceException {
 
-        Integer skip = skipCount;
-        Integer max = maxItems;
-        if (skipCount == null) {
-            skip = Integer.valueOf(0);
-        }
-        if (maxItems == null) {
-            max = Integer.MAX_VALUE;
-        }
+		Integer skip = skipCount;
+		Integer max = maxItems;
+		if (skipCount == null) {
+			skip = Integer.valueOf(0);
+		}
+		if (maxItems == null) {
+			max = Integer.MAX_VALUE;
+		}
 
-        SearchParameters sp = new SearchParameters();
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-        sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-        sp.setLimitBy(LimitBy.FINAL_SIZE);
-        sp.setSkipCount(skip);
-        sp.setMaxItems(max);
+		SearchParameters sp = new SearchParameters();
+		sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
+		sp.setLimitBy(LimitBy.FINAL_SIZE);
+		sp.setSkipCount(skip);
+		sp.setMaxItems(max);
 
-        if (sortField != null) {
-            sp.addSort(sortField, ascending);
-        }
+		if (sortField != null) {
+			sp.addSort(sortField, ascending);
+		}
 
-        StringBuffer query = new StringBuffer();
-        if(!roles.isEmpty()) {
-        String or = "";
-        for (String role : roles) {
-            query.append(or);
-            query.append("PATH:\"/sys:system/sys:authorities/cm:")
-                    .append(siteService.getSiteRoleGroup(companyName, role))
-                    .append("/*\"");
-            or = "OR ";
-        }
-        } else {
-        	query.append("PATH:\"/sys:system/sys:authorities/cm:")
-                    .append(siteService.getSiteGroup(companyName))
-                    .append("/*/*\"");
-        }
-        if (!withAdmins) {
-            query.insert(0, "(").append(") AND");
-            query.append(" NOT PARENT:\"workspace://SpacesStore/GROUP_ALFRESCO_ADMINISTRATORS\"");
-        }
-        logger.debug(query.toString());
-        sp.setQuery(query.toString());
-        ResultSet results = searchService.query(sp);
-        // results.
+		StringBuffer query = new StringBuffer();
+		if (!roles.isEmpty()) {
+			String or = "";
+			for (String role : roles) {
+				query.append(or);
+				query.append("PATH:\"/sys:system/sys:authorities/cm:")
+						.append(siteService.getSiteRoleGroup(companyName, role))
+						.append("/*\"");
+				or = "OR ";
+			}
+		} else {
+			query.append("PATH:\"/sys:system/sys:authorities/cm:")
+					.append(siteService.getSiteGroup(companyName))
+					.append("/*/*\"");
+		}
+		if (!withAdmins) {
+			query.insert(0, "(").append(") AND");
+			query.append(" NOT PARENT:\"workspace://SpacesStore/GROUP_ALFRESCO_ADMINISTRATORS\"");
+		}
+		logger.debug(query.toString());
+		sp.setQuery(query.toString());
+		ResultSet results = searchService.query(sp);
+		// results.
 
-        /**
-         * Transform List<FileInfo> as List<KoyaNode>
-         */
-        List<User> users = CollectionUtils.transform(results.getNodeRefs(),
-                new Function<NodeRef, User>() {
+		/**
+		 * Transform List<FileInfo> as List<KoyaNode>
+		 */
+		List<User> users = CollectionUtils.transform(results.getNodeRefs(),
+				new Function<NodeRef, User>() {
 
-            @Override
-            public User apply(NodeRef nodeRef) {
-                return userService.getUserByUsername(personService
-                        .getPerson(nodeRef).getUserName());
-            }
-        });
+					@Override
+					public User apply(NodeRef nodeRef) {
+						return userService.getUserByUsername(personService
+								.getPerson(nodeRef).getUserName());
+					}
+				});
 
-        return new Pair<List<User>, Pair<Long, Long>>(users,
-                new Pair<Long, Long>(results.getNumberFound(),
-                        results.getNumberFound()));
-    }
+		return new Pair<List<User>, Pair<Long, Long>>(users,
+				new Pair<Long, Long>(results.getNumberFound(),
+						results.getNumberFound()));
+	}
 
 	/**
 	 * List members of the company already validated.
@@ -431,10 +431,19 @@ public class CompanyAclService {
 	 */
 	public SitePermission getSitePermission(Company c, User u) {
 		// try with validated members
-		String roleOfSite = siteService.getMembersRole(c.getName(),
-				u.getUserName());
-		if (roleOfSite != null) {
-			return SitePermission.valueOf(roleOfSite);
+
+		logger.error("company " + c);
+		logger.error("user " + u);
+		try {
+			logger.error("company name " + c.getName());
+			logger.error("user name " + u.getName());
+			String roleOfSite = siteService.getMembersRole(c.getName(),
+					u.getUserName());
+			if (roleOfSite != null) {
+				return SitePermission.valueOf(roleOfSite);
+			}
+		} catch (NullPointerException npe) {
+			logger.error("npe occurs " + npe.toString());
 		}
 		// if not found, try with pending invitation users
 		Iterator<Invitation> it = getPendingInvite(c.getName(), null,
