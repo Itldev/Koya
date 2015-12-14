@@ -155,7 +155,7 @@ public class Start extends AbstractWebScript {
 			} catch (Exception e) {
 				logger.error("action  exception  " + e.toString());
 			}
-			response = KoyaWebscript.getObjectAsJson(d);
+			response = KoyaWebscript.getObjectAsJson(workflow.getId());
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
