@@ -235,7 +235,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				.runAsSystem(new AuthenticationUtil.RunAsWork<User>() {
 					@Override
 					public User doWork() throws Exception {
-						return userService.getUser(memberUserName);
+						return userService.getUserByUsername(memberUserName);
 					}
 				});
 		// add user email to activitySummary

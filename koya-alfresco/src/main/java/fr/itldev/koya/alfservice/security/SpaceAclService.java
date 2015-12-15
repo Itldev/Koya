@@ -224,7 +224,13 @@ public class SpaceAclService {
 				space.getNodeRef(), Company.class);
 
 		SitePermission userPermissionInCompany = null;
-		User u = userService.getUserByEmailFailOver(userMail);
+		User u = null;
+
+		try {
+			u = userService.getUserByEmail(userMail);
+		} catch (KoyaServiceException kse) {
+			// silently catch exception
+		}
 
 		if (u != null) {
 			userPermissionInCompany = companyAclService.getSitePermission(
@@ -242,7 +248,7 @@ public class SpaceAclService {
 			invitation = companyAclService.inviteMember(company, userMail,
 					SitePermission.CONSUMER, space);
 
-			u = userService.getUser(invitation.getInviteeUserName());
+			u = userService.getUserByUsername(invitation.getInviteeUserName());
 			userPermissionInCompany = companyAclService.getSitePermission(
 					company, u);
 		}
@@ -257,7 +263,7 @@ public class SpaceAclService {
 		/**
 		 * User should not already have any permission on node
 		 * 
-		 * User should not belong to any group wich name contains Current Space
+		 * User should not belong to any group which name contains Current Space
 		 * nodeRef id (cf group naming policy)
 		 */
 
@@ -274,13 +280,12 @@ public class SpaceAclService {
 		addKoyaAuthority(space, KoyaPermissionConsumer.CLIENT, u);
 
 		afterShareDelegate.get(nodeService.getType(space.getNodeRef()))
-				.afterShareItem(space.getNodeRef(), userMail, inviter);
+				.afterShareItem(space.getNodeRef(), u, inviter);
 
 		/**
 		 * Post a Share activity using ShareSpaceActivityPoster
 		 */
-		koyaActivityPoster.postSpaceShared(u.getUserName(), inviter.getUserName(),
-				space);
+		koyaActivityPoster.postSpaceShared(u, inviter.getUserName(), space);
 
 		return invitation;
 
@@ -294,7 +299,7 @@ public class SpaceAclService {
 	 * @param userMail
 	 */
 	public void clientUnshare(final Space space, final String userMail) {
-		final User u = userService.getUser(userMail);
+		final User u = userService.getUserByEmail(userMail);
 
 		User revoker = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
@@ -454,8 +459,8 @@ public class SpaceAclService {
 	}
 
 	/**
-	 * Get all spaces a user can access with any permission. Limited to
-	 * company scope
+	 * Get all spaces a user can access with any permission. Limited to company
+	 * scope
 	 * 
 	 * @param u
 	 * @return
@@ -1020,8 +1025,8 @@ public class SpaceAclService {
 	public Boolean toggleConfidential(Space space, Boolean confidential)
 			throws KoyaServiceException {
 
-		User u = userService
-				.getUser(authenticationService.getCurrentUserName());
+		User u = userService.getUserByUsername(authenticationService
+				.getCurrentUserName());
 
 		Company c = koyaNodeService.getFirstParentOfType(space.getNodeRef(),
 				Company.class);

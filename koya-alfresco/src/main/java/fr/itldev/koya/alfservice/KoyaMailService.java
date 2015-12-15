@@ -232,7 +232,7 @@ public class KoyaMailService implements InitializingBean {
 		final Space s = koyaNodeService.getKoyaNode(sharedNodeRef, Space.class);
 		final Company c = koyaNodeService.getFirstParentOfType(sharedNodeRef,
 				Company.class);
-		User u = userService.getUser(destUserName);
+		User u = userService.getUserByUsername(destUserName);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Alert Email - Share : space " + s.getTitle()
@@ -262,7 +262,7 @@ public class KoyaMailService implements InitializingBean {
 		templateModel.put("koyaClient", koyaClientParams);
 
 		if (inviterUserName != null) {
-			User inviter = userService.getUser(inviterUserName);
+			User inviter = userService.getUserByUsername(inviterUserName);
 			templateModel.put("inviter", new ScriptNode(inviter.getNodeRef(),
 					serviceRegistry));
 		}

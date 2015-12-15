@@ -112,8 +112,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 		this.userService = userService;
 	}
 
-	public void setSpaceAclService(
-			SpaceAclService spaceAclService) {
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
 		this.spaceAclService = spaceAclService;
 	}
 
@@ -145,7 +144,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 	public void setFailoverZipCharset(String failoverZipCharset) {
 		this.failoverZipCharset = failoverZipCharset;
 	}
-	
+
 	public void setTransactionService(TransactionService transactionService) {
 		this.transactionService = transactionService;
 	}
@@ -181,14 +180,14 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 		String zipName = (String) nodeService.getProperty(actionedUponNodeRef,
 				ContentModel.PROP_NAME);
 
-		ContentData contentRef =  (ContentData )nodeService.getProperty(actionedUponNodeRef, ContentModel.PROP_CONTENT);
-		long zipSizeBytes = 0; 
-		try{
-			zipSizeBytes = contentRef.getSize(); 
-		}catch(Exception e){
-			
+		ContentData contentRef = (ContentData) nodeService.getProperty(
+				actionedUponNodeRef, ContentModel.PROP_CONTENT);
+		long zipSizeBytes = 0;
+		try {
+			zipSizeBytes = contentRef.getSize();
+		} catch (Exception e) {
+
 		}
-		
 
 		if (!zipName.toLowerCase().endsWith(".zip")) {
 			return; // Not a zip file.
@@ -420,8 +419,6 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 							.getChildByName(documentLibrary,
 									ContentModel.ASSOC_CONTAINS, space);
 
-					
-					
 					boolean newDossier = false;
 					Dossier d = null;
 					try {
@@ -472,8 +469,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 										spaceNodeRef, props);
 								transaction.commit();
 							} catch (Exception e) {
-								try {
-									logger.error("rolllllllbasjj " +e.toString());
+								try {									
 									transaction.rollback();
 								} catch (IllegalStateException
 										| SecurityException | SystemException e1) {
@@ -499,9 +495,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 						continue;
 					}
 
-
 					mapCacheDossier.put(dossierXml.getReference(), d);
-					
 
 					logger.trace(getLogPrefix(companyName, userName)
 							+ "Get dossier responsibles");
@@ -613,14 +607,15 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 				if (dossier == null) {
 					dossier = dossierService.getDossier(company,
 							contentXml.getDossierReference());
-					
-					if(dossier == null){
+
+					if (dossier == null) {
 						sbLog.append("\nDossier "
-								+ contentXml.getDossierReference() + " not found");
+								+ contentXml.getDossierReference()
+								+ " not found");
 						contentStat.countContentDossierNotFound++;
 						continue;
 					}
-					
+
 					mapCacheDossier.put(contentXml.getDossierReference(),
 							dossier);
 				}
@@ -680,8 +675,7 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 
 				Integer errorCode = ex.getErrorCode();
 
-				if (errorCode
-						.equals(KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS)) {
+				if (errorCode.equals(KoyaErrorCodes.FILE_UPLOAD_NAME_EXISTS)) {
 					logger.error(getLogPrefix(companyName, userName) + "File "
 							+ filename + " - " + title + " already exist");
 					sbLog.append("\nFile " + filename + " - " + title
@@ -752,24 +746,32 @@ public class DossierImportActionExecuter extends ActionExecuterAbstractBase {
 			boolean newDossier, final StringBuffer sbLog) {
 		if (!newDossier) {
 			// Removing not responsible anymore
-			
-			List<User> currentUsers = spaceAclService.listMembership(d, permissionCollaborator);
+
+			List<User> currentUsers = spaceAclService.listMembership(d,
+					permissionCollaborator);
 
 			for (User u : currentUsers) {
 				if (!usersMail.contains(u.getEmail())) {
-					spaceAclService.removeKoyaAuthority(d, permissionCollaborator, u);					
+					spaceAclService.removeKoyaAuthority(d,
+							permissionCollaborator, u);
 				}
 			}
 		}
 
 		for (String userMail : usersMail) {
-			User u = userService.getUserByEmailFailOver(userMail);
+			User u = null;
+			try {
+				u = userService.getUserByEmail(userMail);
+			} catch (KoyaServiceException kse) {
+				// silently catch exception
+			}
+
 			if (u != null) {
 				try {
-					spaceAclService.collaboratorShare(d, u, permissionCollaborator);
-					logger.trace(getLogPrefix(c.getName(), null)
-							+ "Adding " + userMail + " as "
-							+ permissionCollaborator);
+ 					spaceAclService.collaboratorShare(d, u,
+							permissionCollaborator);
+					logger.trace(getLogPrefix(c.getName(), null) + "Adding "
+							+ userMail + " as " + permissionCollaborator);
 					sbLog.append("\nAdding " + userMail + " as "
 							+ permissionCollaborator);
 

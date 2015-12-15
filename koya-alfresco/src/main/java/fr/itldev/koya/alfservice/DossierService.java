@@ -409,7 +409,7 @@ public class DossierService {
 
 		Document d = koyaNodeService.getKoyaNode(
 				new NodeRef(upResult.get("nodeRef")), Document.class);
-		User uploader = userService.getUser(authenticationService
+		User uploader = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
 		koyaMailService.sendClientUploadAlertMail(dossier, d, uploader,
 				usersNotified, notifyCompanyManager);

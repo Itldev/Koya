@@ -320,65 +320,11 @@ public class UserService {
 		}
 	}
 
-	/**
-	 * Get User by authenticationKey that could mail address or username.
-	 * 
-	 * 
-	 * TODO prefer username request : no index dependancy
-	 * 
-	 * @param authKey
-	 * @return
-	 * @throws fr.itldev.koya.exception.KoyaServiceException
-	 */
-	@Deprecated
-	public User getUser(final String authKey) throws KoyaServiceException {
-
-		if (personService.personExists(authKey)) {
-			return buildUser(personService.getPerson(authKey));
-		} else {			
-			String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\""
-					+ authKey + "\" ";
-			List<User> users = new ArrayList<>();
-			ResultSet rs = null;
-			try {
-				rs = searchService.query(
-						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-						SearchService.LANGUAGE_LUCENE, luceneRequest);
-				for (ResultSetRow r : rs) {
-					users.add(buildUser(r.getNodeRef()));
-				}
-			} finally {
-				if (rs != null) {
-					rs.close();
-				}
-			}
-			if (users.isEmpty()) {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.NO_SUCH_USER_IDENTIFIED_BY_AUTHKEY,
-						authKey);
-			} else if (users.size() > 1) {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.MANY_USERS_IDENTIFIED_BY_AUTHKEY,
-						authKey);
-			} else {
-				return users.get(0);
-			}
-		}
-	}
-
-	/**
-	 * Return user found by email. Return null if not found : no exception
-	 * thrown
-	 * 
-	 * TODO prefer username request : no index dependancy
-	 * 
-	 * @param authKey
-	 * @return
-	 */
-	@Deprecated
-	public User getUserByEmailFailOver(final String authKey) {
-		String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\""
-				+ authKey + "\" ";
+	// TODO cached value,db request or any index free relation to avoid index
+	// latency.
+	public User getUserByEmail(final String email) throws KoyaServiceException {
+		String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"" + email
+				+ "\" ";
 		List<User> users = new ArrayList<>();
 		ResultSet rs = null;
 		try {
@@ -392,8 +338,12 @@ public class UserService {
 				rs.close();
 			}
 		}
-		if (users.isEmpty() || users.size() > 1) {
-			return null;
+		if (users.isEmpty()) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.NO_SUCH_USER_IDENTIFIED_BY_AUTHKEY, email);
+		} else if (users.size() > 1) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.MANY_USERS_IDENTIFIED_BY_AUTHKEY, email);
 		} else {
 			return users.get(0);
 		}
@@ -423,11 +373,10 @@ public class UserService {
 	 * @param u
 	 * @param n
 	 */
-	public void addSharedNode(String userMail, NodeRef n) {
+	public void addSharedNode(User u, NodeRef n) {
 		String name = nodeService.getProperty(n, ContentModel.PROP_NAME)
 				.toString();
 		try {
-			User u = getUser(userMail);
 
 			if (!nodeService.hasAspect(u.getNodeRef(),
 					KoyaModel.ASPECT_USERSHARES)) {
@@ -451,8 +400,8 @@ public class UserService {
 			if (!exists) {
 				nodeService.createAssociation(u.getNodeRef(), n,
 						KoyaModel.ASSOC_USER_SHAREDNODES);
-				logger.trace("Add userShares Association between " + userMail
-						+ " and " + name);
+				logger.trace("Add userShares Association between "
+						+ u.getEmail() + " and " + name);
 			}
 		} catch (Exception e) {
 		}
@@ -463,11 +412,10 @@ public class UserService {
 	 * @param u
 	 * @param n
 	 */
-	public void removeSharedNode(String userMail, NodeRef n) {
+	public void removeSharedNode(User u, NodeRef n) {
 		String name = nodeService.getProperty(n, ContentModel.PROP_NAME)
 				.toString();
 		try {
-			User u = getUser(userMail);
 
 			if (nodeService.hasAspect(u.getNodeRef(),
 					KoyaModel.ASPECT_USERSHARES)) {
@@ -476,8 +424,8 @@ public class UserService {
 			}
 			nodeService.removeAssociation(u.getNodeRef(), n,
 					KoyaModel.ASSOC_USER_SHAREDNODES);
-			logger.trace("Removes userShares Association between " + userMail
-					+ " and " + name);
+			logger.trace("Removes userShares Association between "
+					+ u.getEmail() + " and " + name);
 
 		} catch (Exception e) {
 		}
@@ -488,7 +436,7 @@ public class UserService {
 	 * 
 	 * Duplicates SpacesAclService.getKoyaUserSpaces
 	 * 
-	 *  TODO remove KoyaModel.ASSOC_USER_SHAREDNODES from model
+	 * TODO remove KoyaModel.ASSOC_USER_SHAREDNODES from model
 	 * 
 	 * @param u
 	 * @return
@@ -498,7 +446,7 @@ public class UserService {
 	public List<Space> getSharedKoyaNodes(String userName, Company c) {
 		List<Space> sharedKoyaNodes = new ArrayList<Space>();
 		try {
-			User u = getUser(userName);
+			User u = getUserByUsername(userName);
 			if (nodeService.hasAspect(u.getNodeRef(),
 					KoyaModel.ASPECT_USERSHARES)) {
 

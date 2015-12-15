@@ -18,57 +18,65 @@
  */
 package fr.itldev.koya.webscript.user;
 
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
-import org.apache.log4j.Logger;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * Get User by Authentication Key.
- *
+ * 
  * This key can either be the username or the user mail address. Service used by
  * library login method
- *
- *
+ * 
+ * 
  */
 public class GetByAuthKey extends AbstractWebScript {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	private UserService userService;
 
-    private UserService userService;
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
+		Map<String, Object> jsonMap = KoyaWebscript.getJsonMap(req);
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, Object> jsonMap = KoyaWebscript.getJsonMap(req);
+		String authKey = (String) jsonMap.get("authKey");
+		Boolean failProof = Boolean.FALSE;
 
-        String authKey = (String) jsonMap.get("authKey");
-        Boolean failProof = Boolean.FALSE;
+		try {
+			failProof = Boolean.valueOf(jsonMap.get("failProof").toString());
+		} catch (NullPointerException ex) {
 
-        try {
-            failProof = Boolean.valueOf(jsonMap.get("failProof").toString());
-        } catch (NullPointerException ex) {
+		}
+		String response = "";
 
-        }
-        String response = "";
+		User u = userService.getUserByUsername(authKey);
+		if (u == null) {
+			try {
+				u = userService.getUserByEmail(authKey);
+			} catch (RuntimeException ex) {
+				if (!failProof) {
+					throw new WebScriptException("KoyaError : "
+							+ ((KoyaServiceException) ex).getErrorCode()
+									.toString());
+				}
+			}
+		}
 
-        try {
-            response = KoyaWebscript.getObjectAsJson(userService.getUser(authKey));
-        } catch (KoyaServiceException ex) {
-            if (!failProof) {
-                throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-            }
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+		response = KoyaWebscript.getObjectAsJson(u);
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 }

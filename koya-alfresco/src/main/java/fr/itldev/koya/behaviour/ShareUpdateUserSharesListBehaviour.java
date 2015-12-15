@@ -4,7 +4,6 @@ import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,12 +44,12 @@ public class ShareUpdateUserSharesListBehaviour implements
 	}
 
 	@Override
-	public void afterShareItem(final NodeRef nodeRef, final String userMail,
-			User inviter) {
+	public void afterShareItem(final NodeRef nodeRef, final User u, User inviter) {
 		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
 			@Override
 			public Object doWork() throws Exception {
-				userService.addSharedNode(userMail, nodeRef);
+
+				userService.addSharedNode(u, nodeRef);
 				return null;
 			}
 		});
@@ -58,11 +57,12 @@ public class ShareUpdateUserSharesListBehaviour implements
 	}
 
 	@Override
-	public void afterUnshareItem(final NodeRef nodeRef, final User user, User inviter) {
+	public void afterUnshareItem(final NodeRef nodeRef, final User user,
+			User inviter) {
 		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork() {
 			@Override
 			public Object doWork() throws Exception {
-				userService.removeSharedNode(user.getEmail(), nodeRef);
+				userService.removeSharedNode(user, nodeRef);
 				return null;
 			}
 		});

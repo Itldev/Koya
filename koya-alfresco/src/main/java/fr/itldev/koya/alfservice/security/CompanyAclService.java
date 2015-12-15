@@ -52,6 +52,7 @@ import org.alfresco.util.collections.Filter;
 import org.alfresco.util.collections.Function;
 import org.apache.log4j.Logger;
 
+import fr.itldev.koya.action.CleanUserPermissionsActionExecuter;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
@@ -468,9 +469,17 @@ public class CompanyAclService {
 			final String userMail, final SitePermission permission,
 			final KoyaNode sharedItem) throws KoyaServiceException {
 
-		//TODO unique email unicity validation (if call inviteMember, 
+		// TODO unique email unicity validation (if call inviteMember,
 		// user should never already exist)
-		User u = userService.getUserByEmailFailOver(userMail);
+		User uTmp = null;
+
+		try {
+			uTmp = userService.getUserByEmail(userMail);
+		} catch (KoyaServiceException kse) {
+			// Silently catch exception
+		}
+		
+		final User u = uTmp;
 
 		if (u == null || getSitePermission(c, u) == null) {
 			/**
@@ -503,7 +512,7 @@ public class CompanyAclService {
 							// Force addSharedNode Before sending invite mail if
 							// sharedItem exists
 							if (sharedItem != null) {
-								userService.addSharedNode(userMail,
+								userService.addSharedNode(u,
 										sharedItem.getNodeRef());
 							}
 							koyaMailService.sendInviteMail(invitation
@@ -593,7 +602,7 @@ public class CompanyAclService {
 				Map<String, Serializable> paramsClean = new HashMap<>();
 				paramsClean.put("userName", u.getUserName());
 				Action cleanUserAuth = actionService.createAction(
-						"cleanPermissions", paramsClean);
+						CleanUserPermissionsActionExecuter.NAME, paramsClean);
 				cleanUserAuth.setExecuteAsynchronously(true);
 				actionService.executeAction(cleanUserAuth,
 						siteService.getSite(c.getName()).getNodeRef());
