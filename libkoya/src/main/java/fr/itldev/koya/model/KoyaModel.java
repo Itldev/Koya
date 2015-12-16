@@ -75,9 +75,6 @@ public class KoyaModel {
 
 	public static final QName ASPECT_CONFIDENTIAL = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "confidential");
-
-	public static final QName ASPECT_USERSHARES = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "userShares");
 	
 	public static final QName ASPECT_BPMSTATUS = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "bpmStatus");
@@ -146,9 +143,6 @@ public class KoyaModel {
 
 	public static final QName ASSOC_LOGO_COMPANY = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "companyLogo");
-
-	public static final QName ASSOC_USER_SHAREDNODES = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "userSharedNodes");
 
 	/**
 	 * Used because koya namespace is not registered

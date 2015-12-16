@@ -41,6 +41,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 
 import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Document;
@@ -90,6 +91,7 @@ public class KoyaMailService implements InitializingBean {
 	protected ServiceRegistry serviceRegistry;
 	protected CompanyAclService companyAclService;
 	protected CompanyService companyService;
+	protected SpaceAclService spaceAclService;
 	protected CompanyPropertiesService companyPropertiesService;
 
 	protected WorkflowService workflowService;
@@ -165,6 +167,12 @@ public class KoyaMailService implements InitializingBean {
 
 	public void setCompanyService(CompanyService companyService) {
 		this.companyService = companyService;
+	}
+	
+	
+
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
 	}
 
 	public void setCompanyPropertiesService(
@@ -503,7 +511,7 @@ public class KoyaMailService implements InitializingBean {
 
 		KoyaInviteSender koyaInviteSender = new KoyaInviteSender(
 				serviceRegistry, repositoryHelper, messageService, this,
-				koyaNodeService, companyAclService, companyService,
+				koyaNodeService, spaceAclService, companyService,
 				companyPropertiesService, userService, koyaClientParams);
 
 		Map<String, String> properties = new HashMap<>();
@@ -734,7 +742,6 @@ public class KoyaMailService implements InitializingBean {
 			return "#";// TODO build share url
 		} else {
 
-					
 			return koyaClientServerPath
 					+ koyaDirectLinkUrlTemplate.replace("{nodeId}", n.getId());
 		}

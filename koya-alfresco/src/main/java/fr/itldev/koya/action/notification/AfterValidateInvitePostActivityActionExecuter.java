@@ -9,13 +9,11 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
 
-import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaActivityPoster;
 import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.SpaceService;
 import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
@@ -36,8 +34,7 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 	protected UserService userService;
 	protected KoyaActivityPoster koyaActivityPoster;
 	protected AuthenticationService authenticationService;
-
-	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
+	protected SpaceAclService spaceAclService;
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
@@ -56,7 +53,10 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 		this.authenticationService = authenticationService;
 	}
 
-	// </editor-fold>
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
+	}
+
 	@Override
 	protected void executeImpl(Action action, final NodeRef actionedUponNodeRef) {
 
@@ -67,9 +67,12 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 			Company c = koyaNodeService.getKoyaNode(actionedUponNodeRef,
 					Company.class);
 
+			User u = userService.getUserByUsername(authenticationService
+					.getCurrentUserName());
+
 			// list user shares to post space shared activity
-			for (Space space : userService.getSharedKoyaNodes(
-					authenticationService.getCurrentUserName(), c)) {
+			for (Space space : spaceAclService.getKoyaUserSpaces(u, c,
+					Dossier.class)) {
 				koyaActivityPoster.postSpaceShared(user, "", space);
 				// inviter is ommited
 			}

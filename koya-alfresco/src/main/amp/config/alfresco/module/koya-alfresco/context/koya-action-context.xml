@@ -87,6 +87,7 @@
         <property name="koyaActivityPoster" ref="koyaActivityPoster"/> 
         <property name="userService" ref="userService"/>                
         <property name="authenticationService" ref="AuthenticationService"/>
+        <property name="spaceAclService" ref="spaceAclService"/>
     </bean>    
     
     <bean id="pdfRender" init-method="init"

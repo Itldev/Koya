@@ -458,6 +458,10 @@ public class SpaceAclService {
 		return spaces;
 	}
 
+	public List<Space> getKoyaUserSpaces(User u, Company c) {
+		return getKoyaUserSpaces(u, c, null);
+	}
+
 	/**
 	 * Get all spaces a user can access with any permission. Limited to company
 	 * scope
@@ -465,7 +469,8 @@ public class SpaceAclService {
 	 * @param u
 	 * @return
 	 */
-	public List<Space> getKoyaUserSpaces(User u, Company c) {
+	public List<Space> getKoyaUserSpaces(User u, Company c,
+			Class<? extends KoyaNode> typeFilter) {
 		List<Space> spaces = new ArrayList<>();
 
 		Set<String> authorities = authorityService.getAuthoritiesForUser(u
@@ -477,7 +482,10 @@ public class SpaceAclService {
 			if (s != null
 					&& koyaNodeService.getFirstParentOfType(s.getNodeRef(),
 							Company.class).equals(c)) {
-				spaces.add(s);
+
+				if (typeFilter == null || s.getClass().equals(typeFilter)) {
+					spaces.add(s);
+				}
 			}
 		}
 		return spaces;

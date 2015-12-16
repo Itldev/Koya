@@ -509,12 +509,6 @@ public class CompanyAclService {
 											koyaClientAcceptUrl,
 											koyaClientRejectUrl);
 
-							// Force addSharedNode Before sending invite mail if
-							// sharedItem exists
-							if (sharedItem != null) {
-								userService.addSharedNode(u,
-										sharedItem.getNodeRef());
-							}
 							koyaMailService.sendInviteMail(invitation
 									.getInviteId());
 							return invitation;

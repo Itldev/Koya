@@ -42,7 +42,7 @@ import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 
 /**
  *
@@ -90,7 +90,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
      */
     private KoyaMailService koyaMailService;
     private KoyaNodeService koyaNodeService;
-    private CompanyAclService companyAclService;
+    private SpaceAclService spaceAclService;
     private CompanyService companyService;
 
     public void setKoyaMailService(KoyaMailService koyaMailService) {
@@ -101,8 +101,8 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         this.koyaNodeService = koyaNodeService;
     }
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
+    public void setSpaceAclService(SpaceAclService companyAclService) {
+        this.spaceAclService = spaceAclService;
     }
 
     public void setCompanyService(CompanyService companyService) {
@@ -132,7 +132,7 @@ public class KoyaInviteHelper extends InviteHelper implements InitializingBean {
         this.nodeService = serviceRegistry.getNodeService();
         this.inviteSender = new KoyaInviteSender(serviceRegistry,
                 repositoryHelper, messageService, koyaMailService,
-                koyaNodeService, companyAclService, companyService,
+                koyaNodeService, spaceAclService, companyService,
                 companyPropertiesService,userService, koyaMailService.getKoyaClientParams());
     }
 
