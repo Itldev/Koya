@@ -38,7 +38,7 @@ import java.io.Serializable;
 public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService, Serializable {
 
 	private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add?alf_ticket={alf_ticket}";
-	private static final String REST_POST_SHAREPRESET_COMPANY = "/s/fr/itldev/koya/company/apply-preset?alf_ticket={alf_ticket}";
+	private static final String REST_POST_SHAREPRESET_COMPANY = "/service/fr/itldev/koya/company/apply-preset";
 
 	private static final String REST_GET_LISTCOMPANY = "/s/fr/itldev/koya/company/list.json?adminMode={adminMode}&alf_ticket={alf_ticket}";
 	private static final String REST_GET_COMPANY = "/s/fr/itldev/koya/company/get/{companyName}?alf_ticket={alf_ticket}";
@@ -91,7 +91,7 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 
 		getTemplate().postForObject(
 				getShareWebappUrl() + REST_POST_SHAREPRESET_COMPANY,
-				initPresetsParams, String.class, admin.getTicketAlfresco());
+				initPresetsParams, String.class);
 		return c;
 	}
 

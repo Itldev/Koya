@@ -23,5 +23,5 @@
    <shortname>Apply json post defined preset company</shortname>   
    <format default="json"/>
    <url>/fr/itldev/koya/company/apply-preset</url>
-   <authentication>admin</authentication>
+   <authentication>none</authentication>
 </webscript>
