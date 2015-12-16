@@ -370,7 +370,7 @@ public class CompanyAclService {
 		if (companyId != null) {
 			criteria.setResourceName(companyId);
 		}
-
+		
 		return AuthenticationUtil
 				.runAsSystem(new AuthenticationUtil.RunAsWork<List<Invitation>>() {
 					@Override

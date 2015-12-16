@@ -35,7 +35,8 @@ import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.Serializable;
 
-public class CompanyServiceImpl extends AlfrescoRestService implements CompanyService, Serializable {
+public class CompanyServiceImpl extends AlfrescoRestService implements
+		CompanyService, Serializable {
 
 	private static final String REST_POST_ADDCOMPANY = "/s/fr/itldev/koya/company/add?alf_ticket={alf_ticket}";
 	private static final String REST_POST_SHAREPRESET_COMPANY = "/service/fr/itldev/koya/company/apply-preset";
@@ -44,7 +45,11 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 	private static final String REST_GET_COMPANY = "/s/fr/itldev/koya/company/get/{companyName}?alf_ticket={alf_ticket}";
 
 	private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/company/members/{companyName}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_LISTMEMBERS_PAGINATED = "/s/fr/itldev/koya/company/members/paginated/{companyName}?skipCount={skipCount}&amp;maxItems={maxItems}&amp;withAdmins={withAdmins}&amp;filterExpr={filterExpr}&amp;typeFilter={typeFilter}&amp;sortField={sortExpr}&amp;ascending={ascending}&amp;alf_ticket={alf_ticket}";
 	private static final String REST_GET_LISTMEMBERS_ROLEFILTER = "/s/fr/itldev/koya/company/members/{companyName}/{roleFilter}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_LISTMEMBERS_PAGINATED_ROLEFILTER = "/s/fr/itldev/koya/company/members/paginated/{companyName}/{roleFilter}?skipCount={skipCount}&amp;maxItems={maxItems}&amp;withAdmins={withAdmins}&amp;filterExpr={filterExpr}&amp;typeFilter={typeFilter}&amp;sortField={sortExpr}&amp;ascending={ascending}&amp;alf_ticket={alf_ticket}";
+	private static final String REST_GET_LISTMEMBERS_PENDING = "/s/fr/itldev/koya/company/members/pending/{companyName}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_LISTMEMBERS_PENDING_ROLEFILTER = "/s/fr/itldev/koya/company/members/pending/{companyName}/{roleFilter}?alf_ticket={alf_ticket}";
 
 	private static final String REST_DEL_DELCOMPANY = "/s/api/sites/{shortname}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_LISTOFFERS = "/s/fr/itldev/koya/salesoffer/list?active={active}&alf_ticket={alf_ticket}";
@@ -173,6 +178,80 @@ public class CompanyServiceImpl extends AlfrescoRestService implements CompanySe
 					getTemplate().getForObject(
 							getAlfrescoServerUrl()
 									+ REST_GET_LISTMEMBERS_ROLEFILTER,
+							String.class, company.getName(), filterString,
+							userLogged.getTicketAlfresco()));
+		}
+
+	}
+
+	@Override
+	public List<User> listMembersPaginated(User userLogged, Company company,
+			List<String> rolesFilter, Integer skipCount, Integer maxItems,
+			Boolean withAdmins, String sortField, Boolean ascending)
+			throws RestClientException, AlfrescoServiceException {
+
+		if (rolesFilter == null) {
+			return fromJSON(
+					new TypeReference<List<User>>() {
+					},
+					getTemplate().getForObject(
+							getAlfrescoServerUrl()
+									+ REST_GET_LISTMEMBERS_PAGINATED,
+							String.class, company.getName(), skipCount,
+							maxItems, withAdmins, null, "", sortField, ascending,
+							userLogged.getTicketAlfresco()));
+		} else {
+
+			String filterString = "";
+			String sep = "";
+			for (String role : rolesFilter) {
+				filterString += sep + role;
+				sep = ",";
+			}
+
+			return fromJSON(
+					new TypeReference<List<User>>() {
+					},
+					getTemplate()
+							.getForObject(
+									getAlfrescoServerUrl()
+											+ REST_GET_LISTMEMBERS_PAGINATED_ROLEFILTER,
+									String.class, company.getName(),
+									filterString, skipCount, maxItems,
+									withAdmins, null, "", sortField, ascending,
+									userLogged.getTicketAlfresco()));
+		}
+
+	}
+	
+	@Override
+	public List<User> listMembersPending(User userLogged, Company company,
+			List<String> rolesFilter) throws RestClientException,
+			AlfrescoServiceException {
+
+		if (rolesFilter == null) {
+			return fromJSON(
+					new TypeReference<List<User>>() {
+					},
+					getTemplate().getForObject(
+							getAlfrescoServerUrl() + REST_GET_LISTMEMBERS_PENDING,
+							String.class, company.getName(),
+							userLogged.getTicketAlfresco()));
+		} else {
+
+			String filterString = "";
+			String sep = "";
+			for (String role : rolesFilter) {
+				filterString += sep + role;
+				sep = ",";
+			}
+
+			return fromJSON(
+					new TypeReference<List<User>>() {
+					},
+					getTemplate().getForObject(
+							getAlfrescoServerUrl()
+									+ REST_GET_LISTMEMBERS_PENDING_ROLEFILTER,
 							String.class, company.getName(), filterString,
 							userLogged.getTicketAlfresco()));
 		}

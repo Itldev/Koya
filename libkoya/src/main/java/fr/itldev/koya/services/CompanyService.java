@@ -24,7 +24,9 @@ import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+
 import java.util.List;
+
 import org.springframework.web.client.RestClientException;
 
 public interface CompanyService extends AlfrescoService {
@@ -175,4 +177,36 @@ public interface CompanyService extends AlfrescoService {
 	 */
 	public void commitProperties(User user, Company c, CompanyProperties p)
 			throws AlfrescoServiceException;
+
+	/**
+	 * List company members paginated
+	 * 
+	 * 
+	 * @param userLogged
+	 * @param company
+	 * @param rolesFilter
+	 * @param skipCount
+	 * @param maxItems
+	 * @param withAdmins
+	 * @param sortField
+	 * @param ascending
+	 * @return
+	 */
+	public List<User> listMembersPaginated(User userLogged, Company company,
+			List<String> rolesFilter, Integer skipCount, Integer maxItems,
+			Boolean withAdmins, String sortField, Boolean ascending);
+
+	/**
+	 * List pending invitation for a company
+	 * 
+	 * @param userLogged
+	 * @param company
+	 * @param rolesFilter
+	 * @return
+	 * @throws RestClientException
+	 * @throws AlfrescoServiceException
+	 */
+	List<User> listMembersPending(User userLogged, Company company,
+			List<String> rolesFilter) throws RestClientException,
+			AlfrescoServiceException;
 }
