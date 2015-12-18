@@ -21,7 +21,7 @@
 	<parent>
 		<groupId>fr.itldev</groupId>
 		<artifactId>koya</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>0.12.0</version>
 	</parent>
 
 	<dependencies>
