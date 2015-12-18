@@ -75,9 +75,9 @@ public class KoyaModel {
 
 	public static final QName ASPECT_CONFIDENTIAL = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "confidential");
-
-	public static final QName ASPECT_USERSHARES = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "userShares");
+	
+	public static final QName ASPECT_BPMSTATUS = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "bpmStatus");
 
 	// ================= Aspects Properties
 
@@ -98,6 +98,9 @@ public class KoyaModel {
 
 	public static final QName PROP_NOTIFIED = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "notified");
+	
+	public static final QName PROP_BPMCURRENTSTATUS = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "currentBpmStatus");
 
 	// ================= Types Properties =========================
 	public static final QName PROP_CONTACTITEM_VALUE = QName.createQName(
@@ -129,7 +132,7 @@ public class KoyaModel {
 
 	public static final QName PROP_REFERENCE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "reference");
-	
+
 	public static final QName PROP_ACTIVITIIDS = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "activitiIds");
 
@@ -140,9 +143,6 @@ public class KoyaModel {
 
 	public static final QName ASSOC_LOGO_COMPANY = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "companyLogo");
-
-	public static final QName ASSOC_USER_SHAREDNODES = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "userSharedNodes");
 
 	/**
 	 * Used because koya namespace is not registered
@@ -170,5 +170,15 @@ public class KoyaModel {
 					put(Dossier.class, TYPE_DOSSIER);
 				}
 			});
+
+	// ========= Constraints values
+
+	public static class BpmStatusValues {
+		public static String RUNNING = "RUNNING";
+		public static String CANCELED = "CANCELED";
+		public static String FINISHED = "FINISHED";
+		public static String UNKNOWN = "UNKNOWN";
+
+	}
 
 }

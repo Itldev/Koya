@@ -33,7 +33,8 @@
         <property name="authorityService" ref="AuthorityService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
         <property name="koyaMailService" ref="koyaMailService"/>
-         
+        <property name="searchService" ref="searchService"/>
+        <property name="personService" ref="personService"/>
         
         <property name="koyaClientServerPath" >
             <value>${koya.client.serverPath}</value>

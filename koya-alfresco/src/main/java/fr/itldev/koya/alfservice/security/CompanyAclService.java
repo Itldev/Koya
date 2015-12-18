@@ -35,15 +35,24 @@ import org.alfresco.service.cmr.invitation.InvitationSearchCriteria;
 import org.alfresco.service.cmr.invitation.InvitationService;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.LimitBy;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.SearchParameters;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.util.Pair;
 import org.alfresco.util.collections.CollectionUtils;
 import org.alfresco.util.collections.Filter;
 import org.alfresco.util.collections.Function;
 import org.apache.log4j.Logger;
 
+import fr.itldev.koya.action.CleanUserPermissionsActionExecuter;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
@@ -65,6 +74,8 @@ public class CompanyAclService {
 	protected AuthorityService authorityService;
 	protected AuthenticationService authenticationService;
 	protected ActionService actionService;
+	protected SearchService searchService;
+	protected PersonService personService;
 
 	protected KoyaNodeService koyaNodeService;
 	protected KoyaMailService koyaMailService;
@@ -136,6 +147,22 @@ public class CompanyAclService {
 		return this.koyaClientRejectUrl;
 	}
 
+	public SearchService getSearchService() {
+		return searchService;
+	}
+
+	public void setSearchService(SearchService searchService) {
+		this.searchService = searchService;
+	}
+
+	public PersonService getPersonService() {
+		return personService;
+	}
+
+	public void setPersonService(PersonService personService) {
+		this.personService = personService;
+	}
+
 	// </editor-fold>
 	// TODO refine by userTypes : Collaborators Roles, Client Roles
 	public List<UserRole> getAvailableRoles(Company c)
@@ -166,6 +193,83 @@ public class CompanyAclService {
 		members.addAll(listMembersPendingInvitation(companyName,
 				permissionsFilter));
 		return members;
+	}
+
+	/**
+	 * 
+	 * @param parent
+	 * @param skipCount
+	 * @param maxItems
+	 * @param onlyFolders
+	 * @return
+	 * @throws KoyaServiceException
+	 */
+	public Pair<List<User>, Pair<Long, Long>> listMembersPaginated(
+			String companyName, List<String> roles, final Integer skipCount,
+			final Integer maxItems, final boolean withAdmins,
+			final String sortField, final Boolean ascending)
+			throws KoyaServiceException {
+
+		Integer skip = skipCount;
+		Integer max = maxItems;
+		if (skipCount == null) {
+			skip = Integer.valueOf(0);
+		}
+		if (maxItems == null) {
+			max = Integer.MAX_VALUE;
+		}
+
+		SearchParameters sp = new SearchParameters();
+		sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
+		sp.setLimitBy(LimitBy.FINAL_SIZE);
+		sp.setSkipCount(skip);
+		sp.setMaxItems(max);
+
+		if (sortField != null) {
+			sp.addSort(sortField, ascending);
+		}
+
+		StringBuffer query = new StringBuffer();
+		if (!roles.isEmpty()) {
+			String or = "";
+			for (String role : roles) {
+				query.append(or);
+				query.append("PATH:\"/sys:system/sys:authorities/cm:")
+						.append(siteService.getSiteRoleGroup(companyName, role))
+						.append("/*\"");
+				or = "OR ";
+			}
+		} else {
+			query.append("PATH:\"/sys:system/sys:authorities/cm:")
+					.append(siteService.getSiteGroup(companyName))
+					.append("/*/*\"");
+		}
+		if (!withAdmins) {
+			query.insert(0, "(").append(") AND");
+			query.append(" NOT PARENT:\"workspace://SpacesStore/GROUP_ALFRESCO_ADMINISTRATORS\"");
+		}
+		logger.debug(query.toString());
+		sp.setQuery(query.toString());
+		ResultSet results = searchService.query(sp);
+		// results.
+
+		/**
+		 * Transform List<FileInfo> as List<KoyaNode>
+		 */
+		List<User> users = CollectionUtils.transform(results.getNodeRefs(),
+				new Function<NodeRef, User>() {
+
+					@Override
+					public User apply(NodeRef nodeRef) {
+						return userService.getUserByUsername(personService
+								.getPerson(nodeRef).getUserName());
+					}
+				});
+
+		return new Pair<List<User>, Pair<Long, Long>>(users,
+				new Pair<Long, Long>(results.getNumberFound(),
+						results.getNumberFound()));
 	}
 
 	/**
@@ -266,7 +370,7 @@ public class CompanyAclService {
 		if (companyId != null) {
 			criteria.setResourceName(companyId);
 		}
-
+		
 		return AuthenticationUtil
 				.runAsSystem(new AuthenticationUtil.RunAsWork<List<Invitation>>() {
 					@Override
@@ -328,10 +432,15 @@ public class CompanyAclService {
 	 */
 	public SitePermission getSitePermission(Company c, User u) {
 		// try with validated members
-		String roleOfSite = siteService.getMembersRole(c.getName(),
-				u.getUserName());
-		if (roleOfSite != null) {
-			return SitePermission.valueOf(roleOfSite);
+
+		try {
+			String roleOfSite = siteService.getMembersRole(c.getName(),
+					u.getUserName());
+			if (roleOfSite != null) {
+				return SitePermission.valueOf(roleOfSite);
+			}
+		} catch (NullPointerException npe) {
+			logger.error("npe occurs " + npe.toString());
 		}
 		// if not found, try with pending invitation users
 		Iterator<Invitation> it = getPendingInvite(c.getName(), null,
@@ -360,9 +469,19 @@ public class CompanyAclService {
 			final String userMail, final SitePermission permission,
 			final KoyaNode sharedItem) throws KoyaServiceException {
 
-		User u = userService.getUserByEmailFailOver(userMail);
+		// TODO unique email unicity validation (if call inviteMember,
+		// user should never already exist)
+		User uTmp = null;
 
-                if (u == null || getSitePermission(c, u) == null) {
+		try {
+			uTmp = userService.getUserByEmail(userMail);
+		} catch (KoyaServiceException kse) {
+			// Silently catch exception
+		}
+		
+		final User u = uTmp;
+
+		if (u == null || getSitePermission(c, u) == null) {
 			/**
 			 * Workaround to resolve invite by user bug :
 			 * 
@@ -390,12 +509,6 @@ public class CompanyAclService {
 											koyaClientAcceptUrl,
 											koyaClientRejectUrl);
 
-							// Force addSharedNode Before sending invite mail if
-							// sharedItem exists
-							if (sharedItem != null) {
-								userService.addSharedNode(userMail,
-										sharedItem.getNodeRef());
-							}
 							koyaMailService.sendInviteMail(invitation
 									.getInviteId());
 							return invitation;
@@ -406,8 +519,10 @@ public class CompanyAclService {
 			return invitation;
 
 		} else {
-                    throw new KoyaServiceException(KoyaErrorCodes.INVITATION_USER_ALREADY_INVITED, "User allready invited for this company");
-                }
+			throw new KoyaServiceException(
+					KoyaErrorCodes.INVITATION_USER_ALREADY_INVITED,
+					"User already invited for this company");
+		}
 	}
 
 	/**
@@ -431,16 +546,31 @@ public class CompanyAclService {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.SECU_USER_MUSTBE_COMPANY_MEMBER_TO_CHANGE_COMPANYROLE);
 		}
-		/**
-		 * TODO check if pending invitation exists
-		 */
+		final InvitationSearchCriteriaImpl criteria = new InvitationSearchCriteriaImpl();
+		criteria.setInvitationType(InvitationSearchCriteria.InvitationType.NOMINATED);
+		criteria.setResourceType(Invitation.ResourceType.WEB_SITE);
+		criteria.setResourceName(c.getName());
+		criteria.setInvitee(u.getUserName());
 
-		try {
-			siteService.setMembership(c.getName(), u.getUserName(),
-					role.toString());
-		} catch (SiteDoesNotExistException ex) {
+		List<Invitation> invitations = AuthenticationUtil
+				.runAsSystem(new AuthenticationUtil.RunAsWork<List<Invitation>>() {
+					@Override
+					public List<Invitation> doWork() throws Exception {
+						return invitationService.searchInvitation(criteria);
+					}
+				});
+
+		if (!invitations.isEmpty()) {
 			throw new KoyaServiceException(
-					KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+					KoyaErrorCodes.SECU_CANT_MODIFY_USER_PENDING_INVITE_ROLE);
+		} else {
+			try {
+				siteService.setMembership(c.getName(), u.getUserName(),
+						role.toString());
+			} catch (SiteDoesNotExistException ex) {
+				throw new KoyaServiceException(
+						KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+			}
 		}
 
 	}
@@ -466,7 +596,7 @@ public class CompanyAclService {
 				Map<String, Serializable> paramsClean = new HashMap<>();
 				paramsClean.put("userName", u.getUserName());
 				Action cleanUserAuth = actionService.createAction(
-						"cleanPermissions", paramsClean);
+						CleanUserPermissionsActionExecuter.NAME, paramsClean);
 				cleanUserAuth.setExecuteAsynchronously(true);
 				actionService.executeAction(cleanUserAuth,
 						siteService.getSite(c.getName()).getNodeRef());

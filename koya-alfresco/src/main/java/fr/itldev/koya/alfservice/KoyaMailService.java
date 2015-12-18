@@ -41,6 +41,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 
 import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Document;
@@ -90,6 +91,7 @@ public class KoyaMailService implements InitializingBean {
 	protected ServiceRegistry serviceRegistry;
 	protected CompanyAclService companyAclService;
 	protected CompanyService companyService;
+	protected SpaceAclService spaceAclService;
 	protected CompanyPropertiesService companyPropertiesService;
 
 	protected WorkflowService workflowService;
@@ -110,6 +112,7 @@ public class KoyaMailService implements InitializingBean {
 	 * Optional parameters, if not set, use clasic share url
 	 */
 	protected String koyaDirectLinkUrlTemplate;
+	protected String koyaClientServerPath;
 
 	/**
      *
@@ -154,12 +157,22 @@ public class KoyaMailService implements InitializingBean {
 		this.koyaDirectLinkUrlTemplate = koyaDirectLinkUrlTemplate;
 	}
 
+	public void setKoyaClientServerPath(String koyaClientServerPath) {
+		this.koyaClientServerPath = koyaClientServerPath;
+	}
+
 	public void setCompanyAclService(CompanyAclService companyAclService) {
 		this.companyAclService = companyAclService;
 	}
 
 	public void setCompanyService(CompanyService companyService) {
 		this.companyService = companyService;
+	}
+	
+	
+
+	public void setSpaceAclService(SpaceAclService spaceAclService) {
+		this.spaceAclService = spaceAclService;
 	}
 
 	public void setCompanyPropertiesService(
@@ -227,7 +240,7 @@ public class KoyaMailService implements InitializingBean {
 		final Space s = koyaNodeService.getKoyaNode(sharedNodeRef, Space.class);
 		final Company c = koyaNodeService.getFirstParentOfType(sharedNodeRef,
 				Company.class);
-		User u = userService.getUser(destUserName);
+		User u = userService.getUserByUsername(destUserName);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Alert Email - Share : space " + s.getTitle()
@@ -257,7 +270,7 @@ public class KoyaMailService implements InitializingBean {
 		templateModel.put("koyaClient", koyaClientParams);
 
 		if (inviterUserName != null) {
-			User inviter = userService.getUser(inviterUserName);
+			User inviter = userService.getUserByUsername(inviterUserName);
 			templateModel.put("inviter", new ScriptNode(inviter.getNodeRef(),
 					serviceRegistry));
 		}
@@ -313,7 +326,6 @@ public class KoyaMailService implements InitializingBean {
 		 * Model Objects
 		 */
 
-		
 		templateModel.put("notifyCompanyManagers", notifyCompanyManagers);
 
 		templateModel.put("clientUploader",
@@ -499,7 +511,7 @@ public class KoyaMailService implements InitializingBean {
 
 		KoyaInviteSender koyaInviteSender = new KoyaInviteSender(
 				serviceRegistry, repositoryHelper, messageService, this,
-				koyaNodeService, companyAclService, companyService,
+				koyaNodeService, spaceAclService, companyService,
 				companyPropertiesService, userService, koyaClientParams);
 
 		Map<String, String> properties = new HashMap<>();
@@ -723,11 +735,15 @@ public class KoyaMailService implements InitializingBean {
 	}
 
 	public String getDirectLinkUrl(NodeRef n) {
-		if (koyaDirectLinkUrlTemplate == null
-				|| koyaDirectLinkUrlTemplate.isEmpty()) {
+
+		if (koyaDirectLinkUrlTemplate == null || koyaClientServerPath == null
+				|| koyaDirectLinkUrlTemplate.isEmpty()
+				|| koyaClientServerPath.isEmpty()) {
 			return "#";// TODO build share url
 		} else {
-			return koyaDirectLinkUrlTemplate.replace("{nodeRef}", n.toString());
+
+			return koyaClientServerPath
+					+ koyaDirectLinkUrlTemplate.replace("{nodeId}", n.getId());
 		}
 	}
 

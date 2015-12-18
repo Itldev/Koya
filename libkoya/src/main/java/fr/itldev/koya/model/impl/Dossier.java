@@ -37,7 +37,6 @@ public class Dossier extends Space {
 
 	private Date lastModifiedDate;
 
-	private List<String> activitiIds;
 
 	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
 	@JsonIgnore
@@ -82,20 +81,7 @@ public class Dossier extends Space {
 		this.lastModifiedDate = lastModifiedDate;
 	}
 
-	public List<String> getActivitiIds() {
-
-		if (activitiIds == null) {
-			activitiIds = new ArrayList<>();
-		}
-
-		return activitiIds;
-	}
-
-	public void setActivitiIds(List<String> activitiIds) {
-		this.activitiIds = activitiIds;
-	}
-		
-
+	
 	// </editor-fold>
 
 	protected Dossier() {

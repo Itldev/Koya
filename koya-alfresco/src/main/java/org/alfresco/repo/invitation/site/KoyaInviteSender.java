@@ -49,10 +49,12 @@ import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.User;
 
 /**
  * Ovverride invite sender in order to provide custom invite mail subject
@@ -93,7 +95,7 @@ public class KoyaInviteSender extends InviteSender {
 	private final RepoAdminService repoAdminService;
 	private final NamespaceService namespaceService;
 	private final KoyaNodeService koyaNodeService;
-	private final CompanyAclService companyAclService;
+	private final SpaceAclService spaceAclService;
 	private final CompanyService companyService;
 	private final UserService userService;
 
@@ -103,8 +105,8 @@ public class KoyaInviteSender extends InviteSender {
 
 	public KoyaInviteSender(ServiceRegistry services, Repository repository,
 			MessageService messageService, KoyaMailService koyaMailService,
-			KoyaNodeService koyaNodeService,
-			CompanyAclService companyAclService, CompanyService companyService,
+			KoyaNodeService koyaNodeService, SpaceAclService spaceAclService,
+			CompanyService companyService,
 			CompanyPropertiesService companyPropertiesService,
 			UserService userService, HashMap<String, Object> koyaClientParams) {
 
@@ -127,7 +129,7 @@ public class KoyaInviteSender extends InviteSender {
 		 */
 		this.koyaMailService = koyaMailService;
 		this.koyaNodeService = koyaNodeService;
-		this.companyAclService = companyAclService;
+		this.spaceAclService = spaceAclService;
 		this.companyService = companyService;
 		this.companyPropertiesService = companyPropertiesService;
 		this.koyaClientParams = koyaClientParams;
@@ -164,8 +166,8 @@ public class KoyaInviteSender extends InviteSender {
 			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE,
 					getEmailTemplateNodeRef());
 
-			Map<String, Object> templateModel = buildMailTextModel(
-					properties, inviter, invitee);
+			Map<String, Object> templateModel = buildMailTextModel(properties,
+					inviter, invitee);
 			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,
 					(Serializable) templateModel);
 			mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT,
@@ -261,12 +263,15 @@ public class KoyaInviteSender extends InviteSender {
 			model.put("company", companyPropertiesService.getProperties(c)
 					.toHashMap());
 
+			User u = userService.getUserByUsername(properties
+					.get(wfVarInviteeUserName));
+
 			/**
 			 * Shared Items
 			 */
 			List<Map<String, String>> shares = new ArrayList<Map<String, String>>();
-			for (KoyaNode s : userService.getSharedKoyaNodes(
-					properties.get(wfVarInviteeUserName), c)) {
+			for (KoyaNode s : spaceAclService.getKoyaUserSpaces(u, c,
+					Dossier.class)) {
 				Map<String, String> share = new HashMap<String, String>();
 				share.put("title", s.getTitle());
 				share.put("type", s.getKtype());

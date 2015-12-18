@@ -71,16 +71,7 @@
 		</property>
 	</bean>
     
-         
-    
-	<!--     Update user shares list -->
-    <bean id="ShareUpdateUserSharesListBehaviour" class="fr.itldev.koya.behaviour.ShareUpdateUserSharesListBehaviour"
-          init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap">
-        <property name="policyComponent" ref="policyComponent" />             
-        <property name="userService" ref="userService" />       
-    </bean>
-    
-    
+            
     
     <!-- Last Add/Update or delete date to dossier Aspect Behaviour -->
     <bean id="LastModificationDateBehaviour" class="fr.itldev.koya.behaviour.LastModificationDateBehaviour"

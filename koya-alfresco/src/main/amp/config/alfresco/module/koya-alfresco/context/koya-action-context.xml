@@ -64,6 +64,18 @@
         <property name="dossierService" ref="dossierService" />
         <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
     </bean>
+    
+    
+      <bean id="copyWorkflowTemplate" 
+          class="fr.itldev.koya.action.CopyWorkflowTemplateActionExecuter" parent="action-executer">
+      	<property name="nodeService" ref="nodeService"/>
+		<property name="searchService" ref="SearchService"/>	
+		<property name="namespaceService" ref="NamespaceService"/>
+		<property name="copyService" ref="copyService" />	
+		<property name="xpathTemplatesRoot" >
+            <value>${koya.workflow.templatesRoot}</value>
+        </property> 
+    </bean>
 
     
     <!--Koya notifications actions Actions-->
@@ -75,6 +87,7 @@
         <property name="koyaActivityPoster" ref="koyaActivityPoster"/> 
         <property name="userService" ref="userService"/>                
         <property name="authenticationService" ref="AuthenticationService"/>
+        <property name="spaceAclService" ref="spaceAclService"/>
     </bean>    
     
     <bean id="pdfRender" init-method="init"

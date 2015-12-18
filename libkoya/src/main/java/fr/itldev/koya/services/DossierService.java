@@ -196,10 +196,10 @@ public interface DossierService extends AlfrescoService {
 			String summaryFileName) throws AlfrescoServiceException;
 
 	/**
-	 * Start a workflow
+	 * Start a workflow and return workflow Instance 
 	 * 
 	 */
-	Dossier startWorkflow(User user, Dossier d, String workflowId,
+	String startWorkflow(User user, Dossier d, String workflowId,
 			Map<String, String> properties) throws AlfrescoServiceException;
 
 	/**

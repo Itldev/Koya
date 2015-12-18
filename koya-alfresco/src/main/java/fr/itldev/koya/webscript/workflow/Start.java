@@ -19,22 +19,20 @@
 package fr.itldev.koya.webscript.workflow;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.alfresco.repo.forms.FormData;
 import org.alfresco.repo.forms.FormService;
 import org.alfresco.repo.forms.Item;
 import org.alfresco.repo.workflow.WorkflowModel;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.CopyService;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.workflow.WorkflowInstance;
-import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -42,6 +40,7 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.action.CopyWorkflowTemplateActionExecuter;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
@@ -63,11 +62,7 @@ public class Start extends AbstractWebScript {
 	private KoyaNodeService koyaNodeService;
 	private FormService formService;
 	private NodeService nodeService;
-	private SearchService searchService;
-	private CopyService copyService;
-	private NamespaceService namespaceService;
-
-	private String xpathTemplatesRoot;
+	private ActionService actionService;
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
@@ -81,20 +76,8 @@ public class Start extends AbstractWebScript {
 		this.nodeService = nodeService;
 	}
 
-	public void setSearchService(SearchService searchService) {
-		this.searchService = searchService;
-	}
-
-	public void setNamespaceService(NamespaceService namespaceService) {
-		this.namespaceService = namespaceService;
-	}
-
-	public void setCopyService(CopyService copyService) {
-		this.copyService = copyService;
-	}
-
-	public void setXpathTemplatesRoot(String xpathTemplatesRoot) {
-		this.xpathTemplatesRoot = xpathTemplatesRoot;
+	public void setActionService(ActionService actionService) {
+		this.actionService = actionService;
 	}
 
 	@Override
@@ -104,7 +87,6 @@ public class Start extends AbstractWebScript {
 		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 
 		String response = "";
-
 		try {
 
 			NodeRef n = koyaNodeService.getNodeRef((String) urlParamsMap
@@ -119,17 +101,17 @@ public class Start extends AbstractWebScript {
 			// Add related dossier as workflow parameter
 			fd.addFieldData("prop_wf_relatednode", d.getNodeRef().toString());
 
+
 			WorkflowInstance workflow = (WorkflowInstance) formService
 					.saveForm(
 							new Item("workflow", "activiti$"
 									+ urlParamsMap.get("workflowId")), fd);
-
 			// relationship between dossier node and activiti instance
-			List<String> activitiIds = d.getActivitiIds();
+			ArrayList<String> activitiIds = new ArrayList<String>(d.getWorkflows().keySet());
+			
 			activitiIds.add(workflow.getId());
-			nodeService.setProperty(d.getNodeRef(), KoyaModel.PROP_ACTIVITIIDS,
-					new ArrayList<String>(activitiIds));
-			d.setActivitiIds(activitiIds);
+			nodeService.setProperty(d.getNodeRef(), KoyaModel.PROP_ACTIVITIIDS,activitiIds);
+
 
 			// Add bpm:packageContains relationship from package node to dossier
 			// node
@@ -139,34 +121,41 @@ public class Start extends AbstractWebScript {
 					.addChild(workflow.getWorkflowPackage(), d.getNodeRef(),
 							WorkflowModel.ASSOC_PACKAGE_CONTAINS,
 							workflowPackageItemId);
+			
+			
+			//set Workflow status Running
+				
+
+			 Map<QName, Serializable> props = new HashMap<QName, Serializable>() {
+                 {
+                     put(KoyaModel.PROP_BPMCURRENTSTATUS, KoyaModel.BpmStatusValues.RUNNING);
+                 }
+             };
+             
+             
+             nodeService.addAspect(workflow.getWorkflowPackage(), KoyaModel.ASPECT_BPMSTATUS, props);		
 
 			/*
-			 * Apply template to dossier if any exists
+			 * Apply template to dossier if any exists : Do it in async action
+			 * !!
 			 */
-			List<NodeRef> nodeRefs = searchService
-					.selectNodes(
-							nodeService
-									.getRootNode(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE),
-							xpathTemplatesRoot + "/cm:"
-									+ urlParamsMap.get("workflowId"), null,
-							namespaceService, false);
+			try {
+				Map<String, Serializable> paramsCopyWorkflowTemplate = new HashMap<>();
+				paramsCopyWorkflowTemplate.put(
+						CopyWorkflowTemplateActionExecuter.PARAM_WORKFLOWID,
+						urlParamsMap.get("workflowId"));
 
-			/**
-			 * If template rootNode exists, then copy in target dossier
-			 */
-			if (nodeRefs.size() == 1) {
-				logger.info("Apply template on "
-						+ urlParamsMap.get("workflowId")
-						+ " workflow creation dossier " + d.getName());
-				for (ChildAssociationRef associationRef : nodeService
-						.getChildAssocs(nodeRefs.get(0))) {
-					copyService.copyAndRename(associationRef.getChildRef(),
-							d.getNodeRef(), associationRef.getTypeQName(),
-							associationRef.getQName(), true);
-				}
+				Action copyWf = actionService.createAction(
+						CopyWorkflowTemplateActionExecuter.NAME,
+						paramsCopyWorkflowTemplate);
+
+				// async exec
+				copyWf.setExecuteAsynchronously(true);
+				actionService.executeAction(copyWf, d.getNodeRef());
+			} catch (Exception e) {
+				logger.error("action  exception  " + e.toString());
 			}
-
-			response = KoyaWebscript.getObjectAsJson(d);
+			response = KoyaWebscript.getObjectAsJson(workflow.getId());
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "

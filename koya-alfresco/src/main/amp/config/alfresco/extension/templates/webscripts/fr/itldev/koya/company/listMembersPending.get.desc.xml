@@ -20,8 +20,13 @@
 -->
 
 <webscript>
-   <shortname>Apply json post defined preset company</shortname>   
-   <format default="json"/>
-   <url>/fr/itldev/koya/company/apply-preset</url>
-   <authentication>none</authentication>
+    <shortname>Get CompanyMembers</shortname>
+    <description>Get CompanyMembers</description>
+    <family>Itldev</family>
+    <url>/fr/itldev/koya/company/members/pending/{companyName}</url>
+    <url>/fr/itldev/koya/company/members/pending/{companyName}/{roleFilter}</url>
+    <authentication>user</authentication>    
+    <format default="json"/>
 </webscript>
+
+	

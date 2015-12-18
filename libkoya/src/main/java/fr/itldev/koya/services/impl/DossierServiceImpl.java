@@ -106,7 +106,8 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 				getAlfrescoServerUrl()
 						+ AlfrescoRestService.REST_GET_LISTCHILD_PAGINATED,
 				PaginatedContentList.class, space.getNodeRef(), skipCount,
-				maxItems, true, filter,"", sortField, ascending, user.getTicketAlfresco());
+				maxItems, true, filter, "", sortField, ascending,
+				user.getTicketAlfresco());
 		return pcl;
 	}
 
@@ -332,10 +333,10 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 	private static final String REST_GET_TASK_STATUS = "/s/fr/itldev/koya/workflow/task-isassignee/{taskInstanceId}?alf_ticket={alf_ticket}";
 
 	@Override
-	public Dossier startWorkflow(User user, Dossier d, String workflowId,
+	public String startWorkflow(User user, Dossier d, String workflowId,
 			Map<String, String> properties) throws AlfrescoServiceException {
 		return fromJSON(
-				new TypeReference<Dossier>() {
+				new TypeReference<String>() {
 				},
 				getTemplate().postForObject(
 						getAlfrescoServerUrl() + REST_POST_START_WORKFLOW,

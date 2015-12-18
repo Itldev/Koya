@@ -320,58 +320,11 @@ public class UserService {
 		}
 	}
 
-	/**
-	 * Get User by authenticationKey that could mail address or username.
-	 * 
-	 * @param authKey
-	 * @return
-	 * @throws fr.itldev.koya.exception.KoyaServiceException
-	 */
-	public User getUser(final String authKey) throws KoyaServiceException {
-
-		if (personService.personExists(authKey)) {
-			return buildUser(personService.getPerson(authKey));
-		} else {
-			String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\""
-					+ authKey + "\" ";
-			List<User> users = new ArrayList<>();
-			ResultSet rs = null;
-			try {
-				rs = searchService.query(
-						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-						SearchService.LANGUAGE_LUCENE, luceneRequest);
-				for (ResultSetRow r : rs) {
-					users.add(buildUser(r.getNodeRef()));
-				}
-			} finally {
-				if (rs != null) {
-					rs.close();
-				}
-			}
-			if (users.isEmpty()) {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.NO_SUCH_USER_IDENTIFIED_BY_AUTHKEY,
-						authKey);
-			} else if (users.size() > 1) {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.MANY_USERS_IDENTIFIED_BY_AUTHKEY,
-						authKey);
-			} else {
-				return users.get(0);
-			}
-		}
-	}
-
-	/**
-	 * Return user found by email. Return null if not found : no exception
-	 * thrown
-	 * 
-	 * @param authKey
-	 * @return
-	 */
-	public User getUserByEmailFailOver(final String authKey) {
-		String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\""
-				+ authKey + "\" ";
+	// TODO cached value,db request or any index free relation to avoid index
+	// latency.
+	public User getUserByEmail(final String email) throws KoyaServiceException {
+		String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"" + email
+				+ "\" ";
 		List<User> users = new ArrayList<>();
 		ResultSet rs = null;
 		try {
@@ -385,8 +338,12 @@ public class UserService {
 				rs.close();
 			}
 		}
-		if (users.isEmpty() || users.size() > 1) {
-			return null;
+		if (users.isEmpty()) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.NO_SUCH_USER_IDENTIFIED_BY_AUTHKEY, email);
+		} else if (users.size() > 1) {
+			throw new KoyaServiceException(
+					KoyaErrorCodes.MANY_USERS_IDENTIFIED_BY_AUTHKEY, email);
 		} else {
 			return users.get(0);
 		}
@@ -408,116 +365,6 @@ public class UserService {
 	public Boolean isDisabled(User u) {
 		return nodeService.getAspects(u.getNodeRef()).contains(
 				ContentModel.ASPECT_PERSON_DISABLED);
-	}
-
-	/**
-	 * Add Node to user SharedElements List
-	 * 
-	 * @param u
-	 * @param n
-	 */
-	public void addSharedNode(String userMail, NodeRef n) {
-		String name = nodeService.getProperty(n, ContentModel.PROP_NAME)
-				.toString();
-		try {
-			User u = getUser(userMail);
-
-			if (!nodeService.hasAspect(u.getNodeRef(),
-					KoyaModel.ASPECT_USERSHARES)) {
-				nodeService.addAspect(u.getNodeRef(),
-						KoyaModel.ASPECT_USERSHARES, null);
-			}
-
-			// list existing associations
-			List<AssociationRef> sharedNodeAssocs = nodeService
-					.getTargetAssocs(u.getNodeRef(),
-							KoyaModel.ASSOC_USER_SHAREDNODES);
-			Boolean exists = false;
-			for (AssociationRef ar : sharedNodeAssocs) {
-				if (ar.getTargetRef().equals(n)) {
-					exists = true;
-					break;
-				}
-
-			}
-
-			if (!exists) {
-				nodeService.createAssociation(u.getNodeRef(), n,
-						KoyaModel.ASSOC_USER_SHAREDNODES);
-				logger.trace("Add userShares Association between " + userMail
-						+ " and " + name);
-			}
-		} catch (Exception e) {
-		}
-	}
-
-	/**
-	 * 
-	 * @param u
-	 * @param n
-	 */
-	public void removeSharedNode(String userMail, NodeRef n) {
-		String name = nodeService.getProperty(n, ContentModel.PROP_NAME)
-				.toString();
-		try {
-			User u = getUser(userMail);
-
-			if (nodeService.hasAspect(u.getNodeRef(),
-					KoyaModel.ASPECT_USERSHARES)) {
-				nodeService.addAspect(u.getNodeRef(),
-						KoyaModel.ASPECT_USERSHARES, null);
-			}
-			nodeService.removeAssociation(u.getNodeRef(), n,
-					KoyaModel.ASSOC_USER_SHAREDNODES);
-			logger.trace("Removes userShares Association between " + userMail
-					+ " and " + name);
-
-		} catch (Exception e) {
-		}
-	}
-
-	/**
-	 * List all User's Koya Nodes. company filter is optionnal
-	 * 
-	 * Duplicates SpacesAclService.getKoyaUserSpaces
-	 * 
-	 *  TODO remove KoyaModel.ASSOC_USER_SHAREDNODES from model
-	 * 
-	 * @param u
-	 * @return
-	 * 
-	 */
-	@Deprecated
-	public List<Space> getSharedKoyaNodes(String userName, Company c) {
-		List<Space> sharedKoyaNodes = new ArrayList<Space>();
-		try {
-			User u = getUser(userName);
-			if (nodeService.hasAspect(u.getNodeRef(),
-					KoyaModel.ASPECT_USERSHARES)) {
-
-				List<AssociationRef> sharedNodeAssocs = nodeService
-						.getTargetAssocs(u.getNodeRef(),
-								KoyaModel.ASSOC_USER_SHAREDNODES);
-
-				for (AssociationRef ar : sharedNodeAssocs) {
-					try {
-						if (c == null
-								|| c.equals(koyaNodeService
-										.getFirstParentOfType(
-												ar.getTargetRef(),
-												Company.class))) {
-							sharedKoyaNodes.add(koyaNodeService.getKoyaNode(
-									ar.getTargetRef(), Space.class));
-						}
-					} catch (KoyaServiceException e) {
-					}
-				}
-			}
-		} catch (KoyaServiceException kse) {
-			logger.error("error listing user " + userName + " shares "
-					+ kse.getMessage());
-		}
-		return sharedKoyaNodes;
 	}
 
 }

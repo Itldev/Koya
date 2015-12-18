@@ -18,12 +18,12 @@
  */
 package fr.itldev.koya.policies;
 
-import fr.itldev.koya.model.KoyaModel;
-import fr.itldev.koya.model.impl.User;
 import org.alfresco.repo.policy.ClassPolicy;
-import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+
+import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.impl.User;
 
 public interface SharePolicies {
 
@@ -56,11 +56,11 @@ public interface SharePolicies {
          * Called after an item has been shared.
          *
          * @param nodeRef the reference to the item has been shared
-         * @param userMail
+         * @param u
          * @param inviter
          * @param sharedByImporter
          */
-        public void afterShareItem(NodeRef nodeRef, String userMail,
+        public void afterShareItem(NodeRef nodeRef, User u,
                 User inviter);
     }
 

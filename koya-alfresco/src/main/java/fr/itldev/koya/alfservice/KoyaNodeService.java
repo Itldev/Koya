@@ -49,6 +49,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
@@ -85,7 +86,9 @@ public class KoyaNodeService {
 	private KoyaActivityPoster activityPoster;
 	protected SearchService searchService;
 	protected NamespaceService namespaceService;
+	protected WorkflowService workflowService;
 
+	
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
@@ -132,11 +135,17 @@ public class KoyaNodeService {
 		this.namespaceService = namespaceService;
 	}
 
+	
+	public void setWorkflowService(WorkflowService workflowService) {
+		this.workflowService = workflowService;
+	}
+
+
 	// </editor-fold>
 	private KoyaNodeBuilder builder;
 
 	public void init() {
-		builder = new KoyaNodeBuilder(nodeService, this);
+		builder = new KoyaNodeBuilder(nodeService, this, workflowService);
 	}
 
 	/**
@@ -161,8 +170,12 @@ public class KoyaNodeService {
 			for (String favStr : foldersFavourites.split(",")) {
 				try {
 					NodeRef n = getNodeRef(favStr);
+					/* 
+					 * try to get parent to exclude invalid node hierachy exceptions
+					 */
+					getParent(n);
 					favourites.add(getKoyaNode(n));
-				} catch (KoyaServiceException | NullPointerException e) {
+				} catch (KoyaServiceException | NullPointerException |InvalidNodeRefException e) {
 					logger.trace("Ignored Favourite nodeRef (FOLDERS) "
 							+ favStr + " : " + e.getMessage());
 				}
@@ -174,8 +187,12 @@ public class KoyaNodeService {
 			for (String favStr : docsFavourites.split(",")) {
 				try {
 					NodeRef n = getNodeRef(favStr);
+					/* 
+					 * try to get parent to exclude invalid node hierachy exceptions
+					 */
+					getParent(n);
 					favourites.add(getKoyaNode(n));
-				} catch (KoyaServiceException | NullPointerException e) {
+				} catch (KoyaServiceException | NullPointerException|InvalidNodeRefException e) {
 					logger.trace("Ignored Favourite nodeRef (DOCS) " + favStr
 							+ " : " + e.getMessage());
 				}
@@ -191,7 +208,7 @@ public class KoyaNodeService {
 						.length() + 1);
 				try {
 					favourites.add(companyBuilder(compName));
-				} catch (KoyaServiceException | NullPointerException e) {
+				} catch (KoyaServiceException | NullPointerException|InvalidNodeRefException e) {
 					logger.trace("Ignored Favourite nodeRef (COMPANY) " + k
 							+ " : " + e.getMessage());
 				}

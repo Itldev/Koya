@@ -87,7 +87,7 @@ public class CleanUserPermissionsActionExecuter extends
 				ContentModel.PROP_NAME);
 		Company c = companyService.getCompany(siteName);
 
-		User u = userService.getUser((String) ruleAction
+		User u = userService.getUserByUsername((String) ruleAction
 				.getParameterValue(PARAM_USERNAME));
 
 		// removes any koya autority membership for user on spaces groups he

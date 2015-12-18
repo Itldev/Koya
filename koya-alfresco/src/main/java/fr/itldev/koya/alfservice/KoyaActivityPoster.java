@@ -93,12 +93,11 @@ public class KoyaActivityPoster implements InitializingBean {
 		PropertyCheck.mandatory(this, "companyAclService", companyAclService);
 	}
 
-	public void postSpaceShared(String inviteeEmail, String inviterUserName,
+	public void postSpaceShared(User invitee, String inviterUserName,
 			Space sharedSpace) {
 		try {
 
-			User user = userService.getUser(inviteeEmail);
-			if (user != null && user.isEnabled() != null && user.isEnabled()) {
+			if (invitee != null && invitee.isEnabled() != null && invitee.isEnabled()) {
 				// TODO test if user still exists : treat invitation deletion
 				// case
 				String siteShortName = siteService.getSiteShortName(sharedSpace
@@ -106,15 +105,15 @@ public class KoyaActivityPoster implements InitializingBean {
 
 				List<Invitation> invitations = companyAclService
 						.getPendingInvite(siteShortName, null,
-								user.getUserName());
+								invitee.getUserName());
 
 				if (invitations.isEmpty()) {
 					activityService.postActivity(
 							KoyaActivityType.KOYA_SPACESHARED,
 							siteShortName,
 							KoyaActivityType.KOYA_APPTOOL,
-							getShareActivityData(user, inviterUserName,
-									sharedSpace), user.getUserName());
+							getShareActivityData(invitee, inviterUserName,
+									sharedSpace), invitee.getUserName());
 
 				}
 			}
@@ -127,7 +126,7 @@ public class KoyaActivityPoster implements InitializingBean {
 			String revokerUserName, Space unsharedSpace) {
 		try {
 
-			User user = userService.getUser(revokedinviteeEmail);
+			User user = userService.getUserByEmail(revokedinviteeEmail);
 			if (user.isEnabled() != null && user.isEnabled()) {
 				// TODO test if user still exists : treat invitation deletion
 				// case

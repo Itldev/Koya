@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,7 +35,13 @@ import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 import java.io.Serializable;
 
-public class FavouriteServiceImpl extends AlfrescoRestService implements FavouriteService, Serializable {
+public class FavouriteServiceImpl extends AlfrescoRestService implements
+		FavouriteService, Serializable {
+	
+	private static final long serialVersionUID = 1L;
+
+	@SuppressWarnings("unused")
+	private final transient Logger logger = Logger.getLogger(this.getClass());
 
 	private static final String REST_GET_LISTFAVOURITES = "/s/fr/itldev/koya/favourites/list?alf_ticket={alf_ticket}";
 	private static final String REST_POST_FAVOURITE_STATUS = "/s/fr/itldev/koya/favourites/set?alf_ticket={alf_ticket}";
@@ -49,9 +56,14 @@ public class FavouriteServiceImpl extends AlfrescoRestService implements Favouri
 	}
 
 	@Override
+	public void resetCache(User user) {
+		cacheManager.revokeUserFavourites(user);
+	}
+
+	@Override
 	public List<KoyaNode> getFavourites(User user)
 			throws AlfrescoServiceException {
-
+		
 		if (user == null) {
 			return new ArrayList<>();
 		}

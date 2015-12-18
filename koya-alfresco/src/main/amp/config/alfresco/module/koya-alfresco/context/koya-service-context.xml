@@ -41,6 +41,7 @@
         <property name="activityPoster" ref="koyaActivityPoster" />
         <property name="searchService" ref="searchService"/>
         <property name="namespaceService" ref="namespaceService"/>
+        <property name="workflowService" ref="WorkflowService"/>
     </bean>
     
     <!--Companies handling service-->
@@ -168,7 +169,7 @@
         <property name="messageService" ref="messageService"/>        
         <property name="koyaMailService" ref="koyaMailService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="companyAclService" ref="companyAclService"/>  
+        <property name="spaceAclService" ref="spaceAclService"/>  
         <property name="companyService" ref="companyService"/>      
        	<property name="companyPropertiesService" ref="companyPropertiesService"/>           
        	<property name="userService" ref="userService"/>                      
@@ -193,6 +194,7 @@
         <property name="messageService" ref="messageService"/>        
         <property name="companyAclService" ref="companyAclService"/> 
         <property name="companyService" ref="companyService"/>   
+        <property name="spaceAclService" ref="spaceAclService"/>
         <property name="companyPropertiesService" ref="companyPropertiesService"/>                      
         <property name="authenticationService" ref="AuthenticationService"/> 
         
@@ -200,6 +202,9 @@
         
         <property name="koyaDirectLinkUrlTemplate" >
             <value>${koya.client.directLinkUrlTemplate}</value>
+        </property>                  
+        <property name="koyaClientServerPath" >
+            <value>${koya.client.serverPath}</value>
         </property>                  
     </bean>
 

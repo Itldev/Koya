@@ -27,7 +27,6 @@ import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.model.KoyaActivityType;
 import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.User;
 
 public class KoyaEmailUserNotifier extends EmailUserNotifier {
 
