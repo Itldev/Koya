@@ -30,9 +30,11 @@ import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.CompanyService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+
 import java.io.Serializable;
 
 public class CompanyServiceImpl extends AlfrescoRestService implements
@@ -45,9 +47,9 @@ public class CompanyServiceImpl extends AlfrescoRestService implements
 	private static final String REST_GET_COMPANY = "/s/fr/itldev/koya/company/get/{companyName}?alf_ticket={alf_ticket}";
 
 	private static final String REST_GET_LISTMEMBERS = "/s/fr/itldev/koya/company/members/{companyName}?alf_ticket={alf_ticket}";
-	private static final String REST_GET_LISTMEMBERS_PAGINATED = "/s/fr/itldev/koya/company/members/paginated/{companyName}?skipCount={skipCount}&amp;maxItems={maxItems}&amp;withAdmins={withAdmins}&amp;filterExpr={filterExpr}&amp;typeFilter={typeFilter}&amp;sortField={sortExpr}&amp;ascending={ascending}&amp;alf_ticket={alf_ticket}";
+	private static final String REST_GET_LISTMEMBERS_PAGINATED = "/s/fr/itldev/koya/company/members/paginated/{companyName}?skipCount={skipCount}&maxItems={maxItems}&withAdmins={withAdmins}&filterExpr={filterExpr}&typeFilter={typeFilter}&sortField={sortExpr}&ascending={ascending}&alf_ticket={alf_ticket}";
 	private static final String REST_GET_LISTMEMBERS_ROLEFILTER = "/s/fr/itldev/koya/company/members/{companyName}/{roleFilter}?alf_ticket={alf_ticket}";
-	private static final String REST_GET_LISTMEMBERS_PAGINATED_ROLEFILTER = "/s/fr/itldev/koya/company/members/paginated/{companyName}/{roleFilter}?skipCount={skipCount}&amp;maxItems={maxItems}&amp;withAdmins={withAdmins}&amp;filterExpr={filterExpr}&amp;typeFilter={typeFilter}&amp;sortField={sortExpr}&amp;ascending={ascending}&amp;alf_ticket={alf_ticket}";
+	private static final String REST_GET_LISTMEMBERS_PAGINATED_ROLEFILTER = "/s/fr/itldev/koya/company/members/paginated/{companyName}/{roleFilter}?skipCount={skipCount}&maxItems={maxItems}&withAdmins={withAdmins}&filterExpr={filterExpr}&typeFilter={typeFilter}&sortField={sortExpr}&ascending={ascending}&alf_ticket={alf_ticket}";
 	private static final String REST_GET_LISTMEMBERS_PENDING = "/s/fr/itldev/koya/company/members/pending/{companyName}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_LISTMEMBERS_PENDING_ROLEFILTER = "/s/fr/itldev/koya/company/members/pending/{companyName}/{roleFilter}?alf_ticket={alf_ticket}";
 
@@ -185,14 +187,14 @@ public class CompanyServiceImpl extends AlfrescoRestService implements
 	}
 
 	@Override
-	public List<User> listMembersPaginated(User userLogged, Company company,
+	public PaginatedContentList listMembersPaginated(User userLogged, Company company,
 			List<String> rolesFilter, Integer skipCount, Integer maxItems,
 			Boolean withAdmins, String sortField, Boolean ascending)
 			throws RestClientException, AlfrescoServiceException {
 
 		if (rolesFilter == null) {
 			return fromJSON(
-					new TypeReference<List<User>>() {
+					new TypeReference<PaginatedContentList>() {
 					},
 					getTemplate().getForObject(
 							getAlfrescoServerUrl()
@@ -210,7 +212,7 @@ public class CompanyServiceImpl extends AlfrescoRestService implements
 			}
 
 			return fromJSON(
-					new TypeReference<List<User>>() {
+					new TypeReference<PaginatedContentList>() {
 					},
 					getTemplate()
 							.getForObject(

@@ -20,9 +20,11 @@ package fr.itldev.koya.webscript.company;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.util.Pair;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -30,6 +32,8 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -86,13 +90,20 @@ public class ListMembersPaginated extends AbstractWebScript {
 		String response;
 		try {
 
-			response = KoyaWebscript.getObjectAsJson(companyAclService
+			Pair<List<User>, Pair<Long, Long>> listChildren = companyAclService
 					.listMembersPaginated(companyName, roles, skipCount,
-							maxItems, withAdmins, sortField, ascending));
+							maxItems, withAdmins, sortField, ascending);
+
+			Map<String, Object> result = new HashMap<String, Object>();
+			result.put("children", listChildren.getFirst());
+			result.put("totalValues", listChildren.getSecond());
+
+			response = KoyaWebscript.getObjectAsJson(result);
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : "
 					+ ex.getErrorCode().toString());
 		}
+		res.setContentEncoding("UTF-8");
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);
 	}
