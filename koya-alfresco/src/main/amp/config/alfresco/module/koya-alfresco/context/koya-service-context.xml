@@ -42,6 +42,7 @@
         <property name="searchService" ref="searchService"/>
         <property name="namespaceService" ref="namespaceService"/>
         <property name="workflowService" ref="WorkflowService"/>
+        <property name="modelService" ref="modelService" />
     </bean>
     
     <!--Companies handling service-->

@@ -87,13 +87,15 @@ public interface UserService {
 
     /**
      *
+     * @param username
      * @param userLog
      * @param oldPassword
      * @param newPassword
      * @throws AlfrescoServiceException
      */
-    void changePassword(User userLog, String oldPassword, String newPassword) throws AlfrescoServiceException, MalformedURLException;
-
+	void changePassword(User userLog, String username, String oldPassword,
+			String newPassword) throws AlfrescoServiceException,
+			MalformedURLException;
     /**
      * find users list wich first/last name or email starts with query. Return
      * list limitated by maxResults.
@@ -173,5 +175,6 @@ public interface UserService {
 	 * @throws AlfrescoServiceException
 	 */
 	List<Activity> listActivities(User user) throws AlfrescoServiceException;
+
 
 }

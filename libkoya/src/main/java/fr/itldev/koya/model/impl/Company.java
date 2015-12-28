@@ -47,6 +47,8 @@ public final class Company extends KoyaNode {
     @JsonIgnore
     private List<Space> children = new ArrayList<>();
 
+    protected String ftpUsername;
+    
     // <editor-fold defaultstate="collapsed" desc="Getters/Setters">
     @JsonDeserialize(using = NodeRefDeserializer.class)
     public NodeRef getCurrentSaleOfferNodeRef() {
@@ -85,7 +87,16 @@ public final class Company extends KoyaNode {
         this.children = (List<Space>) children;
     }
 
-    // </editor-fold>
+    
+    public String getFtpUsername() {
+		return ftpUsername;
+	}
+
+	public void setFtpUsername(String ftpUsername) {
+		this.ftpUsername = ftpUsername;
+	}
+
+	// </editor-fold>
     private Company() {
     }
 
