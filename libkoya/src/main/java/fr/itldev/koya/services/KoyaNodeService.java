@@ -74,4 +74,14 @@ public interface KoyaNodeService extends AlfrescoService {
 	List<KoyaNode> getParents(User user, KoyaNode koyaNode)
 			throws AlfrescoServiceException;
 
+	/**
+	 * Returns size in bytes of node recursively 
+	 * 
+	 * @param user
+	 * @param koyaNode
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	Long getSize(User user, KoyaNode koyaNode) throws AlfrescoServiceException;
+
 }
