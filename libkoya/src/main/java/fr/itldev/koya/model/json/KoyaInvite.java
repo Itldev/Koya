@@ -35,6 +35,8 @@ public class KoyaInvite {
 	private String inviteId;
 	private String ticket;
 
+	private String userName;
+
 	public String getCompanyName() {
 		return companyName;
 	}
@@ -75,6 +77,14 @@ public class KoyaInvite {
 		this.ticket = ticket;
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
 	public KoyaInvite() {
 	}
 
@@ -86,6 +96,7 @@ public class KoyaInvite {
 		this.ticket = i.getTicket();
 		this.email = i.getInviteeEmail();
 		this.companyName = i.getResourceName();
+		this.userName = i.getInviteeUserName();
 	}
 
 }
