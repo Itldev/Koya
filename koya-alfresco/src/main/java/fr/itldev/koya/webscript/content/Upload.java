@@ -64,8 +64,7 @@ public class Upload extends AbstractWebScript {
 		this.koyaContentService = koyaContentService;
 	}
 
-	public void setCompanyPropertiesService(
-			CompanyPropertiesService companyPropertiesService) {
+	public void setCompanyPropertiesService(CompanyPropertiesService companyPropertiesService) {
 		this.companyPropertiesService = companyPropertiesService;
 	}
 
@@ -74,8 +73,7 @@ public class Upload extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
 		Map<String, String> retMap = new HashMap<>();
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
@@ -125,26 +123,23 @@ public class Upload extends AbstractWebScript {
 
 			if (logo) {
 				// company logo upload mode (logo=true)
-				retMap = companyPropertiesService.uploadNewLogo(parent,
-						fileName, content);
+				retMap = companyPropertiesService.uploadNewLogo(parent, fileName, content);
 			} else if (koyaClient) {
-				//TODO client message with upload
-				Dossier d = koyaNodeService.getKoyaNode(parent,Dossier.class);
-				dossierService.uploadKoyaClientDocument(d, fileName, content,"");
+				// TODO client message with upload
+				Dossier d = koyaNodeService.getKoyaNode(parent, Dossier.class);
+				dossierService.uploadKoyaClientDocument(d, fileName, content, "");
 			} else {
-				retMap = koyaContentService.createContentNode(parent, fileName,
-						content);
+				retMap = koyaContentService.createContentNode(parent, fileName, content);
 			}
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		writeResponse(res, retMap, format);
 	}
 
-	private void writeResponse(WebScriptResponse res,
-			Map<String, String> responseMap, String format) throws IOException {
+	private void writeResponse(WebScriptResponse res, Map<String, String> responseMap, String format)
+			throws IOException {
 
 		if (format != null && format.equals("text")) {
 			res.setContentType("text/plain");

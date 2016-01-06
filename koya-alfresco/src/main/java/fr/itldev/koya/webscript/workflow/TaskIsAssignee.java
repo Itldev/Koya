@@ -20,8 +20,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class TaskIsAssignee extends AbstractWorkflowWebscript {
 
 	@Override
-	protected Map<String, Object> buildModel(WorkflowModelBuilder modelBuilder,
-			WebScriptRequest req, Status status, Cache cache) {
+	protected Map<String, Object> buildModel(WorkflowModelBuilder modelBuilder, WebScriptRequest req, Status status,
+			Cache cache) {
 		Map<String, String> params = req.getServiceMatch().getTemplateVars();
 
 		// getting task id from request parameters

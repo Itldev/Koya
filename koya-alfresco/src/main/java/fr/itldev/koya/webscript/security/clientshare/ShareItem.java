@@ -34,7 +34,7 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.model.json.KoyaShare;
-import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -62,23 +62,19 @@ public class ShareItem extends AbstractWebScript {
 	 * @throws IOException
 	 */
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, Object> params = KoyaWebscript.getJsonMap(req);
 		String response;
 		try {
-			NodeRef n = koyaNodeService.getNodeRef((String) params
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			NodeRef n = koyaNodeService.getNodeRef((String) params.get(RestConstants.WSCONST_NODEREF));
 
 			Space space = koyaNodeService.getKoyaNode(n, Space.class);
 
-			String userMail = (String) params.get(KoyaWebscript.WSCONST_EMAIL);
+			String userMail = (String) params.get(RestConstants.WSCONST_EMAIL);
 
-			NominatedInvitation i = spaceAclService
-					.clientShare(space, userMail);
+			NominatedInvitation i = spaceAclService.clientShare(space, userMail);
 
-			KoyaShare koyaShare = new KoyaShare(space, userMail,
-					KoyaPermissionConsumer.CLIENT.toString());
+			KoyaShare koyaShare = new KoyaShare(space, userMail, KoyaPermissionConsumer.CLIENT.toString());
 
 			if (i != null) {
 				koyaShare.setKoyaInvite(new KoyaInvite(i));
@@ -86,8 +82,7 @@ public class ShareItem extends AbstractWebScript {
 			response = KoyaWebscript.getObjectAsJson(koyaShare);
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

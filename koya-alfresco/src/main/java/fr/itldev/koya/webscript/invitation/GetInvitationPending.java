@@ -18,11 +18,11 @@
  */
 package fr.itldev.koya.webscript.invitation;
 
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
@@ -31,57 +31,58 @@ import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * Return True if given inviteId matches a pending invitation
  *
  */
 public class GetInvitationPending extends AbstractWebScript {
 
-    private WorkflowService workflowService;
+	private WorkflowService workflowService;
 
-    public void setWorkflowService(WorkflowService workflowService) {
-        this.workflowService = workflowService;
-    }
+	public void setWorkflowService(WorkflowService workflowService) {
+		this.workflowService = workflowService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        res.setContentType("application/json;charset=UTF-8");
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+		res.setContentType("application/json;charset=UTF-8");
 
-        final String invitationId = (String) urlParams.get("inviteId");
-        List<WorkflowTask> tasks = null;
+		final String invitationId = (String) urlParams.get("inviteId");
+		List<WorkflowTask> tasks = null;
 
-        try {
+		try {
 
-            tasks = workflowService.getTasksForWorkflowPath(invitationId);
-            
-            if (tasks.size() != 1) {
-                res.getWriter().write(Boolean.FALSE.toString());
-                return;
-            }
+			tasks = workflowService.getTasksForWorkflowPath(invitationId);
 
-            WorkflowTask task = tasks.get(0);
-                 
-            if (taskTypeMatches(task,
-                    WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING,
-                    WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING)) {
-                res.getWriter().write(Boolean.TRUE.toString());
-                return;
-            }
+			if (tasks.size() != 1) {
+				res.getWriter().write(Boolean.FALSE.toString());
+				return;
+			}
 
-            res.getWriter().write(Boolean.FALSE.toString());
-            return;
+			WorkflowTask task = tasks.get(0);
 
-        } catch (RuntimeException rex) {
-        } catch (Exception rex) {
-        }
+			if (taskTypeMatches(task, WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING,
+					WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING)) {
+				res.getWriter().write(Boolean.TRUE.toString());
+				return;
+			}
 
-        res.getWriter().write(Boolean.FALSE.toString());
+			res.getWriter().write(Boolean.FALSE.toString());
+			return;
 
-    }
+		} catch (RuntimeException rex) {
+		} catch (Exception rex) {
+		}
 
-    private boolean taskTypeMatches(WorkflowTask task, QName... types) {
-        QName taskDefName = task.getDefinition().getMetadata().getName();
-        return Arrays.asList(types).contains(taskDefName);
-    }
+		res.getWriter().write(Boolean.FALSE.toString());
+
+	}
+
+	private boolean taskTypeMatches(WorkflowTask task, QName... types) {
+		QName taskDefName = task.getDefinition().getMetadata().getName();
+		return Arrays.asList(types).contains(taskDefName);
+	}
 }

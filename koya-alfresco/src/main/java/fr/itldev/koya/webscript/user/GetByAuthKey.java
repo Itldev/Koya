@@ -48,8 +48,7 @@ public class GetByAuthKey extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, Object> jsonMap = KoyaWebscript.getJsonMap(req);
 
 		String authKey = (String) jsonMap.get("authKey");
@@ -68,9 +67,8 @@ public class GetByAuthKey extends AbstractWebScript {
 				u = userService.getUserByEmail(authKey);
 			} catch (RuntimeException ex) {
 				if (!failProof) {
-					throw new WebScriptException("KoyaError : "
-							+ ((KoyaServiceException) ex).getErrorCode()
-									.toString());
+					throw new WebScriptException(
+							"KoyaError : " + ((KoyaServiceException) ex).getErrorCode().toString());
 				}
 			}
 		}

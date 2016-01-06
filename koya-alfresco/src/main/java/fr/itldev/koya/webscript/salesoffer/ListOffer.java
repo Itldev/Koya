@@ -44,8 +44,7 @@ public class ListOffer extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
 		SalesOffer offer1 = new SalesOffer();
 		SalesOffer offer2 = new SalesOffer();

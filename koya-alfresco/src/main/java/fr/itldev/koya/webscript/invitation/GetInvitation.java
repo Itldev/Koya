@@ -18,22 +18,25 @@
  */
 package fr.itldev.koya.webscript.invitation;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.alfresco.service.cmr.invitation.Invitation;
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
+
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.alfresco.service.cmr.invitation.Invitation;
-import org.springframework.extensions.webscripts.AbstractWebScript;
-import org.springframework.extensions.webscripts.WebScriptException;
-import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Checks if user has a pending invitaion for specified company
@@ -42,50 +45,50 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class GetInvitation extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
-    private UserService userService;
-    private CompanyAclService companyAclService;
+	private KoyaNodeService koyaNodeService;
+	private UserService userService;
+	private CompanyAclService companyAclService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
-    }
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
-        String response = "";
+		String userName = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
+		String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
+		String response = "";
 
-        try {
-            User u = userService.getUserByUsername(userName);
-            Company c = koyaNodeService.companyBuilder(companyName);
+		try {
+			User u = userService.getUserByUsername(userName);
+			Company c = koyaNodeService.companyBuilder(companyName);
 
-            List<Invitation> invitations = companyAclService.getPendingInvite(c.getName(), null, u.getUserName());
-            if (invitations != null && invitations.size() == 1) {
+			List<Invitation> invitations = companyAclService.getPendingInvite(c.getName(), null, u.getUserName());
+			if (invitations != null && invitations.size() == 1) {
 
-                Map<String, String> invit = new HashMap<>();
-                invit.put("inviteId", invitations.get(0).getInviteId());
-             //   invit.put("createdAt", invitations.get(0).getCreatedAt());
-                //TODO number of sended mail for this invitation
+				Map<String, String> invit = new HashMap<>();
+				invit.put("inviteId", invitations.get(0).getInviteId());
+				// invit.put("createdAt", invitations.get(0).getCreatedAt());
+				// TODO number of sended mail for this invitation
 
-                response = KoyaWebscript.getObjectAsJson(invit);
-            }
+				response = KoyaWebscript.getObjectAsJson(invit);
+			}
 
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 
 }

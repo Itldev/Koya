@@ -32,8 +32,8 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -54,20 +54,16 @@ public class ListMembersPaginated extends AbstractWebScript {
 	// }
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
 		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
-		String companyName = urlParamsMap
-				.get(KoyaWebscript.WSCONST_COMPANYNAME);
-		String roleFilter = urlParamsMap.get(KoyaWebscript.WSCONST_ROLEFILTER);
+		String companyName = urlParamsMap.get(RestConstants.WSCONST_COMPANYNAME);
+		String roleFilter = urlParamsMap.get(RestConstants.WSCONST_ROLEFILTER);
 
 		String sortField = urlParamsMap.get("sortField");
-		sortField = (!sortField.isEmpty()) ? sortField.replaceFirst("-", ":")
-				: null;
+		sortField = (!sortField.isEmpty()) ? sortField.replaceFirst("-", ":") : null;
 		String strAscending = urlParamsMap.get("ascending");
-		Boolean ascending = (strAscending != null) ? Boolean
-				.valueOf(strAscending) : true;
+		Boolean ascending = (strAscending != null) ? Boolean.valueOf(strAscending) : true;
 		String typeFilter = urlParamsMap.get("typeFilter");
 
 		List<String> roles = new ArrayList<>();
@@ -78,8 +74,7 @@ public class ListMembersPaginated extends AbstractWebScript {
 		} catch (Exception ex) {
 		}
 
-		Boolean withAdmins = ((String) urlParamsMap.get("withAdmins"))
-				.equals("true");
+		Boolean withAdmins = ((String) urlParamsMap.get("withAdmins")).equals("true");
 
 		Integer maxItems = null;
 		Integer skipCount = null;
@@ -90,9 +85,8 @@ public class ListMembersPaginated extends AbstractWebScript {
 		String response;
 		try {
 
-			Pair<List<User>, Pair<Long, Long>> listChildren = companyAclService
-					.listMembersPaginated(companyName, roles, skipCount,
-							maxItems, withAdmins, sortField, ascending);
+			Pair<List<User>, Pair<Long, Long>> listChildren = companyAclService.listMembersPaginated(companyName, roles,
+					skipCount, maxItems, withAdmins, sortField, ascending);
 
 			Map<String, Object> result = new HashMap<String, Object>();
 			result.put("children", listChildren.getFirst());
@@ -100,8 +94,7 @@ public class ListMembersPaginated extends AbstractWebScript {
 
 			response = KoyaWebscript.getObjectAsJson(result);
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentEncoding("UTF-8");
 		res.setContentType("application/json;charset=UTF-8");

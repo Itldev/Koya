@@ -32,6 +32,7 @@ import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -59,24 +60,20 @@ public class ListUserShares extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-		String userName = (String) urlParams
-				.get(KoyaWebscript.WSCONST_USERNAME);
-		String companyName = (String) urlParams
-				.get(KoyaWebscript.WSCONST_COMPANYNAME);
+		String userName = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
+		String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
 		String response;
 
 		try {
 
 			User u = userService.getUserByUsername(userName);
 			Company c = koyaNodeService.companyBuilder(companyName);
-			response = KoyaWebscript.getObjectAsJson(spaceAclService
-					.getKoyaUserSpaces(u, KoyaPermissionConsumer.CLIENT, c));
+			response = KoyaWebscript
+					.getObjectAsJson(spaceAclService.getKoyaUserSpaces(u, KoyaPermissionConsumer.CLIENT, c));
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

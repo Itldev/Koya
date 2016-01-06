@@ -12,6 +12,7 @@ import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -32,23 +33,19 @@ public class ListClientDocuments extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		String response = "[]";
 		try {
 
-			Dossier d = koyaNodeService
-					.getKoyaNode(koyaNodeService.getNodeRef((String) urlParams
-							.get(KoyaWebscript.WSCONST_NODEREF)), Dossier.class);
-		
-			response = KoyaWebscript.getObjectAsJson(dossierService
-					.listKoyaClientDocuments(d));
+			Dossier d = koyaNodeService.getKoyaNode(
+					koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF)), Dossier.class);
+
+			response = KoyaWebscript.getObjectAsJson(dossierService.listKoyaClientDocuments(d));
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 
 		res.setContentEncoding("UTF-8");

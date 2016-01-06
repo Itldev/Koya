@@ -21,7 +21,6 @@ package fr.itldev.koya.webscript.invitation;
 import java.io.IOException;
 
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;

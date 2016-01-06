@@ -30,6 +30,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -52,34 +53,27 @@ public class ListContentTree extends AbstractWebScript {
 	private Logger logger = Logger.getLogger(this.getClass());
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
 		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 		String response = "";
 
 		try {
-			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_NODEREF));
 
-			Boolean onlyFolders = ((String) urlParamsMap
-					.get(KoyaWebscript.WSCONST_ONLYFOLDERS)).equals("true");
+			Boolean onlyFolders = ((String) urlParamsMap.get(RestConstants.WSCONST_ONLYFOLDERS)).equals("true");
 
 			Integer depth = null;
 
-			if (urlParamsMap.containsKey(KoyaWebscript.WSCONST_MAXDEPTH)) {
-				depth = new Integer(
-						(String) urlParamsMap
-								.get(KoyaWebscript.WSCONST_MAXDEPTH));
+			if (urlParamsMap.containsKey(RestConstants.WSCONST_MAXDEPTH)) {
+				depth = new Integer((String) urlParamsMap.get(RestConstants.WSCONST_MAXDEPTH));
 			} else {
 				depth = DEFAULT_MAX_DEPTH;
 			}
-			response = KoyaWebscript.getObjectAsJson(koyaNodeService
-					.listChildrenAsTree(parent, depth, onlyFolders));
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService.listChildrenAsTree(parent, depth, onlyFolders));
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

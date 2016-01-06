@@ -18,18 +18,21 @@
  */
 package fr.itldev.koya.webscript.user;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Revoke user's company access.
@@ -38,37 +41,35 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class Revoke extends AbstractWebScript {
 
-    private Logger logger = Logger.getLogger(this.getClass());
+	private CompanyAclService companyAclService;
+	private KoyaNodeService koyaNodeService;
+	private UserService userService;
 
-    private CompanyAclService companyAclService;
-    private KoyaNodeService koyaNodeService;
-    private UserService userService;
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
-        String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
-        try {
-            companyAclService.removeFromMembers(koyaNodeService.companyBuilder(companyName),
-                    userService.getUserByUsername(userName));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write("");
-    }
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+		String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
+		String userName = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
+		try {
+			companyAclService.removeFromMembers(koyaNodeService.companyBuilder(companyName),
+					userService.getUserByUsername(userName));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write("");
+	}
 
 }

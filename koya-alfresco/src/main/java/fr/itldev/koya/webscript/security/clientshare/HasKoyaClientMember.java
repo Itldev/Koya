@@ -31,6 +31,7 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -54,20 +55,16 @@ public class HasKoyaClientMember extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		String response;
 		try {
-			NodeRef n = koyaNodeService.getNodeRef((String) urlParams
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			NodeRef n = koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF));
 			Space s = (Space) koyaNodeService.getKoyaNode(n);
-			response = KoyaWebscript.getObjectAsJson(spaceAclService
-					.hasMembers(s, KoyaPermissionConsumer.CLIENT));
+			response = KoyaWebscript.getObjectAsJson(spaceAclService.hasMembers(s, KoyaPermissionConsumer.CLIENT));
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

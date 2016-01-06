@@ -11,6 +11,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -32,19 +33,15 @@ public class Size extends AbstractWebScript {
 	 * org.springframework.extensions.webscripts.WebScriptResponse)
 	 */
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		String response;
 		try {
 
-			Map<String, String> urlParamsMap = KoyaWebscript
-					.getUrlParamsMap(req);
-			NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParamsMap
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
+			NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_NODEREF));
 			response = KoyaWebscript.getObjectAsJson(koyaNodeService.getByteSize(nodeRef));
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

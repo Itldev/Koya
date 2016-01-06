@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -36,6 +35,7 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -45,7 +45,6 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  * 
  */
 public class Create extends AbstractWebScript {
-	private Logger logger = Logger.getLogger(this.getClass());
 
 	private SpaceService spaceService;
 	private DossierService dossierService;
@@ -69,36 +68,29 @@ public class Create extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
-		//String name = (String) jsonPostMap.get(KoyaWebscript.WSCONST_NAME);
-		String title = (String) jsonPostMap.get(KoyaWebscript.WSCONST_TITLE);
+		String title = (String) jsonPostMap.get(RestConstants.WSCONST_TITLE);
 		String ktype = (String) jsonPostMap.get("ktype");
 		String response = "";
 
 		try {
-			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap
-					.get(KoyaWebscript.WSCONST_PARENTNODEREF));
-			
+			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_PARENTNODEREF));
+
 			if (ktype.equals(Dossier.class.getSimpleName())) {
-				response = KoyaWebscript.getObjectAsJson(dossierService.create(
-						title, parent, null));
+				response = KoyaWebscript.getObjectAsJson(dossierService.create(title, parent, null));
 			} else if (ktype.equals(Space.class.getSimpleName())) {
-				response = KoyaWebscript.getObjectAsJson(spaceService.create(
-						title, parent, null));
+				response = KoyaWebscript.getObjectAsJson(spaceService.create(title, parent, null));
 
 			} else if (ktype.equals(Directory.class.getSimpleName())) {
-				response = KoyaWebscript.getObjectAsJson(koyaContentService
-						.createDir(title, parent));
+				response = KoyaWebscript.getObjectAsJson(koyaContentService.createDir(title, parent));
 			} else {
 				throw new KoyaServiceException(KoyaErrorCodes.INVALID_TYPE_KOYANODECREATION);
 			}
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

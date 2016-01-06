@@ -37,6 +37,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 import fr.itldev.koya.action.UnzipActionExecuter;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -49,68 +50,62 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  */
 public class ImportZip extends AbstractWebScript {
 
-    private final Logger logger = Logger.getLogger(ImportZip.class);
+	private final Logger logger = Logger.getLogger(ImportZip.class);
 
-    protected NodeService nodeService;
-    protected ActionService actionService;
+	protected NodeService nodeService;
+	protected ActionService actionService;
 
-    /* services */
-    private KoyaNodeService koyaNodeService;
+	/* services */
+	private KoyaNodeService koyaNodeService;
 
-    public void setNodeService(NodeService nodeService) {
-        this.nodeService = nodeService;
-    }
+	public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
 
-    public void setActionService(ActionService actionService) {
-        this.actionService = actionService;
-    }
+	public void setActionService(ActionService actionService) {
+		this.actionService = actionService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res)
-            throws IOException {
-        Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 
-        try {
-            NodeRef zipNodeRef = koyaNodeService
-                    .getNodeRef((String) urlParamsMap
-                            .get(KoyaWebscript.WSCONST_NODEREF));
+		try {
+			NodeRef zipNodeRef = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_NODEREF));
 
-            importZip(zipNodeRef);
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : "
-                    + ex.getErrorCode().toString(), ex);
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write("");
-    }
+			importZip(zipNodeRef);
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString(), ex);
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write("");
+	}
 
-    private void importZip(NodeRef zipFile) throws KoyaServiceException {
-        try {
-            Map<String, Serializable> paramsImport = new HashMap<>();
-            paramsImport.put(ImporterActionExecuter.PARAM_DESTINATION_FOLDER,
-                    nodeService.getPrimaryParent(zipFile).getParentRef());
-            Action importZip = actionService.createAction(
-                    UnzipActionExecuter.NAME, paramsImport);
-            // /**
-            // * Process must be executed synchronously in order to delete
-            // * original zip
-            // *
-            // * We could also have written a new action that extracts AND
-            // delete
-            // * zip.
-            // */
-            importZip.setExecuteAsynchronously(false);
-            actionService.executeAction(importZip, zipFile);
-        } catch (KoyaServiceException kse) {
-            throw kse;
-        } catch (Exception ex) {
-            throw new KoyaServiceException(
-                    KoyaErrorCodes.ZIP_EXTRACTION_PROCESS_ERROR, ex);
-        }
+	private void importZip(NodeRef zipFile) throws KoyaServiceException {
+		try {
+			Map<String, Serializable> paramsImport = new HashMap<>();
+			paramsImport.put(ImporterActionExecuter.PARAM_DESTINATION_FOLDER,
+					nodeService.getPrimaryParent(zipFile).getParentRef());
+			Action importZip = actionService.createAction(UnzipActionExecuter.NAME, paramsImport);
+			// /**
+			// * Process must be executed synchronously in order to delete
+			// * original zip
+			// *
+			// * We could also have written a new action that extracts AND
+			// delete
+			// * zip.
+			// */
+			importZip.setExecuteAsynchronously(false);
+			actionService.executeAction(importZip, zipFile);
+		} catch (KoyaServiceException kse) {
+			throw kse;
+		} catch (Exception ex) {
+			throw new KoyaServiceException(KoyaErrorCodes.ZIP_EXTRACTION_PROCESS_ERROR, ex);
+		}
 
-    }
+	}
 }

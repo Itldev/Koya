@@ -18,62 +18,64 @@
  */
 package fr.itldev.koya.webscript.global;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.json.DiskSizeWrapper;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.DiskSizeWrapper;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  *
  *
  */
 public class DiskSize extends AbstractWebScript {
-    /*services*/
+	/* services */
 
-    private static final String URL_PARAM_NODEREF = "nodeRef";
-    private KoyaNodeService koyaNodeService;
+	private static final String URL_PARAM_NODEREF = "nodeRef";
+	private KoyaNodeService koyaNodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    protected Map<String, String> getUrlParamsMap(WebScriptRequest req) {
-        Map<String, String> params = new HashMap<>();
-        params.putAll(req.getServiceMatch().getTemplateVars());
-        for (String k : req.getParameterNames()) {
-            params.put(k, req.getParameter(k));
-        }
-        return params;
-    }
+	protected Map<String, String> getUrlParamsMap(WebScriptRequest req) {
+		Map<String, String> params = new HashMap<>();
+		params.putAll(req.getServiceMatch().getTemplateVars());
+		for (String k : req.getParameterNames()) {
+			params.put(k, req.getParameter(k));
+		}
+		return params;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        /**
-         * TODO do not use wrapper
-         */
-        DiskSizeWrapper wrapper = new DiskSizeWrapper();
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		/**
+		 * TODO do not use wrapper
+		 */
+		DiskSizeWrapper wrapper = new DiskSizeWrapper();
 
-        String response;
-        try {
+		String response;
+		try {
 
-            NodeRef nodeRef = koyaNodeService.getNodeRef((String) getUrlParamsMap(req).get(URL_PARAM_NODEREF));
-            wrapper.setSize(koyaNodeService.getByteSize(nodeRef));
-            response = KoyaWebscript.getObjectAsJson(wrapper);
+			NodeRef nodeRef = koyaNodeService.getNodeRef((String) getUrlParamsMap(req).get(URL_PARAM_NODEREF));
+			wrapper.setSize(koyaNodeService.getByteSize(nodeRef));
+			response = KoyaWebscript.getObjectAsJson(wrapper);
 
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
 
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 
 }

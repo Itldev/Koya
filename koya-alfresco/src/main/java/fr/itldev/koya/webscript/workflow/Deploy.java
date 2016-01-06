@@ -50,8 +50,7 @@ public class Deploy extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		String response = "";
 		Content workflowDef = null;
 
@@ -63,14 +62,13 @@ public class Deploy extends AbstractWebScript {
 			}
 		}
 
-		WorkflowDeployment deployment = workflowService.deployDefinition(
-				"activiti", workflowDef.getInputStream(),
+		WorkflowDeployment deployment = workflowService.deployDefinition("activiti", workflowDef.getInputStream(),
 				MimetypeMap.MIMETYPE_XML);
 
 		WorkflowDefinition def = deployment.getDefinition();
 
-		logger.debug("Deploy new workflow version :  "+def.getName());
-		
+		logger.debug("Deploy new workflow version :  " + def.getName());
+
 		if (deployment.getProblems().length > 0) {
 			String msg = "";
 			for (String problem : deployment.getProblems()) {

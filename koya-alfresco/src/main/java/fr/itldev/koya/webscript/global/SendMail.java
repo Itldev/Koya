@@ -18,10 +18,8 @@
  */
 package fr.itldev.koya.webscript.global;
 
-import fr.itldev.koya.alfservice.KoyaMailService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.json.MailWrapper;
 import java.io.IOException;
+
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
@@ -29,30 +27,32 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.MailWrapper;
+
 /**
  * Send Email.
  *
  */
 public class SendMail extends AbstractWebScript {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+	protected KoyaMailService koyaMailService;
 
-    protected KoyaMailService koyaMailService;
+	public void setKoyaMailService(KoyaMailService koyaMailService) {
+		this.koyaMailService = koyaMailService;
+	}
 
-    public void setKoyaMailService(KoyaMailService koyaMailService) {
-        this.koyaMailService = koyaMailService;
-    }
-
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            koyaMailService.sendMail(mapper.readValue(req.getContent().getReader(), MailWrapper.class));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write("");
-    }
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			koyaMailService.sendMail(mapper.readValue(req.getContent().getReader(), MailWrapper.class));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write("");
+	}
 
 }

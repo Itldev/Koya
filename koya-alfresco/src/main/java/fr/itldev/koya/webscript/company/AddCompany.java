@@ -18,16 +18,19 @@
  */
 package fr.itldev.koya.webscript.company;
 
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.SalesOffer;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.SalesOffer;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  *
@@ -46,9 +49,9 @@ public class AddCompany extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, Object> jsonParams = KoyaWebscript.getJsonMap(req);
 
-        String name = (String) jsonParams.get(KoyaWebscript.WSCONST_TITLE);
-        String spaceTemplate = (String) jsonParams.get(KoyaWebscript.WSCONST_SPACETEMPLATE);
-        String salesOffer = (String) jsonParams.get(KoyaWebscript.WSCONST_SALESOFFER);
+        String name = (String) jsonParams.get(RestConstants.WSCONST_TITLE);
+        String spaceTemplate = (String) jsonParams.get(RestConstants.WSCONST_SPACETEMPLATE);
+        String salesOffer = (String) jsonParams.get(RestConstants.WSCONST_SALESOFFER);
 
         String response;
 

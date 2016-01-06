@@ -18,31 +18,30 @@
  */
 package fr.itldev.koya.webscript.content;
 
-import fr.itldev.koya.action.PdfRenderActionExecuter;
-import fr.itldev.koya.alfservice.KoyaContentService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_ZIP;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_ZIP;
-import org.alfresco.service.cmr.action.ActionService;
+
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Mostly comming from atolcd ZipContents
@@ -52,82 +51,78 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class ZipContent extends AbstractWebScript {
 
-    private static final String ARG_NODEREFS = "nodeRefs";
-    private static final String ARG_PDF = "pdf";
+	private static final String ARG_NODEREFS = "nodeRefs";
+	private static final String ARG_PDF = "pdf";
 
-//    private ActionService actionService;
-    private KoyaContentService koyaContentService;
-    private KoyaNodeService koyaNodeService;
+	// private ActionService actionService;
+	private KoyaContentService koyaContentService;
+	private KoyaNodeService koyaNodeService;
 
-//    public void setActionService(ActionService actionService) {
-//        this.actionService = actionService;
-//    }
-    public void setKoyaContentService(KoyaContentService koyaContentService) {
-        this.koyaContentService = koyaContentService;
-    }
+	// public void setActionService(ActionService actionService) {
+	// this.actionService = actionService;
+	// }
+	public void setKoyaContentService(KoyaContentService koyaContentService) {
+		this.koyaContentService = koyaContentService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res)
-            throws IOException {
-        Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 
-        ArrayList<NodeRef> nodeRefs = new ArrayList<>();
-        JSONArray jsonArray = (JSONArray) jsonPostMap.get(ARG_NODEREFS);
-        Boolean pdf = (Boolean) jsonPostMap.get(ARG_PDF);
-        if (pdf == null) {
-            pdf = Boolean.FALSE;
-        }
+		ArrayList<NodeRef> nodeRefs = new ArrayList<>();
+		JSONArray jsonArray = (JSONArray) jsonPostMap.get(ARG_NODEREFS);
+		Boolean pdf = (Boolean) jsonPostMap.get(ARG_PDF);
+		if (pdf == null) {
+			pdf = Boolean.FALSE;
+		}
 
-        if (jsonArray != null) {
-            int len = jsonArray.size();
-            for (int i = 0; i < len; i++) {
-                NodeRef n = koyaNodeService.getNodeRef(jsonArray.get(i)
-                        .toString());
-                nodeRefs.add(n);
-            }
-        }
+		if (jsonArray != null) {
+			int len = jsonArray.size();
+			for (int i = 0; i < len; i++) {
+				NodeRef n = koyaNodeService.getNodeRef(jsonArray.get(i).toString());
+				nodeRefs.add(n);
+			}
+		}
 
-        try {
-            res.setContentType(MIMETYPE_ZIP);
-            res.setHeader("Content-Transfer-Encoding", "binary");
-            res.addHeader("Content-Disposition", "attachment");
+		try {
+			res.setContentType(MIMETYPE_ZIP);
+			res.setHeader("Content-Transfer-Encoding", "binary");
+			res.addHeader("Content-Disposition", "attachment");
 
-            res.setHeader("Cache-Control",
-                    "must-revalidate, post-check=0, pre-check=0");
-            res.setHeader("Pragma", "public");
-            res.setHeader("Expires", "0");
+			res.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+			res.setHeader("Pragma", "public");
+			res.setHeader("Expires", "0");
 
-            File tmpZipFile = koyaContentService.zip(nodeRefs, pdf);
+			File tmpZipFile = koyaContentService.zip(nodeRefs, pdf);
 
-            OutputStream outputStream = res.getOutputStream();
-            if (nodeRefs.size() > 0) {
-                InputStream in = new FileInputStream(tmpZipFile);
-                try {
-                    byte[] buffer = new byte[8192];
-                    int len;
+			OutputStream outputStream = res.getOutputStream();
+			if (nodeRefs.size() > 0) {
+				InputStream in = new FileInputStream(tmpZipFile);
+				try {
+					byte[] buffer = new byte[8192];
+					int len;
 
-                    while ((len = in.read(buffer)) > 0) {
-                        outputStream.write(buffer, 0, len);
-                    }
-                } finally {
-                    IOUtils.closeQuietly(in);
-                }
-            }
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : "
-                    + ex.getErrorCode().toString());
-        } catch (RuntimeException e) {
-            /**
-             * TODO koya specific exception
-             */
-            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST,
-                    "Erreur lors de la génération de l'archive.", e);
-        }
+					while ((len = in.read(buffer)) > 0) {
+						outputStream.write(buffer, 0, len);
+					}
+				} finally {
+					IOUtils.closeQuietly(in);
+				}
+			}
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		} catch (RuntimeException e) {
+			/**
+			 * TODO koya specific exception
+			 */
+			throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST,
+					"Erreur lors de la génération de l'archive.", e);
+		}
 
-    }
+	}
 
 }

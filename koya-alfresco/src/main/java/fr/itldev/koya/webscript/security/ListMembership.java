@@ -31,6 +31,7 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -48,30 +49,26 @@ public class ListMembership extends AbstractWebScript {
 		this.koyaNodeService = koyaNodeService;
 	}
 
-
 	public void setSpaceAclService(SpaceAclService spaceAclService) {
 		this.spaceAclService = spaceAclService;
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		String response = "";
 		try {
-			NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF));
 			String roleName = (String) urlParams.get("rolename");
 
 			Space space = koyaNodeService.getKoyaNode(nodeRef, Space.class);
 
-			response = KoyaWebscript.getObjectAsJson(spaceAclService
-					.listMembership(space, KoyaPermission.valueOf(roleName)));
+			response = KoyaWebscript
+					.getObjectAsJson(spaceAclService.listMembership(space, KoyaPermission.valueOf(roleName)));
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

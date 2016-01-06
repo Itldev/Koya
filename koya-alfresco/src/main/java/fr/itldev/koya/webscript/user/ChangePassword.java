@@ -54,8 +54,7 @@ public class ChangePassword extends AbstractWebScript {
 		this.userService = userService;
 	}
 
-	public void setAuthenticationService(
-			MutableAuthenticationService authenticationService) {
+	public void setAuthenticationService(MutableAuthenticationService authenticationService) {
 		this.authenticationService = authenticationService;
 	}
 
@@ -64,13 +63,11 @@ public class ChangePassword extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
 		Map<String, Object> params = KoyaWebscript.getJsonMap(req);
 
-		Boolean isAdmin = authorityService
-				.isAdminAuthority(authenticationService.getCurrentUserName());
+		Boolean isAdmin = authorityService.isAdminAuthority(authenticationService.getCurrentUserName());
 
 		String username = null;
 		String oldpwd = null;
@@ -99,8 +96,7 @@ public class ChangePassword extends AbstractWebScript {
 				userService.changePassword(oldpwd, newpwd);
 			}
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write("");

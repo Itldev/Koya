@@ -18,16 +18,19 @@
  */
 package fr.itldev.koya.webscript.content;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  *
@@ -36,26 +39,26 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class CopyContent extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 
-        String response;
-        try {
-            NodeRef dest = koyaNodeService.getNodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_DESTNODEREF));
-            NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParamsMap.get(KoyaWebscript.WSCONST_NODEREF));
-            response = KoyaWebscript.getObjectAsJson(koyaNodeService.copy(nodeRef, dest));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+		String response;
+		try {
+			NodeRef dest = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_DESTNODEREF));
+			NodeRef nodeRef = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_NODEREF));
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService.copy(nodeRef, dest));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 
 }

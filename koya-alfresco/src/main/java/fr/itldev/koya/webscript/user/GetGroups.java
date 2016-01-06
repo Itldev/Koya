@@ -18,15 +18,17 @@
  */
 package fr.itldev.koya.webscript.user;
 
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Set;
+
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Get groups current user belongs to
@@ -35,29 +37,29 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class GetGroups extends AbstractWebScript {
 
-    private AuthorityService authorityService;
-    private AuthenticationService authenticationService;
+	private AuthorityService authorityService;
+	private AuthenticationService authenticationService;
 
-    public void setAuthorityService(AuthorityService authorityService) {
-        this.authorityService = authorityService;
-    }
+	public void setAuthorityService(AuthorityService authorityService) {
+		this.authorityService = authorityService;
+	}
 
-    public void setAuthenticationService(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+	public void setAuthenticationService(AuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
-        final String username = authenticationService.getCurrentUserName();
-        Set<String> groups = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Set<String>>() {
-            @Override
-            public Set<String> doWork() throws Exception {
-                return authorityService.getAuthoritiesForUser(username);
-            }
-        });
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(KoyaWebscript.getObjectAsJson(groups));
-    }
+		final String username = authenticationService.getCurrentUserName();
+		Set<String> groups = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Set<String>>() {
+			@Override
+			public Set<String> doWork() throws Exception {
+				return authorityService.getAuthoritiesForUser(username);
+			}
+		});
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(KoyaWebscript.getObjectAsJson(groups));
+	}
 
 }

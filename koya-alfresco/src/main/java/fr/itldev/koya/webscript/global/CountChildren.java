@@ -18,12 +18,10 @@
  */
 package fr.itldev.koya.webscript.global;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.collections.CollectionUtils;
@@ -35,47 +33,52 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * Count direct Children of given parent node
  *
  */
 public class CountChildren extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String response;
+		String response;
 
-        try {
-            NodeRef parent = koyaNodeService.getNodeRef((String) urlParams.get(KoyaWebscript.WSCONST_PARENTNODEREF));
-            ObjectMapper mapper = new ObjectMapper();
-            Set qNameFilter = mapper.readValue(req.getContent().getReader(), new TypeReference<Set>() {
-            });
+		try {
+			NodeRef parent = koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_PARENTNODEREF));
+			ObjectMapper mapper = new ObjectMapper();
+			Set qNameFilter = mapper.readValue(req.getContent().getReader(), new TypeReference<Set>() {
+			});
 
-            /**
-             * Transform Set Of Map<String,String> as Set<Qname>
-             */
-            CollectionUtils.transform(qNameFilter, new Transformer() {
-                @Override
-                public Object transform(Object input) {
-                    Map<String, String> m = (Map<String, String>) input;
-                    return QName.createQName(m.get("namespaceURI"), m.get("localName"));
-                }
-            });
+			/**
+			 * Transform Set Of Map<String,String> as Set<Qname>
+			 */
+			CollectionUtils.transform(qNameFilter, new Transformer() {
+				@Override
+				public Object transform(Object input) {
+					Map<String, String> m = (Map<String, String>) input;
+					return QName.createQName(m.get("namespaceURI"), m.get("localName"));
+				}
+			});
 
-            response = KoyaWebscript.getObjectAsJson(koyaNodeService.countChildren(parent, qNameFilter));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService.countChildren(parent, qNameFilter));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 }

@@ -19,17 +19,20 @@
 
 package fr.itldev.koya.webscript.company;
 
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Preferences;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Preferences;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Commit company preferences.
@@ -54,7 +57,7 @@ public class CommitPreferences extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
+        String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
 
         try {
             ObjectMapper mapper = new ObjectMapper();

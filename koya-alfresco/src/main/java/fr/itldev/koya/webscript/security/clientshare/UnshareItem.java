@@ -32,6 +32,7 @@ import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Space;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -59,28 +60,23 @@ public class UnshareItem extends AbstractWebScript {
 	 * @throws IOException
 	 */
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
 		Map<String, Object> params = KoyaWebscript.getJsonMap(req);
 
 		try {
-			NodeRef n = koyaNodeService.getNodeRef((String) params
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			NodeRef n = koyaNodeService.getNodeRef((String) params.get(RestConstants.WSCONST_NODEREF));
 			Space s;
 			KoyaNode si = koyaNodeService.getKoyaNode(n);
 			if (Space.class.isAssignableFrom(si.getClass())) {
 				s = (Space) si;
 			} else {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
+				throw new KoyaServiceException(KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
 			}
 
-			spaceAclService.clientUnshare(s,
-					(String) params.get(KoyaWebscript.WSCONST_EMAIL));
+			spaceAclService.clientUnshare(s, (String) params.get(RestConstants.WSCONST_EMAIL));
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write("");
