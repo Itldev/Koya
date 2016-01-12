@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,14 +31,17 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.services.FavouriteService;
 import fr.itldev.koya.services.KoyaNodeService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.io.Serializable;
 
 public class KoyaNodeServiceImpl extends AlfrescoRestService implements
 		KoyaNodeService, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected static final String REST_GET_DELITEM = "/s/fr/itldev/koya/global/delete/{nodeRef}?alf_ticket={alf_ticket}";
 	protected static final String REST_GET_RENAMEITEM = "/s/fr/itldev/koya/global/rename/{nodeRef}?alf_ticket={alf_ticket}";
-	private static final String REST_GET_PARENTS = "/s/fr/itldev/koya/global/parents/{nodeRef}?nbAncestor={nbAncestor}&alf_ticket={alf_ticket}";
+	private static final String REST_GET_PARENTS = "/s/fr/itldev/koya/global/parents/{nodeRef}?nbAncestor={nbAncestor}&failSafe={failSafe}&alf_ticket={alf_ticket}";
 	private static final String REST_GET_PARENTS_INFINITE = "/s/fr/itldev/koya/global/parents/{nodeRef}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_SIZE = "/s/fr/itldev/koya/content/size/{nodeRef}?alf_ticket={alf_ticket}";
 
@@ -130,7 +134,25 @@ public class KoyaNodeServiceImpl extends AlfrescoRestService implements
 	 * @throws AlfrescoServiceException
 	 */
 	@Override
-	public KoyaNode getParent(User user, KoyaNode KoyaNode)
+	public KoyaNode getParent(User user, KoyaNode koyaNode)
+			throws AlfrescoServiceException {
+		return getParent(user, koyaNode,false);
+	}
+	
+	
+	/**
+	 * 
+	 * Returns KoyaNode Parent if exists.
+	 * 
+	 * Do not throw exception if Failsafe parameter true; 
+	 * 
+	 * @param user
+	 * @param koyaNode
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	@Override
+	public KoyaNode getParent(User user, KoyaNode koyaNode,Boolean failSafe)
 			throws AlfrescoServiceException {
 
 		List<KoyaNode> parents = fromJSON(
@@ -138,17 +160,17 @@ public class KoyaNodeServiceImpl extends AlfrescoRestService implements
 				},
 				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_PARENTS,
-						String.class, KoyaNode.getNodeRef(), 1,
+						String.class, koyaNode.getNodeRef(), 1,failSafe,
 						user.getTicketAlfresco()));
 
-		if (parents.isEmpty()) {
+		if (parents== null ||parents.isEmpty()) {
 			return null;
 		} else {
 			return parents.get(0);
 		}
 
 	}
-
+	
 	/**
 	 * Get Secured Item Parent if exists.
 	 * 

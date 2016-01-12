@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -38,7 +39,6 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  * 
  */
 public class GetParent extends AbstractWebScript {
-
 	private KoyaNodeService koyaNodeService;
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
@@ -62,13 +62,31 @@ public class GetParent extends AbstractWebScript {
 		} catch (NumberFormatException ex) {
 			nbAncestor = KoyaNodeService.NB_ANCESTOR_INFINTE;
 		}
-		String response;
-		try {
-			response = KoyaWebscript.getObjectAsJson(koyaNodeService.getParentsList(node, nbAncestor));
 
-		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		Boolean failSafe;
+		try {
+			failSafe = Boolean.valueOf((String) urlParams.get("failSafe"));
+		} catch (NumberFormatException ex) {
+			failSafe = false;
 		}
+		String response;
+		if (!failSafe) {
+			try {
+				response = KoyaWebscript.getObjectAsJson(koyaNodeService.getParentsList(node, nbAncestor));
+
+			} catch (KoyaServiceException ex) {
+				throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+			}
+		} else {
+			// failSafe mode
+			try {
+				response = KoyaWebscript.getObjectAsJson(koyaNodeService.getParentsList(node, nbAncestor));
+			} catch (RuntimeException ex) {
+				response = "";
+
+			}
+		}
+
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);
 	}
