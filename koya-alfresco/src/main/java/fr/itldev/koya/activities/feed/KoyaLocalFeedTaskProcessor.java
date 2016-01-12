@@ -428,7 +428,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				rolesSelector.add(KoyaPermissionCollaborator.RESPONSIBLE);
 				rolesSelector.add(KoyaPermissionCollaborator.MEMBER);
 				rolesSelector.add(KoyaPermissionConsumer.CLIENT);
-				rolesSelector.add(KoyaPermissionConsumer.PARTNER);
+				
 
 				return spaceAclService.listUsersAuthorities(s.getNodeRef(),
 						rolesSelector);

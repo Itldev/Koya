@@ -39,10 +39,12 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.namespace.NamespacePrefixResolver;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
+import org.alfresco.util.Pair;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
@@ -82,6 +84,7 @@ public class DossierService {
 	private KoyaMailService koyaMailService;
 	private UserService userService;
 	private AuthenticationService authenticationService;
+	private OwnableService ownableService;
 
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setNodeService(NodeService nodeService) {
@@ -127,6 +130,11 @@ public class DossierService {
 	public void setAuthenticationService(
 			AuthenticationService authenticationService) {
 		this.authenticationService = authenticationService;
+	}
+	
+	
+	public void setOwnableService(OwnableService ownableService) {
+		this.ownableService = ownableService;
 	}
 
 	// </editor-fold>
@@ -352,10 +360,10 @@ public class DossierService {
 	}
 
 	/*
-	 * ========== Koya Client Upload in specific upload directory ==========
+	 * ========== Site Consumer Upload in specific upload directory ==========
 	 */
 
-	public Map<String, String> uploadKoyaClientDocument(Dossier dossier,
+	public Map<String, String> uploadSiteConsumerDocument(Dossier dossier,
 			String fileName,
 			org.springframework.extensions.surf.util.Content content,
 			String clientMessage) throws KoyaServiceException {
@@ -378,11 +386,18 @@ public class DossierService {
 						+ ++uniqueFileCounter + fileName.substring(dot);
 			}
 		}
-
-		Map<String, String> upResult = koyaContentService.createContentNode(
+		
+		
+		Pair<NodeRef,Map<String, String>> uploadResult = koyaContentService.createContentNode(
 				upDir, finalFileName, null, content.getMimetype(),
 				content.getEncoding(), content.getInputStream(), false);
-
+		
+		//===== permissions and ownable
+		ownableService.setOwner(uploadResult.getFirst(), authenticationService.getCurrentUserName());
+		//no inherence
+		spaceAclService.initConsumerUploadedDocument(dossier, uploadResult.getFirst());
+		
+		
 		//
 		List<User> usersNotified = spaceAclService.listMembership(dossier,
 				KoyaPermissionCollaborator.RESPONSIBLE);
@@ -403,21 +418,21 @@ public class DossierService {
 			if (usersNotified.isEmpty()) {
 				logger.warn("No responsible nor Company manager notifiable for client document add. Company :  "
 						+ c.getTitle() + " Dossier " + dossier.getTitle());
-				return upResult;
+				return uploadResult.getSecond();
 			}
 		}
 
 		Document d = koyaNodeService.getKoyaNode(
-				new NodeRef(upResult.get("nodeRef")), Document.class);
+				new NodeRef(uploadResult.getSecond().get("nodeRef")), Document.class);
 		User uploader = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
 		koyaMailService.sendClientUploadAlertMail(dossier, d, uploader,
 				usersNotified, notifyCompanyManager);
 
-		return upResult;
+		return uploadResult.getSecond();
 	}
 
-	public List<Document> listKoyaClientDocuments(final Dossier dossier) {
+	public List<Document> listSiteConsumerDocuments(final Dossier dossier) {
 		NodeRef upDir = getPublicUploadFolder(dossier);
 		if (upDir != null) {
 			List<Document> docs = new ArrayList<>();
@@ -434,7 +449,7 @@ public class DossierService {
 		}
 	}
 
-	private static String KOYACLIENT_UPLOADDIR_NAME = "koyaClientUpload";
+	private static String SITECONSUMER_UPLOADDIR_NAME = "siteConsumerUpload";
 
 	private NodeRef getPublicUploadFolder(Dossier dossier) {
 		NodeRef publicUploadFolder = null;
@@ -446,7 +461,7 @@ public class DossierService {
 
 			NodeRef koyaClientUpDir = nodeService.getChildByName(
 					c.getNodeRef(), ContentModel.ASSOC_CONTAINS,
-					KOYACLIENT_UPLOADDIR_NAME);
+					SITECONSUMER_UPLOADDIR_NAME);
 
 			if (koyaClientUpDir != null) {
 				publicUploadFolder = nodeService.getChildByName(
@@ -466,31 +481,29 @@ public class DossierService {
 				.runAsSystem(new AuthenticationUtil.RunAsWork<NodeRef>() {
 					@Override
 					public NodeRef doWork() throws Exception {
-
+						
 						Company c = koyaNodeService.getFirstParentOfType(
 								dossier.getNodeRef(), Company.class);
 						// create public client upload dir if not exists
 						NodeRef companyClientUpDir = nodeService
 								.getChildByName(c.getNodeRef(),
 										ContentModel.ASSOC_CONTAINS,
-										KOYACLIENT_UPLOADDIR_NAME);
+										SITECONSUMER_UPLOADDIR_NAME);
 
 						if (companyClientUpDir == null) {
 							final Map<QName, Serializable> properties = new HashMap<>();
 							properties.put(ContentModel.PROP_NAME,
-									KOYACLIENT_UPLOADDIR_NAME);
+									SITECONSUMER_UPLOADDIR_NAME);
 							properties.put(ContentModel.PROP_TITLE,
-									KOYACLIENT_UPLOADDIR_NAME);
+									SITECONSUMER_UPLOADDIR_NAME);
 
 							ChildAssociationRef car = nodeService.createNode(
 									c.getNodeRef(),
 									ContentModel.ASSOC_CONTAINS,
 									QName.createQName(
 											NamespaceService.CONTENT_MODEL_1_0_URI,
-											KOYACLIENT_UPLOADDIR_NAME),
-									ContentModel.TYPE_FOLDER, properties);
-							spaceAclService.initCompanyKoyaClientDirAcl(c,
-									car.getChildRef());
+											SITECONSUMER_UPLOADDIR_NAME),
+									ContentModel.TYPE_FOLDER, properties);						
 							companyClientUpDir = car.getChildRef();
 						}
 
@@ -508,7 +521,7 @@ public class DossierService {
 										publicUploadFolderName(dossier)),
 								ContentModel.TYPE_FOLDER, properties);
 
-						spaceAclService.initSingleDossierKoyaClientDirAcl(
+						spaceAclService.initSingleDossierSiteConsumerUploadDirAcl(
 								dossier, car.getChildRef());
 						return car.getChildRef();
 					}

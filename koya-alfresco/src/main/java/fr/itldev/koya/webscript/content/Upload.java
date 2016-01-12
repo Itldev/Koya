@@ -86,13 +86,12 @@ public class Upload extends AbstractWebScript {
 		}
 
 		/**
-		 * This upload mode allows any public client (ie KoyaClientRole on
-		 * dossier) to upload a document in a specific dir of th defined dossier
-		 * parentNodeRef must be a dossier object
+		 * This upload mode allows any Consumer (ie KoyaClient or KoyaPartner Role on
+		 * dossier) to upload a document in a specific dir Upload dir related to a dossier.
 		 */
-		Boolean koyaClient = false;
+		Boolean consumer = false;
 		try {
-			koyaClient = Boolean.valueOf(urlParams.get("koyaClient"));
+			consumer = Boolean.valueOf(urlParams.get("consumer"));
 		} catch (Exception e) {
 		}
 
@@ -124,12 +123,12 @@ public class Upload extends AbstractWebScript {
 			if (logo) {
 				// company logo upload mode (logo=true)
 				retMap = companyPropertiesService.uploadNewLogo(parent, fileName, content);
-			} else if (koyaClient) {
+			} else if (consumer) {
 				// TODO client message with upload
 				Dossier d = koyaNodeService.getKoyaNode(parent, Dossier.class);
-				dossierService.uploadKoyaClientDocument(d, fileName, content, "");
+				dossierService.uploadSiteConsumerDocument(d, fileName, content, "");
 			} else {
-				retMap = koyaContentService.createContentNode(parent, fileName, content);
+				retMap = koyaContentService.createContentNode(parent, fileName, content).getSecond();
 			}
 
 		} catch (KoyaServiceException ex) {

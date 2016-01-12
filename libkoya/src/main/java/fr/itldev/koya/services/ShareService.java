@@ -25,6 +25,7 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.KoyaShare;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 /**
@@ -41,7 +42,8 @@ public interface ShareService extends AlfrescoService {
 	 * @param sharedUserMail
 	 * 
 	 */
-	KoyaShare shareItem(User user, KoyaNode itemToShare, String sharedUserMail)
+	KoyaShare shareItem(User user, KoyaNode itemToShare, String sharedUserMail,
+			KoyaPermissionConsumer permission)
 			throws AlfrescoServiceException;
 
 	/**
@@ -63,7 +65,8 @@ public interface ShareService extends AlfrescoService {
 	 * @return
 	 * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
 	 */
-	List<User> sharedUsers(User user, KoyaNode item)
+	List<User> sharedUsers(User user, KoyaNode item,
+			KoyaPermissionConsumer permission)
 			throws AlfrescoServiceException;
 
 	/**

@@ -19,7 +19,7 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  * List Client Documents in hidden folder for specified dossier
  * 
  */
-public class ListClientDocuments extends AbstractWebScript {
+public class ListSiteConsumerDocuments extends AbstractWebScript {
 
 	private DossierService dossierService;
 	private KoyaNodeService koyaNodeService;
@@ -42,7 +42,7 @@ public class ListClientDocuments extends AbstractWebScript {
 			Dossier d = koyaNodeService.getKoyaNode(
 					koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF)), Dossier.class);
 
-			response = KoyaWebscript.getObjectAsJson(dossierService.listKoyaClientDocuments(d));
+			response = KoyaWebscript.getObjectAsJson(dossierService.listSiteConsumerDocuments(d));
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

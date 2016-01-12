@@ -23,7 +23,12 @@ public class SitePermission extends AlfrescoPermission {
     }
 
     private static final Map<String, SitePermission> sitePermissionCache = new HashMap<String, SitePermission>() {
-        {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
             for (SitePermission sp : getAll()) {
                 put(sp.permissionName, sp);
             }

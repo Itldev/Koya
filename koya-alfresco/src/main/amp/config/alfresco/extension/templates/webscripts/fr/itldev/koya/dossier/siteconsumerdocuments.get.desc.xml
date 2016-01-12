@@ -20,10 +20,10 @@
 -->
 
 <webscript>
-    <shortname>UnShare Secured Item</shortname>
+    <shortname>Get Uploaded Site Consumer documents List for specified dossier</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/security/clientshare/undo</url>
-    <authentication>user</authentication>    
+    <url>/fr/itldev/koya/dossier/siteconsumerdocuments/{nodeRef}</url>
+    <authentication>user</authentication>
     <format default="json"/>
 </webscript>
 

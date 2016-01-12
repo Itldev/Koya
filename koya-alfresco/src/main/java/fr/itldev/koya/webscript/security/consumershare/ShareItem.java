@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.security.clientshare;
+package fr.itldev.koya.webscript.security.consumershare;
 
 import java.io.IOException;
 import java.util.Map;
@@ -35,6 +35,7 @@ import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.model.json.KoyaShare;
 import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -71,10 +72,12 @@ public class ShareItem extends AbstractWebScript {
 			Space space = koyaNodeService.getKoyaNode(n, Space.class);
 
 			String userMail = (String) params.get(RestConstants.WSCONST_EMAIL);
+			String permission = (String) params.get(RestConstants.WSCONST_KOYAPERMISSION);
+			KoyaPermissionConsumer kPermission = (KoyaPermissionConsumer) KoyaPermission.valueOf(permission);
 
-			NominatedInvitation i = spaceAclService.clientShare(space, userMail);
+			NominatedInvitation i = spaceAclService.consumerShare(space, userMail, kPermission);
 
-			KoyaShare koyaShare = new KoyaShare(space, userMail, KoyaPermissionConsumer.CLIENT.toString());
+			KoyaShare koyaShare = new KoyaShare(space, userMail, permission);
 
 			if (i != null) {
 				koyaShare.setKoyaInvite(new KoyaInvite(i));

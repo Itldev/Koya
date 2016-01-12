@@ -91,6 +91,7 @@
 		<property name="userService" ref="userService" />
 		<property name="authenticationService" ref="AuthenticationService" />
 		<property name="companyAclService" ref="companyAclService" />
+		<property name="ownableService" ref="ownableService" />		
 	</bean>
 
     <!--Contents handling service-->

@@ -48,23 +48,19 @@
             Roles applied to SiteConsumers:
             
             KoyaClient : Allow read only control on nodes
-            KoyaPartner : Allow limited write access. TODO 
-        -->
-      
+            KoyaPartner : Allow limited read node access. 
+        -->      
         <permissionGroup name="KoyaClient" allowFullControl="false" expose="true">           
             <includePermissionGroup permissionGroup="Consumer" type="cm:cmobject" />
             <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
-            <!--<requiredPermission on="node" type="st:site" name="SiteConsumer" />-->
         </permissionGroup>
              
         <permissionGroup name="KoyaPartner" allowFullControl="false" expose="true">            
-            <includePermissionGroup permissionGroup="AddChildren" type="sys:base"/>
-            <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
-            <includePermissionGroup type="sys:base" permissionGroup="ReadChildren"/>
-            <!--<requiredPermission on="node" type="st:site" name="SiteConsumer" />-->
+   	     <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
+	     <includePermissionGroup  permissionGroup="ReadProperties" type="sys:base"/>
+   	     <includePermissionGroup type="sys:base" permissionGroup="ReadContent"/>
         </permissionGroup>
-      
-             
+        
     </permissionSet>
     
 </permissions>

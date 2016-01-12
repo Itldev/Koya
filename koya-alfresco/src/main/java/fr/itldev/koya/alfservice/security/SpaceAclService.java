@@ -190,11 +190,11 @@ public class SpaceAclService {
 	}
 
 	/*
-	 * ========= Client Share ===============
+	 * ========= Consumer Share ===============
 	 */
 
 	/**
-	 * Share Space with client defined by his email adress
+	 * Share Space with Consumer defined by his email adress
 	 * 
 	 * if user with such an email address, creates and invite him. Then grant
 	 * Space permission KoyaPermissionConsumer.CLIENT by adding to corresponding
@@ -205,8 +205,8 @@ public class SpaceAclService {
 	 * @return
 	 * @throws KoyaServiceException
 	 */
-	public NominatedInvitation clientShare(final Space space,
-			final String userMail) throws KoyaServiceException {
+	public NominatedInvitation consumerShare(final Space space,
+			final String userMail,KoyaPermissionConsumer permission) throws KoyaServiceException {
 
 		User inviter = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
@@ -214,7 +214,7 @@ public class SpaceAclService {
 		logger.info("[Share] : {'user':'" + inviter.getEmail()
 				+ "','invitee':'" + userMail + "','koyaNode':'"
 				+ space.toString() + "','permission':'"
-				+ KoyaPermissionConsumer.CLIENT.toString() + "}");
+				+ permission.toString() + "}");
 
 		beforeShareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.beforeShareItem(space.getNodeRef(), userMail, inviter);
@@ -277,7 +277,7 @@ public class SpaceAclService {
 			}
 		}
 
-		addKoyaAuthority(space, KoyaPermissionConsumer.CLIENT, u);
+		addKoyaAuthority(space, permission, u);
 
 		afterShareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.afterShareItem(space.getNodeRef(), u, inviter);
@@ -292,13 +292,13 @@ public class SpaceAclService {
 	}
 
 	/**
-	 * Remove KoyaPermissionConsumer.CLIENT for user defined by email address
+	 * Remove KoyaPermissionConsumer. for user defined by email address
 	 * 
 	 * 
 	 * @param space
 	 * @param userMail
 	 */
-	public void clientUnshare(final Space space, final String userMail) {
+	public void consumerUnshare(final Space space, final String userMail,KoyaPermissionConsumer permission) {
 		final User u = userService.getUserByEmail(userMail);
 
 		User revoker = userService.getUserByUsername(authenticationService
@@ -307,13 +307,13 @@ public class SpaceAclService {
 		logger.info("[Unshare] : {'user':'" + revoker.getEmail()
 				+ "','unshared':'" + u.getEmail() + "','koyaNode':'"
 				+ space.toString() + "','permission':'"
-				+ KoyaPermissionConsumer.CLIENT.toString() + "}");
+				+ permission.toString() + "}");
 
 		beforeUnshareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.beforeUnshareItem(space.getNodeRef(), userMail, revoker);
 
-		// Gets the user involved in unsharing - throws execption if not found
-		removeKoyaAuthority(space, KoyaPermissionConsumer.CLIENT, u);
+		// Gets the user involved in unsharing - throws exception if not found
+		removeKoyaAuthority(space, permission, u);
 
 		afterUnshareDelegate.get(nodeService.getType(space.getNodeRef()))
 				.afterUnshareItem(space.getNodeRef(), u, revoker);
@@ -804,60 +804,31 @@ public class SpaceAclService {
 	 * @param dossier
 	 * @param koyaClientDir
 	 */
-	public void initSingleDossierKoyaClientDirAcl(Dossier dossier,
-			NodeRef koyaClientDir) {
-		permissionService
-				.setPermission(
-						koyaClientDir,
-						"GROUP_"
-								+ dossier
-										.getAuthorityName(KoyaPermissionCollaborator.MEMBER
-												.toString()),
-						KoyaPermissionCollaborator.MEMBER.toString(), true);
-
-		permissionService
-				.setPermission(
-						koyaClientDir,
-						"GROUP_"
-								+ dossier
-										.getAuthorityName(KoyaPermissionCollaborator.RESPONSIBLE
-												.toString()),
-						KoyaPermissionCollaborator.RESPONSIBLE.toString(), true);
-
+	public void initSingleDossierSiteConsumerUploadDirAcl(Dossier dossier,
+ NodeRef koyaClientDir) {
 		permissionService.setPermission(koyaClientDir,
-				"GROUP_" + dossier.getAuthorityName("KoyaClient"),
-				"SiteContributor", true);
-
+				"GROUP_" + dossier.getAuthorityName(KoyaPermissionCollaborator.MEMBER.toString()),
+				KoyaPermissionCollaborator.MEMBER.toString(), true);
+		permissionService.setPermission(koyaClientDir,
+				"GROUP_" + dossier.getAuthorityName(KoyaPermissionCollaborator.RESPONSIBLE.toString()),
+				KoyaPermissionCollaborator.RESPONSIBLE.toString(), true);
+		permissionService.setPermission(koyaClientDir, "GROUP_" + dossier.getAuthorityName("KoyaClient"),
+				SitePermission.CONTRIBUTOR.toString(), true);
+		permissionService.setPermission(koyaClientDir, "GROUP_" + dossier.getAuthorityName("KoyaPartner"),
+				SitePermission.CONTRIBUTOR.toString(), true);
 	}
 
-	/**
-	 * 
-	 * @param dossier
-	 * @param koyaClientDir
-	 */
-	public void initCompanyKoyaClientDirAcl(Company company,
-			NodeRef companyKoyaClientDir) {
 
-		// Clear the node inherited permissions
-		permissionService.setInheritParentPermissions(companyKoyaClientDir,
-				false);
-		permissionService.setPermission(companyKoyaClientDir, siteService
-				.getSiteRoleGroup(company.getName(),
-						SitePermission.MANAGER.toString()),
-				SitePermission.MANAGER.toString(), true);
-		permissionService.setPermission(companyKoyaClientDir, siteService
-				.getSiteRoleGroup(company.getName(),
-						SitePermission.CONTRIBUTOR.toString()),
-				SitePermission.CONTRIBUTOR.toString(), true);
-		permissionService.setPermission(companyKoyaClientDir, siteService
-				.getSiteRoleGroup(company.getName(),
-						SitePermission.COLLABORATOR.toString()),
-				SitePermission.CONTRIBUTOR.toString(), true);
+	
+	public void initConsumerUploadedDocument(Dossier dossier,NodeRef documentNodeRef){
+		permissionService.setInheritParentPermissions(documentNodeRef, false);
+		permissionService.setPermission(documentNodeRef,
+				"GROUP_" + dossier.getAuthorityName(KoyaPermissionCollaborator.MEMBER.toString()),
+				KoyaPermissionCollaborator.MEMBER.toString(), true);
 
-		permissionService.setPermission(companyKoyaClientDir, siteService
-				.getSiteRoleGroup(company.getName(),
-						SitePermission.CONSUMER.toString()),
-				SitePermission.CONSUMER.toString(), true);
+		permissionService.setPermission(documentNodeRef,
+				"GROUP_" + dossier.getAuthorityName(KoyaPermissionCollaborator.RESPONSIBLE.toString()),
+				KoyaPermissionCollaborator.RESPONSIBLE.toString(), true);
 	}
 
 	/**

@@ -21,6 +21,7 @@ import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.model.json.KoyaShare;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
@@ -84,10 +85,10 @@ public class ActivitiesTest extends TestCase {
 		
 		 Dossier d1 = dossierService.create(admin, spaceTests, "d1");
 		 KoyaShare s1 = shareService.shareItem(manager, d1, USER_SHAREDCLIENT
-		 + "-1-" + randomTestId + USER_MAILDOMAIN);
+		 + "-1-" + randomTestId + USER_MAILDOMAIN,KoyaPermissionConsumer.CLIENT);
 		 Dossier d2 = dossierService.create(admin, spaceTests, "d2");
 		 KoyaShare s2 = shareService.shareItem(manager, d2, USER_SHAREDCLIENT
-		 + "-2-" + randomTestId + USER_MAILDOMAIN);
+		 + "-2-" + randomTestId + USER_MAILDOMAIN,KoyaPermissionConsumer.CLIENT);
 		
 		 client1 = validateInvitationAndLogin(USER_SHAREDCLIENT + "-1-",
 		 s1.getKoyaInvite());

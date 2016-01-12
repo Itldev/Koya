@@ -42,9 +42,13 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class DossierServiceImpl extends AlfrescoRestService implements
 		DossierService, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static final String REST_GET_LISTMEMBERSHIP = "/s/fr/itldev/koya/security/membership/{rolename}/{noderef}?alf_ticket={alf_ticket}";
 	private static final String REST_POST_MODIFYMEMBERSHIP = "/s/fr/itldev/koya/security/membership/{method}/{rolename}/{noderef}?alf_ticket={alf_ticket}";
-	private static final String REST_GET_CLIENT_DOC_LIST = "/s/fr/itldev/koya/dossier/clientdocuments/{noderef}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_SITECONSUMER_DOC_LIST = "/s/fr/itldev/koya/dossier/siteconsumerdocuments/{noderef}?alf_ticket={alf_ticket}";
 
 	private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}?alf_ticket={alf_ticket}";
 
@@ -316,7 +320,7 @@ public class DossierServiceImpl extends AlfrescoRestService implements
 				new TypeReference<List<Document>>() {
 				},
 				getTemplate().getForObject(
-						getAlfrescoServerUrl() + REST_GET_CLIENT_DOC_LIST,
+						getAlfrescoServerUrl() + REST_GET_SITECONSUMER_DOC_LIST,
 						String.class, dossier.getNodeRef(),
 						user.getTicketAlfresco()));
 

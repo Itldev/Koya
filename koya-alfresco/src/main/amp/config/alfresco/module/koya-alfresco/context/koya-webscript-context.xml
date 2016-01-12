@@ -182,8 +182,8 @@
 	</bean>
 
 	<!--List available client uploaded documents -->
-	<bean id="webscript.fr.itldev.koya.dossier.clientdocuments.get"
-		class="fr.itldev.koya.webscript.dossier.ListClientDocuments" parent="webscript">
+	<bean id="webscript.fr.itldev.koya.dossier.siteconsumerdocuments.get"
+		class="fr.itldev.koya.webscript.dossier.ListSiteConsumerDocuments" parent="webscript">
 		<property name="koyaNodeService" ref="koyaNodeService" />
 		<property name="dossierService" ref="dossierService" />
 
@@ -459,16 +459,16 @@
 	================================================================== -->
 
 	<!-- share secured item -->
-	<bean id="webscript.fr.itldev.koya.security.clientshare.doshare.post"
-		class="fr.itldev.koya.webscript.security.clientshare.ShareItem"
+	<bean id="webscript.fr.itldev.koya.security.consumershare.doshare.post"
+		class="fr.itldev.koya.webscript.security.consumershare.ShareItem"
 		parent="webscript">
 		<property name="spaceAclService" ref="spaceAclService" />
 		<property name="koyaNodeService" ref="koyaNodeService" />
 	</bean>
 
 	<!-- unshare secured item -->
-	<bean id="webscript.fr.itldev.koya.security.clientshare.undoshare.post"
-		class="fr.itldev.koya.webscript.security.clientshare.UnshareItem"
+	<bean id="webscript.fr.itldev.koya.security.consumershare.undoshare.post"
+		class="fr.itldev.koya.webscript.security.consumershare.UnshareItem"
 		parent="webscript">
 		<property name="spaceAclService" ref="spaceAclService" />
 		<property name="koyaNodeService" ref="koyaNodeService" />

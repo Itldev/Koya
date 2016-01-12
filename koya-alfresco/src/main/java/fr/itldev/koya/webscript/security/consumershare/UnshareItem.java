@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.security.clientshare;
+package fr.itldev.koya.webscript.security.consumershare;
 
 import java.io.IOException;
 import java.util.Map;
@@ -33,6 +33,8 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -73,8 +75,10 @@ public class UnshareItem extends AbstractWebScript {
 			} else {
 				throw new KoyaServiceException(KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
 			}
+			String permission = (String) params.get(RestConstants.WSCONST_KOYAPERMISSION);
+			KoyaPermissionConsumer kPermission = (KoyaPermissionConsumer) KoyaPermission.valueOf(permission);
 
-			spaceAclService.clientUnshare(s, (String) params.get(RestConstants.WSCONST_EMAIL));
+			spaceAclService.consumerUnshare(s, (String) params.get(RestConstants.WSCONST_EMAIL), kPermission);
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}

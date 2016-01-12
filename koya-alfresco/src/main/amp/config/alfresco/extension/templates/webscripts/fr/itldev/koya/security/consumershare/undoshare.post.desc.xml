@@ -20,11 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Share Secured Item</shortname>    
+    <shortname>UnShare Secured Item</shortname>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/security/clientshare/do</url>
+    <url>/fr/itldev/koya/security/consumershare/undo</url>
     <authentication>user</authentication>    
-    <transaction>requiresnew</transaction>
     <format default="json"/>
 </webscript>
 

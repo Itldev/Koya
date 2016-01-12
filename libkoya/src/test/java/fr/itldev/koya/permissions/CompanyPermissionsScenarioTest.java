@@ -21,6 +21,7 @@ import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.model.json.KoyaShare;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.CompanyService;
 import fr.itldev.koya.services.DossierService;
 import fr.itldev.koya.services.InvitationService;
@@ -112,7 +113,7 @@ public class CompanyPermissionsScenarioTest extends TestCase {
 		// share dossier d1 with new client : automatic accept invitation
 		String userMail = "newclient" + testRamdomId + "@test.com";
 
-		KoyaShare ks = shareService.shareItem(admin, d1, userMail);
+		KoyaShare ks = shareService.shareItem(admin, d1, userMail,KoyaPermissionConsumer.CLIENT);
 
 		User u = new User();
 		u.setName("TEST");

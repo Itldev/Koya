@@ -53,6 +53,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.Pair;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -231,7 +232,7 @@ public class KoyaContentService {
         }
     }
 
-    public Map<String, String> createContentNode(NodeRef parent,
+    public Pair<NodeRef,Map<String, String>> createContentNode(NodeRef parent,
             String fileName,
             org.springframework.extensions.surf.util.Content content)
             throws KoyaServiceException {
@@ -240,20 +241,20 @@ public class KoyaContentService {
                 content.getEncoding(), content.getInputStream(),true);
     }
 
-    public Map<String, String> createContentNode(NodeRef parent,
+    public Pair<NodeRef,Map<String, String>> createContentNode(NodeRef parent,
             String fileName, InputStream contentInputStream)
             throws KoyaServiceException {
         return createContentNode(parent, fileName, null, contentInputStream);
     }
 
-    public Map<String, String> createContentNode(NodeRef parent,
+    public Pair<NodeRef,Map<String, String>> createContentNode(NodeRef parent,
             String fileName, String name, InputStream contentInputStream)
             throws KoyaServiceException {
         return createContentNode(parent, fileName, name, null, null,
                 contentInputStream,true);
     }
 
-    public Map<String, String> createContentNode(NodeRef parent,
+    public Pair<NodeRef,Map<String, String>> createContentNode(NodeRef parent,
             String fileName, String name, String mimetype, String encoding,
             InputStream contentInputStream,Boolean postActivity) throws KoyaServiceException {
         Boolean rename = false;
@@ -315,7 +316,7 @@ public class KoyaContentService {
 		if(postActivity){
 			activityPoster.postFileFolderAdded(createdNode);
 		}
-        return retMap;
+        return new Pair<NodeRef, Map<String,String>>(createdNode, retMap);
     }
 
     /**
