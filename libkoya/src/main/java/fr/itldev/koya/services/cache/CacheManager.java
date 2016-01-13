@@ -37,6 +37,8 @@ public class CacheManager implements InitializingBean, Serializable {
 	private CacheConfig userFavouritesCacheConfig;
 	private Cache<KoyaNode, Boolean> nodeSharedWithKoyaClientCache;
 	private CacheConfig nodeSharedWithKoyaClientCacheConfig;
+	private Cache<KoyaNode, Boolean> nodeSharedWithKoyaPartnerCache;
+	private CacheConfig nodeSharedWithKoyaPartnerCacheConfig;
 	private Cache<String, Map<String, String>> invitationsCache;
 	private CacheConfig invitationsCacheConfig;
 	private Cache<String, Boolean> isManagerCache;
@@ -63,6 +65,11 @@ public class CacheManager implements InitializingBean, Serializable {
 	public void setNodeSharedWithKoyaClientCacheConfig(
 			CacheConfig nodeSharedWithKoyaClientCacheConfig) {
 		this.nodeSharedWithKoyaClientCacheConfig = nodeSharedWithKoyaClientCacheConfig;
+	}
+	
+	public void setNodeSharedWithKoyaPartnerCacheConfig(
+			CacheConfig nodeSharedWithKoyaPartnerCacheConfig) {
+		this.nodeSharedWithKoyaPartnerCacheConfig = nodeSharedWithKoyaPartnerCacheConfig;
 	}
 
 	public void setInvitationsCacheConfig(CacheConfig invitationsCacheConfig) {
@@ -150,6 +157,23 @@ public class CacheManager implements InitializingBean, Serializable {
 									.getExpireAfterWriteSeconds(),
 							TimeUnit.SECONDS).build();
 		}
+		//
+		if (nodeSharedWithKoyaPartnerCacheConfig == null) {
+			nodeSharedWithKoyaPartnerCacheConfig = CacheConfig.noCache();
+		}
+		nodeSharedWithKoyaPartnerCacheConfig
+				.debugLogConfig("nodeSharedWithKoyaPartnerCache");
+
+		if (nodeSharedWithKoyaPartnerCacheConfig.getEnabled()) {
+			nodeSharedWithKoyaPartnerCache = CacheBuilder
+					.newBuilder()
+					.maximumSize(nodeSharedWithKoyaPartnerCacheConfig.getMaxSize())
+					.expireAfterWrite(
+							nodeSharedWithKoyaPartnerCacheConfig
+									.getExpireAfterWriteSeconds(),
+							TimeUnit.SECONDS).build();
+		}
+		
 		//
 		if (invitationsCacheConfig == null) {
 			invitationsCacheConfig = CacheConfig.noCache();
@@ -305,7 +329,7 @@ public class CacheManager implements InitializingBean, Serializable {
 	}
 
 	/**
-	 * ======= Node Shared With Consumer ==========
+	 * ======= Node Shared With Koya Client ==========
 	 * 
 	 */
 	public Boolean getNodeSharedWithKoyaClient(KoyaNode i) {
@@ -332,6 +356,37 @@ public class CacheManager implements InitializingBean, Serializable {
 		}
 	}
 
+	
+
+	/**
+	 * ======= Node Shared With Koya Partner ==========
+	 * 
+	 */
+	public Boolean getNodeSharedWithKoyaPartner(KoyaNode i) {
+		Boolean s;
+
+		if (nodeSharedWithKoyaPartnerCacheConfig.getEnabled()) {
+			s = nodeSharedWithKoyaPartnerCache.getIfPresent(i);
+			if (s != null) {
+				return s;
+			}
+		}
+		return null;
+	}
+
+	public void setNodeSharedWithKoyaPartner(KoyaNode i, Boolean s) {
+		if (nodeSharedWithKoyaPartnerCacheConfig.getEnabled()) {
+			nodeSharedWithKoyaPartnerCache.put(i, s);
+		}
+	}
+
+	public void revokeNodeSharedWithKoyaPartner(KoyaNode i) {
+		if (nodeSharedWithKoyaPartnerCacheConfig.getEnabled()) {
+			nodeSharedWithKoyaPartnerCache.invalidate(i);
+		}
+	}
+
+	
 	/**
 	 * ======= Invitations ==========
 	 * 

@@ -113,6 +113,15 @@
 					value="${nodeSharedWithKoyaClientCache.expireAfterWriteSeconds}" />
 			</bean>
 		</property>
+		
+			<property name="nodeSharedWithKoyaPartnerCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${nodeSharedWithKoyaPartnerCache.enabled}" />
+				<property name="maxSize" value="${nodeSharedWithKoyaPartnerCache.maxSize}" />
+				<property name="expireAfterWriteSeconds"
+					value="${nodeSharedWithKoyaPartnerCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
 
 		<property name="invitationsCacheConfig">
 			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">

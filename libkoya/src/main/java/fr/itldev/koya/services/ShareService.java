@@ -83,10 +83,19 @@ public interface ShareService extends AlfrescoService {
 			Company c) throws AlfrescoServiceException;
 
 	/**
-	 * Checks if item has any share with consumer permission
+	 * Checks if item has any share with KoyaClient permission
 	 * 
 	 * @param item
 	 * @return
 	 */
 	Boolean isSharedWithKoyaClient(Space item);
+	
+	
+	/**
+	 * Checks if item has any share with KoyaPartner permission
+	 * 
+	 * @param item
+	 * @return
+	 */
+	Boolean isSharedWithKoyaPartner(Space item);
 }
