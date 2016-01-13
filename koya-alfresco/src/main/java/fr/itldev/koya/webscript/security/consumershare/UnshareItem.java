@@ -67,7 +67,8 @@ public class UnshareItem extends AbstractWebScript {
 		Map<String, Object> params = KoyaWebscript.getJsonMap(req);
 
 		try {
-			NodeRef n = koyaNodeService.getNodeRef((String) params.get(RestConstants.WSCONST_NODEREF));
+			NodeRef n = koyaNodeService
+					.getNodeRef((String) params.get(RestConstants.WSCONST_NODEREF));
 			Space s;
 			KoyaNode si = koyaNodeService.getKoyaNode(n);
 			if (Space.class.isAssignableFrom(si.getClass())) {
@@ -75,10 +76,16 @@ public class UnshareItem extends AbstractWebScript {
 			} else {
 				throw new KoyaServiceException(KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
 			}
-			String permission = (String) params.get(RestConstants.WSCONST_KOYAPERMISSION);
-			KoyaPermissionConsumer kPermission = (KoyaPermissionConsumer) KoyaPermission.valueOf(permission);
 
-			spaceAclService.consumerUnshare(s, (String) params.get(RestConstants.WSCONST_EMAIL), kPermission);
+			KoyaPermissionConsumer kPermission = null;
+			try {
+				kPermission = (KoyaPermissionConsumer) KoyaPermission
+						.valueOf((String) params.get(RestConstants.WSCONST_KOYAPERMISSION));
+			} catch (NullPointerException npe) {
+
+			}
+			spaceAclService.consumerUnshare(s, (String) params.get(RestConstants.WSCONST_EMAIL),
+					kPermission);
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
