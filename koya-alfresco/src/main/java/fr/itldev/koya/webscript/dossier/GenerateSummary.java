@@ -188,6 +188,8 @@ public class GenerateSummary extends AbstractWebScript implements
 					+ sysAdminParams.getAlfrescoPort() + "/"
 					+ sysAdminParams.getAlfrescoContext()
 					+ "/s/fr/itldev/koya/company/logo/" + c.getName();
+			
+			logger.info("logourl="+logoUrl);
 
 			NodeRef logo = companyPropertiesService.getLogo(c);
 			ContentReader contentReader = contentService.getReader(logo,
