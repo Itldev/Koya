@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;

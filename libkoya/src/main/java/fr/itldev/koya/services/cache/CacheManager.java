@@ -35,8 +35,8 @@ public class CacheManager implements InitializingBean, Serializable {
 	private CacheConfig companyPreferencesCacheConfig;
 	private Cache<User, List<KoyaNode>> userFavouritesCache;
 	private CacheConfig userFavouritesCacheConfig;
-	private Cache<KoyaNode, Boolean> nodeSharedWithConsumerCache;
-	private CacheConfig nodeSharedWithConsumerCacheConfig;
+	private Cache<KoyaNode, Boolean> nodeSharedWithKoyaClientCache;
+	private CacheConfig nodeSharedWithKoyaClientCacheConfig;
 	private Cache<String, Map<String, String>> invitationsCache;
 	private CacheConfig invitationsCacheConfig;
 	private Cache<String, Boolean> isManagerCache;
@@ -60,9 +60,9 @@ public class CacheManager implements InitializingBean, Serializable {
 		this.userFavouritesCacheConfig = userFavouritesCacheConfig;
 	}
 
-	public void setNodeSharedWithConsumerCacheConfig(
-			CacheConfig nodeSharedWithConsumerCacheConfig) {
-		this.nodeSharedWithConsumerCacheConfig = nodeSharedWithConsumerCacheConfig;
+	public void setNodeSharedWithKoyaClientCacheConfig(
+			CacheConfig nodeSharedWithKoyaClientCacheConfig) {
+		this.nodeSharedWithKoyaClientCacheConfig = nodeSharedWithKoyaClientCacheConfig;
 	}
 
 	public void setInvitationsCacheConfig(CacheConfig invitationsCacheConfig) {
@@ -135,18 +135,18 @@ public class CacheManager implements InitializingBean, Serializable {
 
 		//
 
-		if (nodeSharedWithConsumerCacheConfig == null) {
-			nodeSharedWithConsumerCacheConfig = CacheConfig.noCache();
+		if (nodeSharedWithKoyaClientCacheConfig == null) {
+			nodeSharedWithKoyaClientCacheConfig = CacheConfig.noCache();
 		}
-		nodeSharedWithConsumerCacheConfig
-				.debugLogConfig("nodeSharedWithConsumerCache");
+		nodeSharedWithKoyaClientCacheConfig
+				.debugLogConfig("nodeSharedWithKoyaClientCache");
 
-		if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-			nodeSharedWithConsumerCache = CacheBuilder
+		if (nodeSharedWithKoyaClientCacheConfig.getEnabled()) {
+			nodeSharedWithKoyaClientCache = CacheBuilder
 					.newBuilder()
-					.maximumSize(nodeSharedWithConsumerCacheConfig.getMaxSize())
+					.maximumSize(nodeSharedWithKoyaClientCacheConfig.getMaxSize())
 					.expireAfterWrite(
-							nodeSharedWithConsumerCacheConfig
+							nodeSharedWithKoyaClientCacheConfig
 									.getExpireAfterWriteSeconds(),
 							TimeUnit.SECONDS).build();
 		}
@@ -308,11 +308,11 @@ public class CacheManager implements InitializingBean, Serializable {
 	 * ======= Node Shared With Consumer ==========
 	 * 
 	 */
-	public Boolean getNodeSharedWithConsumer(KoyaNode i) {
+	public Boolean getNodeSharedWithKoyaClient(KoyaNode i) {
 		Boolean s;
 
-		if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-			s = nodeSharedWithConsumerCache.getIfPresent(i);
+		if (nodeSharedWithKoyaClientCacheConfig.getEnabled()) {
+			s = nodeSharedWithKoyaClientCache.getIfPresent(i);
 			if (s != null) {
 				return s;
 			}
@@ -320,15 +320,15 @@ public class CacheManager implements InitializingBean, Serializable {
 		return null;
 	}
 
-	public void setNodeSharedWithConsumer(KoyaNode i, Boolean s) {
-		if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-			nodeSharedWithConsumerCache.put(i, s);
+	public void setNodeSharedWithKoyaClient(KoyaNode i, Boolean s) {
+		if (nodeSharedWithKoyaClientCacheConfig.getEnabled()) {
+			nodeSharedWithKoyaClientCache.put(i, s);
 		}
 	}
 
-	public void revokeNodeSharedWithConsumer(KoyaNode i) {
-		if (nodeSharedWithConsumerCacheConfig.getEnabled()) {
-			nodeSharedWithConsumerCache.invalidate(i);
+	public void revokeNodeSharedWithKoyaClient(KoyaNode i) {
+		if (nodeSharedWithKoyaClientCacheConfig.getEnabled()) {
+			nodeSharedWithKoyaClientCache.invalidate(i);
 		}
 	}
 
@@ -465,8 +465,8 @@ public class CacheManager implements InitializingBean, Serializable {
 				+ companyPreferencesCache.stats().toString());
 		logger.info("[userFavouritesCache Stats] "
 				+ userFavouritesCache.stats().toString());
-		logger.info("[nodeSharedWithConsumerCache Stats] "
-				+ nodeSharedWithConsumerCache.stats().toString());
+		logger.info("[nodeSharedWithKoyaClientCache Stats] "
+				+ nodeSharedWithKoyaClientCache.stats().toString());
 		logger.info("[invitationsCache Stats] "
 				+ invitationsCache.stats().toString());
 		logger.info("[isManagerCache Stats] "

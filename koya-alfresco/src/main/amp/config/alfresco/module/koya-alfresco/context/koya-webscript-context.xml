@@ -484,8 +484,8 @@
 	</bean>
 
 
-	<bean id="webscript.fr.itldev.koya.security.clientshare.clientmember.get"
-		class="fr.itldev.koya.webscript.security.clientshare.HasKoyaClientMember"
+	<bean id="webscript.fr.itldev.koya.security.hasmember.get"
+		class="fr.itldev.koya.webscript.security.HasMember"
 		parent="webscript">
 		<property name="spaceAclService" ref="spaceAclService" />
 		<property name="koyaNodeService" ref="koyaNodeService" />

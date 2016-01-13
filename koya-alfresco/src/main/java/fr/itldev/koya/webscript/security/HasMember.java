@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.security.clientshare;
+package fr.itldev.koya.webscript.security;
 
 import java.io.IOException;
 import java.util.Map;
@@ -32,7 +32,7 @@ import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.json.RestConstants;
-import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
+import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -41,7 +41,7 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  * 
  * 
  */
-public class HasKoyaClientMember extends AbstractWebScript {
+public class HasMember extends AbstractWebScript {
 
 	private SpaceAclService spaceAclService;
 	private KoyaNodeService koyaNodeService;
@@ -62,7 +62,8 @@ public class HasKoyaClientMember extends AbstractWebScript {
 		try {
 			NodeRef n = koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF));
 			Space s = (Space) koyaNodeService.getKoyaNode(n);
-			response = KoyaWebscript.getObjectAsJson(spaceAclService.hasMembers(s, KoyaPermissionConsumer.CLIENT));
+			KoyaPermission p = KoyaPermission.valueOf((String)  urlParams.get(RestConstants.WSCONST_ROLENAME));
+			response = KoyaWebscript.getObjectAsJson(spaceAclService.hasMembers(s, p));
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}

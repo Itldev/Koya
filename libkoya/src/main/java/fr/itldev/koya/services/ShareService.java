@@ -88,5 +88,5 @@ public interface ShareService extends AlfrescoService {
 	 * @param item
 	 * @return
 	 */
-	Boolean isSharedWithConsumerPermission(Space item);
+	Boolean isSharedWithKoyaClient(Space item);
 }

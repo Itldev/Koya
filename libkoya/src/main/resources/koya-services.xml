@@ -105,12 +105,12 @@
 			</bean>
 		</property>
 
-		<property name="nodeSharedWithConsumerCacheConfig">
+		<property name="nodeSharedWithKoyaClientCacheConfig">
 			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
-				<property name="enabled" value="${nodeSharedWithConsumerCache.enabled}" />
-				<property name="maxSize" value="${nodeSharedWithConsumerCache.maxSize}" />
+				<property name="enabled" value="${nodeSharedWithKoyaClientCache.enabled}" />
+				<property name="maxSize" value="${nodeSharedWithKoyaClientCache.maxSize}" />
 				<property name="expireAfterWriteSeconds"
-					value="${nodeSharedWithConsumerCache.expireAfterWriteSeconds}" />
+					value="${nodeSharedWithKoyaClientCache.expireAfterWriteSeconds}" />
 			</bean>
 		</property>
 
