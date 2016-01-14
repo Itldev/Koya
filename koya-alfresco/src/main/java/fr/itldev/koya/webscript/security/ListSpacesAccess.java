@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see `<http://www.gnu.org/licenses/>`.
  */
-package fr.itldev.koya.webscript.security.clientshare;
+package fr.itldev.koya.webscript.security;
 
 import java.io.IOException;
 import java.util.Map;
@@ -33,15 +33,15 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.RestConstants;
-import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
+import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
- * List users shares in a company.
+ * List all spaces a user can access with given role by company
  * 
  * 
  */
-public class ListUserShares extends AbstractWebScript {
+public class ListSpacesAccess extends AbstractWebScript {
 
 	private SpaceAclService spaceAclService;
 	private KoyaNodeService koyaNodeService;
@@ -61,17 +61,18 @@ public class ListUserShares extends AbstractWebScript {
 
 	@Override
 	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-		String userName = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
-		String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
-		String response;
-
+		String response = "";
 		try {
+			Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+			String userName = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
+			String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
+			String roleName = (String) urlParams.get(RestConstants.WSCONST_ROLENAME);
+			KoyaPermission permission = KoyaPermission.valueOf(roleName);
 
 			User u = userService.getUserByUsername(userName);
 			Company c = koyaNodeService.companyBuilder(companyName);
 			response = KoyaWebscript
-					.getObjectAsJson(spaceAclService.getKoyaUserSpaces(u, KoyaPermissionConsumer.CLIENT, c));
+					.getObjectAsJson(spaceAclService.getKoyaUserSpaces(u, permission, c));
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}

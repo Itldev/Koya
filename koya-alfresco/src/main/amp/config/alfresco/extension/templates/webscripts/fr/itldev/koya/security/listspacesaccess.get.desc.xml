@@ -20,13 +20,11 @@
 -->
 
 <webscript>
-	<shortname>Checks if node has any Koya client share member</shortname>
-	<family>Itldev</family>
-	<url>/fr/itldev/koya/security/clientshare/clientmember/{nodeRef}</url>
-	<authentication runas="admin">none</authentication>
-	<!-- TODO define anonymous user to exec this request -->
-	<format default="json" />
-	<transaction>required</transaction>
+    <shortname>List spaces a user can acces with given roleName in a specified company</shortname>
+    <family>Itldev</family>
+    <url>/fr/itldev/koya/security/listspacesaccess/{userName}/{companyName}/{roleName}</url>
+    <authentication>user</authentication>
+    <format default="json"/>
 </webscript>
 
 	

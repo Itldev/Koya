@@ -475,8 +475,8 @@
 	</bean>
 
 	<bean
-		id="webscript.fr.itldev.koya.security.clientshare.listusershares.get"
-		class="fr.itldev.koya.webscript.security.clientshare.ListUserShares"
+		id="webscript.fr.itldev.koya.security.listspacesaccess.get"
+		class="fr.itldev.koya.webscript.security.ListSpacesAccess"
 		parent="webscript">
 		<property name="spaceAclService" ref="spaceAclService" />
 		<property name="koyaNodeService" ref="koyaNodeService" />
