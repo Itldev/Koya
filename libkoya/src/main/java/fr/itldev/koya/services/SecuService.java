@@ -23,9 +23,11 @@ import java.util.List;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.Permissions;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserConnection;
 import fr.itldev.koya.model.impl.UserRole;
+import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 public interface SecuService {
@@ -38,8 +40,7 @@ public interface SecuService {
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	List<UserRole> listAvailableRoles(User userLogged, Company c)
-			throws AlfrescoServiceException;
+	List<UserRole> listAvailableRoles(User userLogged, Company c) throws AlfrescoServiceException;
 
 	/**
 	 * Get current Role in Company context for specified User.
@@ -62,8 +63,8 @@ public interface SecuService {
 	 * @param roleName
 	 * @throws AlfrescoServiceException
 	 */
-	void setUserRole(User userLogged, Company c, String userNameSetRole,
-			String roleName) throws AlfrescoServiceException;
+	void setUserRole(User userLogged, Company c, String userNameSetRole, String roleName)
+			throws AlfrescoServiceException;
 
 	/**
 	 * 
@@ -74,9 +75,8 @@ public interface SecuService {
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	List<UserConnection> listUserConnections(User userLogged,
-			User userToGetConnections, List<Company> companyFilter,
-			Integer maxResults) throws AlfrescoServiceException;
+	List<UserConnection> listUserConnections(User userLogged, User userToGetConnections,
+			List<Company> companyFilter, Integer maxResults) throws AlfrescoServiceException;
 
 	/**
 	 * revoke all user Acces on specified company.
@@ -86,8 +86,7 @@ public interface SecuService {
 	 * @param u
 	 * @throws AlfrescoServiceException
 	 */
-	void revokeAccess(User userLogged, Company c, User u)
-			throws AlfrescoServiceException;
+	void revokeAccess(User userLogged, Company c, User u) throws AlfrescoServiceException;
 
 	/**
 	 * Checks if user logged is company manager.
@@ -97,8 +96,7 @@ public interface SecuService {
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	Boolean isCompanyManager(User userLogged, Company c)
-			throws AlfrescoServiceException;
+	Boolean isCompanyManager(User userLogged, Company c) throws AlfrescoServiceException;
 
 	/**
 	 * Get permissions on defined secured Item
@@ -108,7 +106,40 @@ public interface SecuService {
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	Permissions getPermissions(User user, KoyaNode s)
-			throws AlfrescoServiceException;
+	Permissions getPermissions(User user, KoyaNode s) throws AlfrescoServiceException;
+
+	/**
+	 * List all users member of KoyaResponsibles Group on Space.
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<User> listResponsibles(User user, Space dossier) throws AlfrescoServiceException;
+
+	/**
+	 * List all users member of KoyaMember Group on Space.
+	 * 
+	 * @param user
+	 * @param dossier
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<User> listMembers(User user, Space dossier) throws AlfrescoServiceException;
+
+	/**
+	 * List all spaces a user can access with given permission in company
+	 * context
+	 * 
+	 * @param user
+	 * @param checked
+	 * @param company
+	 * @param permission
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<Space> listSpacesAccess(User user, User checked, Company company,
+			KoyaPermission permission) throws AlfrescoServiceException;
 
 }
