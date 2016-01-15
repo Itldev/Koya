@@ -31,7 +31,7 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-public interface DossierService {
+public interface DossierService extends AlfrescoService{
 
 	/**
 	 * Creates a new Dossier
