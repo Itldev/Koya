@@ -25,8 +25,7 @@ import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ktype")
 @JsonSubTypes({ @Type(value = Company.class, name = "Company"),
-		@Type(value = Space.class, name = "Space"),
-		@Type(value = Dossier.class, name = "Dossier"),
+		@Type(value = Space.class, name = "Space"), @Type(value = Dossier.class, name = "Dossier"),
 		@Type(value = Directory.class, name = "Directory"),
 		@Type(value = Document.class, name = "Document"),
 		@Type(value = SalesOffer.class, name = "Salesoffer"),
@@ -119,8 +118,7 @@ public abstract class KoyaNode {
 	@Override
 	public int hashCode() {
 		int hash = HASHCONST1;
-		hash = HASHCONST2 * hash
-				+ (getNodeRef() != null ? getNodeRef().hashCode() : 0);
+		hash = HASHCONST2 * hash + (getNodeRef() != null ? getNodeRef().hashCode() : 0);
 		return hash;
 	}
 
@@ -133,16 +131,16 @@ public abstract class KoyaNode {
 			return false;
 		}
 		final KoyaNode other = (KoyaNode) obj;
-		if ((getNodeRef() == null) ? (other.getNodeRef() != null) : !this
-				.getNodeRef().equals(other.getNodeRef())) {
+		if ((getNodeRef() == null) ? (other.getNodeRef() != null)
+				: !this.getNodeRef().equals(other.getNodeRef())) {
 			return false;
 		}
 		return true;
 	}
 
 	public String toString() {
-		return "{'ktype':'" + getKtype() + "','name':'" + getName() + "'}";
-		// "','nodeRef':'" + getNodeRef().toString() +
+		return "{'ktype':'" + getKtype() + "','name':'" + getName() + "','nodeRef':'"
+				+ getNodeRef().toString() + "}";
 	}
 
 }
