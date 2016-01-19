@@ -36,8 +36,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.resetpassword.activiti.ResetPasswordModel;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**

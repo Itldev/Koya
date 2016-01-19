@@ -19,31 +19,45 @@
 
 package fr.itldev.koya.model.impl;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+/**
+ * This Object aims to carry Alfresco server meta informations
+ *
+ */
+public class MetaInfos {
 
-import fr.itldev.koya.services.impl.util.PreferencesDeserializer;
-import fr.itldev.koya.services.impl.util.PreferencesSerializer;
+    Properties serverInfos;
+    Properties koyaInfos;
+    List<Properties> modules = new ArrayList<>();
 
-@JsonDeserialize(using = PreferencesDeserializer.class)
-@JsonSerialize(using = PreferencesSerializer.class)
-public final class Preferences extends HashMap<String, Object> {
-
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	@Override
-    public String toString() {
-        StringBuilder ts = new StringBuilder(" ==== Preferences ===== \n");
-
-        for (String k : this.keySet()) {
-            ts.append(k).append(" = ").append(this.get(k).toString()).append("\n");
-        }
-
-        return ts.toString();
+    public Properties getServerInfos() {
+        return serverInfos;
     }
+
+    public void setServerInfos(Properties serverInfos) {
+        this.serverInfos = serverInfos;
+    }
+
+    public Properties getKoyaInfos() {
+        return koyaInfos;
+    }
+
+    public void setKoyaInfos(Properties koyaInfos) {
+        this.koyaInfos = koyaInfos;
+    }
+
+    public List<Properties> getModules() {
+        return modules;
+    }
+
+    public void setModules(List<Properties> modules) {
+        this.modules = modules;
+    }
+
+    public MetaInfos() {
+    }
+
 }

@@ -43,9 +43,9 @@ import fr.itldev.koya.alfservice.KoyaMailService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.resetpassword.activiti.ResetPasswordModel;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**

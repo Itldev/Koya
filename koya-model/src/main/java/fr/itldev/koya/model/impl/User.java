@@ -23,7 +23,6 @@ import java.util.Objects;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.springframework.web.client.RestTemplate;
 
 import fr.itldev.koya.model.KoyaNode;
 

@@ -21,7 +21,7 @@ package fr.itldev.koya.model.impl;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
-import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
+import fr.itldev.koya.model.json.util.NodeRefDeserializer;
 
 /**
  * Template attribute exists to determinate Offer available for Sale and Offers
@@ -43,7 +43,6 @@ public final class SalesOffer {
 
 	protected String name;
 	protected String title;
-
 
 	/*
 	 * ======== Attributes Getters/Setters

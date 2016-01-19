@@ -60,9 +60,9 @@ import org.apache.log4j.Logger;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.utils.KoyaNodeBuilder;
 
 /**

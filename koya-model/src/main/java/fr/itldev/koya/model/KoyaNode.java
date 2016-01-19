@@ -17,7 +17,7 @@ import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.Template;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
+import fr.itldev.koya.model.json.util.NodeRefDeserializer;
 
 /**
  * Koya Node is a subset of Alfresco Nodes Handled by Koya AMP

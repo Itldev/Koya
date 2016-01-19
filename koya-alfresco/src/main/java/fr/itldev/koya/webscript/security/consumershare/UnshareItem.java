@@ -31,11 +31,11 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.model.permissions.KoyaPermission;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**

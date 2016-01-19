@@ -62,8 +62,9 @@ import org.springframework.extensions.webscripts.WebScriptException;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+
 import org.alfresco.service.cmr.action.Action;
 
 /**

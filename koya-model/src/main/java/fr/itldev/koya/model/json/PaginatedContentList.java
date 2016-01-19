@@ -6,7 +6,7 @@ import org.alfresco.util.Pair;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 import fr.itldev.koya.model.interfaces.KoyaContent;
-import fr.itldev.koya.services.impl.util.PaginatedContentListDeserializer;
+import fr.itldev.koya.model.json.util.PaginatedContentListDeserializer;
 
 @JsonDeserialize(using = PaginatedContentListDeserializer.class)
 public class PaginatedContentList {

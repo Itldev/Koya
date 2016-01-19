@@ -17,7 +17,7 @@
  * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
  */
 
-package fr.itldev.koya.services.impl.util;
+package fr.itldev.koya.model;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,11 +29,11 @@ import java.util.Properties;
  *
  *
  */
-public class KoyaUtil {
+public class KoyaModelVersion {
 
-    public static final String getLibKoyaVersion() {
+    public static final String getVersion() {
 
-        Enumeration resEnum;
+        Enumeration<?> resEnum;
         try {
             /*
              Loads all build.properties resources and 
@@ -50,7 +50,7 @@ public class KoyaUtil {
                         } catch (IOException ioe) {
                         }
                     }
-                    if (prop.get("build.artifactId").equals("libkoya")) {
+                    if (prop.get("build.artifactId").equals("koya-model")) {
                         return prop.get("build.version.full").toString();
                     }
 

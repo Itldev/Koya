@@ -1,4 +1,4 @@
-package fr.itldev.koya.services.impl.util;
+package fr.itldev.koya.model.json.util;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,6 +23,7 @@ public class PaginatedContentListDeserializer extends
 	private static TypeReference<List<KoyaNode>> TYPEREF_LSTKOYANODES = new TypeReference<List<KoyaNode>>() {
 	};
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public PaginatedContentList deserialize(JsonParser jp,
 			DeserializationContext dc) throws IOException,

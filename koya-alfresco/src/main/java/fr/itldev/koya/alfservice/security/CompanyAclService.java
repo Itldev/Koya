@@ -58,11 +58,11 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserRole;
 import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 public class CompanyAclService {
 

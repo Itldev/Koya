@@ -44,8 +44,8 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 import fr.itldev.koya.action.notification.AfterValidateInvitePostActivityActionExecuter;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**

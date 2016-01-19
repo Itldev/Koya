@@ -1,4 +1,4 @@
-package fr.itldev.koya.services.impl.util;
+package fr.itldev.koya.model.json.util;
 
 import java.io.IOException;
 import java.util.List;

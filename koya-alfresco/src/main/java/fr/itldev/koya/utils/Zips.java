@@ -1,7 +1,8 @@
 package fr.itldev.koya.utils;
 
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;

@@ -1,4 +1,4 @@
-package fr.itldev.koya.services.impl.util;
+package fr.itldev.koya.model.json.util;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import org.codehaus.jackson.map.type.TypeFactory;
 
 public class ActivitySummaryDeserializer extends
 		JsonDeserializer<HashMap<String, String>> {
+	@SuppressWarnings("deprecation")
 	@Override
 	public HashMap<String, String> deserialize(JsonParser jp,
 			DeserializationContext ctxt) throws IOException,

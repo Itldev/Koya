@@ -7,7 +7,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
-import fr.itldev.koya.services.impl.util.ActivitySummaryDeserializer;
+import fr.itldev.koya.model.json.util.ActivitySummaryDeserializer;
 
 public class Activity {
 	private Integer id;

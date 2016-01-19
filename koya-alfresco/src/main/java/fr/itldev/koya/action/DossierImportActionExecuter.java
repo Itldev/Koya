@@ -61,12 +61,12 @@ import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
 import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.utils.Zips;
 
 public class DossierImportActionExecuter extends ActionExecuterAbstractBase {

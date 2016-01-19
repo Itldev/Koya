@@ -49,6 +49,12 @@
             <artifactId>alfresco-data-model</artifactId>
             <version>${alfresco.version}</version>
         </dependency>  
+        
+         <dependency>
+            <groupId>fr.itldev</groupId>
+            <artifactId>koya-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>  
               
         <!-- =======tests =====================-->
         <dependency>

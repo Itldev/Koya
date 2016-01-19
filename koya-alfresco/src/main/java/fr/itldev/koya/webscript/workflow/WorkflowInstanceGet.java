@@ -20,7 +20,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 
 public class WorkflowInstanceGet extends AbstractWorkflowWebscript {
 	public static final String PARAM_INCLUDE_TASKS = "includeTasks";

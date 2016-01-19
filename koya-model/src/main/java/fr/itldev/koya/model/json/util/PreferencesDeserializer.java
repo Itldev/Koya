@@ -17,7 +17,7 @@
  * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
  */
 
-package fr.itldev.koya.services.impl.util;
+package fr.itldev.koya.model.json.util;
 
 import fr.itldev.koya.model.impl.Preferences;
 import java.io.IOException;

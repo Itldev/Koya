@@ -26,7 +26,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 import fr.itldev.koya.model.KoyaNode;
-import fr.itldev.koya.services.impl.util.NodeRefDeserializer;
+import fr.itldev.koya.model.json.util.NodeRefDeserializer;
 
 /**
  *

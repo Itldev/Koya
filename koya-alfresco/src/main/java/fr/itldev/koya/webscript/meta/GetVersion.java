@@ -24,8 +24,7 @@ import java.io.IOException;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
-
-import fr.itldev.koya.services.impl.util.KoyaUtil;
+import fr.itldev.koya.model.KoyaModelVersion;
 
 /**
  * Returns libKoya version
@@ -37,7 +36,7 @@ public class GetVersion extends AbstractWebScript {
 	@Override
 	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		res.setContentType("application/json;charset=UTF-8");
-		res.getWriter().write(KoyaUtil.getLibKoyaVersion());
+		res.getWriter().write(KoyaModelVersion.getVersion());
 	}
 
 }

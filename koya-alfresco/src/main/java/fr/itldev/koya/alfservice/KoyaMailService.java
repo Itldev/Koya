@@ -43,13 +43,13 @@ import org.springframework.beans.factory.InitializingBean;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 /**
  *
