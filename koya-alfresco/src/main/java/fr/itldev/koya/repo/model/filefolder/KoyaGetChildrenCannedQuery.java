@@ -10,9 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
-
 import org.alfresco.query.CannedQueryParameters;
 import org.alfresco.query.CannedQuerySortDetails;
 import org.alfresco.query.CannedQuerySortDetails.SortOrder;
@@ -31,11 +31,6 @@ import org.alfresco.repo.model.filefolder.GetChildrenCannedQuery;
 import org.alfresco.repo.model.filefolder.HiddenAspect;
 import org.alfresco.repo.node.getchildren.FilterProp;
 import org.alfresco.repo.node.getchildren.FilterSortNodeEntity;
-import static org.alfresco.repo.node.getchildren.GetChildrenCannedQuery.MAX_FILTER_SORT_PROPS;
-import static org.alfresco.repo.node.getchildren.GetChildrenCannedQuery.SORT_QNAME_CONTENT_MIMETYPE;
-import static org.alfresco.repo.node.getchildren.GetChildrenCannedQuery.SORT_QNAME_CONTENT_SIZE;
-import static org.alfresco.repo.node.getchildren.GetChildrenCannedQuery.SORT_QNAME_NODE_IS_FOLDER;
-import static org.alfresco.repo.node.getchildren.GetChildrenCannedQuery.SORT_QNAME_NODE_TYPE;
 import org.alfresco.repo.node.getchildren.GetChildrenCannedQueryParams;
 import org.alfresco.repo.security.permissions.PermissionCheckedValue;
 import org.alfresco.repo.security.permissions.impl.acegi.MethodSecurityBean;
@@ -51,12 +46,10 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
 import org.alfresco.util.ParameterCheck;
 import org.apache.log4j.Logger;
-import org.springframework.shell.support.util.NaturalOrderComparator;
 
 public class KoyaGetChildrenCannedQuery extends GetChildrenCannedQuery {
 
     private final Logger logger = Logger.getLogger(this.getClass());
-//    private NodeService nodeService;
     private final NodeDAO nodeDAO;
     private final QNameDAO qnameDAO;
     private final CannedQueryDAO cannedQueryDAO;
