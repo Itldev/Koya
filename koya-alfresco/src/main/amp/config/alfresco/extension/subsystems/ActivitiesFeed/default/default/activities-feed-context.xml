@@ -9,6 +9,7 @@
       <property name="postDAO" ref="postDAO"/>
       <property name="tenantService" ref="tenantService"/>
       <property name="userNamesAreCaseSensitive" value="${user.name.caseSensitive}"/>
+      <property name="eventPublisher" ref="eventPublisher" />
    </bean>
    
    <bean id="activityService" class="org.alfresco.repo.activities.ActivityServiceImpl">
@@ -25,6 +26,10 @@
       <property name="maxFeedItems" value="${activities.feed.max.size}"/>
    </bean>
    
+   <bean id="ffActivitiesPoster" class="org.alfresco.service.cmr.activities.FileFolderActivityPosterImpl">
+      <property name="activityService" ref="activityService" />
+   </bean>
+   
    <!-- cleans out-of-date feed entries -->
    <bean id="feedCleaner" class="org.alfresco.repo.activities.feed.cleanup.FeedCleaner" init-method="init">
       <property name="feedDAO" ref="feedDAO"/>
@@ -34,6 +39,7 @@
       <property name="policyComponent" ref="policyComponent"/>
       <property name="transactionService" ref="transactionService"/>
       
+      <property name="userNamesAreCaseSensitive" value="${user.name.caseSensitive}"/>
       <property name="maxIdRange">
          <value>${activities.feed.max.idRange}</value> <!-- max ID range between max(id) and min(id).  Limits absolute number of entries. -->
       </property>
@@ -83,7 +89,9 @@
    <!-- Local (non-grid-based) Feed Generator -->
    
    <bean id="feedGenerator" class="org.alfresco.repo.activities.feed.local.LocalFeedGenerator" parent="baseFeedGenerator">
-      <property name="feedTaskProcessor" ref="feedTaskProcessor"/>
+      <property name="feedTaskProcessor" ref="FeedTaskProcessor"/>
+      <property name="batchSize" value="${activities.feed.generator.batchSize}"/>
+      <property name="numThreads" value="${activities.feed.generator.numThreads}"/>
    </bean>
    
    <bean id="feedTaskProcessor" class="fr.itldev.koya.activities.feed.KoyaLocalFeedTaskProcessor">
@@ -96,23 +104,39 @@
       <property name="siteService" ref="SiteService"/>
       <property name="nodeService" ref="NodeService"/>
       <property name="contentService" ref="ContentService"/>
-      <property name="permissionService" ref="permissionService"/>
+      <property name="permissionService" ref="PermissionService"/>
       <property name="subscriptionService" ref="SubscriptionService"/>
       <property name="tenantService" ref="tenantService"/>
+            
+      <property name="userNamesAreCaseSensitive" value="${user.name.caseSensitive}"/>
             
       <property name="templateSearchPaths">
           <list>
               <value>alfresco/extension/templates/activities</value>
               <value>alfresco/templates/activities</value>
           </list>
-      </property>            
-      
-      <property name="koyaMailService" ref="koyaMailService"/>
+      </property>
+       <property name="koyaMailService" ref="koyaMailService"/>
        <property name="koyaNodeService" ref="koyaNodeService"/>
        <property name="userService" ref="userService"/>
-        <property name="spaceAclService" ref="spaceAclService"/> 
+       <property name="spaceAclService" ref="spaceAclService"/>
+      
    </bean>
    
+   <bean id="FeedTaskProcessor" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="proxyTargetClass">
+            <value>true</value>
+        </property>
+        <property name="target">
+            <ref bean="feedTaskProcessor"/>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <idref bean="checkTxnAdvisor" />
+            </list>
+        </property>
+    </bean>
+
    <bean id="feedNotifier" class="org.alfresco.repo.activities.feed.FeedNotifierImpl">
       <property name="personService" ref="PersonService"/>
       <property name="nodeService" ref="NodeService"/>
@@ -130,33 +154,39 @@
    </bean>
    
    <!--  Feed Email Notifier -->
-
-	<bean id="emailUserNotifier" class="fr.itldev.koya.activities.feed.KoyaEmailUserNotifier">
-		<property name="activitiesFeedModdelBuilderFactory" ref="feedModelBuilderFactory" />
-		<property name="activityService" ref="activityService" />
-		<property name="namespaceService" ref="NamespaceService" />
-		<property name="repoAdminService" ref="repoAdminService" />
-		<property name="nodeService" ref="NodeService" />
-		<property name="siteService" ref="SiteService" />
-		<property name="actionService" ref="ActionService" />
-		<property name="authenticationContext" ref="authenticationContext" />
-		<property name="excludedEmailSuffixes">
-			<list>
-				<value>admin@alfresco.com</value>
-				<value>_import@alfresco.com</value>
-			</list>
-		</property>
-		<property name="koyaMailService" ref="koyaMailService" />
-		<property name="companyAclService" ref="companyAclService"/>
-		<property name="companyService" ref="companyService"/>
-	</bean>
-	
+    
+   <bean id="emailUserNotifier" class="fr.itldev.koya.activities.feed.KoyaEmailUserNotifier">
+		<property name="activitiesFeedModelBuilderFactory" ref="feedModelBuilderFactory" />
+      <property name="activityService" ref="activityService"/>
+      <property name="namespaceService" ref="NamespaceService"/>
+      <property name="repoAdminService" ref="repoAdminService"/>
+      <property name="nodeService" ref="NodeService"/>
+      <property name="siteService" ref="SiteService"/>
+      <property name="actionService" ref="ActionService"/>
+      <property name="authenticationContext" ref="authenticationContext"/>
+      <property name="excludedEmailSuffixes">
+          <list>
+              <value>admin@alfresco.com</value>
+	      <value>_import@alfresco.com</value>
+          </list>
+      </property>
+      <property name="koyaMailService" ref="koyaMailService" />
+	<property name="companyAclService" ref="companyAclService"/>
+	<property name="companyService" ref="companyService"/>
+   </bean>
    
    <bean id="feedModelBuilderFactory" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
       <property name="targetBeanName" value="feedModelBuilderPrototype"/>
    </bean>
    
-   <bean id="feedModelBuilderPrototype" class="org.alfresco.repo.activities.feed.DefaultActivitiesFeedModelBuilder" scope="prototype"/>
+   <bean id="feedModelBuilderPrototype" class="org.alfresco.repo.activities.feed.DefaultActivitiesFeedModelBuilder" scope="prototype">
+      <property name="ignoredActivityTypes">
+         <set>
+            <value>org.alfresco.documentlibrary.file-previewed</value>
+            <value>org.alfresco.documentlibrary.file-downloaded</value>
+         </set>
+      </property>
+   </bean>
    
    <bean id="feedEmailTemplateLocation" class="org.alfresco.repo.dictionary.RepositoryLocation">
         <!-- other properties will be defaulted, but can be overridden here -->

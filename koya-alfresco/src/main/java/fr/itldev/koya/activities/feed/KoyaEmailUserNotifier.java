@@ -186,7 +186,7 @@ public class KoyaEmailUserNotifier extends EmailUserNotifier {
 					modelBuilder = companyModelBuilder.get(companyName);
 
 					try {
-						modelBuilder.addAcctivitiyFeedEntry(feedEntry);
+						modelBuilder.addActivityFeedEntry(feedEntry);
 					} catch (JSONException je) {
 						// skip this feed entry
 						logger.warn("Skip feed entry for user (" + feedUserId
