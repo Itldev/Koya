@@ -96,6 +96,12 @@
         <signalEventDefinition signalRef="endRes"></signalEventDefinition>
       </boundaryEvent>
       <sequenceFlow id="flow183" sourceRef="boundarysignal8" targetRef="parallelgateway2"></sequenceFlow>
+      <endEvent id="endevent24" name="End"></endEvent>
+      <sequenceFlow id="flow226" sourceRef="exclusivegateway7" targetRef="endevent24"></sequenceFlow>
+      <boundaryEvent id="boundarysignal12" name="Signal" attachedToRef="editDueDateTask" cancelActivity="true">
+        <signalEventDefinition signalRef="endRes"></signalEventDefinition>
+      </boundaryEvent>
+      <sequenceFlow id="flow227" sourceRef="boundarysignal12" targetRef="parallelgateway2"></sequenceFlow>
     </subProcess>
     <subProcess id="loanProcess" name="Loan Process">
       <userTask id="loanRequestTask" name="validate loan Request" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:LPrequest"></userTask>
@@ -207,10 +213,6 @@
     <endEvent id="endevent18" name="End"></endEvent>
     <sequenceFlow id="flow177" sourceRef="boundarysignal5" targetRef="endevent18"></sequenceFlow>
     <sequenceFlow id="flow178" sourceRef="boundarysignal4" targetRef="endevent17"></sequenceFlow>
-    <boundaryEvent id="boundarysignal6" name="Signal" attachedToRef="asyncAssignationProcess" cancelActivity="true">
-      <signalEventDefinition signalRef="endRes"></signalEventDefinition>
-    </boundaryEvent>
-    <sequenceFlow id="flow181" sourceRef="boundarysignal6" targetRef="parallelgateway2"></sequenceFlow>
     <userTask id="signSaleTask" name="Sign Sale" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyares:doSignature">
       <extensionElements>
         <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
@@ -299,6 +301,9 @@ execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariab
       <bpmndi:BPMNShape bpmnElement="boundarysignal2" id="BPMNShape_boundarysignal2">
         <omgdc:Bounds height="30.0" width="30.0" x="285.0" y="461.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundarysignal12" id="BPMNShape_boundarysignal12">
+        <omgdc:Bounds height="30.0" width="30.0" x="260.0" y="442.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent8" id="BPMNShape_endevent8">
         <omgdc:Bounds height="35.0" width="35.0" x="540.0" y="538.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
@@ -335,8 +340,8 @@ execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariab
       <bpmndi:BPMNShape bpmnElement="signalintermediatethrowevent1" id="BPMNShape_signalintermediatethrowevent1">
         <omgdc:Bounds height="35.0" width="35.0" x="411.0" y="716.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="boundarysignal6" id="BPMNShape_boundarysignal6">
-        <omgdc:Bounds height="30.0" width="30.0" x="263.0" y="416.0"></omgdc:Bounds>
+      <bpmndi:BPMNShape bpmnElement="endevent24" id="BPMNShape_endevent24">
+        <omgdc:Bounds height="35.0" width="35.0" x="490.0" y="424.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="loanProcess" id="BPMNShape_loanProcess">
         <omgdc:Bounds height="136.0" width="541.0" x="830.0" y="64.0"></omgdc:Bounds>
@@ -585,6 +590,15 @@ execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariab
         <omgdi:waypoint x="502.0" y="697.0"></omgdi:waypoint>
         <omgdi:waypoint x="503.0" y="578.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow226" id="BPMNEdge_flow226">
+        <omgdi:waypoint x="445.0" y="441.0"></omgdi:waypoint>
+        <omgdi:waypoint x="490.0" y="441.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow227" id="BPMNEdge_flow227">
+        <omgdi:waypoint x="275.0" y="472.0"></omgdi:waypoint>
+        <omgdi:waypoint x="259.0" y="529.0"></omgdi:waypoint>
+        <omgdi:waypoint x="503.0" y="538.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow53" id="BPMNEdge_flow53">
         <omgdi:waypoint x="875.0" y="133.0"></omgdi:waypoint>
         <omgdi:waypoint x="900.0" y="133.0"></omgdi:waypoint>
@@ -722,11 +736,6 @@ execution.setVariable("doSignatureCompletionDate",utils.toISO8601(task.getVariab
       <bpmndi:BPMNEdge bpmnElement="flow178" id="BPMNEdge_flow178">
         <omgdi:waypoint x="1328.0" y="211.0"></omgdi:waypoint>
         <omgdi:waypoint x="1327.0" y="228.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow181" id="BPMNEdge_flow181">
-        <omgdi:waypoint x="278.0" y="446.0"></omgdi:waypoint>
-        <omgdi:waypoint x="277.0" y="557.0"></omgdi:waypoint>
-        <omgdi:waypoint x="483.0" y="558.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow206" id="BPMNEdge_flow206">
         <omgdi:waypoint x="725.0" y="658.0"></omgdi:waypoint>
