@@ -37,7 +37,6 @@ import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -81,7 +80,6 @@ public class SpaceAclService {
 	protected KoyaNodeService koyaNodeService;
 	protected NodeService nodeService;
 	protected AuthenticationService authenticationService;
-	protected SearchService searchService;
 	protected AuthorityService authorityService;
 	protected SiteService siteService;
 	protected InvitationService invitationService;
@@ -118,9 +116,6 @@ public class SpaceAclService {
 		this.authenticationService = authenticationService;
 	}
 
-	public void setSearchService(SearchService searchService) {
-		this.searchService = searchService;
-	}
 
 	public void setAuthorityService(AuthorityService authorityService) {
 		this.authorityService = authorityService;
@@ -562,6 +557,11 @@ public class SpaceAclService {
 	 */
 
 	private static Map<String, String> GROUP_SITE_PERMISSIONS_SPACE = new HashMap<String, String>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		{
 			put(SitePermission.MANAGER.toString(), SitePermission.MANAGER.toString());
 			put(SitePermission.CONTRIBUTOR.toString(), SitePermission.CONTRIBUTOR.toString());
@@ -570,6 +570,11 @@ public class SpaceAclService {
 	};
 
 	private static Map<String, String> GROUP_SITE_PERMISSIONS_DOSSIER = new HashMap<String, String>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		{
 			put(SitePermission.MANAGER.toString(), SitePermission.MANAGER.toString());
 			put(SitePermission.CONTRIBUTOR.toString(), SitePermission.CONTRIBUTOR.toString());
@@ -578,6 +583,11 @@ public class SpaceAclService {
 	};
 
 	private static Map<String, String> GROUP_KOYA_PERMISSIONS_SPACE = new HashMap<String, String>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		{
 			put("KoyaResponsible", "KoyaResponsible");
 			put("KoyaMember", "KoyaMember");
@@ -588,6 +598,11 @@ public class SpaceAclService {
 	};
 
 	private static Map<String, String> GROUP_KOYA_PERMISSIONS_DOSSIER = new HashMap<String, String>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		{
 			put("KoyaResponsible", "KoyaResponsible");
 			put("KoyaMember", "KoyaMember");
