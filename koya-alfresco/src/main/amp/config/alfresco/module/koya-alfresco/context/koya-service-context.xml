@@ -123,6 +123,7 @@
         <property name="siteService" ref="SiteService"/>
         <property name="invitationService" ref="invitationService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
+        <property name="template" ref="mailtousername_SqlSessionTemplate"/>
     </bean>
    
  

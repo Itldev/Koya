@@ -17,7 +17,7 @@
  * along with this program.  If not, see `<http://www.gnu.org/licenses/>`.
  */
 
-package fr.itldev.koya.security;
+package fr.itldev.koya.repo.security.authentication;
 
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;

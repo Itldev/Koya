@@ -114,7 +114,7 @@
 
     <!-- Authentication service for chaining -->
     <!--   <bean id="localAuthenticationService" class="org.alfresco.repo.security.authentication.MutableAuthenticationServiceImpl">-->
-    <bean id="localAuthenticationService" class="fr.itldev.koya.security.MutableAuthenticationServiceItlMail">
+    <bean id="localAuthenticationService" class="fr.itldev.koya.repo.security.authentication.MutableAuthenticationServiceItlMail">
         <property name="authenticationDao">
             <ref bean="authenticationDao" />
         </property>
