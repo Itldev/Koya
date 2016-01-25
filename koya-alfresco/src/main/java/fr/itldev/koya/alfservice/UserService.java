@@ -312,8 +312,8 @@ public class UserService {
 	public User getUserByEmail(final String email) throws KoyaServiceException {
 		UserMailEntity ume = new UserMailEntity();
 		ume.setMail(email);
-		ume.setMailPropName("mail");
-		ume.setMailPropUri("http://www.itldev.fr/koyamodel/content/1.0");
+		ume.setMailPropName("email");
+		ume.setMailPropUri("http://www.alfresco.org/model/content/1.0");
 		ume.setUserNamePropName("userName");
 		ume.setUserNamePropUri("http://www.alfresco.org/model/content/1.0");
 
