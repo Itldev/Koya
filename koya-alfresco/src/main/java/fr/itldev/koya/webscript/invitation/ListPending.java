@@ -19,39 +19,33 @@
 package fr.itldev.koya.webscript.invitation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.invitation.Invitation;
+import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
- * Checks if user has a pending invitaion for specified company
- *
+ * Returns user Pending invitations alfresco wide
  *
  */
-public class GetInvitation extends AbstractWebScript {
+public class ListPending extends AbstractWebScript {
 
-	private KoyaNodeService koyaNodeService;
-	private UserService userService;
 	private CompanyAclService companyAclService;
-
-	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-		this.koyaNodeService = koyaNodeService;
-	}
+	private UserService userService;
 
 	public void setUserService(UserService userService) {
 		this.userService = userService;
@@ -66,23 +60,23 @@ public class GetInvitation extends AbstractWebScript {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		String userName = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
-		String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
 		String response = "";
 
 		try {
 			User u = userService.getUserByUsername(userName);
-			Company c = koyaNodeService.companyBuilder(companyName);
+			List<Invitation> invitations = companyAclService.getPendingInvite(null, null, userName);
 
-			List<Invitation> invitations = companyAclService.getPendingInvite(c.getName(), null, u.getUserName());
-			if (invitations != null && invitations.size() == 1) {
-
+			List<Map<String, String>> invResponse = new ArrayList<>();
+			for (Invitation i : invitations) {
 				Map<String, String> invit = new HashMap<>();
-				invit.put("inviteId", invitations.get(0).getInviteId());
-				// invit.put("createdAt", invitations.get(0).getCreatedAt());
-				// TODO number of sended mail for this invitation
-
-				response = KoyaWebscript.getObjectAsJson(invit);
+				invit.put("inviteId", i.getInviteId());
+				invit.put("inviteTicket", ((NominatedInvitation) i).getTicket());
+				invit.put("userEnabled", u.isEnabled().toString());
+				invit.put("companyName", i.getResourceName());
+				invResponse.add(invit);
 			}
+
+			response = KoyaWebscript.getObjectAsJson(invResponse);
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());

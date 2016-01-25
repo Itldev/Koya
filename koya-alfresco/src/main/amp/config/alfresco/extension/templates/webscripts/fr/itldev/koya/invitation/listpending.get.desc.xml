@@ -20,10 +20,11 @@
 -->
 
 <webscript>
-    <shortname>Get user's invitation on company if exists</shortname>   
+    <shortname>Get user's pending invitations</shortname>   
     <family>Itldev</family>
-    <url>/fr/itldev/koya/invitation/invitation/{userName}/{companyName}</url>   
-    <authentication>user</authentication>    
+    <url>/fr/itldev/koya/invitation/listpending/{userName}</url>   
+    <!-- TODO application scope authentication -->
+    <authentication runas="admin">none</authentication>    
     <format default="json"/>
 </webscript>
 

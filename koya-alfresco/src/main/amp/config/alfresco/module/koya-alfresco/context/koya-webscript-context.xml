@@ -410,10 +410,9 @@
 	================================================================== -->
 
 
-	<bean id="webscript.fr.itldev.koya.invitation.invitation.get"
-		class="fr.itldev.koya.webscript.invitation.GetInvitation" parent="webscript">
+	<bean id="webscript.fr.itldev.koya.invitation.listpending.get"
+		class="fr.itldev.koya.webscript.invitation.ListPending" parent="webscript">
 		<property name="companyAclService" ref="companyAclService" />
-		<property name="koyaNodeService" ref="koyaNodeService" />
 		<property name="userService" ref="userService" />
 	</bean>
 
@@ -434,14 +433,6 @@
 		<property name="companyAclService" ref="companyAclService" />
 		<property name="koyaNodeService" ref="koyaNodeService" />
 	</bean>
-
-
-	<bean id="webscript.fr.itldev.koya.invitation.invitationpending.get"
-		class="fr.itldev.koya.webscript.invitation.GetInvitationPending"
-		parent="webscript">
-		<property name="workflowService" ref="WorkflowService" />
-	</bean>
-
 
 	<bean id="webscript.fr.itldev.koya.invitation.validate.post"
 		class="fr.itldev.koya.webscript.invitation.ValidateInvitation" parent="webscript">
