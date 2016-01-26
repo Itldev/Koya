@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.type.TypeReference;
 
 import fr.itldev.koya.model.impl.Company;
@@ -142,7 +141,6 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
 		return null;
 	}
 	
-	private Logger logger = Logger.getLogger(this.getClass());
 	@Override
 	public List<Map<String, String>> listInvitations(String userName)
 			throws AlfrescoServiceException {
@@ -155,9 +153,7 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
 		invList = fromJSON(new TypeReference<List>() {
 		}, getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LISTPENDINGINVITATIONS, String.class,
 				userName));
-		
-		logger.error(" request user "+userName + " >> "+invList);
-
+	
 		cacheManager.setInvitations(userName, invList);
 		return invList;
 	}
