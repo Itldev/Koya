@@ -73,6 +73,7 @@ public class ListPending extends AbstractWebScript {
 				invit.put("inviteTicket", ((NominatedInvitation) i).getTicket());
 				invit.put("userEnabled", u.isEnabled().toString());
 				invit.put("companyName", i.getResourceName());
+				invit.put("inviteeEmail", ((NominatedInvitation) i).getInviteeEmail());
 				invResponse.add(invit);
 			}
 
