@@ -39,7 +39,7 @@ public class CacheManager implements InitializingBean, Serializable {
 	private CacheConfig nodeSharedWithKoyaClientCacheConfig;
 	private Cache<KoyaNode, Boolean> nodeSharedWithKoyaPartnerCache;
 	private CacheConfig nodeSharedWithKoyaPartnerCacheConfig;
-	private Cache<String, Map<String, String>> invitationsCache;
+	private Cache<String, List<Map<String, String>>> invitationsCache;
 	private CacheConfig invitationsCacheConfig;
 	private Cache<String, Boolean> isManagerCache;
 	private CacheConfig isManagerCacheConfig;
@@ -391,11 +391,11 @@ public class CacheManager implements InitializingBean, Serializable {
 	 * ======= Invitations ==========
 	 * 
 	 */
-	public Map<String, String> getInvitations(String userEmail) {
-		Map<String, String> invitations;
+	public List<Map<String, String>> getInvitations(String userName) {
+		List<Map<String, String>> invitations;
 
 		if (invitationsCacheConfig.getEnabled()) {
-			invitations = invitationsCache.getIfPresent(userEmail);
+			invitations = invitationsCache.getIfPresent(userName);
 			if (invitations != null) {
 				return invitations;
 			}
@@ -403,15 +403,15 @@ public class CacheManager implements InitializingBean, Serializable {
 		return null;
 	}
 
-	public void setInvitations(String userEmail, Map<String, String> invitations) {
+	public void setInvitations(String userName, List<Map<String, String>> invitations) {
 		if (invitationsCacheConfig.getEnabled()) {
-			invitationsCache.put(userEmail, invitations);
+			invitationsCache.put(userName, invitations);
 		}
 	}
 
-	public void revokeInvitations(String userEmail) {
+	public void revokeInvitations(String userName) {
 		if (invitationsCacheConfig.getEnabled()) {
-			invitationsCache.invalidate(userEmail);
+			invitationsCache.invalidate(userName);
 		}
 	}
 

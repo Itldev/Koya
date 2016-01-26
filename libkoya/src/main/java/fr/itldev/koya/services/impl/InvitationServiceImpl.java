@@ -18,32 +18,45 @@
  */
 package fr.itldev.koya.services.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.type.TypeReference;
 
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.services.InvitationService;
+import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import java.io.Serializable;
 
 public class InvitationServiceImpl extends AlfrescoRestService implements InvitationService, Serializable {
 
-	private static final String REST_GET_INVITATION = "/s/fr/itldev/koya/invitation/invitation/{userName}/{companyName}?alf_ticket={alf_ticket}";
-	private static final String REST_GET_INVITATIONPENDING = "/s/fr/itldev/koya/invitation/pending/{inviteId}";
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static final String REST_GET_LISTPENDINGINVITATIONS = "/s/fr/itldev/koya/invitation/listpending/{userName}";
 	private static final String REST_POST_INVITATION = "/s/fr/itldev/koya/invitation/sendmail?alf_ticket={alf_ticket}";
 	private static final String REST_POST_VALIDUSERBYINVITE = "/s/fr/itldev/koya/invitation/validate";
 	private static final String REST_POST_INVITEUSER = "/s/fr/itldev/koya/invitation/invite?alf_ticket={alf_ticket}";
 
 	private CacheManager cacheManager;
+	private UserService userService;
 
 	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
+	
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+
 
 	/**
 	 * Invite user identified by email on company with rolename granted.
@@ -57,8 +70,11 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
 	@Override
 	public KoyaInvite inviteUser(User userLogged, Company c, String userEmail,
 			String roleName) throws AlfrescoServiceException {
-
-		cacheManager.revokeInvitations(userEmail);
+		User u = userService.getUserFromEmailFailProof(userLogged, userEmail);
+		if(u != null){
+			cacheManager.revokeInvitations(u.getUserName());
+		}
+				
 
 		KoyaInvite iw = new KoyaInvite();
 		iw.setCompanyName(c.getName());
@@ -82,6 +98,13 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
 	public User validateInvitation(User user, String inviteId,
 			String inviteTicket) throws AlfrescoServiceException {
 
+		String enabled = Boolean.FALSE.toString();		
+		try{
+			enabled = user.isEnabled().toString();			
+		}catch(Exception e){
+			
+		}
+		
 		Map<String, String> params = new HashMap<>();
 		params.put("inviteId", inviteId);
 		params.put("inviteTicket", inviteTicket);
@@ -89,11 +112,12 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
 		params.put("lastName", user.getName());
 		params.put("firstName", user.getFirstName());
 		params.put("civilTitle", user.getCivilTitle());
+		params.put("userEnabled", enabled);
 
 		User u = getTemplate().postForObject(
 				getAlfrescoServerUrl() + REST_POST_VALIDUSERBYINVITE, params,
 				User.class);
-		cacheManager.revokeInvitations(u.getEmail());
+		cacheManager.revokeInvitations(u.getUserName());
 		return u;
 	}
 
@@ -107,50 +131,35 @@ public class InvitationServiceImpl extends AlfrescoRestService implements Invita
 	 * @throws AlfrescoServiceException
 	 */
 	@Override
-	public Map<String, String> getInvitation(User user, Company c,
-			User userToGetInvitaion) throws AlfrescoServiceException {
-		Map<String, String> m = cacheManager.getInvitations(userToGetInvitaion
-				.getEmail());
-		if (m != null) {
-			if (m.isEmpty()) {
-				return null;
-			} else {
-				return m;
+	public Map<String, String> getInvitation(Company c, String userName)
+			throws AlfrescoServiceException {
+		List<Map<String, String>> invitations = listInvitations(userName);
+		for (Map<String, String> i : invitations) {
+			if (i.get("companyName").equals(c.getName())) {
+				return i;
 			}
 		}
-
-		m = fromJSON(
-				new TypeReference<Map>() {
-				},
-				getTemplate().getForObject(
-						getAlfrescoServerUrl() + REST_GET_INVITATION,
-						String.class, userToGetInvitaion.getUserName(),
-						c.getName(),user.getTicketAlfresco()));
-
-		Map<String, String> value;
-		if (m == null) {
-			value = new HashMap<>();
-		} else {
-			value = m;
-		}
-		cacheManager.setInvitations(userToGetInvitaion.getEmail(), value);
-		return m;
-
+		return null;
 	}
-
-	/**
-	 * Checks anynomously if given inviteId exists (is is a pending invite).
-	 * 
-	 * @param inviteId
-	 * @return
-	 * @throws AlfrescoServiceException
-	 */
+	
+	private Logger logger = Logger.getLogger(this.getClass());
 	@Override
-	public Boolean isInvitationPending(String inviteId)
+	public List<Map<String, String>> listInvitations(String userName)
 			throws AlfrescoServiceException {
-		return getTemplate().getForObject(
-				getAlfrescoServerUrl() + REST_GET_INVITATIONPENDING,
-				String.class, inviteId).equals("true");
+
+		List<Map<String, String>> m = cacheManager.getInvitations(userName);
+		if (m != null) {			
+				return m;			
+		}
+		List<Map<String, String>> invList;
+		invList = fromJSON(new TypeReference<List>() {
+		}, getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_LISTPENDINGINVITATIONS, String.class,
+				userName));
+		
+		logger.error(" request user "+userName + " >> "+invList);
+
+		cacheManager.setInvitations(userName, invList);
+		return invList;
 	}
 
 	/**

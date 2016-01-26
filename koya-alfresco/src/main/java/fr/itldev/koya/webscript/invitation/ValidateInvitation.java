@@ -97,6 +97,7 @@ public class ValidateInvitation extends AbstractWebScript {
 		final String invitationId = (String) jsonPostMap.get("inviteId");
 		final String inviteTicket = (String) jsonPostMap.get("inviteTicket");
 		final String newPassword = (String) jsonPostMap.get("password");
+		final Boolean userEnabled = Boolean.valueOf((String) jsonPostMap.get("userEnabled"));
 		final User userInvited = new User();
 		userInvited.setName((String) jsonPostMap.get("lastName"));
 		userInvited.setFirstName((String) jsonPostMap.get("firstName"));
@@ -166,10 +167,6 @@ public class ValidateInvitation extends AbstractWebScript {
 			userInvited.setUserName(invitation.getInviteeUserName());
 			userInvited.setEmail(invitation.getInviteeEmail());
 
-			Map<QName, Serializable> taskProps = startTask.getProperties();
-			final String oldPassword = (String) taskProps
-					.get(WorkflowModelNominatedInvitation.WF_PROP_INVITEE_GEN_PASSWORD);
-
 			// First accept invitation
 			Exception eInvite = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
 				@Override
@@ -187,31 +184,47 @@ public class ValidateInvitation extends AbstractWebScript {
 			if (eInvite != null) {
 				throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_ACCEPT_ERROR, eInvite);
 			}
-
+			
+			if(!userEnabled){	
 			// then modify user properties and password
-			Exception eModify = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
-				@Override
-				public Exception doWork() throws Exception {
-					try {
-
-						userService.modifyUser(userInvited);
-						userService.changePassword(oldPassword, newPassword);
-					} catch (Exception ex) {
-						return ex;
+				Exception eModify = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Exception>() {
+					@Override
+					public Exception doWork() throws Exception {
+						try {
+							//Validate user information only if passwords are setted
+							//if not session validation is initiated by logged and already enabled user
+							userService.modifyUser(userInvited);
+						} catch (Exception ex) {
+							return ex;
+						}
+						return null;
 					}
-					return null;
-				}
-			}, invitation.getInviteeUserName());
+				}, invitation.getInviteeUserName());
 
-			if (eModify != null) {
-				eModify.printStackTrace();
-				throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
+				if (eModify != null) {
+					eModify.printStackTrace();
+					throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_USER_MODIFICATION_ERROR, eModify);
+				}
+			
+				 AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Exception>() {
+						@Override
+						public Exception doWork() throws Exception {
+							try {
+								userService.adminForceChangePassword(invitation.getInviteeUserName(), newPassword);
+								
+							} catch (Exception ex) {
+								return ex;
+							}
+							return null;
+						}
+					});				 
 			}
 
 			/**
-			 * Post an activity for dossiers shared to this user executed
-			 * asynchronously
-			 */
+			 * Post an activity for dossiers shared to this user in the company context 
+			 * 
+			 * executed asynchronously
+			 */					
 			AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>() {
 				@Override
 				public Void doWork() throws Exception {
@@ -231,12 +244,11 @@ public class ValidateInvitation extends AbstractWebScript {
 			 * 
 			 * 
 			 */
-
+			logger.info("[Invite Validation] : {'user':'" + userInvited.getEmail() + "','company':'"+invitation.getResourceName()+"'}");
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 
-		logger.info("[Invite Validation] : {'user':'" + userInvited.getEmail() + "','company':''}");
 		res.setContentType("application/json;charset=UTF-8");
 		// TODO return validation status
 		res.getWriter().write(KoyaWebscript.getObjectAsJson(userInvited));

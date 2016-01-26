@@ -28,6 +28,7 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.KoyaShare;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.ShareService;
+import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
@@ -47,9 +48,15 @@ public class ShareServiceImpl extends SecuServiceImpl implements ShareService {
 	protected static final String REST_POST_UNSHARESINGLE = "/s/fr/itldev/koya/security/consumershare/undo?alf_ticket={alf_ticket}";
 
 	private CacheManager cacheManager;
+	private UserService userService;
 
 	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
+	}
+	
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
 	}
 
 	@Override
@@ -58,7 +65,12 @@ public class ShareServiceImpl extends SecuServiceImpl implements ShareService {
 
 		cacheManager.revokeNodeSharedWithKoyaClient(itemToShare);
 		cacheManager.revokeNodeSharedWithKoyaPartner(itemToShare);
-
+		
+		User u = userService.getUserFromEmailFailProof(user, sharedUserMail);
+		if(u != null){
+			cacheManager.revokeInvitations(u.getUserName());
+		}
+		
 		Map<String, String> shareParams = new HashMap<>();
 		shareParams.put("email", sharedUserMail);
 		shareParams.put("nodeRef", itemToShare.getNodeRef().toString());
@@ -78,7 +90,11 @@ public class ShareServiceImpl extends SecuServiceImpl implements ShareService {
 			throws AlfrescoServiceException {
 		cacheManager.revokeNodeSharedWithKoyaClient(itemToUnShare);
 		cacheManager.revokeNodeSharedWithKoyaPartner(itemToUnShare);
-
+		User u = userService.getUserFromEmailFailProof(user, unsharedUserMail);
+		if(u != null){
+			cacheManager.revokeInvitations(u.getUserName());
+		}
+		
 		Map<String, String> unshareParams = new HashMap<>();
 		unshareParams.put("email", unsharedUserMail);
 		unshareParams.put("nodeRef", itemToUnShare.getNodeRef().toString());

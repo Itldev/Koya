@@ -63,6 +63,7 @@ import fr.itldev.koya.model.impl.User;
 public class KoyaInviteSender extends InviteSender {
 
 	private static final String EMAIL_SUBJECT = "koya.invitation.invitesender.email.subject";
+	private Logger logger = Logger.getLogger(this.getClass());
 
 	// koya sepecic injections
 	private KoyaMailService koyaMailService;
@@ -208,6 +209,9 @@ public class KoyaInviteSender extends InviteSender {
 		String params = buildUrlParamString(properties);
 		final String acceptLink = makeLink(properties.get(wfVarServerPath),
 				properties.get(wfVarAcceptUrl), params);
+		
+		logger.info("invite accept link = "+acceptLink);
+		
 		final String rejectLink = makeLink(properties.get(wfVarServerPath),
 				properties.get(wfVarRejectUrl), params);
 

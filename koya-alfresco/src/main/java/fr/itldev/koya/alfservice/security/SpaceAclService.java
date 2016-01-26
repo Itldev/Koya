@@ -407,7 +407,62 @@ public class SpaceAclService {
 			return false;
 		}
 	}
+	
+	/*
+	 * 
+	 * ================= Spaces Listing methods ============================
+	 * 
+	 */
+	
+	
+	/**
+	 * List all user available spaces per company
+	 * 
+	 * TODO find a way to list only company related authorities : pre filter instead of post filter.
+	 * 
+	 * @param u
+	 * @return
+	 */
+	private List<Space> getUserAvailableSpaces(User u, Company co,
+			KoyaPermission permissionFilter) {
+		List<Space> spaces = new ArrayList<>();
+		Set<String> authorities = authorityService.getAuthoritiesForUser(u.getUserName());
+		for (String a : authorities) {
+			if (permissionFilter == null || a.endsWith(permissionFilter.toString())) {
+				Space s = getKoyaNodeFromGroupName(a);
+				if (s != null) {
+					/*
+					 * Get parent company with system permissions.
+					 * 
+					 * If this method is called by pending invitation user, he
+					 * doesn't have any permission on site node but has on space
+					 * : causes permissions exception.
+					 * 
+					 */
+					final NodeRef spaceNodeRef = s.getNodeRef();
+					Company parentCompany = AuthenticationUtil
+							.runAsSystem(new AuthenticationUtil.RunAsWork<Company>() {
+								@Override
+								public Company doWork() throws Exception {
+									return koyaNodeService.getFirstParentOfType(spaceNodeRef,
+											Company.class);
+								}
+							});
+					if (parentCompany != null && parentCompany.equals(co)) {
+						spaces.add(s);
+					}
+				}
 
+			}
+		}
+		return spaces;
+	}
+	
+	
+	public List<Space> getKoyaUserSpaces(User u, Company co){
+		return getUserAvailableSpaces(u,co,null);
+	}
+		
 	/**
 	 * Get all spaces a user can access with given Koya Permission. Limited to
 	 * company scope
@@ -415,27 +470,10 @@ public class SpaceAclService {
 	 * @param u
 	 * @return
 	 */
-	public List<Space> getKoyaUserSpaces(User u, KoyaPermission permission, Company c) {
-		List<Space> spaces = new ArrayList<>();
-
-		Set<String> authorities = authorityService.getAuthoritiesForUser(u.getUserName());
-
-		for (String a : authorities) {
-
-			if (a.endsWith(permission.toString())) {
-				Space s = getKoyaNodeFromGroupName(a);
-				if (s != null && koyaNodeService.getFirstParentOfType(s.getNodeRef(), Company.class)
-						.equals(c)) {
-					spaces.add(s);
-				}
-			}
-		}
-		return spaces;
+	public List<Space> getKoyaUserSpaces(User u, KoyaPermission permission, Company c) {	
+		return getUserAvailableSpaces(u,c,permission);	
 	}
 
-	public List<Space> getKoyaUserSpaces(User u, Company c) {
-		return getKoyaUserSpaces(u, c, null);
-	}
 
 	/**
 	 * Get all spaces a user can access with any permission. Limited to company
@@ -444,20 +482,12 @@ public class SpaceAclService {
 	 * @param u
 	 * @return
 	 */
-	public List<Space> getKoyaUserSpaces(User u, Company c, Class<? extends KoyaNode> typeFilter) {
+	public List<Space> getKoyaUserSpaces(User u, Company co, Class<? extends KoyaNode> typeFilter) {
 		List<Space> spaces = new ArrayList<>();
-
-		Set<String> authorities = authorityService.getAuthoritiesForUser(u.getUserName());
-
-		for (String a : authorities) {
-
-			Space s = getKoyaNodeFromGroupName(a);
-			if (s != null && koyaNodeService.getFirstParentOfType(s.getNodeRef(), Company.class)
-					.equals(c)) {
-
-				if (typeFilter == null || s.getClass().equals(typeFilter)) {
-					spaces.add(s);
-				}
+		
+		for(Space s:getUserAvailableSpaces(u,co,null)){
+			if (typeFilter == null || s.getClass().equals(typeFilter)) {
+				spaces.add(s);
 			}
 		}
 		return spaces;
