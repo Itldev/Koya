@@ -200,8 +200,8 @@ public class KoyaMailService implements InitializingBean {
 	// </editor-fold>
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		koyaClientParams = new HashMap<>();
-		koyaClientParams.put("serverPath", companyAclService.getKoyaClientServerPath());
+		koyaClientParams = new HashMap<>();		
+		koyaClientParams.put("serverPath", koyaClientServerPath);		
 	}
 
 	/**
