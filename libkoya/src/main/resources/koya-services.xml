@@ -105,12 +105,21 @@
 			</bean>
 		</property>
 
-		<property name="nodeSharedWithConsumerCacheConfig">
+		<property name="nodeSharedWithKoyaClientCacheConfig">
 			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
-				<property name="enabled" value="${nodeSharedWithConsumerCache.enabled}" />
-				<property name="maxSize" value="${nodeSharedWithConsumerCache.maxSize}" />
+				<property name="enabled" value="${nodeSharedWithKoyaClientCache.enabled}" />
+				<property name="maxSize" value="${nodeSharedWithKoyaClientCache.maxSize}" />
 				<property name="expireAfterWriteSeconds"
-					value="${nodeSharedWithConsumerCache.expireAfterWriteSeconds}" />
+					value="${nodeSharedWithKoyaClientCache.expireAfterWriteSeconds}" />
+			</bean>
+		</property>
+		
+			<property name="nodeSharedWithKoyaPartnerCacheConfig">
+			<bean class="fr.itldev.koya.services.impl.util.CacheConfig">
+				<property name="enabled" value="${nodeSharedWithKoyaPartnerCache.enabled}" />
+				<property name="maxSize" value="${nodeSharedWithKoyaPartnerCache.maxSize}" />
+				<property name="expireAfterWriteSeconds"
+					value="${nodeSharedWithKoyaPartnerCache.expireAfterWriteSeconds}" />
 			</bean>
 		</property>
 
@@ -226,6 +235,7 @@
 	<bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl"
 		parent="abstractRestService">
 		<property name="cacheManager" ref="cacheManager" />
+		<property name="userService" ref="userService" />		
 	</bean>
 
 	<bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl"
@@ -239,5 +249,6 @@
 	<bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl"
 		parent="abstractRestService">
 		<property name="cacheManager" ref="cacheManager" />
+		<property name="userService" ref="userService" />
 	</bean>
 </beans>

@@ -21,17 +21,17 @@ package fr.itldev.koya.services;
 import java.util.List;
 
 import fr.itldev.koya.model.KoyaNode;
-import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.KoyaShare;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 /**
  * Sharing Secured items.
  * 
  */
-public interface ShareService extends AlfrescoService {
+public interface ShareService {
 
 	/**
 	 * Public share KoyaNode to a user (pre created or not)
@@ -41,8 +41,8 @@ public interface ShareService extends AlfrescoService {
 	 * @param sharedUserMail
 	 * 
 	 */
-	KoyaShare shareItem(User user, KoyaNode itemToShare, String sharedUserMail)
-			throws AlfrescoServiceException;
+	KoyaShare shareItem(User user, KoyaNode itemToShare, String sharedUserMail,
+			KoyaPermissionConsumer permission) throws AlfrescoServiceException;
 
 	/**
 	 * Revoke Shares KoyaNodes to a list of users
@@ -56,34 +56,38 @@ public interface ShareService extends AlfrescoService {
 			throws AlfrescoServiceException;
 
 	/**
-	 * Show Users who can publicly access to given element.
+	 * List all user who belongs KoyaClient permission group on defined space
 	 * 
 	 * @param user
-	 * @param item
-	 * @return
-	 * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
-	 */
-	List<User> sharedUsers(User user, KoyaNode item)
-			throws AlfrescoServiceException;
-
-	/**
-	 * Get all KoyaNodes shared for specified user on a company.
-	 * 
-	 * @param userLogged
-	 * @param userToGetShares
-	 * @param c
+	 * @param space
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	@Deprecated
-	List<KoyaNode> sharedItems(User userLogged, User userToGetShares,
-			Company c) throws AlfrescoServiceException;
+	List<User> listClients(User user, Space space) throws AlfrescoServiceException;
 
 	/**
-	 * Checks if item has any share with consumer permission
+	 * List all user who belongs KoyaPartner permission group on defined space
+	 * 
+	 * @param user
+	 * @param space
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<User> listPartners(User user, KoyaNode space) throws AlfrescoServiceException;
+
+	/**
+	 * Checks if item has any share with KoyaClient permission
 	 * 
 	 * @param item
 	 * @return
 	 */
-	Boolean isSharedWithConsumerPermission(Space item);
+	Boolean isSharedWithKoyaClient(Space item);
+
+	/**
+	 * Checks if item has any share with KoyaPartner permission
+	 * 
+	 * @param item
+	 * @return
+	 */
+	Boolean isSharedWithKoyaPartner(Space item);
 }

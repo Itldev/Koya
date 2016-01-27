@@ -18,18 +18,10 @@
  */
 package fr.itldev.koya.webscript.invitation;
 
-import fr.itldev.koya.alfservice.KoyaMailService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -40,6 +32,16 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.KoyaMailService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.permissions.SitePermission;
+import fr.itldev.koya.webscript.KoyaWebscript;
+
 /**
  * Send invite mail with given inviteId
  *
@@ -47,81 +49,73 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class SendInviteMail extends AbstractWebScript {
 
-    protected KoyaMailService koyaMailService;
-    protected CompanyAclService companyAclService;
-    protected WorkflowService workflowService;
-    protected AuthenticationService authenticationService;
-    protected UserService userService;
-    protected KoyaNodeService koyaNodeService;
+	protected KoyaMailService koyaMailService;
+	protected CompanyAclService companyAclService;
+	protected WorkflowService workflowService;
+	protected AuthenticationService authenticationService;
+	protected UserService userService;
+	protected KoyaNodeService koyaNodeService;
 
-    public void setKoyaMailService(KoyaMailService koyaMailService) {
-        this.koyaMailService = koyaMailService;
-    }
+	public void setKoyaMailService(KoyaMailService koyaMailService) {
+		this.koyaMailService = koyaMailService;
+	}
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
-    }
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    public void setWorkflowService(WorkflowService workflowService) {
-        this.workflowService = workflowService;
-    }
+	public void setWorkflowService(WorkflowService workflowService) {
+		this.workflowService = workflowService;
+	}
 
-    public void setAuthenticationService(
-            AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+	public void setAuthenticationService(AuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res)
-            throws IOException {
-        Map<String, Object> postParams = KoyaWebscript.getJsonMap(req);
-        final String inviteId = (String) postParams.get("inviteId");
-        Map<String, String> returnValues = new HashMap<>();
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, Object> postParams = KoyaWebscript.getJsonMap(req);
+		final String inviteId = (String) postParams.get("inviteId");
+		Map<String, String> returnValues = new HashMap<>();
 
-        try {
-            WorkflowTask task = AuthenticationUtil
-                    .runAsSystem(new AuthenticationUtil.RunAsWork<WorkflowTask>() {
-                        @Override
-                        public WorkflowTask doWork() throws Exception {
-                            return workflowService.getStartTask(inviteId);
-                        }
-                    });
+		try {
+			WorkflowTask task = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<WorkflowTask>() {
+				@Override
+				public WorkflowTask doWork() throws Exception {
+					return workflowService.getStartTask(inviteId);
+				}
+			});
 
-            /**
-             * Security : user must be SiteManager or SiteCollaborator of
-             * current company
-             */
-            String companyName = (String) task.getProperties().get(
-                    WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME);
-            User u = userService.getUserByUsername(authenticationService
-                    .getCurrentUserName());
-            SitePermission userPermissionInCompany = companyAclService
-                    .getSitePermission(
-                            koyaNodeService.companyBuilder(companyName), u);
+			/**
+			 * Security : user must be SiteManager or SiteCollaborator of
+			 * current company
+			 */
+			String companyName = (String) task.getProperties()
+					.get(WorkflowModelNominatedInvitation.WF_PROP_RESOURCE_NAME);
+			User u = userService.getUserByUsername(authenticationService.getCurrentUserName());
+			SitePermission userPermissionInCompany = companyAclService
+					.getSitePermission(koyaNodeService.companyBuilder(companyName), u);
 
-            if (!userPermissionInCompany.equals(SitePermission.COLLABORATOR)
-                    && !userPermissionInCompany.equals(SitePermission.MANAGER)) {
-                throw new KoyaServiceException(
-                        KoyaErrorCodes.INVITATION_PROCESS_NOT_ALLOWED_RESEND_MAIL);
-            }
+			if (!userPermissionInCompany.equals(SitePermission.COLLABORATOR)
+					&& !userPermissionInCompany.equals(SitePermission.MANAGER)) {
+				throw new KoyaServiceException(KoyaErrorCodes.INVITATION_PROCESS_NOT_ALLOWED_RESEND_MAIL);
+			}
 
-            returnValues.put("destEmail",
-                    koyaMailService.sendInviteMail(inviteId));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : "
-                    + ex.getErrorCode().toString());
-        }
+			returnValues.put("destEmail", koyaMailService.sendInviteMail(inviteId));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
 
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(KoyaWebscript.getObjectAsJson(returnValues));
-    }
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(KoyaWebscript.getObjectAsJson(returnValues));
+	}
 
 }

@@ -36,110 +36,78 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public abstract class KoyaWebscript {
 
-    private static final Logger LOGGER = Logger.getLogger(KoyaWebscript.class);
+	private static final Logger LOGGER = Logger.getLogger(KoyaWebscript.class);
 
-    public static final String WSCONST_NODEREF = "nodeRef";
-    public static final String WSCONST_DESTNODEREF = "destNodeRef";
-    public static final String WSCONST_NAME = "name";
-    public static final String WSCONST_TITLE = "title";
-    public static final String WSCONST_SHORTNAME = "shortname";
-    public static final String WSCONST_TEMPLATENAME = "templatename";
-    public static final String WSCONST_NBANCESTOR = "nbAncestor";
-    public static final String WSCONST_PARENTNODEREF = "parentNodeRef";
-    public static final String WSCONST_USERNAME = "userName";
-    public static final String WSCONST_COMPANYNAME = "companyName";
-    public static final String WSCONST_ROLENAME = "roleName";
-    public static final String WSCONST_ONLYFOLDERS = "onlyFolders";
-    public static final String WSCONST_QUERY = "query";
-    public static final String WSCONST_ROLEFILTER = "roleFilter";
-    public static final String WSCONST_MAXRESULTS = "maxResults";
-    public static final String WSCONST_EMAIL = "email";
-    public static final String WSCONST_COMPANIESFILTER = "companiesFilter";
-    public static final String WSCONST_PREFKEY = "preferenceKey";
-    public static final String WSCONST_ENABLE = "enable";
-    public static final String WSCONST_MAXDEPTH = "maxdepth";
-    public static final String WSCONST_USERFAVOURITE = "userFavourite";
-    public static final String WSCONST_NEWNAME = "newName";
-    public static final String WSCONST_ACTIVE = "active";
-    public static final String WSCONST_XPATH = "xPath";
-    public static final String WSCONST_SPACETEMPLATE = "spacetemplate";
-    public static final String WSCONST_SALESOFFER = "salesoffer";
-    public static final String WSCONST_KOYAPERMISSION = "koyaPermission";
+	/**
+	 * Extracts JSON POST data.
+	 *
+	 * @param req
+	 * @return
+	 * @throws java.io.IOException
+	 */
+	public static Map<String, Object> getJsonMap(WebScriptRequest req) throws IOException {
 
-    /**
-     * Extracts JSON POST data.
-     *
-     * @param req
-     * @return
-     * @throws java.io.IOException
-     */
-    public static Map<String, Object> getJsonMap(WebScriptRequest req)
-            throws IOException {
+		JSONParser parser = new JSONParser();
+		// TODO improve json POST reading
+		try {
+			return (JSONObject) parser.parse(req.getContent().getContent());
+		} catch (ParseException ex) {
+			LOGGER.error(ex.getMessage(), ex);
+		}
 
-        JSONParser parser = new JSONParser();
-        // TODO improve json POST reading
-        try {
-            return (JSONObject) parser.parse(req.getContent().getContent());
-        } catch (ParseException ex) {
-            LOGGER.error(ex.getMessage(), ex);
-        }
+		return new HashMap<>();
 
-        return new HashMap<>();
+	}
 
-    }
+	/**
+	 * Extracts URL paramters.
+	 *
+	 *
+	 * @param req
+	 * @return
+	 */
+	public static Map<String, String> getUrlParamsMap(WebScriptRequest req) {
+		Map<String, String> params = new HashMap<>();
+		params.putAll(req.getServiceMatch().getTemplateVars());
+		for (String k : req.getParameterNames()) {
+			String param;
+			try {
+				/**
+				 * Decode double encoded url parameter : ex string with accent
+				 * characters
+				 *
+				 * TODO charset permissive implementation
+				 */
+				param = new String(req.getParameter(k).getBytes("iso-8859-1"), "UTF-8");
+			} catch (UnsupportedEncodingException ex) {
+				param = req.getParameter(k);
+				LOGGER.error(ex.getMessage(), ex);
 
-    /**
-     * Extracts URL paramters.
-     *
-     *
-     * @param req
-     * @return
-     */
-    public static Map<String, String> getUrlParamsMap(WebScriptRequest req) {
-        Map<String, String> params = new HashMap<>();
-        params.putAll(req.getServiceMatch().getTemplateVars());
-        for (String k : req.getParameterNames()) {
-            String param;
-            try {
-                /**
-                 * Decode double encoded url parameter : ex string with accent
-                 * characters
-                 *
-                 * TODO charset permissive implementation
-                 */
-                param = new String(req.getParameter(k).getBytes("iso-8859-1"),
-                        "UTF-8");
-            } catch (UnsupportedEncodingException ex) {
-                param = req.getParameter(k);
-                LOGGER.error(ex.getMessage(), ex);
+			}
 
-            }
+			params.put(k, param);
+		}
+		return params;
+	}
 
-            params.put(k, param);
-        }
-        return params;
-    }
+	public static <T> T fromJSON(final TypeReference<T> type, final String jsonPacket) {
+		T data = null;
 
-    
-    public static <T> T fromJSON(final TypeReference<T> type,
-            final String jsonPacket) {
-        T data = null;
+		if (jsonPacket == null) {
+			return null;
+		}
 
-        if (jsonPacket == null) {
-            return null;
-        }
+		try {
+			data = new ObjectMapper().readValue(jsonPacket, type);
+		} catch (Exception e) {
 
-        try {
-            data = new ObjectMapper().readValue(jsonPacket, type);
-        } catch (Exception e) {
-           
-        }
-        return data;
-    }
-    
-    public static String getObjectAsJson(Object o) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(o);
-    }
+		}
+		return data;
+	}
+
+	public static String getObjectAsJson(Object o) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.writeValueAsString(o);
+	}
 
 }

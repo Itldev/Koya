@@ -18,12 +18,14 @@
  */
 package fr.itldev.koya.webscript.favourites;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Get authenticated User favourites
@@ -31,16 +33,16 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class List extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(KoyaWebscript.getObjectAsJson(koyaNodeService.getFavourites()));
-    }
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(KoyaWebscript.getObjectAsJson(koyaNodeService.getFavourites()));
+	}
 
 }

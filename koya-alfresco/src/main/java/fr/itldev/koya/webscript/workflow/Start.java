@@ -45,6 +45,7 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -81,16 +82,14 @@ public class Start extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 
 		String response = "";
 		try {
 
-			NodeRef n = koyaNodeService.getNodeRef((String) urlParamsMap
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			NodeRef n = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_NODEREF));
 			Dossier d = koyaNodeService.getKoyaNode(n, Dossier.class);
 
 			FormData fd = new FormData();
@@ -101,39 +100,29 @@ public class Start extends AbstractWebScript {
 			// Add related dossier as workflow parameter
 			fd.addFieldData("prop_wf_relatednode", d.getNodeRef().toString());
 
-
 			WorkflowInstance workflow = (WorkflowInstance) formService
-					.saveForm(
-							new Item("workflow", "activiti$"
-									+ urlParamsMap.get("workflowId")), fd);
+					.saveForm(new Item("workflow", "activiti$" + urlParamsMap.get("workflowId")), fd);
 			// relationship between dossier node and activiti instance
 			ArrayList<String> activitiIds = new ArrayList<String>(d.getWorkflows().keySet());
-			
-			activitiIds.add(workflow.getId());
-			nodeService.setProperty(d.getNodeRef(), KoyaModel.PROP_ACTIVITIIDS,activitiIds);
 
+			activitiIds.add(workflow.getId());
+			nodeService.setProperty(d.getNodeRef(), KoyaModel.PROP_ACTIVITIIDS, activitiIds);
 
 			// Add bpm:packageContains relationship from package node to dossier
 			// node
-			QName workflowPackageItemId = QName.createQName("wpi", d
-					.getNodeRef().toString());
-			nodeService
-					.addChild(workflow.getWorkflowPackage(), d.getNodeRef(),
-							WorkflowModel.ASSOC_PACKAGE_CONTAINS,
-							workflowPackageItemId);
-			
-			
-			//set Workflow status Running
-				
+			QName workflowPackageItemId = QName.createQName("wpi", d.getNodeRef().toString());
+			nodeService.addChild(workflow.getWorkflowPackage(), d.getNodeRef(), WorkflowModel.ASSOC_PACKAGE_CONTAINS,
+					workflowPackageItemId);
 
-			 Map<QName, Serializable> props = new HashMap<QName, Serializable>() {
-                 {
-                     put(KoyaModel.PROP_BPMCURRENTSTATUS, KoyaModel.BpmStatusValues.RUNNING);
-                 }
-             };
-             
-             
-             nodeService.addAspect(workflow.getWorkflowPackage(), KoyaModel.ASPECT_BPMSTATUS, props);		
+			// set Workflow status Running
+
+			Map<QName, Serializable> props = new HashMap<QName, Serializable>() {
+				{
+					put(KoyaModel.PROP_BPMCURRENTSTATUS, KoyaModel.BpmStatusValues.RUNNING);
+				}
+			};
+
+			nodeService.addAspect(workflow.getWorkflowPackage(), KoyaModel.ASPECT_BPMSTATUS, props);
 
 			/*
 			 * Apply template to dossier if any exists : Do it in async action
@@ -141,12 +130,10 @@ public class Start extends AbstractWebScript {
 			 */
 			try {
 				Map<String, Serializable> paramsCopyWorkflowTemplate = new HashMap<>();
-				paramsCopyWorkflowTemplate.put(
-						CopyWorkflowTemplateActionExecuter.PARAM_WORKFLOWID,
+				paramsCopyWorkflowTemplate.put(CopyWorkflowTemplateActionExecuter.PARAM_WORKFLOWID,
 						urlParamsMap.get("workflowId"));
 
-				Action copyWf = actionService.createAction(
-						CopyWorkflowTemplateActionExecuter.NAME,
+				Action copyWf = actionService.createAction(CopyWorkflowTemplateActionExecuter.NAME,
 						paramsCopyWorkflowTemplate);
 
 				// async exec
@@ -158,8 +145,7 @@ public class Start extends AbstractWebScript {
 			response = KoyaWebscript.getObjectAsJson(workflow.getId());
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

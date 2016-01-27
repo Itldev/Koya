@@ -150,7 +150,7 @@ public class DossierServiceImplTest extends TestCase {
 	@Test
 	public void testListResponsibles() throws AlfrescoServiceException {
 		Dossier d = dossierService.create(admin, spaceTests, "dossLstResp");
-		List<User> resp = dossierService.listResponsibles(admin, d);
+		List<User> resp = secuService.listResponsibles(admin, d);
 		// TODO add responsibles but not admin beacause not returned as
 		// responsible
 		// assertEquals(resp.size(), 1);
@@ -163,35 +163,35 @@ public class DossierServiceImplTest extends TestCase {
 	public void testAddDelResponsibles() throws AlfrescoServiceException {
 
 		Dossier d = dossierService.create(admin, spaceTests, "dossAddDelResp");
-		List<User> resp = dossierService.listResponsibles(admin, d);
+		List<User> resp = secuService.listResponsibles(admin, d);
 		assertEquals(resp.size(), 1);// creator automaticly set as responsible
 
 		User u1 = testUsers.get(0);
 
 		// Add a new responsibles --> now 2 reponsibles
 		dossierService.addResponsible(admin, d, u1);
-		assertEquals(2, dossierService.listResponsibles(admin, d).size());
+		assertEquals(2, secuService.listResponsibles(admin, d).size());
 		// adding twice same user shouldn't be taken in account
 		dossierService.addResponsible(admin, d, u1);
-		assertEquals(2, dossierService.listResponsibles(admin, d).size());
+		assertEquals(2, secuService.listResponsibles(admin, d).size());
 
 		// del a responsible --> now only 1
 		dossierService.removeMembership(admin, d, admin);// -> NPE ???
-		assertEquals(1, dossierService.listResponsibles(admin, d).size());
-		assertEquals(u1, dossierService.listResponsibles(admin, d).get(0));
+		assertEquals(1, secuService.listResponsibles(admin, d).size());
+		assertEquals(u1, secuService.listResponsibles(admin, d).get(0));
 		// remove non responsive shouldn't have impact
 		dossierService.removeMembership(admin, d, admin);
-		assertEquals(1, dossierService.listResponsibles(admin, d).size());
+		assertEquals(1, secuService.listResponsibles(admin, d).size());
 
 		// Add / del collection test
 		dossierService.addResponsible(admin, d, testUsers);
-		assertEquals(2, dossierService.listResponsibles(admin, d).size());
+		assertEquals(2, secuService.listResponsibles(admin, d).size());
 		// 2 because u1 is already in responsibles list
 
 		for (User u : testUsers) {
 			dossierService.removeMembership(admin, d, u);
 		}
-		assertEquals(0, dossierService.listResponsibles(admin, d).size());
+		assertEquals(0, secuService.listResponsibles(admin, d).size());
 
 	}
 

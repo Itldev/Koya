@@ -37,9 +37,9 @@ import fr.itldev.koya.alfservice.CompanyPropertiesService;
 import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -48,11 +48,9 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  * This document is placed on dossier root
  * 
  */
-public class GenerateSummary extends AbstractWebScript implements
-		InitializingBean {
+public class GenerateSummary extends AbstractWebScript implements InitializingBean {
 
 	private final static String TPL_SUMMARY = "//app:company_home/app:dictionary/cm:koya/cm:templates/cm:dossier-summary.html.ftl";
-	private final static String DEFAULT_DOCNAME = "dossier-summary";
 
 	private KoyaNodeService koyaNodeService;
 	private TemplateService templateService;
@@ -107,8 +105,7 @@ public class GenerateSummary extends AbstractWebScript implements
 		this.companyService = companyService;
 	}
 
-	public void setCompanyPropertiesService(
-			CompanyPropertiesService companyPropertiesService) {
+	public void setCompanyPropertiesService(CompanyPropertiesService companyPropertiesService) {
 		this.companyPropertiesService = companyPropertiesService;
 	}
 
@@ -117,21 +114,20 @@ public class GenerateSummary extends AbstractWebScript implements
 	}
 
 	protected RepositoryLocation templateLocation;
-	private Logger logger = Logger.getLogger(this.getClass());
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		templateLocation = new RepositoryLocation(
-				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, TPL_SUMMARY, "xpath");
+		templateLocation = new RepositoryLocation(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_SUMMARY, "xpath");
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		NodeRef htmlSummaryNodeRef;
 		NodeRef pdfSummaryNodeRef;
+
 		try {
 
 			/**
@@ -140,12 +136,12 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * Find Dossier
 			 */
 			Dossier d = koyaNodeService.getKoyaNode(
-					koyaNodeService.getNodeRef("workspace://SpacesStore/"
-							+ (String) urlParams.get("nodeId")), Dossier.class);
+					koyaNodeService.getNodeRef(
+							"workspace://SpacesStore/" + (String) urlParams.get("nodeId")),
+					Dossier.class);
 
-			Company c = (Company) koyaNodeService.getFirstParentOfType(
-					d.getNodeRef(), Company.class);
-
+			Company c = (Company) koyaNodeService.getFirstParentOfType(d.getNodeRef(),
+					Company.class);
 			/**
 			 * =================================================
 			 * 
@@ -154,19 +150,11 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * TODO try to read template from company settings if exists
 			 * 
 			 */
-			List<NodeRef> nodeRefs = searchService.selectNodes(
-					nodeService.getRootNode(templateLocation.getStoreRef()),
-					templateLocation.getPath(), null, namespaceService, false);
+			// TODO get dynamicly found template
+			NodeRef template = getStaticTemplate();
 
-			if (nodeRefs.isEmpty()) {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.SUMMARY_TEMPLATE_NOT_FOUND);
-			}
-			NodeRef summarytemplate = fileFolderService
-					.getLocalizedSibling(nodeRefs.get(0));
-			if (summarytemplate == null) {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.SUMMARY_TEMPLATE_NOT_FOUND);
+			if (template == null) {
+				throw new KoyaServiceException(KoyaErrorCodes.SUMMARY_TEMPLATE_NOT_FOUND);
 			}
 
 			/**
@@ -176,43 +164,36 @@ public class GenerateSummary extends AbstractWebScript implements
 			 */
 			String htmlText = null;
 			Map<String, Serializable> paramsTemplate = new HashMap<>();
-			paramsTemplate.put("dossier", new TemplateNode(d.getNodeRef(),
-					serviceRegistry, null));
+			paramsTemplate.put("dossier", new TemplateNode(d.getNodeRef(), serviceRegistry, null));
 
 			// logo parameters
-			paramsTemplate.put("dossier", new TemplateNode(d.getNodeRef(),
-					serviceRegistry, null));
+			paramsTemplate.put("dossier", new TemplateNode(d.getNodeRef(), serviceRegistry, null));
 
 			final String logoUrl = sysAdminParams.getAlfrescoProtocol() + "://"
-					+ sysAdminParams.getAlfrescoHost() + ":"
-					+ sysAdminParams.getAlfrescoPort() + "/"
-					+ sysAdminParams.getAlfrescoContext()
-					+ "/s/fr/itldev/koya/company/logo/" + c.getName();
+					+ sysAdminParams.getAlfrescoHost() + ":" + sysAdminParams.getAlfrescoPort()
+					+ "/" + sysAdminParams.getAlfrescoContext() + "/s/fr/itldev/koya/company/logo/"
+					+ c.getName();
 
 			NodeRef logo = companyPropertiesService.getLogo(c);
-			ContentReader contentReader = contentService.getReader(logo,
-					ContentModel.PROP_CONTENT);
+			ContentReader contentReader = contentService.getReader(logo, ContentModel.PROP_CONTENT);
 
 			// scale image
-			final BufferedImage bimg = ImageIO.read(contentReader
-					.getContentInputStream());
+			final BufferedImage bimg = ImageIO.read(contentReader.getContentInputStream());
 			final int heigth = 80;
 			final int width = (heigth * bimg.getWidth()) / bimg.getHeight();
 
-			paramsTemplate.put("logo", new HashMap() {
-				{
-					put("url", logoUrl);
-					put("height", Integer.valueOf(heigth).toString());
-					put("width", Integer.valueOf(width).toString());
-				}
-			});
+			HashMap<String, String> logoSettings = new HashMap<>();
+			logoSettings.put("url", logoUrl);
+			logoSettings.put("height", Integer.valueOf(heigth).toString());
+			logoSettings.put("width", Integer.valueOf(width).toString());
+			logoSettings.put("companyName", c.getName());
+			paramsTemplate.put("logo", logoSettings);
 
 			try {
-				htmlText = templateService.processTemplate("freemarker",
-						summarytemplate.toString(), paramsTemplate);
+				htmlText = templateService.processTemplate("freemarker", template.toString(),
+						paramsTemplate);
 			} catch (Exception templateEx) {
-				throw new KoyaServiceException(
-						KoyaErrorCodes.SUMMARY_TEMPLATE_PROCESS_ERROR);
+				throw new KoyaServiceException(KoyaErrorCodes.SUMMARY_TEMPLATE_PROCESS_ERROR);
 			}
 
 			NodeRef companyTmpSummaryDir = companyService.getTmpSummaryDir(c);
@@ -223,18 +204,15 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * Write html file
 			 */
 
-			htmlSummaryNodeRef = nodeService.getChildByName(
-					companyTmpSummaryDir, ContentModel.ASSOC_CONTAINS,
-					summaryFileName + ".html");
+			htmlSummaryNodeRef = nodeService.getChildByName(companyTmpSummaryDir,
+					ContentModel.ASSOC_CONTAINS, summaryFileName + ".html");
 
 			if (htmlSummaryNodeRef == null) {
-				htmlSummaryNodeRef = fileFolderService.create(
-						companyTmpSummaryDir, summaryFileName + ".html",
-						ContentModel.TYPE_CONTENT).getNodeRef();
+				htmlSummaryNodeRef = fileFolderService.create(companyTmpSummaryDir,
+						summaryFileName + ".html", ContentModel.TYPE_CONTENT).getNodeRef();
 			}
 
-			ContentWriter fileWriter = fileFolderService
-					.getWriter(htmlSummaryNodeRef);
+			ContentWriter fileWriter = fileFolderService.getWriter(htmlSummaryNodeRef);
 			fileWriter.setEncoding("UTF-8");
 			fileWriter.putContent(htmlText);
 			// creates new revision
@@ -246,35 +224,30 @@ public class GenerateSummary extends AbstractWebScript implements
 			 * Convert html to pdf
 			 */
 
-			pdfSummaryNodeRef = nodeService.getChildByName(
-					companyTmpSummaryDir, ContentModel.ASSOC_CONTAINS,
-					summaryFileName + ".pdf");
+			pdfSummaryNodeRef = nodeService.getChildByName(companyTmpSummaryDir,
+					ContentModel.ASSOC_CONTAINS, summaryFileName + ".pdf");
 
 			if (pdfSummaryNodeRef == null) {
-				pdfSummaryNodeRef = fileFolderService.create(
-						companyTmpSummaryDir, summaryFileName + ".pdf",
-						ContentModel.TYPE_CONTENT).getNodeRef();
+				pdfSummaryNodeRef = fileFolderService.create(companyTmpSummaryDir,
+						summaryFileName + ".pdf", ContentModel.TYPE_CONTENT).getNodeRef();
 			}
 
-			ContentReader htmlSummaryReader = fileFolderService
-					.getReader(htmlSummaryNodeRef);
+			ContentReader htmlSummaryReader = fileFolderService.getReader(htmlSummaryNodeRef);
 			htmlSummaryReader.setMimetype("text/html");
 
-			ContentWriter pdfSummaryWriter = fileFolderService
-					.getWriter(pdfSummaryNodeRef);
+			ContentWriter pdfSummaryWriter = fileFolderService.getWriter(pdfSummaryNodeRef);
 			pdfSummaryWriter.setEncoding("UTF-8");
 			pdfSummaryWriter.setMimetype("application/pdf");
 
-			ContentTransformer transformer = contentService.getTransformer(
-					"text/html", "application/pdf");
+			ContentTransformer transformer = contentService.getTransformer("text/html",
+					"application/pdf");
 
 			transformer.transform(htmlSummaryReader, pdfSummaryWriter);
 			// creates new revision
 			versionService.createVersion(pdfSummaryNodeRef, null);
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 
 		res.setContentEncoding("UTF-8");
@@ -288,11 +261,42 @@ public class GenerateSummary extends AbstractWebScript implements
 		} catch (Exception ex) {
 			throw new WebScriptException("Unable to stream output");
 		}
-
 	}
 
 	private String getDossierSummaryFileName(Dossier d) {
 		return "dossier-summary-" + d.getNodeRef().getId();
+	}
+
+	private static final String SUMMARY_NODEREF = "workspace://SpacesStore/5e43d1bd-b2cd-4ffd-ae81-84f0aa9a2154";
+	private NodeRef summarytemplate;
+
+	private NodeRef getStaticTemplate() {
+		/**
+		 * Loads template with static reference as it's defined in koya
+		 * bootstrap
+		 * 
+		 * Fix xpath search very long
+		 * 
+		 * TODO prefer dynamic loading with short template search time
+		 */
+		return new NodeRef(SUMMARY_NODEREF);
+	}
+
+	private NodeRef getTemplate() {
+
+		if (summarytemplate != null) {
+			return summarytemplate;
+		}
+
+		List<NodeRef> nodeRefs = searchService.selectNodes(
+				nodeService.getRootNode(templateLocation.getStoreRef()), templateLocation.getPath(),
+				null, namespaceService, false);
+
+		if (nodeRefs.isEmpty()) {
+			throw new KoyaServiceException(KoyaErrorCodes.SUMMARY_TEMPLATE_NOT_FOUND);
+		}
+		summarytemplate = fileFolderService.getLocalizedSibling(nodeRefs.get(0));
+		return summarytemplate;
 	}
 
 }

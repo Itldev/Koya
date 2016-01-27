@@ -34,6 +34,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -54,18 +55,15 @@ public class ListContent extends AbstractWebScript {
 	private Logger logger = Logger.getLogger(this.getClass());
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
 		Map<String, String> urlParamsMap = KoyaWebscript.getUrlParamsMap(req);
 		String response = "";
 
 		try {
-			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			NodeRef parent = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_NODEREF));
 
-			String filterExpr = processPatternFilter(urlParamsMap
-					.get("filterExpr"));
+			String filterExpr = processPatternFilter(urlParamsMap.get("filterExpr"));
 
 			/**
 			 * 
@@ -73,17 +71,16 @@ public class ListContent extends AbstractWebScript {
 			 * 
 			 */
 			String sortField = urlParamsMap.get("sortField");
-                        sortField = (!sortField.isEmpty())?sortField.replaceFirst("-", ":"):null;
-                        String strAscending = urlParamsMap.get("ascending");
-                        Boolean ascending = (strAscending!=null)?Boolean.valueOf(strAscending):true;
+			sortField = (!sortField.isEmpty()) ? sortField.replaceFirst("-", ":") : null;
+			String strAscending = urlParamsMap.get("ascending");
+			Boolean ascending = (strAscending != null) ? Boolean.valueOf(strAscending) : true;
 			String typeFilter = urlParamsMap.get("typeFilter");
 
 			/**
 			 * Check mode
 			 */
 
-			Boolean onlyFolders = ((String) urlParamsMap
-					.get(KoyaWebscript.WSCONST_ONLYFOLDERS)).equals("true");
+			Boolean onlyFolders = ((String) urlParamsMap.get(RestConstants.WSCONST_ONLYFOLDERS)).equals("true");
 
 			Integer maxItems = null;
 			Integer skipCount = null;
@@ -91,14 +88,12 @@ public class ListContent extends AbstractWebScript {
 			maxItems = Integer.valueOf(urlParamsMap.get("maxItems"));
 			skipCount = Integer.valueOf(urlParamsMap.get("skipCount"));
 
-			logger.trace("listContent arguments skipcount=" + skipCount
-					+ ";maxItems=" + maxItems + ";onlyFolders=" + onlyFolders
-					+ ";filterExpr=" + filterExpr + ";sortField=" + sortField
-					+ ";ascending="+ascending+";typeFilter=" + typeFilter);
+			logger.trace("listContent arguments skipcount=" + skipCount + ";maxItems=" + maxItems + ";onlyFolders="
+					+ onlyFolders + ";filterExpr=" + filterExpr + ";sortField=" + sortField + ";ascending=" + ascending
+					+ ";typeFilter=" + typeFilter);
 
-			Pair<List<KoyaNode>, Pair<Integer, Integer>> listChildren = koyaNodeService
-					.listChildrenPaginated(parent, skipCount, maxItems,
-							onlyFolders, filterExpr, sortField, ascending);
+			Pair<List<KoyaNode>, Pair<Integer, Integer>> listChildren = koyaNodeService.listChildrenPaginated(parent,
+					skipCount, maxItems, onlyFolders, filterExpr, sortField, ascending);
 
 			Map<String, Object> result = new HashMap<String, Object>();
 			result.put("children", listChildren.getFirst());
@@ -107,8 +102,7 @@ public class ListContent extends AbstractWebScript {
 			response = KoyaWebscript.getObjectAsJson(result);
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentEncoding("UTF-8");
 		res.setContentType("application/json;charset=UTF-8");

@@ -57,6 +57,7 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<modules>
+		<module>koya-model</module>
 		<module>koya-alfresco</module>
 		<module>koya-share</module>
 		<module>libkoya</module>
@@ -155,6 +156,7 @@
 		<profile>
 			<id>run</id>
 			<modules>
+				<module>solr</module>
 				<module>alfresco</module>
 				<module>share</module>
 				<module>runner</module>

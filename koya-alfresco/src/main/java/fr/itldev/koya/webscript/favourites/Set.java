@@ -18,16 +18,19 @@
  */
 package fr.itldev.koya.webscript.favourites;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Set/unset User Favourite status.
@@ -36,27 +39,27 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class Set extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, Object> postMap = KoyaWebscript.getJsonMap(req);
-        String response = "";
-        try {
-            NodeRef node = koyaNodeService.getNodeRef((String) postMap.get(KoyaWebscript.WSCONST_NODEREF));
-            koyaNodeService.setFavouriteStatus(node, ((Boolean) postMap.get("status")));
-            //return current favourite status.
-            response = KoyaWebscript.getObjectAsJson(koyaNodeService.isFavourite(node));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, Object> postMap = KoyaWebscript.getJsonMap(req);
+		String response = "";
+		try {
+			NodeRef node = koyaNodeService.getNodeRef((String) postMap.get(RestConstants.WSCONST_NODEREF));
+			koyaNodeService.setFavouriteStatus(node, ((Boolean) postMap.get("status")));
+			// return current favourite status.
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService.isFavourite(node));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
 
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 
 }

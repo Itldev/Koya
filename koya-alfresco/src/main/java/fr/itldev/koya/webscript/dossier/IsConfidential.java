@@ -29,6 +29,7 @@ import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -50,15 +51,13 @@ public class IsConfidential extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		Boolean isConfidential = false;
 		try {
-			KoyaNode item = koyaNodeService.getKoyaNode(koyaNodeService
-					.getNodeRef((String) urlParams
-							.get(KoyaWebscript.WSCONST_NODEREF)));
+			KoyaNode item = koyaNodeService
+					.getKoyaNode(koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF)));
 
 			isConfidential = spaceAclService.isConfidential(item);
 

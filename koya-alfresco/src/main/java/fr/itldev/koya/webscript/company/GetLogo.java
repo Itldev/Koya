@@ -30,6 +30,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.CompanyPropertiesService;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -59,7 +60,7 @@ public class GetLogo extends AbstractWebScript {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		String companyName = (String) urlParams
-				.get(KoyaWebscript.WSCONST_COMPANYNAME);
+				.get(RestConstants.WSCONST_COMPANYNAME);
 
 		try {
 			

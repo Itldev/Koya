@@ -29,12 +29,12 @@
     <version>${project.version}</version>
     <!-- Imports are required to allow references to definitions in other models
     -->
-    
+
     <imports>
         <!-- Import Alfresco Dictionary Definitions -->
         <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
         <!-- Import Alfresco Content Domain Model Definitions -->
-        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />    
+        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
     </imports>
     <!-- Introduction of new namespaces defined by this model -->
     <namespaces>
@@ -72,33 +72,33 @@
     <types>
         <type name="koya:container">
             <parent>cm:folder</parent>
-        </type>        
-                       
+        </type>
+
         <type name="koya:space">
             <title>space</title>
-            <parent>koya:container</parent>            
-        </type>        
-        
+            <parent>koya:container</parent>
+        </type>
+
         <type name="koya:dossier">
-            <title>dossier</title> 
-            <parent>koya:container</parent>   
+            <title>dossier</title>
+            <parent>koya:container</parent>
             <properties>
                 <property name="koya:reference">
                     <type>d:text</type>
                 </property>
             	 <property name="koya:activitiIds">
                     <type>d:text</type>
-                    <multiple>true</multiple>                    
-                </property>            
-            </properties> 
-        </type> 
-        
-        
-        
+                    <multiple>true</multiple>
+                </property>
+            </properties>
+        </type>
+
+
+
         <!--
         Companies properties and contacts
         -->
-        
+
         <type name="koya:contactItem">
             <title>Koya Contact Item</title>
             <parent>cm:content</parent>
@@ -110,20 +110,20 @@
                     <type>d:text</type>
                     <constraints>
                         <constraint ref="koya:contactItemsTypes" />
-                    </constraints>  
-                </property>     
+                    </constraints>
+                </property>
             </properties>
         </type>
-        
-        
+
+
         <type name="koya:contact">
             <title>Koya Contact</title>
-            <parent>cm:folder</parent>           
+            <parent>cm:folder</parent>
             <associations>
                 <association name="koya:contactUserAssoc">
                     <source>
                         <mandatory>false</mandatory>
-                        <many>true</many>                       
+                        <many>true</many>
                     </source>
                     <target>
                         <class>cm:person</class>
@@ -144,9 +144,9 @@
                     <duplicate>false</duplicate>
                     <propagateTimestamps>true</propagateTimestamps>
                 </child-association>
-            </associations>            
+            </associations>
         </type>
-        
+
         <type name="koya:companyProperties">
         <title>Company properties</title>
             <parent>cm:folder</parent>
@@ -163,17 +163,17 @@
                 <property name="koya:city">
                     <type>d:text</type>
                 </property>
-                <property name="koya:description">                               
+                <property name="koya:description">
                     <type>d:text</type>
                 </property>
                 <property name="koya:legalInformations">
                     <type>d:text</type>
-                </property>               
+                </property>
                 <property name="koya:mailHeaderText">
 					<type>d:text</type>
-				</property>                                                      
-            </properties>    
-            <associations>   
+				</property>
+            </properties>
+            <associations>
             	 <association name="koya:companyLogo">
                     <source>
                         <mandatory>false</mandatory>
@@ -185,7 +185,7 @@
                         <many>false</many>
                     </target>
                 </association>
-                         
+
                 <child-association name="koya:contactItemsAssoc">
                     <source>
                         <mandatory>false</mandatory>
@@ -199,7 +199,7 @@
                     <duplicate>false</duplicate>
                     <propagateTimestamps>true</propagateTimestamps>
                 </child-association>
-                
+
                 <child-association name="koya:contactsAssoc">
                     <source>
                         <mandatory>false</mandatory>
@@ -213,26 +213,26 @@
                     <duplicate>false</duplicate>
                     <propagateTimestamps>true</propagateTimestamps>
                 </child-association>
-                      
-            </associations> 
-                            
+
+            </associations>
+
         </type>
 
-		
+
     </types>
-      
+
     <aspects>
-    
+
     <aspect name="koya:companySite">
-			<title>Koya Company site Aspect</title>	
+			<title>Koya Company site Aspect</title>
 			<properties>
                 <property name="koya:companyHome">
                     <type>d:noderef</type>
                     <default>true</default>
-                </property>                        
-            </properties>  
+                </property>
+            </properties>
 		</aspect>
-    
+
         <!--Aspect available on containers to trigger active status-->
         <aspect name="koya:activable">
             <title>Active trigger</title>
@@ -240,10 +240,10 @@
                 <property name="koya:isActive">
                     <type>d:boolean</type>
                     <default>true</default>
-                </property>                        
-            </properties>  
-        </aspect>        
-        
+                </property>
+            </properties>
+        </aspect>
+
         <aspect name="koya:mailunique">
             <title>Person Mail Unique</title>
             <properties>
@@ -251,20 +251,20 @@
                     <type>d:text</type>
                     <constraints>
                         <constraint ref="koya:mailUniqueConstraint" />
-                    </constraints>  
-                </property>     
-            </properties>  
-        </aspect>                     
-        
+                    </constraints>
+                </property>
+            </properties>
+        </aspect>
+
          <aspect name="koya:civilTitled">
-            <title>Person civil title</title>  
+            <title>Person civil title</title>
             <properties>
                 <property name="koya:civilTitle">
                     <type>d:text</type>
-                </property>     
-            </properties>            
-        </aspect>        
-        
+                </property>
+            </properties>
+        </aspect>
+
         <aspect name="koya:lastModified">
             <title>Date last content change</title>
             <properties>
@@ -277,13 +277,13 @@
                 </property>
             </properties>
         </aspect>
-        
-        
+
+
         <aspect name="koya:confidential">
             <title>confidential item</title>
         </aspect>
-                     
-        
+
+
         <aspect name="koya:bpmStatus">
 			<title>Koya bpm status</title>
 			<properties>
@@ -294,28 +294,8 @@
 					</constraints>
 				</property>
 			</properties>
-		</aspect>
-		
-<!-- 		This previously deleted aspect is declared again in order to  -->
-<!-- 		apply a script thats removes all reference -->
-		
-         <aspect name="koya:userShares">
-            <title>user Shares</title>
-             <associations>   
-            	 <association name="koya:userSharedNodes">
-                    <source>
-                        <mandatory>false</mandatory>
-                        <many>true</many>
-                    </source>
-                    <target>
-                        <class>koya:container</class>
-                        <mandatory>false</mandatory>
-                        <many>true</many>
-                    </target>
-                </association>
-             </associations>
-        </aspect>                   
-        
+		</aspect> 
+
     </aspects>
-    
+
 </model>

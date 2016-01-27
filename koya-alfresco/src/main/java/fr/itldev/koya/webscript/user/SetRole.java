@@ -18,18 +18,21 @@
  */
 package fr.itldev.koya.webscript.user;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.Map;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.model.permissions.SitePermission;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Set User's role on specified company.
@@ -38,37 +41,37 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class SetRole extends AbstractWebScript {
 
-    private CompanyAclService companyAclService;
-    private KoyaNodeService koyaNodeService;
-    private UserService userService;
+	private CompanyAclService companyAclService;
+	private KoyaNodeService koyaNodeService;
+	private UserService userService;
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
-    }
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        String username = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
-        String roleName = (String) urlParams.get(KoyaWebscript.WSCONST_ROLENAME);
-        try {
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+		String username = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
+		String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
+		String roleName = (String) urlParams.get(RestConstants.WSCONST_ROLENAME);
+		try {
 
-            companyAclService.setRole(koyaNodeService.companyBuilder(companyName),
-                    userService.getUserByUsername(username), SitePermission.valueOf(roleName));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write("");
-    }
+			companyAclService.setRole(koyaNodeService.companyBuilder(companyName),
+					userService.getUserByUsername(username), SitePermission.valueOf(roleName));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write("");
+	}
 
 }

@@ -18,6 +18,14 @@
  */
 package fr.itldev.koya.webscript.user;
 
+import java.io.IOException;
+import java.util.Map;
+
+import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
+
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.CompanyAclService;
@@ -25,14 +33,9 @@ import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.impl.UserRole;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.webscript.KoyaWebscript;
-import java.io.IOException;
-import java.util.Map;
-import org.springframework.extensions.webscripts.AbstractWebScript;
-import org.springframework.extensions.webscripts.WebScriptException;
-import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
  * Get user's role on specified company
@@ -41,43 +44,42 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class GetRole extends AbstractWebScript {
 
-    private KoyaNodeService koyaNodeService;
-    private UserService userService;
-    private CompanyAclService companyAclService;
+	private KoyaNodeService koyaNodeService;
+	private UserService userService;
+	private CompanyAclService companyAclService;
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
-    }
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
-        String response;
+		String userName = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
+		String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
+		String response;
 
-        try {
+		try {
 
-            User u = userService.getUserByUsername(userName);
-            Company c = koyaNodeService.companyBuilder(companyName);
-            SitePermission permission = companyAclService.getSitePermission(c, u);
-            response = KoyaWebscript.getObjectAsJson(
-                    new UserRole(permission!=null?companyAclService.getSitePermission(c, u).toString():null));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+			User u = userService.getUserByUsername(userName);
+			Company c = koyaNodeService.companyBuilder(companyName);
+			SitePermission permission = companyAclService.getSitePermission(c, u);
+			response = KoyaWebscript.getObjectAsJson(
+					new UserRole(permission != null ? companyAclService.getSitePermission(c, u).toString() : null));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 
 }
- 

@@ -29,6 +29,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -37,7 +38,6 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  * 
  */
 public class GetParent extends AbstractWebScript {
-
 	private KoyaNodeService koyaNodeService;
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
@@ -45,35 +45,47 @@ public class GetParent extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		NodeRef node = null;
 		try {
-			node = koyaNodeService.getNodeRef((String) urlParams
-					.get(KoyaWebscript.WSCONST_NODEREF));
+			node = koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF));
 		} catch (Exception ex) {
-			throw new WebScriptException("KoyaError cannot build noderef: "
-					+ ex.toString());
+			throw new WebScriptException("KoyaError cannot build noderef: " + ex.toString());
 
 		}
 		Integer nbAncestor;
 		try {
-			nbAncestor = Integer.valueOf((String) urlParams
-					.get(KoyaWebscript.WSCONST_NBANCESTOR));
+			nbAncestor = Integer.valueOf((String) urlParams.get(RestConstants.WSCONST_NBANCESTOR));
 		} catch (NumberFormatException ex) {
 			nbAncestor = KoyaNodeService.NB_ANCESTOR_INFINTE;
 		}
-		String response;
-		try {
-			response = KoyaWebscript.getObjectAsJson(koyaNodeService
-					.getParentsList(node, nbAncestor));
 
-		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+		Boolean failSafe;
+		try {
+			failSafe = Boolean.valueOf((String) urlParams.get("failSafe"));
+		} catch (NumberFormatException ex) {
+			failSafe = false;
 		}
+		String response;
+		if (!failSafe) {
+			try {
+				response = KoyaWebscript.getObjectAsJson(koyaNodeService.getParentsList(node, nbAncestor));
+
+			} catch (KoyaServiceException ex) {
+				throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+			}
+		} else {
+			// failSafe mode
+			try {
+				response = KoyaWebscript.getObjectAsJson(koyaNodeService.getParentsList(node, nbAncestor));
+			} catch (RuntimeException ex) {
+				response = "";
+
+			}
+		}
+
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);
 	}

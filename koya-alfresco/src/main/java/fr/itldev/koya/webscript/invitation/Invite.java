@@ -21,7 +21,6 @@ package fr.itldev.koya.webscript.invitation;
 import java.io.IOException;
 
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
@@ -45,8 +44,6 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  */
 public class Invite extends AbstractWebScript {
 
-	private Logger logger = Logger.getLogger(this.getClass());
-
 	private CompanyAclService companyAclService;
 	private KoyaNodeService koyaNodeService;
 
@@ -59,26 +56,19 @@ public class Invite extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		String response;
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			KoyaInvite iw = mapper.readValue(req.getContent().getReader(),
-					KoyaInvite.class);
-			NominatedInvitation invitation = (NominatedInvitation) companyAclService
-					.inviteMember(
-							koyaNodeService.companyBuilder(iw.getCompanyName()),
-							iw.getEmail(),
-							SitePermission.valueOf(iw.getRoleName()), null);
-			iw.setInviteId(invitation.getInviteId());
-			iw.setTicket(invitation.getTicket());
+			KoyaInvite iw = mapper.readValue(req.getContent().getReader(), KoyaInvite.class);
+			NominatedInvitation invitation = (NominatedInvitation) companyAclService.inviteMember(
+					koyaNodeService.companyBuilder(iw.getCompanyName()), iw.getEmail(),
+					SitePermission.valueOf(iw.getRoleName()), null);
 
-			response = KoyaWebscript.getObjectAsJson(iw);
+			response = KoyaWebscript.getObjectAsJson(new KoyaInvite(invitation));
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

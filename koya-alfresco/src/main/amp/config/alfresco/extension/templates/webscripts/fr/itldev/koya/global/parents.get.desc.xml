@@ -23,7 +23,7 @@
     <shortname>Get Content Parent</shortname>
     <description>Get Content Parent</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/global/parents/{nodeRef}?nbAncestor={nbAncestor}</url>
+    <url>/fr/itldev/koya/global/parents/{nodeRef}?nbAncestor={nbAncestor}&amp;failSafe{failSafe}</url>
     <authentication>user</authentication>
     <format default="json"/>
 </webscript>

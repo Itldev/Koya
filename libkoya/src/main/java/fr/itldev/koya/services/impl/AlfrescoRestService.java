@@ -18,6 +18,7 @@
  */
 package fr.itldev.koya.services.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,18 +32,21 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.client.RestTemplate;
 
+import fr.itldev.koya.model.KoyaModelVersion;
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.MetaInfos;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
-import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.AlfrescoService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import fr.itldev.koya.services.impl.util.KoyaUtil;
-import java.io.Serializable;
 
 
 public class AlfrescoRestService implements AlfrescoService, Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = Logger.getLogger(AlfrescoRestService.class);
 
@@ -121,7 +125,7 @@ public class AlfrescoRestService implements AlfrescoService, Serializable {
 	public Boolean checkLibVersionMatch() {
 		String serverVersion = getTemplate().getForObject(
 				getAlfrescoServerUrl() + REST_GET_LIBVERSION, String.class);
-		String localVersion = KoyaUtil.getLibKoyaVersion();
+		String localVersion = KoyaModelVersion.getVersion();
 
 		Boolean match = localVersion.equals(serverVersion);
 		if (!match) {

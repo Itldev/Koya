@@ -30,12 +30,13 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  *
- *TODO nom a changer !!!
+ * TODO nom a changer !!!
  */
 public class GetKoyaNode extends AbstractWebScript {
 
@@ -46,23 +47,18 @@ public class GetKoyaNode extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
 		String response;
 
 		try {
-			NodeRef nodeRefStr = koyaNodeService.getNodeRef((String) urlParams
-					.get(KoyaWebscript.WSCONST_NODEREF));
-			response = KoyaWebscript.getObjectAsJson(koyaNodeService
-					.getKoyaNode(nodeRefStr));
+			NodeRef nodeRefStr = koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF));
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService.getKoyaNode(nodeRefStr));
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		} catch (AccessDeniedException ade) {
-			throw new WebScriptException("KoyaError : "
-					+ KoyaErrorCodes.ACCESS_DENIED.toString());
+			throw new WebScriptException("KoyaError : " + KoyaErrorCodes.ACCESS_DENIED.toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(response);

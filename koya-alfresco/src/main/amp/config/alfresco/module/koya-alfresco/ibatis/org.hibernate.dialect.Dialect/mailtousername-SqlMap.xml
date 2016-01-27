@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="koya.mailtousername">
+
+
+	<parameterMap id="parameter_Mail" type="UserMail">
+		<parameter property="mail" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<parameter property="mailPropUri" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<parameter property="mailPropName" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<parameter property="userNamePropUri" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<parameter property="userNamePropName" jdbcType="VARCHAR" javaType="java.lang.String" />
+	</parameterMap>
+
+	<resultMap id="result_User_UserName" type="UserMail">
+		<result property="userName" column="username" jdbcType="VARCHAR"
+			javaType="java.lang.String" />
+	</resultMap>
+
+	<select id="select_username" parameterMap="parameter_Mail"
+		resultMap="result_User_UserName">
+        <![CDATA[
+ 		SELECT 
+ 			p2.string_value as username
+    	FROM 
+    		alf_node a
+		    LEFT JOIN alf_node_properties p  ON (a.id = p.node_id)
+		    LEFT JOIN alf_qname q ON (p.qname_id = q.id)
+		    LEFT JOIN alf_namespace n ON (n.id=q.ns_id)
+		    LEFT JOIN alf_node_properties p2 ON (a.id = p2.node_id)
+		    LEFT JOIN alf_qname q2 ON (p2.qname_id = q2.id)
+		    LEFT JOIN alf_namespace n2 ON (n2.id = q2.ns_id)
+    	WHERE 
+    		p.string_value= #{mail}
+		    AND  n.uri= #{mailPropUri}
+		    AND q.local_name= #{mailPropName}
+		    AND  n2.uri= #{userNamePropUri}
+		    AND q2.local_name= #{userNamePropName}
+        ]]>
+	</select>
+
+
+</mapper>

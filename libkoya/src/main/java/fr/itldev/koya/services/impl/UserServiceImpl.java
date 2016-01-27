@@ -27,6 +27,7 @@ import java.util.Map;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.client.RestClientException;
 
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Activity;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Preferences;
@@ -35,7 +36,6 @@ import fr.itldev.koya.model.json.AuthTicket;
 import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 public class UserServiceImpl extends AlfrescoRestService implements UserService {
 
@@ -214,11 +214,13 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService 
 	}
 
 	@Override
-	public void changePassword(User userLog, String oldPassword,
+	public void changePassword(User userLog, String username, String oldPassword,
 			String newPassword) throws AlfrescoServiceException,
 			MalformedURLException {
 
 		Map<String, String> params = new HashMap<String, String>();
+		if(username != null && !username.isEmpty())
+			params.put("userName", username);
 		params.put("oldPwd", oldPassword);
 		params.put("newPwd", newPassword);
 

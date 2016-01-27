@@ -23,6 +23,7 @@ import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Preferences;
 import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
 import java.util.List;
@@ -192,7 +193,7 @@ public interface CompanyService extends AlfrescoService {
 	 * @param ascending
 	 * @return
 	 */
-	public List<User> listMembersPaginated(User userLogged, Company company,
+	public PaginatedContentList listMembersPaginated(User userLogged, Company company,
 			List<String> rolesFilter, Integer skipCount, Integer maxItems,
 			Boolean withAdmins, String sortField, Boolean ascending);
 

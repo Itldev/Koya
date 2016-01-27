@@ -19,16 +19,18 @@
 
 package fr.itldev.koya.webscript.user;
 
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * List User's connection log
@@ -37,41 +39,40 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class ListConnect extends AbstractWebScript {
 
-    private Logger logger = Logger.getLogger(this.getClass());
-    private static final Integer DEFAULT_MAXRESULTS = 0;//infinite
+	private static final Integer DEFAULT_MAXRESULTS = 0;// infinite
 
-    private UserService userService;
+	private UserService userService;
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String userName = (String) urlParams.get(KoyaWebscript.WSCONST_USERNAME);
-        String response;
+		String userName = (String) urlParams.get(RestConstants.WSCONST_USERNAME);
+		String response;
 
-        Integer maxResults;
-        try {
-            maxResults = Integer.valueOf((String) urlParams.get(KoyaWebscript.WSCONST_MAXRESULTS));
-        } catch (NumberFormatException e) {
-            maxResults = DEFAULT_MAXRESULTS;
-        }
+		Integer maxResults;
+		try {
+			maxResults = Integer.valueOf((String) urlParams.get(RestConstants.WSCONST_MAXRESULTS));
+		} catch (NumberFormatException e) {
+			maxResults = DEFAULT_MAXRESULTS;
+		}
 
-        List<String> companiesFilter = new ArrayList<>();
-        try {
-            for (String company : ((String) urlParams.get(KoyaWebscript.WSCONST_COMPANIESFILTER)).split(",")) {
-                companiesFilter.add(company.trim());
-            }
-        } catch (Exception ex) {
-            //silent exception
-        }
-        response = KoyaWebscript.getObjectAsJson(userService.getConnectionLog(userName, companiesFilter, maxResults));
+		List<String> companiesFilter = new ArrayList<>();
+		try {
+			for (String company : ((String) urlParams.get(RestConstants.WSCONST_COMPANIESFILTER)).split(",")) {
+				companiesFilter.add(company.trim());
+			}
+		} catch (Exception ex) {
+			// silent exception
+		}
+		response = KoyaWebscript.getObjectAsJson(userService.getConnectionLog(userName, companiesFilter, maxResults));
 
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 
 }

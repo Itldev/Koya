@@ -20,7 +20,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 
 public class WorkflowInstanceGet extends AbstractWorkflowWebscript {
 	public static final String PARAM_INCLUDE_TASKS = "includeTasks";
@@ -34,8 +34,7 @@ public class WorkflowInstanceGet extends AbstractWorkflowWebscript {
 	}
 
 	@Override
-	protected Map<String, Object> buildModel(
-			final WorkflowModelBuilder modelBuilder, WebScriptRequest req,
+	protected Map<String, Object> buildModel(final WorkflowModelBuilder modelBuilder, WebScriptRequest req,
 			Status status, Cache cache) {
 		Map<String, String> params = req.getServiceMatch().getTemplateVars();
 		String currentUser = authenticationService.getCurrentUserName();
@@ -45,14 +44,12 @@ public class WorkflowInstanceGet extends AbstractWorkflowWebscript {
 
 		final boolean includeTasks = getIncludeTasks(req);
 
-		final WorkflowInstance workflowInstance = workflowService
-				.getWorkflowById(workflowInstanceId);
+		final WorkflowInstance workflowInstance = workflowService.getWorkflowById(workflowInstanceId);
 
 		// task was not found -> return 404
 		if (workflowInstance == null) {
 			throw new WebScriptException(HttpServletResponse.SC_NOT_FOUND,
-					"Unable to find workflow instance with id: "
-							+ workflowInstanceId);
+					"Unable to find workflow instance with id: " + workflowInstanceId);
 		}
 
 		/**
@@ -60,25 +57,19 @@ public class WorkflowInstanceGet extends AbstractWorkflowWebscript {
 		 * user has read permissions on reference node then override permissions
 		 * by extracting workflow details as system user
 		 */
-		List<ChildAssociationRef> childRefs = nodeService
-				.getChildAssocs(workflowInstance.getWorkflowPackage());
+		List<ChildAssociationRef> childRefs = nodeService.getChildAssocs(workflowInstance.getWorkflowPackage());
 
 		if (childRefs.size() != 1) {
-			throw new WebScriptException("KoyaError : "
-					+ KoyaErrorCodes.WF_NO_OR_TOO_MANY_REFERENCE_ITEM);
+			throw new WebScriptException("KoyaError : " + KoyaErrorCodes.WF_NO_OR_TOO_MANY_REFERENCE_ITEM);
 		}
 		try {
 			NodeRef referenceNode = childRefs.get(0).getChildRef();
-			if (!permissionService.hasPermission(referenceNode,
-					PermissionService.READ).equals(AccessStatus.ALLOWED)) {
+			if (!permissionService.hasPermission(referenceNode, PermissionService.READ).equals(AccessStatus.ALLOWED)) {
 
-				throw new WebScriptException(
-						"KoyaError : "
-								+ KoyaErrorCodes.WF_NO_READ_PERMISSION_ON_REFERENCE_ITEM);
+				throw new WebScriptException("KoyaError : " + KoyaErrorCodes.WF_NO_READ_PERMISSION_ON_REFERENCE_ITEM);
 			}
 		} catch (Exception ex) {
-			throw new WebScriptException("KoyaError : "
-					+ KoyaErrorCodes.WF_NO_READ_PERMISSION_ON_REFERENCE_ITEM);
+			throw new WebScriptException("KoyaError : " + KoyaErrorCodes.WF_NO_READ_PERMISSION_ON_REFERENCE_ITEM);
 		}
 
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -86,8 +77,7 @@ public class WorkflowInstanceGet extends AbstractWorkflowWebscript {
 				.runAsSystem(new AuthenticationUtil.RunAsWork<Map<String, Object>>() {
 					@Override
 					public Map<String, Object> doWork() throws Exception {
-						return modelBuilder.buildDetailed(workflowInstance,
-								includeTasks);
+						return modelBuilder.buildDetailed(workflowInstance, includeTasks);
 					}
 				});
 

@@ -60,18 +60,15 @@ public class AfterValidateInvitePostActivityActionExecuter extends
 	@Override
 	protected void executeImpl(Action action, final NodeRef actionedUponNodeRef) {
 
-		User user = userService.getUserByUsername(authenticationService
-				.getCurrentUserName());
 
 		try {
 			Company c = koyaNodeService.getKoyaNode(actionedUponNodeRef,
 					Company.class);
 
-			User u = userService.getUserByUsername(authenticationService
-					.getCurrentUserName());
-
+			User user = userService.getUserByUsername(authenticationService
+				.getCurrentUserName());
 			// list user shares to post space shared activity
-			for (Space space : spaceAclService.getKoyaUserSpaces(u, c,
+			for (Space space : spaceAclService.getKoyaUserSpaces(user, c,
 					Dossier.class)) {
 				koyaActivityPoster.postSpaceShared(user, "", space);
 				// inviter is ommited

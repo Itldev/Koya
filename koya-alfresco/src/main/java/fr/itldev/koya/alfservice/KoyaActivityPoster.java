@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
-import org.alfresco.opencmis.ActivityPoster;
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.repo.model.filefolder.HiddenAspect;
+import org.alfresco.repo.webdav.WebDAVServerException;
 import org.alfresco.service.cmr.activities.ActivityService;
 import org.alfresco.service.cmr.invitation.Invitation;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -37,7 +37,7 @@ public class KoyaActivityPoster implements InitializingBean {
 
 	public static final char PathSeperatorChar = '/';
 
-	private static Log logger = LogFactory.getLog(ActivityPoster.class);
+	private static Log logger = LogFactory.getLog(KoyaActivityPoster.class);
 
 	private ActivityService activityService;
 	private SiteService siteService;

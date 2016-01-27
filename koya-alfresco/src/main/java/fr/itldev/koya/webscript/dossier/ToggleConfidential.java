@@ -32,7 +32,7 @@ import fr.itldev.koya.alfservice.UserService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -55,8 +55,7 @@ public class ToggleConfidential extends AbstractWebScript {
 		this.koyaNodeService = koyaNodeService;
 	}
 
-	public void setAuthenticationService(
-			AuthenticationService authenticationService) {
+	public void setAuthenticationService(AuthenticationService authenticationService) {
 		this.authenticationService = authenticationService;
 	}
 
@@ -65,24 +64,21 @@ public class ToggleConfidential extends AbstractWebScript {
 	}
 
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res)
-			throws IOException {
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
 		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 		Map<String, Object> postParams = KoyaWebscript.getJsonMap(req);
 
 		Boolean isConfidential = false;
 		try {
-			Space space = koyaNodeService.getKoyaNode(koyaNodeService
-					.getNodeRef((String) urlParams
-							.get(KoyaWebscript.WSCONST_NODEREF)), Space.class);
+			Space space = koyaNodeService.getKoyaNode(
+					koyaNodeService.getNodeRef((String) urlParams.get(RestConstants.WSCONST_NODEREF)), Space.class);
 
-			isConfidential = spaceAclService.toggleConfidential( space,
+			isConfidential = spaceAclService.toggleConfidential(space,
 					Boolean.valueOf(postParams.get("confidential").toString()));
 
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : "
-					+ ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 		res.setContentType("application/json;charset=UTF-8");
 		res.getWriter().write(isConfidential.toString());

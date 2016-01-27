@@ -18,17 +18,12 @@
  */
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.action.DossierImportActionExecuter;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
-import fr.itldev.koya.services.impl.AlfrescoRestService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.action.CompositeAction;
@@ -53,13 +48,21 @@ import org.alfresco.util.GUID;
 import org.alfresco.util.ISO9075;
 import org.alfresco.util.PropertyMap;
 
+import fr.itldev.koya.action.DossierImportActionExecuter;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.permissions.SitePermission;
+
 /**
  *
  */
-public class ModelService extends AlfrescoRestService implements Serializable {
+public class ModelService  implements Serializable {
 
-    private static final String SPACE_TEMPLATE_PATH = "/app:company_home/app:dictionary/app:koya_space_templates";
-    private static final String REST_GET_DOC_LIB_LIST = "/slingshot/doclib/containers/";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static final String SPACE_TEMPLATE_PATH = "/app:company_home/app:dictionary/app:koya_space_templates";
     private static final String IMPORT_FOLDER_NAME = "import";
 
     // Dependencies
@@ -219,7 +222,12 @@ public class ModelService extends AlfrescoRestService implements Serializable {
 
         Rule importRule = new Rule();
         importRule.setRuleTypes(new ArrayList<String>() {
-            {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			{
                 add(RuleType.INBOUND);
                 add(RuleType.UPDATE);
             }

@@ -121,7 +121,8 @@
     </bean>
     
     <bean id="shareService" class="fr.itldev.koya.services.impl.ShareServiceImpl" parent="abstractRestService">
-    <property name="cacheManager" ref="cacheManager" />
+    	<property name="cacheManager" ref="cacheManager" />
+    	<property name="userService" ref="userService" />
     </bean>
     <bean id="secuService" class="fr.itldev.koya.services.impl.SecuServiceImpl" parent="abstractRestService">
     <property name="cacheManager" ref="cacheManager" />
@@ -130,8 +131,10 @@
     
     <bean id="searchService" class="fr.itldev.koya.services.impl.SearchServiceImpl" parent="abstractRestService"/>
     
-    <bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl" parent="abstractRestService">
-    <property name="cacheManager" ref="cacheManager" />
-    </bean>
+    <bean id="invitationService" class="fr.itldev.koya.services.impl.InvitationServiceImpl"
+	parent="abstractRestService">
+		<property name="cacheManager" ref="cacheManager" />
+		<property name="userService" ref="userService" />
+	</bean>
 
 </beans>

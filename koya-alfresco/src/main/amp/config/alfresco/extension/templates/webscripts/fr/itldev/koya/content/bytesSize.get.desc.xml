@@ -1,0 +1,9 @@
+
+<webscript>
+    <shortname>Size in bytes</shortname>
+    <description>Recursive size of a node in bytes</description>
+    <family>Itldev</family>
+    <url>/fr/itldev/koya/content/size/{nodeRef}</url>
+    <authentication>user</authentication>    
+    <format default="json"/>
+</webscript>

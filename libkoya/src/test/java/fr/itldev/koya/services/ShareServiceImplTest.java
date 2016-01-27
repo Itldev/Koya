@@ -38,6 +38,7 @@ import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.KoyaInvite;
 import fr.itldev.koya.model.json.KoyaShare;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.model.permissions.SitePermission;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 /**
@@ -128,7 +129,7 @@ public class ShareServiceImplTest extends TestCase {
 		Dossier d1 = dossierService.create(admin, spaceTests, "d1");
 		try {
 			shareService.shareItem(collaborator, d1, USER_SHAREDCLIENT
-					+ randomTestId + USER_MAILDOMAIN);
+					+ randomTestId + USER_MAILDOMAIN,KoyaPermissionConsumer.CLIENT);
 			fail("collaborator shouldn't have share permission as not dossier member");
 		} catch (AlfrescoServiceException e) {
 			// acces denied
@@ -143,7 +144,7 @@ public class ShareServiceImplTest extends TestCase {
 		dossierService.addMember(admin, d1, collaborator);
 
 		KoyaShare share = shareService.shareItem(collaborator, d1,
-				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN);
+				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN,KoyaPermissionConsumer.CLIENT);
 		assertNotNull(share.getKoyaInvite().getTicket());
 		// sharing should result in invitation : user exists
 		sharedClient = validateInvitationAndLogin(USER_SHAREDCLIENT,
@@ -151,7 +152,7 @@ public class ShareServiceImplTest extends TestCase {
 
 		try {
 			shareService.shareItem(sharedClient, d1, USER_SHAREDCLIENT
-					+ randomTestId + USER_MAILDOMAIN);
+					+ randomTestId + USER_MAILDOMAIN,KoyaPermissionConsumer.CLIENT);
 			fail("shared client shouldn't have any share permission");
 		} catch (AlfrescoServiceException ase) {
 
@@ -165,7 +166,7 @@ public class ShareServiceImplTest extends TestCase {
 		dossierService.addMember(admin, d1, collaborator);
 
 		KoyaShare share = shareService.shareItem(collaborator, d1,
-				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN);
+				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN,KoyaPermissionConsumer.CLIENT);
 		assertNotNull(share.getKoyaInvite().getTicket()); // sharing should
 															// result in
 															// inviation.
@@ -192,7 +193,7 @@ public class ShareServiceImplTest extends TestCase {
 		dossierService.addMember(admin, d1, collaborator);
 
 		KoyaShare share = shareService.shareItem(collaborator, d1,
-				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN);
+				USER_SHAREDCLIENT + randomTestId + USER_MAILDOMAIN,KoyaPermissionConsumer.CLIENT);
 		assertNotNull(share.getKoyaInvite().getTicket()); // sharing should
 															// result in
 															// inviation.

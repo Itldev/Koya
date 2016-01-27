@@ -54,7 +54,6 @@
         <property name="permissionService" ref="PermissionService"/>     
         <property name="nodeService" ref="NodeService"/>       
         <property name="authenticationService" ref="AuthenticationService"/>    
-        <property name="searchService" ref="SearchService"/> 
         <property name="authorityService" ref="authorityService"/> 
         <property name="siteService" ref="SiteService"/>       
         <property name="invitationService" ref="invitationService"/>       

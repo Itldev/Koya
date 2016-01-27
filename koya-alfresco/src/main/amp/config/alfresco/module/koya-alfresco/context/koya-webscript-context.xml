@@ -22,605 +22,525 @@
 
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <beans>
-    
-    
-    <!--
-    ==================================================================
-    ========================== Companies ==============================
-    ==================================================================
-    -->
-    <!--create company-->
-    <bean id="webscript.fr.itldev.koya.company.addcompany.post" 
-          class="fr.itldev.koya.webscript.company.AddCompany"
-          parent="webscript">                
-        <property name="companyService" ref="companyService" />        
-    </bean>
-    
-    <!--list companies-->
-    <bean id="webscript.fr.itldev.koya.company.list.get"
-          class="fr.itldev.koya.webscript.company.ListCompany"
-          parent="webscript">                
-        <property name="companyService" ref="companyService" />        
-    </bean>
-    
-    <!--get Company by shortName-->
-    <bean id="webscript.fr.itldev.koya.company.company.get"
-          class="fr.itldev.koya.webscript.company.GetCompany"
-          parent="webscript">                
-        <property name="companyService" ref="companyService" />        
-    </bean>
-    
-    
-    <!-- list members-->
-    <bean id="webscript.fr.itldev.koya.company.listMembers.get" 
-          class="fr.itldev.koya.webscript.company.ListMembers"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" />       
-        <property name="koyaNodeService" ref="koyaNodeService" />        
-    </bean>
-        <bean id="webscript.fr.itldev.koya.company.listMembersPending.get" 
-          class="fr.itldev.koya.webscript.company.ListMembersPending"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" />       
-        <property name="koyaNodeService" ref="koyaNodeService" />        
-    </bean>
-    <bean id="webscript.fr.itldev.koya.company.listMembersPaginated.get" 
-          class="fr.itldev.koya.webscript.company.ListMembersPaginated"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" />       
-    </bean>
-    
-    
-    <!-- get current preferences-->
-    <bean id="webscript.fr.itldev.koya.company.preferences.get" 
-          class="fr.itldev.koya.webscript.company.GetPreferences"
-          parent="webscript">                
-        <property name="companyService" ref="companyService" />        
-    </bean>
-    
-    <!-- get company logo-->
-    <bean id="webscript.fr.itldev.koya.company.logo.get" 
-          class="fr.itldev.koya.webscript.company.GetLogo"
-          parent="webscript">                
-        <property name="companyPropertiesService" ref="companyPropertiesService" />
-        <property name="contentService" ref="ContentService"/>      
-    </bean>
-    
-    
-    <!-- commit preferences-->
-    <bean id="webscript.fr.itldev.koya.company.preferences.post" 
-          class="fr.itldev.koya.webscript.company.CommitPreferences"
-          parent="webscript">                
-        <property name="companyService" ref="companyService" />        
-    </bean>
-    
-    
-    
-    <!-- get current properties-->
-    <bean id="webscript.fr.itldev.koya.company.properties.get" 
-          class="fr.itldev.koya.webscript.company.GetProperties"
-          parent="webscript">                
-        <property name="companyPropertiesService" ref="companyPropertiesService" />        
-    </bean>
-    
-    
-    <!-- commit properties-->
-    <bean id="webscript.fr.itldev.koya.company.properties.post" 
-          class="fr.itldev.koya.webscript.company.CommitProperties"
-          parent="webscript">                
-        <property name="companyPropertiesService" ref="companyPropertiesService" />        
-    </bean>
-    
-    
-    <!-- get available roles-->
-    <bean id="webscript.fr.itldev.koya.company.roles.get" 
-          class="fr.itldev.koya.webscript.company.GetRoles"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" />       
-        <property name="koyaNodeService" ref="koyaNodeService" />        
-    </bean>
-    
-    
-    <!-- Check if user is manager on specified company-->
-    <bean id="webscript.fr.itldev.koya.company.ismanager.get" 
-          class="fr.itldev.koya.webscript.company.IsManager"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" />    
-    </bean>
-    
-    <!--
-    ==================================================================
-    ========================== Sale Offers ==================
-    ==================================================================
-    -->
-    <!--liste des Offres commerciales -->
-    <bean id="webscript.fr.itldev.koya.salesoffer.list.get" 
-          class="fr.itldev.koya.webscript.salesoffer.ListOffer"
-          parent="webscript">                
-        <property name="salesOfferService" ref="salesOfferService" />
-    </bean>
-    <!--
-    ==================================================================
-    ========================== Spaces ==============================
-    ==================================================================
-    -->
-    
-    <!-- apply space template -->
-    <bean id="webscript.fr.itldev.koya.space.apply-template.get" 
-          class="fr.itldev.koya.webscript.space.ApplyTemplates"
-          parent="webscript"> 
-        <property name="modelService" ref="modelService"/>               
-    </bean>
-    
-    <!-- list spaces -->
-    <bean id="webscript.fr.itldev.koya.space.list.post" 
-          class="fr.itldev.koya.webscript.space.ListSpace"
-          parent="webscript">                
-        <property name="spaceService" ref="spaceService" />
-        
-    </bean>
-         
-    <!--
-    ==================================================================
-    ========================== Dossiers ==============================
-    ==================================================================
-    -->
-    <!--Toogle confidentialty status -->
-    <bean id="webscript.fr.itldev.koya.dossier.confidential.post" 
-          class="fr.itldev.koya.webscript.dossier.ToggleConfidential"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceAclService" ref="spaceAclService"/>
-        <property name="userService" ref="userService"/>
-        <property name="authenticationService" ref="authenticationService" />
-    </bean>
-       
-       
-       
-    <!--get confidentialty status -->
-    <bean id="webscript.fr.itldev.koya.dossier.confidential.get" 
-          class="fr.itldev.koya.webscript.dossier.IsConfidential"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceAclService" ref="spaceAclService"/>        
-    </bean>
-    
-    <!--generate summary document -->
-    <bean id="webscript.fr.itldev.koya.dossier.summary.get" 
-          class="fr.itldev.koya.webscript.dossier.GenerateSummary"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="templateService" ref="templateService"/>
-        <property name="namespaceService" ref="namespaceService"/>
-        <property name="fileFolderService" ref="fileFolderService"/>
-        <property name="searchService" ref="searchService"/>
-        <property name="nodeService" ref="nodeService"/>
-        <property name="serviceRegistry" ref="ServiceRegistry"/>  
-        <property name="contentService" ref="contentService" />  
-        <property name="versionService" ref="versionService" />    
-        <property name="companyService" ref="companyService" />  
-        <property name="companyPropertiesService" ref="companyPropertiesService" />  
-        <property name="sysAdminParams" ref="sysAdminParams"/>  
-    </bean>
+
+
+        <!--
+        ==================================================================
+        ========================== Companies ==============================
+        ==================================================================
+        -->
+	<!--create company -->
+	<bean id="webscript.fr.itldev.koya.company.addcompany.post" class="fr.itldev.koya.webscript.company.AddCompany"
+		parent="webscript">
+		<property name="companyService" ref="companyService" />
+	</bean>
+
+	<!--list companies -->
+	<bean id="webscript.fr.itldev.koya.company.list.get" class="fr.itldev.koya.webscript.company.ListCompany"
+		parent="webscript">
+		<property name="companyService" ref="companyService" />
+	</bean>
+
+	<!--get Company by shortName -->
+	<bean id="webscript.fr.itldev.koya.company.company.get" class="fr.itldev.koya.webscript.company.GetCompany"
+		parent="webscript">
+		<property name="companyService" ref="companyService" />
+	</bean>
+
+
+	<!-- list members -->
+	<bean id="webscript.fr.itldev.koya.company.listMembers.get" class="fr.itldev.koya.webscript.company.ListMembers"
+		parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+	<bean id="webscript.fr.itldev.koya.company.listMembersPending.get"
+		class="fr.itldev.koya.webscript.company.ListMembersPending" parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+	<bean id="webscript.fr.itldev.koya.company.listMembersPaginated.get"
+		class="fr.itldev.koya.webscript.company.ListMembersPaginated" parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+	</bean>
+
+
+	<!-- get current preferences -->
+	<bean id="webscript.fr.itldev.koya.company.preferences.get" class="fr.itldev.koya.webscript.company.GetPreferences"
+		parent="webscript">
+		<property name="companyService" ref="companyService" />
+	</bean>
+
+	<!-- get company logo -->
+	<bean id="webscript.fr.itldev.koya.company.logo.get" class="fr.itldev.koya.webscript.company.GetLogo"
+		parent="webscript">
+		<property name="companyPropertiesService" ref="companyPropertiesService" />
+		<property name="contentService" ref="ContentService" />
+	</bean>
+
+
+	<!-- commit preferences -->
+	<bean id="webscript.fr.itldev.koya.company.preferences.post"
+		class="fr.itldev.koya.webscript.company.CommitPreferences" parent="webscript">
+		<property name="companyService" ref="companyService" />
+	</bean>
+
+
+
+	<!-- get current properties -->
+	<bean id="webscript.fr.itldev.koya.company.properties.get" class="fr.itldev.koya.webscript.company.GetProperties"
+		parent="webscript">
+		<property name="companyPropertiesService" ref="companyPropertiesService" />
+	</bean>
+
+
+	<!-- commit properties -->
+	<bean id="webscript.fr.itldev.koya.company.properties.post" class="fr.itldev.koya.webscript.company.CommitProperties"
+		parent="webscript">
+		<property name="companyPropertiesService" ref="companyPropertiesService" />
+	</bean>
+
+
+	<!-- get available roles -->
+	<bean id="webscript.fr.itldev.koya.company.roles.get" class="fr.itldev.koya.webscript.company.GetRoles"
+		parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+
+	<!-- Check if user is manager on specified company -->
+	<bean id="webscript.fr.itldev.koya.company.ismanager.get" class="fr.itldev.koya.webscript.company.IsManager"
+		parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+	</bean>
+
+	<!--
+	================================================================== 
+	========================= Sale Offers ==================
+	================================================================== 
+	-->
+	<!--liste des Offres commerciales -->
+	<bean id="webscript.fr.itldev.koya.salesoffer.list.get" class="fr.itldev.koya.webscript.salesoffer.ListOffer"
+		parent="webscript">
+		<property name="salesOfferService" ref="salesOfferService" />
+	</bean>
+	<!--
+	================================================================== 
+	========================== Spaces ==============================
+	================================================================== -->
+
+	<!-- apply space template -->
+	<bean id="webscript.fr.itldev.koya.space.apply-template.get"
+		class="fr.itldev.koya.webscript.space.ApplyTemplates" parent="webscript">
+		<property name="modelService" ref="modelService" />
+	</bean>
+
+	<!-- list spaces -->
+	<bean id="webscript.fr.itldev.koya.space.list.post" class="fr.itldev.koya.webscript.space.ListSpace"
+		parent="webscript">
+		<property name="spaceService" ref="spaceService" />
+
+	</bean>
+
+	<!-- ================================================================== 
+	========================== Dossiers ==============================
+	================================================================== -->
+	<!--Toogle confidentialty status -->
+	<bean id="webscript.fr.itldev.koya.dossier.confidential.post"
+		class="fr.itldev.koya.webscript.dossier.ToggleConfidential" parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="userService" ref="userService" />
+		<property name="authenticationService" ref="authenticationService" />
+	</bean>
+
+
+
+	<!--get confidentialty status -->
+	<bean id="webscript.fr.itldev.koya.dossier.confidential.get"
+		class="fr.itldev.koya.webscript.dossier.IsConfidential" parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="spaceAclService" ref="spaceAclService" />
+	</bean>
+
+	<!--generate summary document -->
+	<bean id="webscript.fr.itldev.koya.dossier.summary.get" class="fr.itldev.koya.webscript.dossier.GenerateSummary"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="templateService" ref="templateService" />
+		<property name="namespaceService" ref="namespaceService" />
+		<property name="fileFolderService" ref="fileFolderService" />
+		<property name="searchService" ref="searchService" />
+		<property name="nodeService" ref="nodeService" />
+		<property name="serviceRegistry" ref="ServiceRegistry" />
+		<property name="contentService" ref="contentService" />
+		<property name="versionService" ref="versionService" />
+		<property name="companyService" ref="companyService" />
+		<property name="companyPropertiesService" ref="companyPropertiesService" />
+		<property name="sysAdminParams" ref="sysAdminParams" />
+	</bean>
 
 	<!--List available client uploaded documents -->
-	<bean id="webscript.fr.itldev.koya.dossier.clientdocuments.get"
-		class="fr.itldev.koya.webscript.dossier.ListClientDocuments" parent="webscript">
+	<bean id="webscript.fr.itldev.koya.dossier.siteconsumerdocuments.get"
+		class="fr.itldev.koya.webscript.dossier.ListSiteConsumerDocuments" parent="webscript">
 		<property name="koyaNodeService" ref="koyaNodeService" />
 		<property name="dossierService" ref="dossierService" />
 
 	</bean>
-       
-    <!--
-    ==================================================================
-    ========================== Contents ============================
-    ==================================================================
-    -->
- 
-  
-    <!--content listing-->
-    <bean id="webscript.fr.itldev.koya.content.list.get" 
-          class="fr.itldev.koya.webscript.content.ListContent"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />     
-    </bean>
-    
-       <!--content listing-->
-    <bean id="webscript.fr.itldev.koya.content.tree.get" 
-          class="fr.itldev.koya.webscript.content.ListContentTree"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />     
-    </bean>
-    
-    <!--content move-->
-    <bean id="webscript.fr.itldev.koya.content.move.get" 
-          class="fr.itldev.koya.webscript.content.MoveContent"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-    
-    <!--content copy-->
-    <bean id="webscript.fr.itldev.koya.content.copy.get" 
-          class="fr.itldev.koya.webscript.content.CopyContent"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-   
-    
-    <!-- zip content-->
-    <bean id="webscript.fr.itldev.koya.content.zip.post" 
-          class="fr.itldev.koya.webscript.content.ZipContent"
-          parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />
-        <property name="koyaNodeService" ref="koyaNodeService" />
-    </bean>
-    
-    
-    <!-- import Zip -->
-    <bean id="webscript.fr.itldev.koya.content.importzip.get" 
-          class="fr.itldev.koya.webscript.content.ImportZip"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />
-        <property name="nodeService" ref="nodeService" />   
-        <property name="actionService" ref="ActionService"/>
 
-    </bean>
-    
-    
-    <bean id="webscript.fr.itldev.koya.content.upload.post" 
-          class="fr.itldev.koya.webscript.content.Upload"
-          parent="webscript">                
-        <property name="koyaContentService" ref="koyaContentService" />
-        <property name="koyaNodeService" ref="koyaNodeService" />         
-        <property name="companyPropertiesService" ref="companyPropertiesService" />         
-        <property name="dossierService" ref="dossierService" />   
-    </bean>
-    
-    <!--
-    ==================================================================
-    ========================== Favourites ============================
-    ==================================================================
-    -->
-    
-    <!-- Get Users Favourites -->
-    <bean id="webscript.fr.itldev.koya.favourites.list.get" 
-          class="fr.itldev.koya.webscript.favourites.List"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />      
-    </bean>
-    
-    <!--Change or get Favourite Status-->
-    <bean id="webscript.fr.itldev.koya.favourites.set.post" 
-          class="fr.itldev.koya.webscript.favourites.Set"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-    
-    <!--
-    ==================================================================
-    ========================== Global ============================
-    ==================================================================
-    -->
-    
-    
-    <!--Container creation space, dossier or directory-->
-    <bean id="webscript.fr.itldev.koya.global.create.post"
-          class="fr.itldev.koya.webscript.global.Create"
-          parent="webscript">                
-        <property name="spaceService" ref="spaceService" />
-        <property name="dossierService" ref="dossierService" /> 
-        <property name="koyaNodeService" ref="koyaNodeService" />
-        <property name="koyaContentService" ref="koyaContentService" />          
-    </bean>
-    
-    
-    <!--Get used disk size-->
-    <bean id="webscript.fr.itldev.koya.global.disksize.get" 
-          class="fr.itldev.koya.webscript.global.DiskSize"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />  
-    </bean>
-    
-    <bean id="webscript.fr.itldev.koya.global.node.get" 
-          class="fr.itldev.koya.webscript.global.GetKoyaNode"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-    
-    <!-- rename secured item -->
-    <bean id="webscript.fr.itldev.koya.global.rename.post" 
-          class="fr.itldev.koya.webscript.global.Rename"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />          
-    </bean>
-    
-    <!-- delete secured item -->
-    <bean id="webscript.fr.itldev.koya.global.delete.get" 
-          class="fr.itldev.koya.webscript.global.Delete"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />         
-    </bean>
-    
-    <!--get Parent-->
-    <bean id="webscript.fr.itldev.koya.global.parents.get" 
-          class="fr.itldev.koya.webscript.global.GetParent"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />     
-    </bean>
-    
-    <!--send email-->
-    <bean id="webscript.fr.itldev.koya.global.mail.post" 
-          class="fr.itldev.koya.webscript.global.SendMail"
-          parent="webscript">                
-        <property name="koyaMailService" ref="koyaMailService" />
-    </bean>
-    
-    
-    
-    <!-- Get Permissions on node -->
-    <bean id="webscript.fr.itldev.koya.global.secu.permissions.get" 
-          class="fr.itldev.koya.webscript.global.secu.GetPermissions"
-          parent="webscript">                
-        <property name="spaceAclService" ref="spaceAclService" />  
-        <property name="koyaNodeService" ref="koyaNodeService" />       
-    </bean>
-    
-    
-    <!--count Children of given type-->
-    <bean id="webscript.fr.itldev.koya.global.countchildren.post" 
-          class="fr.itldev.koya.webscript.global.CountChildren"
-          parent="webscript">            
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-    
-    
-    
-    <!--
-    ==================================================================
-    ========================== Users ==============================
-    ==================================================================
-    -->
-    
-    <bean id="webscript.fr.itldev.koya.user.modifydetails.post" 
-          class="fr.itldev.koya.webscript.user.ModifyDetails"
-          parent="webscript">                
-        <property name="userService" ref="userService" /> 
-    </bean>
-    
-    <bean id="webscript.fr.itldev.koya.user.find.get" 
-          class="fr.itldev.koya.webscript.user.Find"
-          parent="webscript">                
-        <property name="userService" ref="userService" /> 
-    </bean>
-    
-    <bean id="webscript.fr.itldev.koya.user.changepassword.post" 
-          class="fr.itldev.koya.webscript.user.ChangePassword"
-          parent="webscript">                
-        <property name="userService" ref="userService" />
-        <property name="authenticationService" ref="AuthenticationService"/>
+	<!-- ================================================================== 
+	========================== Contents ============================
+	================================================================== -->
+
+
+	<!--content listing -->
+	<bean id="webscript.fr.itldev.koya.content.list.get" class="fr.itldev.koya.webscript.content.ListContent"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!--content listing -->
+	<bean id="webscript.fr.itldev.koya.content.tree.get" class="fr.itldev.koya.webscript.content.ListContentTree"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!--content move -->
+	<bean id="webscript.fr.itldev.koya.content.move.get" class="fr.itldev.koya.webscript.content.MoveContent"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!--content copy -->
+	<bean id="webscript.fr.itldev.koya.content.copy.get" class="fr.itldev.koya.webscript.content.CopyContent"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+
+	<!-- zip content -->
+	<bean id="webscript.fr.itldev.koya.content.zip.post" class="fr.itldev.koya.webscript.content.ZipContent"
+		parent="webscript">
+		<property name="koyaContentService" ref="koyaContentService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+
+	<!-- import Zip -->
+	<bean id="webscript.fr.itldev.koya.content.importzip.get" class="fr.itldev.koya.webscript.content.ImportZip"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="nodeService" ref="nodeService" />
+		<property name="actionService" ref="ActionService" />
+
+	</bean>
+
+
+	<bean id="webscript.fr.itldev.koya.content.upload.post" class="fr.itldev.koya.webscript.content.Upload"
+		parent="webscript">
+		<property name="koyaContentService" ref="koyaContentService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="companyPropertiesService" ref="companyPropertiesService" />
+		<property name="dossierService" ref="dossierService" />
+	</bean>
+	
+	<bean id="webscript.fr.itldev.koya.content.bytesSize.get" class="fr.itldev.koya.webscript.content.Size"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+	
+	<!-- ================================================================== 
+	========================== Favourites ============================
+	================================================================== -->
+
+	<!-- Get Users Favourites -->
+	<bean id="webscript.fr.itldev.koya.favourites.list.get" class="fr.itldev.koya.webscript.favourites.List"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!--Change or get Favourite Status -->
+	<bean id="webscript.fr.itldev.koya.favourites.set.post" class="fr.itldev.koya.webscript.favourites.Set"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!-- ================================================================== 
+	========================== Global ============================
+	================================================================== -->
+
+
+	<!--Container creation space, dossier or directory -->
+	<bean id="webscript.fr.itldev.koya.global.create.post" class="fr.itldev.koya.webscript.global.Create"
+		parent="webscript">
+		<property name="spaceService" ref="spaceService" />
+		<property name="dossierService" ref="dossierService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="koyaContentService" ref="koyaContentService" />
+	</bean>
+
+
+	<!--Get used disk size -->
+	<bean id="webscript.fr.itldev.koya.global.disksize.get" class="fr.itldev.koya.webscript.global.DiskSize"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<bean id="webscript.fr.itldev.koya.global.node.get" class="fr.itldev.koya.webscript.global.GetKoyaNode"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!-- rename secured item -->
+	<bean id="webscript.fr.itldev.koya.global.rename.post" class="fr.itldev.koya.webscript.global.Rename"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!-- delete secured item -->
+	<bean id="webscript.fr.itldev.koya.global.delete.get" class="fr.itldev.koya.webscript.global.Delete"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!--get Parent -->
+	<bean id="webscript.fr.itldev.koya.global.parents.get" class="fr.itldev.koya.webscript.global.GetParent"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!--send email -->
+	<bean id="webscript.fr.itldev.koya.global.mail.post" class="fr.itldev.koya.webscript.global.SendMail"
+		parent="webscript">
+		<property name="koyaMailService" ref="koyaMailService" />
+	</bean>
+
+
+
+	<!-- Get Permissions on node -->
+	<bean id="webscript.fr.itldev.koya.global.secu.permissions.get"
+		class="fr.itldev.koya.webscript.global.secu.GetPermissions" parent="webscript">
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+
+	<!--count Children of given type -->
+	<bean id="webscript.fr.itldev.koya.global.countchildren.post"
+		class="fr.itldev.koya.webscript.global.CountChildren" parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+
+
+	<!-- ================================================================== 
+	========================== Users ==============================
+	================================================================== -->
+
+	<bean id="webscript.fr.itldev.koya.user.modifydetails.post" class="fr.itldev.koya.webscript.user.ModifyDetails"
+		parent="webscript">
+		<property name="userService" ref="userService" />
+	</bean>
+
+	<bean id="webscript.fr.itldev.koya.user.find.get" class="fr.itldev.koya.webscript.user.Find"
+		parent="webscript">
+		<property name="userService" ref="userService" />
+	</bean>
+
+	<bean id="webscript.fr.itldev.koya.user.changepassword.post"
+		class="fr.itldev.koya.webscript.user.ChangePassword" parent="webscript">
+		<property name="userService" ref="userService" />
+		<property name="authenticationService" ref="AuthenticationService" />
 		<property name="authorityService" ref="authorityService" />
-    </bean>
-    
-    <bean id="webscript.fr.itldev.koya.user.getbyauthkey.post" 
-          class="fr.itldev.koya.webscript.user.GetByAuthKey"
-          parent="webscript">                
-        <property name="userService" ref="userService" /> 
-    </bean>
-    
-    
-    
-    <!-- get user role for a company -->
-    <bean id="webscript.fr.itldev.koya.user.role.get" 
-          class="fr.itldev.koya.webscript.user.GetRole"
-          parent="webscript">                
-        <property name="koyaNodeService" ref="koyaNodeService" />      
-        <property name="userService" ref="userService" />      
-        <property name="companyAclService" ref="companyAclService" />        
-    </bean>
+	</bean>
 
-    <!-- set user role for a company -->
-    <bean id="webscript.fr.itldev.koya.user.setrole.get" 
-          class="fr.itldev.koya.webscript.user.SetRole"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" />        
-        <property name="koyaNodeService" ref="koyaNodeService" />        
-        <property name="userService" ref="userService" />        
-    </bean>
-    
-    
-    
-   
-    
-    <bean id="webscript.fr.itldev.koya.user.revoke.get" 
-          class="fr.itldev.koya.webscript.user.Revoke"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" /> 
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
-        <property name="userService" ref="userService" /> 
-
-    </bean>
-    
-    <bean id="webscript.fr.itldev.koya.user.listconnect.get"
-          class="fr.itldev.koya.webscript.user.ListConnect"
-          parent="webscript">                
-        <property name="userService" ref="userService" /> 
-    </bean>
-    
-    <bean id="webscript.fr.itldev.koya.user.groups.get"
-          class="fr.itldev.koya.webscript.user.GetGroups"
-          parent="webscript">                        
-        <property name="authorityService" ref="AuthorityService"/>
-        <property name="authenticationService" ref="AuthenticationService"/>
-
-    </bean>
-
-    
-    
-    
-    <!--
-    ==================================================================
-    ========================== Invitation ==============================
-    ==================================================================
-    -->
-    
-    
-    <bean id="webscript.fr.itldev.koya.invitation.invitation.get"
-          class="fr.itldev.koya.webscript.invitation.GetInvitation"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" />
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
-        <property name="userService" ref="userService" /> 
-    </bean>
-    
-    
-    <bean id="webscript.fr.itldev.koya.invitation.sendmail.post"
-          class="fr.itldev.koya.webscript.invitation.SendInviteMail"
-          parent="webscript">                         
-        <property name="workflowService" ref="WorkflowService"/>
-        <property name="koyaMailService" ref="koyaMailService"/>
-        <property name="koyaNodeService" ref="koyaNodeService"/> 
-        <property name="companyAclService" ref="companyAclService"/> 
-        <property name="authenticationService" ref="AuthenticationService"/> 
-        <property name="userService" ref="userService"/>         
-    </bean>
-    
-    
-    <bean id="webscript.fr.itldev.koya.invitation.invite.post" 
-          class="fr.itldev.koya.webscript.invitation.Invite"
-          parent="webscript">                
-        <property name="companyAclService" ref="companyAclService" /> 
-        <property name="koyaNodeService" ref="koyaNodeService" /> 
-    </bean>
-    
-    
-    <bean id="webscript.fr.itldev.koya.invitation.invitationpending.get" 
-          class="fr.itldev.koya.webscript.invitation.GetInvitationPending"
-          parent="webscript">                
-        <property name="workflowService" ref="WorkflowService" /> 
-    </bean>
-    
-    
-    <bean id="webscript.fr.itldev.koya.invitation.validate.post" 
-          class="fr.itldev.koya.webscript.invitation.ValidateInvitation"
-          parent="webscript">
-        <property name="userService" ref="userService" /> 
-        <property name="invitationService" ref="invitationService" /> 
-        <property name="workflowService" ref="WorkflowService" /> 
-        <property name="activityService" ref="activityService" />
-        <property name="actionService" ref="ActionService" />
-        <property name="siteService" ref="siteService" />
-    </bean>
+	<bean id="webscript.fr.itldev.koya.user.getbyauthkey.post" class="fr.itldev.koya.webscript.user.GetByAuthKey"
+		parent="webscript">
+		<property name="userService" ref="userService" />
+	</bean>
 
 
-    <!--
-    ==================================================================
-    ========================== Shares ==============================
-    ==================================================================
-    -->
-    
-    <!-- share secured item -->
-    <bean id="webscript.fr.itldev.koya.security.clientshare.doshare.post" 
-          class="fr.itldev.koya.webscript.security.clientshare.ShareItem"
-          parent="webscript">                
-        <property name="spaceAclService" ref="spaceAclService" />   
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-    
-    <!-- unshare secured item -->
-    <bean id="webscript.fr.itldev.koya.security.clientshare.undoshare.post" 
-          class="fr.itldev.koya.webscript.security.clientshare.UnshareItem"
-          parent="webscript">                
-        <property name="spaceAclService" ref="spaceAclService" />   
-        <property name="koyaNodeService" ref="koyaNodeService" />   
-    </bean>
-       
-    <bean id="webscript.fr.itldev.koya.security.clientshare.listusershares.get" 
-          class="fr.itldev.koya.webscript.security.clientshare.ListUserShares"
-          parent="webscript">
-        <property name="spaceAclService" ref="spaceAclService" />   
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="userService" ref="userService"/>
-    </bean>
-    
-    
-    <bean id="webscript.fr.itldev.koya.security.clientshare.clientmember.get" 
-          class="fr.itldev.koya.webscript.security.clientshare.HasKoyaClientMember"
-          parent="webscript">
-        <property name="spaceAclService" ref="spaceAclService" />   
-        <property name="koyaNodeService" ref="koyaNodeService"/>
-    </bean>
-    
-       
-    <!--
-    ==================================================================
-    ========================== Meta  ==============================
-    ==================================================================
-    -->
-    
-    
-    <!-- items shared with users -->
-    <bean id="webscript.fr.itldev.koya.meta.infos.get" 
-          class="fr.itldev.koya.webscript.meta.GetInfos"
-          parent="webscript">
-        <property name="moduleService" ref="moduleService" />   
-    </bean>
-    
-    <bean id="webscript.fr.itldev.koya.meta.libversion.get" 
-          class="fr.itldev.koya.webscript.meta.GetVersion"
-          parent="webscript">
-    </bean>
-    
-       
-    <!--
-    ==================================================================
-    ========================== Reset Password Workflow ===============
-    ==================================================================
-    -->
-    
-    <bean id="webscript.fr.itldev.koya.resetpassword.request.post" 
-          class="fr.itldev.koya.webscript.resetpassword.ResetRequest"
-          parent="webscript">
-        <property name="userService" ref="userService" />   
-        <property name="workflowService" ref="WorkflowService" />  
-        <property name="companyAclService" ref="companyAclService"/> 
-        <property name="koyaMailService" ref="koyaMailService"/> 
-    </bean>
-    
-    
-    <bean id="webscript.fr.itldev.koya.resetpassword.validation.post" 
-          class="fr.itldev.koya.webscript.resetpassword.ResetValidation"
-          parent="webscript">       
-        <property name="workflowService" ref="WorkflowService" />   
-    </bean>
 
-    <!--
-    ==================================================================
-    ========================== Activities Feed ===============
-    ==================================================================
-    -->
-       <!-- Activity User Feed - to get activities feed for logged in user -->
-   <bean id="webscript.fr.itldev.koya.activities.feed.userfeed.get"
-	class="fr.itldev.koya.webscript.activities.UserFeedRetrieverWebScript"
-	parent="webscript">
+	<!-- get user role for a company -->
+	<bean id="webscript.fr.itldev.koya.user.role.get" class="fr.itldev.koya.webscript.user.GetRole"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="userService" ref="userService" />
+		<property name="companyAclService" ref="companyAclService" />
+	</bean>
+
+	<!-- set user role for a company -->
+	<bean id="webscript.fr.itldev.koya.user.setrole.get" class="fr.itldev.koya.webscript.user.SetRole"
+		parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="userService" ref="userService" />
+	</bean>
+
+
+
+
+
+	<bean id="webscript.fr.itldev.koya.user.revoke.get" class="fr.itldev.koya.webscript.user.Revoke"
+		parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="userService" ref="userService" />
+
+	</bean>
+
+	<bean id="webscript.fr.itldev.koya.user.listconnect.get" class="fr.itldev.koya.webscript.user.ListConnect"
+		parent="webscript">
+		<property name="userService" ref="userService" />
+	</bean>
+
+	<bean id="webscript.fr.itldev.koya.user.groups.get" class="fr.itldev.koya.webscript.user.GetGroups"
+		parent="webscript">
+		<property name="authorityService" ref="AuthorityService" />
+		<property name="authenticationService" ref="AuthenticationService" />
+
+	</bean>
+
+
+
+
+	<!-- ================================================================== 
+	========================== Invitation ==============================
+	================================================================== -->
+
+
+	<bean id="webscript.fr.itldev.koya.invitation.listpending.get"
+		class="fr.itldev.koya.webscript.invitation.ListPending" parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="userService" ref="userService" />
+	</bean>
+
+
+	<bean id="webscript.fr.itldev.koya.invitation.sendmail.post"
+		class="fr.itldev.koya.webscript.invitation.SendInviteMail" parent="webscript">
+		<property name="workflowService" ref="WorkflowService" />
+		<property name="koyaMailService" ref="koyaMailService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="authenticationService" ref="AuthenticationService" />
+		<property name="userService" ref="userService" />
+	</bean>
+
+
+	<bean id="webscript.fr.itldev.koya.invitation.invite.post" class="fr.itldev.koya.webscript.invitation.Invite"
+		parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<bean id="webscript.fr.itldev.koya.invitation.validate.post"
+		class="fr.itldev.koya.webscript.invitation.ValidateInvitation" parent="webscript">
+		<property name="userService" ref="userService" />
+		<property name="invitationService" ref="invitationService" />
+		<property name="workflowService" ref="WorkflowService" />
+		<property name="activityService" ref="activityService" />
+		<property name="actionService" ref="ActionService" />
+		<property name="siteService" ref="siteService" />
+	</bean>
+
+
+	<!-- ================================================================== 
+	========================== Shares ==============================
+	================================================================== -->
+
+	<!-- share secured item -->
+	<bean id="webscript.fr.itldev.koya.security.consumershare.doshare.post"
+		class="fr.itldev.koya.webscript.security.consumershare.ShareItem"
+		parent="webscript">
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<!-- unshare secured item -->
+	<bean id="webscript.fr.itldev.koya.security.consumershare.undoshare.post"
+		class="fr.itldev.koya.webscript.security.consumershare.UnshareItem"
+		parent="webscript">
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+	<bean
+		id="webscript.fr.itldev.koya.security.listspacesaccess.get"
+		class="fr.itldev.koya.webscript.security.ListSpacesAccess"
+		parent="webscript">
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="userService" ref="userService" />
+	</bean>
+
+
+	<bean id="webscript.fr.itldev.koya.security.hasmember.get"
+		class="fr.itldev.koya.webscript.security.HasMember"
+		parent="webscript">
+		<property name="spaceAclService" ref="spaceAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />
+	</bean>
+
+
+	<!-- ================================================================== 
+	========================== Meta ==============================
+	================================================================== -->
+
+
+	<!-- items shared with users -->
+	<bean id="webscript.fr.itldev.koya.meta.infos.get" class="fr.itldev.koya.webscript.meta.GetInfos"
+		parent="webscript">
+		<property name="moduleService" ref="moduleService" />
+	</bean>
+
+	<bean id="webscript.fr.itldev.koya.meta.libversion.get" class="fr.itldev.koya.webscript.meta.GetVersion"
+		parent="webscript">
+	</bean>
+
+
+	<!-- ================================================================== 
+	========================== Reset Password Workflow ===============
+	================================================================== -->
+
+	<bean id="webscript.fr.itldev.koya.resetpassword.request.post"
+		class="fr.itldev.koya.webscript.resetpassword.ResetRequest" parent="webscript">
+		<property name="userService" ref="userService" />
+		<property name="workflowService" ref="WorkflowService" />
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="koyaMailService" ref="koyaMailService" />
+	</bean>
+
+
+	<bean id="webscript.fr.itldev.koya.resetpassword.validation.post"
+		class="fr.itldev.koya.webscript.resetpassword.ResetValidation" parent="webscript">
+		<property name="workflowService" ref="WorkflowService" />
+	</bean>
+
+	<!-- ================================================================== 
+	========================== Activities Feed ===============
+	================================================================== -->
+	<!-- Activity User Feed - to get activities feed for logged in user -->
+	<bean id="webscript.fr.itldev.koya.activities.feed.userfeed.get"
+		class="fr.itldev.koya.webscript.activities.UserFeedRetrieverWebScript"
+		parent="webscript">
 		<property name="activityService" ref="activityService" />
 		<property name="subscriptionService" ref="SubscriptionService" />
 		<property name="userNamesAreCaseSensitive" value="${user.name.caseSensitive}" />
 		<property name="companyService" ref="companyService" />
 	</bean>
-  
-   <!-- Activity Admin Feed - to get activities feed for specified user -->
-   <bean id="webscript.fr.itldev.koya.activities.feed.userfeed-admin.get"
-         class="fr.itldev.koya.webscript.activities.UserFeedRetrieverWebScript"
-         parent="webscript">
-      <property name="activityService" ref="activityService"/>
-      <property name="subscriptionService" ref="SubscriptionService"/>
-   </bean>
-   
-    <!--
-    ==================================================================
-    ========================== Sysadmin  ===============
-    ==================================================================
-    -->
+
+	<!-- Activity Admin Feed - to get activities feed for specified user -->
+	<bean id="webscript.fr.itldev.koya.activities.feed.userfeed-admin.get"
+		class="fr.itldev.koya.webscript.activities.UserFeedRetrieverWebScript"
+		parent="webscript">
+		<property name="activityService" ref="activityService" />
+		<property name="subscriptionService" ref="SubscriptionService" />
+	</bean>
+
+	<!-- ================================================================== 
+	========================== Sysadmin ===============
+	================================================================== -->
 
 	<!-- Fires Activity notifier -->
 	<bean id="webscript.fr.itldev.koya.sysadmin.activities.notify.get"
@@ -644,19 +564,17 @@
 		<property name="spaceAclService" ref="spaceAclService" />
 		<property name="userService" ref="userService" />
 	</bean>
-	
-	<!--
-    ==================================================================
-    ========================== Tmp Patch ==============================
-    ==================================================================
-    -->
-	
-	
-	
-	 <!-- Converts existing permissions on dossiers in new group based permissions scheme -->
-	<bean id="webscript.fr.itldev.koya.meta.convertpermissions.get" 
-	class="fr.itldev.koya.patch.ConvertPermissionsv010"
-		parent="webscript">
+
+	<!-- ================================================================== 
+	========================== Tmp Patch ==============================
+	================================================================== -->
+
+
+
+	<!-- Converts existing permissions on dossiers in new group based permissions 
+		scheme -->
+	<bean id="webscript.fr.itldev.koya.meta.convertpermissions.get"
+		class="fr.itldev.koya.patch.ConvertPermissionsv010" parent="webscript">
 		<property name="companyService" ref="companyService" />
 		<property name="spaceService" ref="spaceService" />
 		<property name="dossierService" ref="dossierService" />
@@ -666,37 +584,31 @@
 		<property name="ownableService" ref="ownableService" />
 		<property name="transactionService" ref="transactionService" />
 	</bean>
-		
-   <!--
-    ==================================================================
-    ========================== WorkFlows ==============================
-    ==================================================================
-    -->
-    
-    <bean id="webscript.fr.itldev.koya.workflow.start.post"
-		class="fr.itldev.koya.webscript.workflow.Start"
+
+	<!-- ================================================================== 
+	========================== WorkFlows ============================== 
+	================================================================== -->
+
+	<bean id="webscript.fr.itldev.koya.workflow.start.post" class="fr.itldev.koya.webscript.workflow.Start"
 		parent="webscript">
-		<property name="koyaNodeService" ref="koyaNodeService"/>
-		<property name="formService" ref="FormService"/>
-		<property name="nodeService" ref="nodeService"/>
-		<property name="actionService" ref="ActionService"/>
-	</bean>
-	
-	<bean id="webscript.fr.itldev.koya.workflow.deploy.post"
-		class="fr.itldev.koya.webscript.workflow.Deploy"
-		parent="webscript">
-		<property name="workflowService" ref="WorkflowService"/>
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="formService" ref="FormService" />
+		<property name="nodeService" ref="nodeService" />
+		<property name="actionService" ref="ActionService" />
 	</bean>
 
-	<bean id="webscript.fr.itldev.koya.workflow.workflow-instance.get" 
-		  class="fr.itldev.koya.webscript.workflow.WorkflowInstanceGet"
-	      parent="abstractWorkflowWebScript">	
-	      <property name="permissionService" ref="PermissionService"/>
+	<bean id="webscript.fr.itldev.koya.workflow.deploy.post" class="fr.itldev.koya.webscript.workflow.Deploy"
+		parent="webscript">
+		<property name="workflowService" ref="WorkflowService" />
 	</bean>
- 	<bean id="webscript.fr.itldev.koya.workflow.task-isassignee.get" 
-		  class="fr.itldev.koya.webscript.workflow.TaskIsAssignee"
-	      parent="abstractWorkflowWebScript">
+
+	<bean id="webscript.fr.itldev.koya.workflow.workflow-instance.get"
+		class="fr.itldev.koya.webscript.workflow.WorkflowInstanceGet" parent="abstractWorkflowWebScript">
+		<property name="permissionService" ref="PermissionService" />
 	</bean>
- 
-   
+	<bean id="webscript.fr.itldev.koya.workflow.task-isassignee.get"
+		class="fr.itldev.koya.webscript.workflow.TaskIsAssignee" parent="abstractWorkflowWebScript">
+	</bean>
+
+
 </beans>

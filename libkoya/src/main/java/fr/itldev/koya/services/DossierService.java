@@ -31,7 +31,7 @@ import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
-public interface DossierService extends AlfrescoService {
+public interface DossierService extends AlfrescoService{
 
 	/**
 	 * Creates a new Dossier
@@ -94,28 +94,6 @@ public interface DossierService extends AlfrescoService {
 			throws AlfrescoServiceException;
 
 	/**
-	 * List all users in charge of specified Dossier.
-	 * 
-	 * @param user
-	 * @param dossier
-	 * @return
-	 * @throws AlfrescoServiceException
-	 */
-	List<User> listResponsibles(User user, Dossier dossier)
-			throws AlfrescoServiceException;
-
-	/**
-	 * List all users members of specified Dossier.
-	 * 
-	 * @param user
-	 * @param dossier
-	 * @return
-	 * @throws AlfrescoServiceException
-	 */
-	List<User> listMembers(User user, Dossier dossier)
-			throws AlfrescoServiceException;
-
-	/**
 	 * Adds a user in charge of specified Dossier.
 	 * 
 	 * @param user
@@ -134,8 +112,7 @@ public interface DossierService extends AlfrescoService {
 	 * @param responsible
 	 * @throws AlfrescoServiceException
 	 */
-	void addMember(User user, Dossier dossier, User member)
-			throws AlfrescoServiceException;
+	void addMember(User user, Dossier dossier, User member) throws AlfrescoServiceException;
 
 	/**
 	 * Add a list of users in charge of specified Dossier.

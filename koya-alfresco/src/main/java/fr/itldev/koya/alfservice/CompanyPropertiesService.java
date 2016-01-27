@@ -28,12 +28,12 @@ import org.apache.log4j.Logger;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.CompanyProperties;
 import fr.itldev.koya.model.impl.Contact;
 import fr.itldev.koya.model.impl.ContactItem;
 import fr.itldev.koya.model.impl.GeoPos;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 public class CompanyPropertiesService {
 

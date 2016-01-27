@@ -22,10 +22,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -41,11 +39,7 @@ import org.alfresco.service.cmr.invitation.InvitationExceptionUserError;
 import org.alfresco.service.cmr.invitation.ModeratedInvitation;
 import org.alfresco.service.cmr.invitation.NominatedInvitation;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.workflow.WorkflowAdminService;
@@ -58,6 +52,9 @@ import org.alfresco.util.GUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import fr.itldev.koya.alfservice.UserService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.permissions.SitePermission;
 
 /**
@@ -82,13 +79,13 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
     private WorkflowAdminService workflowAdminService;
     
-    private SearchService searchService;
+    private UserService userService;
     
-    
-
-    public void setSearchService(SearchService searchService) {
-		this.searchService = searchService;
+    public void setUserService(UserService userService) {
+		this.userService = userService;
 	}
+
+
 
 	private final int maxUserNameGenRetries = MAX_NUM_INVITEE_USER_NAME_GEN_TRIES;
 
@@ -352,7 +349,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         // if we have not explicitly been passed an existing user's user name
         // then ....
         //
-        // if a person already exists who has the given invitee email address
+        // if a person already exists with the given invitee email address
         //
         // 1) obtain invitee user name from first person found having the
         // invitee email address
@@ -361,50 +358,22 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         // or he/she is already a member of the given site
         //        
         if (inviteeUserName == null || inviteeUserName.trim().length() == 0) {
-
             inviteeUserName = null;
-
-			/**
-			 * ITL : replace
-			 * getPersonService().getPeopleFilteredByProperty(ContentModel
-			 * .PROP_EMAIL, inviteeEmail, 100); 
-			 * 
-			 * by user email field search to
-			 * avoid PersonService Warn log message : 
-			 * 
-			 * "PersonService.getPeopleFilteredByProperty() is being called to
-			 * find people by {http://www.alfresco.org/model/content/1.0}email.
-			 * Only PROP_FIRSTNAME, PROP_LASTNAME, PROP_USERNAME are now used in
-			 * the search, so fewer nodes may be returned than expected of there
-			 * are more than 100 users in total"
-			 * 
-			 */
-
-			String luceneQuery = "TYPE:\"cm:person\" AND @koya\\:mail:\""
-					+ inviteeEmail + "\"";
-			Set<NodeRef> peopleWithInviteeEmail = new HashSet<NodeRef>();
-
-			ResultSet rs = null;
+            
+            /*
+             * Try de to find user by email
+             */
+			User u = null;
 			try {
-				rs = searchService.query(
-						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-						SearchService.LANGUAGE_LUCENE, luceneQuery);
-				for (ResultSetRow r : rs) {
-					peopleWithInviteeEmail.add(r.getNodeRef());
-				}
-			} finally {
-				if (rs != null) {
-					rs.close();
-				}
+				u = userService.getUserByEmail(inviteeEmail);
+			} catch (KoyaServiceException kse) {
+
 			}
-            
-            //search 
-            //Set<NodeRef> peopleWithInviteeEmail = getPersonService().getPeopleFilteredByProperty(ContentModel.PROP_EMAIL, inviteeEmail, 100);
-            
-            if (peopleWithInviteeEmail.size() > 0) {
+		
+            if (u !=null) {
                 // get person already existing who has the given
                 // invitee email address
-                NodeRef personRef = peopleWithInviteeEmail.iterator().next();
+                NodeRef personRef = u.getNodeRef();
 
                 // got a match on email
                 // get invitee user name of that person

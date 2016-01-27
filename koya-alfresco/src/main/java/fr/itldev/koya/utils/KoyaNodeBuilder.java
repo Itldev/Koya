@@ -13,15 +13,16 @@ import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.QName;
 
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.ModelService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 
 /**
  *
@@ -32,12 +33,14 @@ public class KoyaNodeBuilder {
 	private final NodeService nodeService;
 	private final KoyaNodeService koyaNodeService;
 	private final WorkflowService workflowService;
-
+	private final ModelService modelService;
+	
 	public KoyaNodeBuilder(NodeService nodeService,
-			KoyaNodeService koyaNodeService,WorkflowService workflowService) {
+			KoyaNodeService koyaNodeService,WorkflowService workflowService, ModelService modelService) {
 		this.nodeService = nodeService;
 		this.koyaNodeService = koyaNodeService;
 		this.workflowService = workflowService;
+		this.modelService = modelService;
 	}
 
 	public KoyaNode build(NodeRef nodeRef) throws KoyaServiceException {
@@ -68,6 +71,7 @@ public class KoyaNodeBuilder {
 		Company c = Company.newInstance();
 		c.setName((String) nodeService.getProperty(n, ContentModel.PROP_NAME));
 		c.setTitle((String) nodeService.getProperty(n, ContentModel.PROP_TITLE));
+		c.setFtpUsername(modelService.getCompanyImporterUsername(c.getName()));
 		c.setNodeRef(n);
 		return c;
 	}

@@ -24,9 +24,6 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.15</version>                    
-                <configuration>
-                    <argLine>-javaagent:${spring-agent.path} -Dlog4j.configuration=file:${log4j-conf.path}</argLine>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -51,6 +48,12 @@
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-data-model</artifactId>
             <version>${alfresco.version}</version>
+        </dependency>  
+        
+         <dependency>
+            <groupId>fr.itldev</groupId>
+            <artifactId>koya-model</artifactId>
+            <version>${project.version}</version>
         </dependency>  
               
         <!-- =======tests =====================-->

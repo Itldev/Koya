@@ -22,15 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.type.TypeReference;
-
 import fr.itldev.koya.model.KoyaNode;
-import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.KoyaShare;
 import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 import fr.itldev.koya.services.ShareService;
+import fr.itldev.koya.services.UserService;
 import fr.itldev.koya.services.cache.CacheManager;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
@@ -38,34 +36,48 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
  *
  *
  */
-public class ShareServiceImpl extends AlfrescoRestService implements
-		ShareService {
+public class ShareServiceImpl extends SecuServiceImpl implements ShareService {
 
-	protected static final String REST_GET_SHAREDITEMS = "/s/fr/itldev/koya/security/clientshare/listusershares/{userName}/{companyName}?alf_ticket={alf_ticket}";
-	protected static final String REST_GET_HASCLIENTMEMBER = "/s/fr/itldev/koya/security/clientshare/clientmember/{noderef}";
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected static final String REST_GET_HASMEMBER = "/s/fr/itldev/koya/security/hasmember/{roleName}/{nodeRef}";
 
-	protected static final String REST_POST_SHARESINGLE = "/s/fr/itldev/koya/security/clientshare/do?alf_ticket={alf_ticket}";
-	protected static final String REST_POST_UNSHARESINGLE = "/s/fr/itldev/koya/security/clientshare/undo?alf_ticket={alf_ticket}";
+	protected static final String REST_POST_SHARESINGLE = "/s/fr/itldev/koya/security/consumershare/do?alf_ticket={alf_ticket}";
+	protected static final String REST_POST_UNSHARESINGLE = "/s/fr/itldev/koya/security/consumershare/undo?alf_ticket={alf_ticket}";
 
 	private CacheManager cacheManager;
+	private UserService userService;
 
 	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
+	
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
 
 	@Override
-	public KoyaShare shareItem(User user, KoyaNode itemToShare, String sharedUserMail)
-			throws AlfrescoServiceException {
-		
-		cacheManager.revokeNodeSharedWithConsumer(itemToShare);
+	public KoyaShare shareItem(User user, KoyaNode itemToShare, String sharedUserMail,
+			KoyaPermissionConsumer permission) throws AlfrescoServiceException {
 
+		cacheManager.revokeNodeSharedWithKoyaClient(itemToShare);
+		cacheManager.revokeNodeSharedWithKoyaPartner(itemToShare);
+		
+		User u = userService.getUserFromEmailFailProof(user, sharedUserMail);
+		if(u != null){
+			cacheManager.revokeInvitations(u.getUserName());
+		}
+		
 		Map<String, String> shareParams = new HashMap<>();
 		shareParams.put("email", sharedUserMail);
 		shareParams.put("nodeRef", itemToShare.getNodeRef().toString());
-		
-		return getTemplate().postForObject(
-				getAlfrescoServerUrl() + REST_POST_SHARESINGLE, shareParams,
-				KoyaShare.class,user.getTicketAlfresco());
+		shareParams.put("koyaPermission", permission.toString());
+
+		return getTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_SHARESINGLE,
+				shareParams, KoyaShare.class, user.getTicketAlfresco());
 	}
 
 	/**
@@ -74,85 +86,93 @@ public class ShareServiceImpl extends AlfrescoRestService implements
 	 * @param user
 	 */
 	@Override
-	public void unShareItem(User user, KoyaNode itemToUnShare,
-			String unsharedUserMail) throws AlfrescoServiceException {
-		cacheManager.revokeNodeSharedWithConsumer(itemToUnShare);
-
+	public void unShareItem(User user, KoyaNode itemToUnShare, String unsharedUserMail)
+			throws AlfrescoServiceException {
+		cacheManager.revokeNodeSharedWithKoyaClient(itemToUnShare);
+		cacheManager.revokeNodeSharedWithKoyaPartner(itemToUnShare);
+		User u = userService.getUserFromEmailFailProof(user, unsharedUserMail);
+		if(u != null){
+			cacheManager.revokeInvitations(u.getUserName());
+		}
+		
 		Map<String, String> unshareParams = new HashMap<>();
 		unshareParams.put("email", unsharedUserMail);
 		unshareParams.put("nodeRef", itemToUnShare.getNodeRef().toString());
-		
-		getTemplate().postForObject(
-				getAlfrescoServerUrl() + REST_POST_UNSHARESINGLE,
-				unshareParams, String.class,user.getTicketAlfresco());
+
+		getTemplate().postForObject(getAlfrescoServerUrl() + REST_POST_UNSHARESINGLE, unshareParams,
+				String.class, user.getTicketAlfresco());
 	}
 
 	/**
-	 * Show Users who can publicly access to given element.
+	 * List all user who belongs KoyaClient permission group on defined space
 	 * 
 	 * @param user
-	 * @param item
-	 * @return
-	 * @throws fr.itldev.koya.services.exceptions.AlfrescoServiceException
-	 */
-	@Override
-	public List<User> sharedUsers(User user, KoyaNode item)
-			throws AlfrescoServiceException {
-		return fromJSON(
-				new TypeReference<List<User>>() {
-				},
-				getTemplate().getForObject(
-						getAlfrescoServerUrl()
-								+ DossierServiceImpl.REST_GET_LISTMEMBERSHIP,
-						String.class, KoyaPermissionConsumer.CLIENT,
-						item.getNodeRef(),user.getTicketAlfresco()));
-	}
-
-	/**
-	 * Get all KoyaNodes shared for specified user on a company.
-	 * 
-	 * @param userLogged
-	 * @param userToGetShares
-	 * @param c
+	 * @param space
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
 	@Override
-	public List<KoyaNode> sharedItems(User userLogged, User userToGetShares,
-			Company c) throws AlfrescoServiceException {
-
-		return fromJSON(
-				new TypeReference<List<KoyaNode>>() {
-				},
-				getTemplate().getForObject(
-						getAlfrescoServerUrl() + REST_GET_SHAREDITEMS,
-						String.class, userToGetShares.getUserName(),
-						c.getName(),userLogged.getTicketAlfresco()));
-
+	public List<User> listClients(User user, Space space) throws AlfrescoServiceException {
+		return listUsers(user, space, KoyaPermissionConsumer.CLIENT);
 	}
 
 	/**
-	 * Checks if item has any share with consumer permission
+	 * List all user who belongs KoyaPartner permission group on defined space
+	 * 
+	 * @param user
+	 * @param space
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	@Override
+	public List<User> listPartners(User user, KoyaNode space) throws AlfrescoServiceException {
+		return listUsers(user, space, KoyaPermissionConsumer.PARTNER);
+	}
+
+	/**
+	 * Checks if item has any share with KoyaClient permission
 	 * 
 	 * @param item
 	 * @return
 	 */
 	@Override
-	public Boolean isSharedWithConsumerPermission(Space item) {
+	public Boolean isSharedWithKoyaClient(Space item) {
 
 		if (item == null) {
 			return Boolean.FALSE;
 		}
-		Boolean shared = cacheManager
-				.getNodeSharedWithConsumer((KoyaNode) item);
+		Boolean shared = cacheManager.getNodeSharedWithKoyaClient((KoyaNode) item);
 
 		if (shared != null) {
 			return shared;
 		}
-		shared = getTemplate().getForObject(
-				getAlfrescoServerUrl() + REST_GET_HASCLIENTMEMBER,
-				Boolean.class, item.getNodeRef());
-		cacheManager.setNodeSharedWithConsumer((KoyaNode) item, shared);
+		shared = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_HASMEMBER,
+				Boolean.class, KoyaPermissionConsumer.CLIENT, item.getNodeRef());
+		cacheManager.setNodeSharedWithKoyaClient((KoyaNode) item, shared);
+		return shared;
+
+	}
+
+	/**
+	 * Checks if item has any share with KoyaPartner permission
+	 * 
+	 * @param item
+	 * @return
+	 */
+	@Override
+	public Boolean isSharedWithKoyaPartner(Space item) {
+
+		if (item == null) {
+			return Boolean.FALSE;
+		}
+		Boolean shared = cacheManager.getNodeSharedWithKoyaPartner((KoyaNode) item);
+
+		if (shared != null) {
+			return shared;
+		}
+		shared = getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_HASMEMBER,
+				Boolean.class, KoyaPermissionConsumer.PARTNER, item.getNodeRef());
+		cacheManager.setNodeSharedWithKoyaPartner((KoyaNode) item, shared);
 		return shared;
 
 	}

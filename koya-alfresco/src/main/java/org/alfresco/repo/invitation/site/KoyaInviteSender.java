@@ -69,18 +69,17 @@ public class KoyaInviteSender extends InviteSender {
 	private KoyaMailService koyaMailService;
 	//
 
-	private static final List<String> expectedProperties = Arrays.asList(
-			wfVarInviteeUserName,//
-			WorkflowModelNominatedInvitation.wfVarResourceName,//
-			wfVarInviterUserName,//
-			wfVarInviteeUserName,//
-			WorkflowModelNominatedInvitation.wfVarRole,//
-			WorkflowModelNominatedInvitation.wfVarInviteeGenPassword,//
-			WorkflowModelNominatedInvitation.wfVarResourceName,//
-			WorkflowModelNominatedInvitation.wfVarInviteTicket,//
-			WorkflowModelNominatedInvitation.wfVarServerPath,//
-			WorkflowModelNominatedInvitation.wfVarAcceptUrl,//
-			WorkflowModelNominatedInvitation.wfVarRejectUrl, WF_INSTANCE_ID,//
+	private static final List<String> expectedProperties = Arrays.asList(wfVarInviteeUserName, //
+			WorkflowModelNominatedInvitation.wfVarResourceName, //
+			wfVarInviterUserName, //
+			wfVarInviteeUserName, //
+			WorkflowModelNominatedInvitation.wfVarRole, //
+			WorkflowModelNominatedInvitation.wfVarInviteeGenPassword, //
+			WorkflowModelNominatedInvitation.wfVarResourceName, //
+			WorkflowModelNominatedInvitation.wfVarInviteTicket, //
+			WorkflowModelNominatedInvitation.wfVarServerPath, //
+			WorkflowModelNominatedInvitation.wfVarAcceptUrl, //
+			WorkflowModelNominatedInvitation.wfVarRejectUrl, WF_INSTANCE_ID, //
 			WF_PACKAGE);
 
 	private final ActionService actionService;
@@ -106,8 +105,7 @@ public class KoyaInviteSender extends InviteSender {
 	public KoyaInviteSender(ServiceRegistry services, Repository repository,
 			MessageService messageService, KoyaMailService koyaMailService,
 			KoyaNodeService koyaNodeService, SpaceAclService spaceAclService,
-			CompanyService companyService,
-			CompanyPropertiesService companyPropertiesService,
+			CompanyService companyService, CompanyPropertiesService companyPropertiesService,
 			UserService userService, HashMap<String, Object> koyaClientParams) {
 
 		super(services, repository, messageService);
@@ -142,8 +140,7 @@ public class KoyaInviteSender extends InviteSender {
 		checkProperties(properties);
 
 		ParameterCheck.mandatory("Properties", properties);
-		NodeRef inviter = personService.getPerson(properties
-				.get(wfVarInviterUserName));
+		NodeRef inviter = personService.getPerson(properties.get(wfVarInviterUserName));
 		String inviteeName = properties.get(wfVarInviteeUserName);
 		NodeRef invitee = personService.getPerson(inviteeName);
 		Action mail = actionService.createAction(MailActionExecuter.NAME);
@@ -158,24 +155,22 @@ public class KoyaInviteSender extends InviteSender {
 			 */
 
 			/**
-             *
-             */
-			mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT_PARAMS,
-					new Object[] { ModelUtil.getProductName(repoAdminService),
-							getSiteName(properties) });
-			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE,
-					getEmailTemplateNodeRef());
+			 *
+			 */
+			mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT_PARAMS, new Object[] {
+					ModelUtil.getProductName(repoAdminService), getSiteName(properties) });
 
-			Map<String, Object> templateModel = buildMailTextModel(properties,
-					inviter, invitee);
+			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE,
+					KoyaMailService.TPLNODEREF_MAIL_INVITATION);
+
+			Map<String, Object> templateModel = buildMailTextModel(properties, inviter, invitee);
 			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,
 					(Serializable) templateModel);
-			mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT,
-					koyaMailService
-							.getI18nSubject(EMAIL_SUBJECT, templateModel));
 
-			mail.setParameterValue(
-					MailActionExecuter.PARAM_IGNORE_SEND_FAILURE, true);
+			mail.setParameterValue(MailActionExecuter.PARAM_SUBJECT,
+					koyaMailService.getI18nSubject(EMAIL_SUBJECT, templateModel));
+
+			mail.setParameterValue(MailActionExecuter.PARAM_IGNORE_SEND_FAILURE, true);
 			actionService.executeAction(mail, getWorkflowPackage(properties));
 		} catch (KoyaServiceException ex) {
 			throw new RuntimeException(ex);
@@ -189,52 +184,34 @@ public class KoyaInviteSender extends InviteSender {
 	private void checkProperties(Map<String, String> properties) {
 		Set<String> keys = properties.keySet();
 		if (!keys.containsAll(expectedProperties)) {
-			LinkedList<String> missingProperties = new LinkedList<>(
-					expectedProperties);
+			LinkedList<String> missingProperties = new LinkedList<>(expectedProperties);
 			missingProperties.removeAll(keys);
 			throw new InvitationException(
-					"The following mandatory properties are missing:\n"
-							+ missingProperties);
+					"The following mandatory properties are missing:\n" + missingProperties);
 		}
 	}
 
 	private String getEmail(NodeRef person) {
-		return (String) nodeService
-				.getProperty(person, ContentModel.PROP_EMAIL);
+		return (String) nodeService.getProperty(person, ContentModel.PROP_EMAIL);
 	}
 
-	private NodeRef getEmailTemplateNodeRef() {
-		List<NodeRef> nodeRefs = searchService.selectNodes(
-				repository.getRootHome(), koyaMailService.TPL_MAIL_INVITATION,
-				null, this.namespaceService, false);
-
-		if (nodeRefs.size() == 1) {
-			// Now localise this
-			NodeRef base = nodeRefs.get(0);
-			NodeRef local = fileFolderService.getLocalizedSibling(base);
-			return local;
-		} else {
-			throw new InvitationException("Cannot find the email template!");
-		}
-	}
-
-	private Map<String, Object> buildMailTextModel(
-			final Map<String, String> properties, NodeRef inviter,
-			NodeRef invitee) {
+	private Map<String, Object> buildMailTextModel(final Map<String, String> properties,
+			NodeRef inviter, NodeRef invitee) {
 		// Set the core model parts
 		// Note - the user part is skipped, as that's implied via the run-as
 		Map<String, Object> model = new HashMap<>();
 		model.put(TemplateService.KEY_COMPANY_HOME, repository.getCompanyHome());
-		model.put(TemplateService.KEY_USER_HOME,
-				repository.getUserHome(inviter));
-		model.put(TemplateService.KEY_PRODUCT_NAME,
-				ModelUtil.getProductName(repoAdminService));
+		model.put(TemplateService.KEY_USER_HOME, repository.getUserHome(inviter));
+		model.put(TemplateService.KEY_PRODUCT_NAME, ModelUtil.getProductName(repoAdminService));
 
 		// Build up the args for rendering inside the template
 
 		String params = buildUrlParamString(properties);
 		final String acceptLink = makeLink(properties.get(wfVarServerPath),
 				properties.get(wfVarAcceptUrl), params);
+		
+		logger.info("invite accept link = "+acceptLink);
+		
 		final String rejectLink = makeLink(properties.get(wfVarServerPath),
 				properties.get(wfVarRejectUrl), params);
 
@@ -243,8 +220,7 @@ public class KoyaInviteSender extends InviteSender {
 				put("siteName", getSiteName(properties));
 				put("inviteeSiteRole", getRoleName(properties));
 				put("inviteeUserName", properties.get(wfVarInviteeUserName));
-				put("inviteeGenPassword",
-						properties.get(wfVarInviteeGenPassword));
+				put("inviteeGenPassword", properties.get(wfVarInviteeGenPassword));
 				put("acceptLink", acceptLink);
 				put("rejectLink", rejectLink);
 			}
@@ -258,20 +234,16 @@ public class KoyaInviteSender extends InviteSender {
 			// TODO get invite Items from specific workflow model
 			// model.put("InviteItem", false);
 
-			Company c = companyService.getCompany(properties
-					.get(wfVarResourceName));
-			model.put("company", companyPropertiesService.getProperties(c)
-					.toHashMap());
+			Company c = companyService.getCompany(properties.get(wfVarResourceName));
+			model.put("company", companyPropertiesService.getProperties(c).toHashMap());
 
-			User u = userService.getUserByUsername(properties
-					.get(wfVarInviteeUserName));
+			User u = userService.getUserByUsername(properties.get(wfVarInviteeUserName));
 
 			/**
 			 * Shared Items
 			 */
 			List<Map<String, String>> shares = new ArrayList<Map<String, String>>();
-			for (KoyaNode s : spaceAclService.getKoyaUserSpaces(u, c,
-					Dossier.class)) {
+			for (KoyaNode s : spaceAclService.getKoyaUserSpaces(u, c, Dossier.class)) {
 				Map<String, String> share = new HashMap<String, String>();
 				share.put("title", s.getTitle());
 				share.put("type", s.getKtype());
@@ -287,8 +259,7 @@ public class KoyaInviteSender extends InviteSender {
 		return model;
 	}
 
-	private NodeRef getWorkflowPackage(Map<String, String> properties)
-			throws KoyaServiceException {
+	private NodeRef getWorkflowPackage(Map<String, String> properties) throws KoyaServiceException {
 		String packageRef = properties.get(WF_PACKAGE);
 		return koyaNodeService.getNodeRef(packageRef);
 	}
@@ -298,8 +269,7 @@ public class KoyaInviteSender extends InviteSender {
 		SiteInfo site = siteService.getSite(siteFullName);
 
 		if (site == null) {
-			throw new InvitationException("The site " + siteFullName
-					+ " could not be found.");
+			throw new InvitationException("The site " + siteFullName + " could not be found.");
 		}
 
 		String siteName = site.getShortName();
@@ -324,8 +294,7 @@ public class KoyaInviteSender extends InviteSender {
 
 	private String getRoleName(Map<String, String> properties) {
 		String roleName = properties.get(wfVarRole);
-		String role = messageService
-				.getMessage("invitation.invitesender.email.role." + roleName);
+		String role = messageService.getMessage("invitation.invitesender.email.role." + roleName);
 		if (role == null) {
 			role = roleName;
 		}

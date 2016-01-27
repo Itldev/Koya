@@ -31,6 +31,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 import fr.itldev.koya.alfservice.CompanyPropertiesService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.impl.CompanyProperties;
+import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
@@ -57,7 +58,7 @@ public class CommitProperties extends AbstractWebScript {
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
         Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
 
-        String companyName = (String) urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
+        String companyName = (String) urlParams.get(RestConstants.WSCONST_COMPANYNAME);
         try {
             ObjectMapper mapper = new ObjectMapper();
             CompanyProperties cp = mapper.readValue(req.getContent().getReader(), CompanyProperties.class);

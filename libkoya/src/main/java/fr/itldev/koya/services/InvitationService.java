@@ -1,5 +1,6 @@
 package fr.itldev.koya.services;
 
+import java.util.List;
 import java.util.Map;
 
 import fr.itldev.koya.model.impl.Company;
@@ -37,7 +38,7 @@ public interface InvitationService extends AlfrescoService {
 			throws AlfrescoServiceException;
 
 	/**
-	 * Get user's invitation on company if exists.
+	 * Get user's pending invitation on company if exists.
 	 * 
 	 * @param user
 	 * @param c
@@ -45,19 +46,19 @@ public interface InvitationService extends AlfrescoService {
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	public Map<String, String> getInvitation(User user, Company c,
-			User userToGetInvitaion) throws AlfrescoServiceException;
+	public Map<String, String> getInvitation(Company c,
+			String userName) throws AlfrescoServiceException;
 
+	
 	/**
-	 * Checks anynomously if given inviteId exists (is is a pending invite).
-	 * 
-	 * @param inviteId
+	 * List all pending invitations for user
+	 * @param user
+	 * @param userToGetInvitaion
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	public Boolean isInvitationPending(String inviteId)
-			throws AlfrescoServiceException;
-
+	public List<Map<String, String>> listInvitations(String userName) throws AlfrescoServiceException;
+	
 	/**
 	 * Send invitation mail again to invitee based on invitationId
 	 * 

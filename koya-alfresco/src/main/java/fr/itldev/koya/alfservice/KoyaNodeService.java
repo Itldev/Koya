@@ -60,9 +60,9 @@ import org.apache.log4j.Logger;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
-import fr.itldev.koya.services.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.utils.KoyaNodeBuilder;
 
 /**
@@ -87,7 +87,7 @@ public class KoyaNodeService {
 	protected SearchService searchService;
 	protected NamespaceService namespaceService;
 	protected WorkflowService workflowService;
-
+	protected ModelService modelService;
 	
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setNodeService(NodeService nodeService) {
@@ -140,12 +140,16 @@ public class KoyaNodeService {
 		this.workflowService = workflowService;
 	}
 
+	public void setModelService(ModelService modelService) {
+		this.modelService = modelService;
+	}
+
 
 	// </editor-fold>
 	private KoyaNodeBuilder builder;
 
 	public void init() {
-		builder = new KoyaNodeBuilder(nodeService, this, workflowService);
+		builder = new KoyaNodeBuilder(nodeService, this, workflowService, modelService);
 	}
 
 	/**

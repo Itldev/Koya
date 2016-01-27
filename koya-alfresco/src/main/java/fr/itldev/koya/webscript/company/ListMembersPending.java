@@ -18,63 +18,65 @@
  */
 package fr.itldev.koya.webscript.company;
 
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.security.CompanyAclService;
-import fr.itldev.koya.model.permissions.SitePermission;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.webscript.KoyaWebscript;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.alfservice.security.CompanyAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.model.permissions.SitePermission;
+import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * List Company members.
  */
 public class ListMembersPending extends AbstractWebScript {
 
-    private CompanyAclService companyAclService;
-    private KoyaNodeService koyaNodeService;
+	private CompanyAclService companyAclService;
+	private KoyaNodeService koyaNodeService;
 
-    public void setCompanyAclService(CompanyAclService companyAclService) {
-        this.companyAclService = companyAclService;
-    }
+	public void setCompanyAclService(CompanyAclService companyAclService) {
+		this.companyAclService = companyAclService;
+	}
 
-    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
-        this.koyaNodeService = koyaNodeService;
-    }
+	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+		this.koyaNodeService = koyaNodeService;
+	}
 
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 
-        Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
-        String companyName = urlParams.get(KoyaWebscript.WSCONST_COMPANYNAME);
-        String roleFilter = urlParams.get(KoyaWebscript.WSCONST_ROLEFILTER);
+		Map<String, String> urlParams = KoyaWebscript.getUrlParamsMap(req);
+		String companyName = urlParams.get(RestConstants.WSCONST_COMPANYNAME);
+		String roleFilter = urlParams.get(RestConstants.WSCONST_ROLEFILTER);
 
-        String response;
-        try {
+		String response;
+		try {
 
-            List<SitePermission> permisssionsFilter = new ArrayList<>();
+			List<SitePermission> permisssionsFilter = new ArrayList<>();
 
-            try {
-                for (String role : roleFilter.split(",")) {
-                    permisssionsFilter.add(SitePermission.valueOf(role));
-                }
-            } catch (Exception ex) {
-            }
+			try {
+				for (String role : roleFilter.split(",")) {
+					permisssionsFilter.add(SitePermission.valueOf(role));
+				}
+			} catch (Exception ex) {
+			}
 
-            response = KoyaWebscript.getObjectAsJson(
-                    companyAclService.listMembersPendingInvitation(companyName,
-                            permisssionsFilter));
-        } catch (KoyaServiceException ex) {
-            throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
-        }
-        res.setContentType("application/json;charset=UTF-8");
-        res.getWriter().write(response);
-    }
+			response = KoyaWebscript
+					.getObjectAsJson(companyAclService.listMembersPendingInvitation(companyName, permisssionsFilter));
+		} catch (KoyaServiceException ex) {
+			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
+	}
 
 }
