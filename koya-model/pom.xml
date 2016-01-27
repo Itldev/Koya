@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>koya-model</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>0.13.0</version>
 	<packaging>jar</packaging>
 	<name>[Koya] model Objects</name>
 
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>fr.itldev</groupId>
 		<artifactId>koya</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>0.13.0</version>
 	</parent>
 
 	<build>
