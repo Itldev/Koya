@@ -22,8 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.service.cmr.repository.NodeRef;
-
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
@@ -169,9 +168,9 @@ public interface DossierService extends AlfrescoService{
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	Map<String, NodeRef> createSummary(User user, Dossier dossier,
-			String summaryFileName) throws AlfrescoServiceException;
+	KoyaNode createSummary(User user, Dossier dossier) throws AlfrescoServiceException;
 
+	
 	/**
 	 * Start a workflow and return workflow Instance 
 	 * 
