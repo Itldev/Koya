@@ -29,6 +29,7 @@ import org.alfresco.service.namespace.QName;
 import org.codehaus.jackson.type.TypeReference;
 
 import fr.itldev.koya.model.KoyaModel;
+import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
@@ -51,7 +52,7 @@ public class DossierServiceImpl extends AlfrescoRestService
 
 	private static final String REST_CONFIDENTIAL = "/s/fr/itldev/koya/dossier/confidential/{nodeRef}?alf_ticket={alf_ticket}";
 
-	private static final String REST_SUMMARY = "/s/fr/itldev/koya/dossier/summary/{nodeId}?documentName={documentName}?alf_ticket={alf_ticket}";
+	private static final String REST_SUMMARY = "/s/fr/itldev/koya/dossier/summary/{nodeId}?alf_ticket={alf_ticket}";
 
 	private CacheManager cacheManager;
 
@@ -244,20 +245,18 @@ public class DossierServiceImpl extends AlfrescoRestService
 	}
 
 	@Override
-	public Map<String, NodeRef> createSummary(User user, Dossier dossier, String summaryFileName)
+	public KoyaNode createSummary(User user, Dossier dossier)
 			throws AlfrescoServiceException {
-		// extract map
-		Map<String, String> returnValues = getTemplate().getForObject(
-				getAlfrescoServerUrl() + REST_SUMMARY, Map.class, dossier.getNodeRef().getId(),
-				summaryFileName, user.getTicketAlfresco());
-
-		Map<String, NodeRef> nodes = new HashMap<String, NodeRef>();
-		for (String k : returnValues.keySet()) {
-			nodes.put(k, new NodeRef(returnValues.get(k)));
-		}
-		return nodes;
+		
+		return fromJSON(
+				new TypeReference<KoyaNode>() {
+				},
+				getTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_SUMMARY, String.class, dossier.getNodeRef().getId(),
+						 user.getTicketAlfresco()));		
 	}
-
+	
+	
 	@Override
 	public List<Document> listClientUploadedDocuments(User user, Dossier dossier) {
 
