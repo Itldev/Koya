@@ -1,5 +1,6 @@
 package fr.itldev.koya.model;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +39,9 @@ public abstract class KoyaNode {
 	protected String name;
 	protected String title;
 	private Map<String, String> workflows = new HashMap<>();
+
+	private Date creationDate;
+	private String creatorUsername;
 
 	/*
 	 * ======== Constructors
@@ -93,6 +97,22 @@ public abstract class KoyaNode {
 
 	public void setWorkflows(Map<String, String> workflows) {
 		this.workflows = workflows;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public String getCreatorUsername() {
+		return creatorUsername;
+	}
+
+	public void setCreatorUsername(String creatorUsername) {
+		this.creatorUsername = creatorUsername;
 	}
 
 	/**

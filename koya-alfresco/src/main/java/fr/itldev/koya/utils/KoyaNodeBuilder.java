@@ -34,9 +34,9 @@ public class KoyaNodeBuilder {
 	private final KoyaNodeService koyaNodeService;
 	private final WorkflowService workflowService;
 	private final ModelService modelService;
-	
-	public KoyaNodeBuilder(NodeService nodeService,
-			KoyaNodeService koyaNodeService,WorkflowService workflowService, ModelService modelService) {
+
+	public KoyaNodeBuilder(NodeService nodeService, KoyaNodeService koyaNodeService,
+			WorkflowService workflowService, ModelService modelService) {
 		this.nodeService = nodeService;
 		this.koyaNodeService = koyaNodeService;
 		this.workflowService = workflowService;
@@ -54,108 +54,93 @@ public class KoyaNodeBuilder {
 		} else if (type.equals(KoyaModel.TYPE_DOSSIER)) {
 			si = nodeDossierBuilder(nodeRef);
 		} else if (type.equals(ContentModel.TYPE_FOLDER)
-				&& (koyaNodeService
-						.getFirstParentOfType(nodeRef, Dossier.class) != null)) {
+				&& (koyaNodeService.getFirstParentOfType(nodeRef, Dossier.class) != null)) {
 			si = nodeDirBuilder(nodeRef);
-		} else if ((type.equals(ContentModel.TYPE_CONTENT) || type
-				.equals(ContentModel.TYPE_THUMBNAIL))) {
+		} else if ((type.equals(ContentModel.TYPE_CONTENT)
+				|| type.equals(ContentModel.TYPE_THUMBNAIL))) {
 			si = nodeDocumentBuilder(nodeRef);
 		} else {
-			throw new KoyaServiceException(
-					KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
+			throw new KoyaServiceException(KoyaErrorCodes.INVALID_KOYANODE_NODEREF);
 		}
 		return si;
 	}
 
+	private void fillKoyaNodeCommonProperties(KoyaNode k, NodeRef n) {
+		k.setNodeRef(n);
+		k.setName((String) nodeService.getProperty(n, ContentModel.PROP_NAME));
+		k.setTitle((String) nodeService.getProperty(n, ContentModel.PROP_TITLE));
+		k.setCreationDate((Date) nodeService.getProperty(n, ContentModel.PROP_CREATED));
+		k.setCreatorUsername((String) nodeService.getProperty(n, ContentModel.PROP_CREATOR));
+	}
+
 	private Company companyBuilder(NodeRef n) throws KoyaServiceException {
 		Company c = Company.newInstance();
-		c.setName((String) nodeService.getProperty(n, ContentModel.PROP_NAME));
-		c.setTitle((String) nodeService.getProperty(n, ContentModel.PROP_TITLE));
+		fillKoyaNodeCommonProperties(c, n);
 		c.setFtpUsername(modelService.getCompanyImporterUsername(c.getName()));
-		c.setNodeRef(n);
 		return c;
 	}
 
-	private Space nodeSpaceBuilder(final NodeRef spaceNodeRef)
-			throws KoyaServiceException {
+	private Space nodeSpaceBuilder(final NodeRef spaceNodeRef) throws KoyaServiceException {
 		Space s = Space.newInstance();
-		s.setNodeRef(spaceNodeRef);
-		s.setName((String) nodeService.getProperty(spaceNodeRef,
-				ContentModel.PROP_NAME));
-		s.setTitle((String) nodeService.getProperty(spaceNodeRef,
-				ContentModel.PROP_TITLE));
+		fillKoyaNodeCommonProperties(s, spaceNodeRef);
 		return s;
 	}
-	
+
 	private Dossier nodeDossierBuilder(final NodeRef dossierNodeRef) {
 		Dossier d = Dossier.newInstance();
-		d.setNodeRef(dossierNodeRef);
-		d.setName((String) nodeService.getProperty(dossierNodeRef,
-				ContentModel.PROP_NAME));
-		if (nodeService.getProperty(dossierNodeRef,
-				KoyaModel.PROP_LASTMODIFICATIONDATE) != null) {
-			d.setLastModifiedDate((Date) nodeService.getProperty(
-					dossierNodeRef, KoyaModel.PROP_LASTMODIFICATIONDATE));
+		fillKoyaNodeCommonProperties(d, dossierNodeRef);
+
+		if (nodeService.getProperty(dossierNodeRef, KoyaModel.PROP_LASTMODIFICATIONDATE) != null) {
+			d.setLastModifiedDate((Date) nodeService.getProperty(dossierNodeRef,
+					KoyaModel.PROP_LASTMODIFICATIONDATE));
 		} else {
-			d.setLastModifiedDate((Date) nodeService.getProperty(
-					dossierNodeRef, ContentModel.PROP_MODIFIED));
+			d.setLastModifiedDate(
+					(Date) nodeService.getProperty(dossierNodeRef, ContentModel.PROP_MODIFIED));
 		}
 
 		if (nodeService.getProperty(dossierNodeRef, KoyaModel.PROP_ACTIVITIIDS) != null) {
 
-			
 			@SuppressWarnings("unchecked")
-			List<String> ids = (List<String>) nodeService.getProperty(
-					dossierNodeRef, KoyaModel.PROP_ACTIVITIIDS);
+			List<String> ids = (List<String>) nodeService.getProperty(dossierNodeRef,
+					KoyaModel.PROP_ACTIVITIIDS);
 			for (String activitiId : ids) {
-				
-				String status=null;
-				try{
+
+				String status = null;
+				try {
 					WorkflowInstance wf = workflowService.getWorkflowById(activitiId);
-					status = (String) nodeService.getProperty(wf.getWorkflowPackage(), KoyaModel.PROP_BPMCURRENTSTATUS);
-					if(status == null ){
+					status = (String) nodeService.getProperty(wf.getWorkflowPackage(),
+							KoyaModel.PROP_BPMCURRENTSTATUS);
+					if (status == null) {
 						status = KoyaModel.BpmStatusValues.UNKNOWN;
 					}
-				}catch(Exception e){
+				} catch (Exception e) {
 					status = KoyaModel.BpmStatusValues.UNKNOWN;
 				}
-				d.getWorkflows().put(activitiId,status);
+				d.getWorkflows().put(activitiId, status);
 			}
 
 		}
-
-		d.setTitle((String) nodeService.getProperty(dossierNodeRef,
-				ContentModel.PROP_TITLE));
-				return d;
+		return d;
 	}
 
 	private Directory nodeDirBuilder(NodeRef dirNodeRef) {
 		Directory dir = Directory.newInstance();
-		dir.setNodeRef(dirNodeRef);
-		dir.setName((String) nodeService.getProperty(dirNodeRef,
-				ContentModel.PROP_NAME));
-		dir.setTitle((String) nodeService.getProperty(dirNodeRef,
-				ContentModel.PROP_TITLE));
+		fillKoyaNodeCommonProperties(dir, dirNodeRef);
 		return dir;
 	}
 
 	private Document nodeDocumentBuilder(final NodeRef docNodeRef) {
 		Document doc = Document.newInsance();
-		doc.setNodeRef(docNodeRef);
-		doc.setName((String) nodeService.getProperty(docNodeRef,
-				ContentModel.PROP_NAME));
-		doc.setTitle((String) nodeService.getProperty(docNodeRef,
-				ContentModel.PROP_TITLE));
-		doc.setByteSize(AuthenticationUtil
-				.runAsSystem(new AuthenticationUtil.RunAsWork<Long>() {
-					@Override
-					public Long doWork() throws Exception {
-						return koyaNodeService.getByteSize(docNodeRef);
-					}
-				}));
+		fillKoyaNodeCommonProperties(doc, docNodeRef);
+		doc.setByteSize(AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Long>() {
+			@Override
+			public Long doWork() throws Exception {
+				return koyaNodeService.getByteSize(docNodeRef);
+			}
+		}));
 
-		ContentData contentData = (ContentData) nodeService.getProperty(
-				docNodeRef, ContentModel.PROP_CONTENT);
+		ContentData contentData = (ContentData) nodeService.getProperty(docNodeRef,
+				ContentModel.PROP_CONTENT);
 		doc.setMimeType(contentData.getMimetype());
 		return doc;
 	}
