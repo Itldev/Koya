@@ -21,11 +21,9 @@
 
 <webscript>
     <shortname>Get Roles</shortname>
-    <description>Get all available roles for a company</description>
+    <description>Get all available roles for a KoyaNode</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/company/roles/{companyName}</url>
-    <authentication>user</authentication>    
+    <url>/fr/itldev/koya/security/roles/{nodeId}</url>
+    <authentication>user</authentication>
     <format default="json"/>
 </webscript>
-
-	

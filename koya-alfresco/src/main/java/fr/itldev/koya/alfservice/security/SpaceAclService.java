@@ -883,7 +883,25 @@ public class SpaceAclService {
 	 * 
 	 * ================= Permissions Getting Methods ==================
 	 */
-
+	
+	
+	/**
+	 * Return user permission set for user on node
+	 * @param s
+	 * @param u
+	 * @return
+	 */
+	public KoyaPermission getKoyaPermission(Space s,User u){		
+		for (AccessPermission ap : permissionService.getAllSetPermissions(s.getNodeRef())) {
+			for (KoyaPermission p : KoyaPermission.getAll()) {
+				if (ap.getAuthority().endsWith(p.toString())) {
+					return p;
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Builds Koya permissions on given NodeRef for authenticated user.
 	 * 
