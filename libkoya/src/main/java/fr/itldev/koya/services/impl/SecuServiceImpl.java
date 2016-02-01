@@ -42,8 +42,8 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService,
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final String REST_GET_AVAILABLEROLES = "/s/fr/itldev/koya/company/roles/{companyName}?alf_ticket={alf_ticket}";
-	private static final String REST_GET_USERROLE = "/s/fr/itldev/koya/user/role/{companyName}/{userName}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_AVAILABLEROLES = "/s/fr/itldev/koya/security/roles/{nodeId}?alf_ticket={alf_ticket}";
+	private static final String REST_GET_USERROLE = "/s/fr/itldev/koya/security/role/{userName}?nodeId={nodeId}&alf_ticket={alf_ticket}";
 	private static final String REST_GET_SETUSERROLE = "/s/fr/itldev/koya/user/setrole/{companyName}/{userName}/{roleName}?alf_ticket={alf_ticket}";
 	private static final String REST_GET_LISTUSERCONNECTIONS = "/s/fr/itldev/koya/user/listconnect/{userName}?"
 			+ "companiesFilter={companiesFilter}&maxResults={maxResults}&alf_ticket={alf_ticket}";
@@ -61,19 +61,19 @@ public class SecuServiceImpl extends AlfrescoRestService implements SecuService,
 	}
 
 	@Override
-	public List<UserRole> listAvailableRoles(User userLogged, Company c)
+	public List<UserRole> listAvailableRoles(User userLogged, KoyaNode k)
 			throws AlfrescoServiceException {
 		return fromJSON(new TypeReference<List<UserRole>>() {
 		}, getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_AVAILABLEROLES,
-				String.class, c.getName(), userLogged.getTicketAlfresco()));
+				String.class, k.getNodeRef().getId(), userLogged.getTicketAlfresco()));
 	}
 
 	@Override
-	public UserRole getUserRole(User userLogged, Company c, User userToGetRole)
+	public UserRole getUserRole(User userLogged, KoyaNode k, User userToGetRole)
 			throws AlfrescoServiceException {
 		return fromJSON(new TypeReference<UserRole>() {
 		}, getTemplate().getForObject(getAlfrescoServerUrl() + REST_GET_USERROLE, String.class,
-				c.getName(), userToGetRole.getUserName(), userLogged.getTicketAlfresco()));
+				userToGetRole.getUserName(),k.getNodeRef().getId(),  userLogged.getTicketAlfresco()));
 	}
 
 	@Override

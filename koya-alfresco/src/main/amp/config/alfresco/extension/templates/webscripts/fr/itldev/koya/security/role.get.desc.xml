@@ -20,12 +20,10 @@
 -->
 
 <webscript>
-    <shortname>Get User Role</shortname>
+    <shortname>Get User Role on node</shortname>
     <description>Get user role for a company</description>
     <family>Itldev</family>
-    <url>/fr/itldev/koya/user/role/{companyName}/{userName}</url>
-    <authentication>user</authentication>    
+    <url>/fr/itldev/koya/security/role/{userName}?nodeId={nodeId}</url>
+    <authentication>user</authentication>
     <format default="json"/>
 </webscript>
-
-	
