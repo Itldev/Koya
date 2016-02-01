@@ -97,8 +97,8 @@ public class GetRole extends AbstractWebScript {
 				ur = new UserRole(kp != null ? kp.toString() : null);
 			}
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("User role for " + u.getUserName() + " on node " + n.getName() + " > "
+			if (logger.isTraceEnabled()) {
+				logger.trace("User role for " + u.getUserName() + " on node " + n.getName() + " > "
 						+ ur.toString());
 			}
 			response = KoyaWebscript.getObjectAsJson(ur);
