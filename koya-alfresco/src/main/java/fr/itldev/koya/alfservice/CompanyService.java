@@ -459,12 +459,22 @@ public class CompanyService {
 	private static String TMP_SUMMARY_DIR = "tmpDossierSummary";
 
 	public NodeRef getTmpSummaryDir(final Company company) {
+		return getTmpDir(company, TMP_SUMMARY_DIR);
+	}
+	
+	private static String TMP_ZIP_DIR = "tmpDossierZip";
+	
+	public NodeRef getTmpZipDir(final Company company) {
+		return getTmpDir(company, TMP_ZIP_DIR);
+	}
+	
+	public NodeRef getTmpDir(final Company company, final String dirName) {
 
 		NodeRef tmpSummaryDir = null;
 
 		try {
 			tmpSummaryDir = nodeService.getChildByName(company.getNodeRef(),
-					ContentModel.ASSOC_CONTAINS, TMP_SUMMARY_DIR);
+					ContentModel.ASSOC_CONTAINS, dirName);
 		} catch (Exception e) {
 		}
 
@@ -477,16 +487,16 @@ public class CompanyService {
 
 							final Map<QName, Serializable> properties = new HashMap<>();
 							properties.put(ContentModel.PROP_NAME,
-									TMP_SUMMARY_DIR);
+									dirName);
 							properties.put(ContentModel.PROP_TITLE,
-									TMP_SUMMARY_DIR);
+									dirName);
 
 							ChildAssociationRef car = nodeService.createNode(
 									company.getNodeRef(),
 									ContentModel.ASSOC_CONTAINS,
 									QName.createQName(
 											NamespaceService.CONTENT_MODEL_1_0_URI,
-											TMP_SUMMARY_DIR),
+											dirName),
 									ContentModel.TYPE_FOLDER, properties);
 
 							permissionService.setPermission(

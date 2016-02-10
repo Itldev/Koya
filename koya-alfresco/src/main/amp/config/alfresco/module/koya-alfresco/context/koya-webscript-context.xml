@@ -219,6 +219,7 @@
 		parent="webscript">
 		<property name="koyaContentService" ref="koyaContentService" />
 		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="companyService" ref="companyService" />
 	</bean>
 	
 	<!-- zip content -->

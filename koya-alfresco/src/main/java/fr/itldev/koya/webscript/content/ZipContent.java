@@ -30,6 +30,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.rest.framework.jacksonextensions.NodeRefSerializer;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
@@ -38,29 +39,29 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaContentService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Mostly comming from atolcd ZipContents
  * http://github.com/atolcd/alfresco-zip-and-download.git
- *
+ * 
  * http://www.atolcd.com/
  */
 public class ZipContent extends AbstractWebScript {
 
 	private static final String ARG_NODEREFS = "nodeRefs";
 	private static final String ARG_PDF = "pdf";
+	private static final String ARG_ZIPNAME = "zipname";
 
-	// private ActionService actionService;
 	private KoyaContentService koyaContentService;
 	private KoyaNodeService koyaNodeService;
+	private CompanyService companyService;
 
-	// public void setActionService(ActionService actionService) {
-	// this.actionService = actionService;
-	// }
 	public void setKoyaContentService(KoyaContentService koyaContentService) {
 		this.koyaContentService = koyaContentService;
 	}
@@ -69,52 +70,49 @@ public class ZipContent extends AbstractWebScript {
 		this.koyaNodeService = koyaNodeService;
 	}
 
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
+
 	@Override
-	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-		Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+	public void execute(WebScriptRequest req, WebScriptResponse res)
+			throws IOException {
 
-		ArrayList<NodeRef> nodeRefs = new ArrayList<>();
-		JSONArray jsonArray = (JSONArray) jsonPostMap.get(ARG_NODEREFS);
-		Boolean pdf = (Boolean) jsonPostMap.get(ARG_PDF);
-		if (pdf == null) {
-			pdf = Boolean.FALSE;
-		}
-
-		if (jsonArray != null) {
-			int len = jsonArray.size();
-			for (int i = 0; i < len; i++) {
-				NodeRef n = koyaNodeService.getNodeRef(jsonArray.get(i).toString());
-				nodeRefs.add(n);
-			}
-		}
+		NodeRef zipNodeRef;
+		String response;
 
 		try {
-			res.setContentType(MIMETYPE_ZIP);
-			res.setHeader("Content-Transfer-Encoding", "binary");
-			res.addHeader("Content-Disposition", "attachment");
+			Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 
-			res.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
-			res.setHeader("Pragma", "public");
-			res.setHeader("Expires", "0");
+			ArrayList<NodeRef> nodeRefs = new ArrayList<>();
+			JSONArray jsonArray = (JSONArray) jsonPostMap.get(ARG_NODEREFS);
+			Boolean pdf = (Boolean) jsonPostMap.get(ARG_PDF);
+			String zipname = (String) jsonPostMap.get(ARG_ZIPNAME);
 
-			File tmpZipFile = koyaContentService.zip(nodeRefs, pdf);
-
-			OutputStream outputStream = res.getOutputStream();
-			if (nodeRefs.size() > 0) {
-				InputStream in = new FileInputStream(tmpZipFile);
-				try {
-					byte[] buffer = new byte[8192];
-					int len;
-
-					while ((len = in.read(buffer)) > 0) {
-						outputStream.write(buffer, 0, len);
-					}
-				} finally {
-					IOUtils.closeQuietly(in);
-				}
+			if (pdf == null) {
+				pdf = Boolean.FALSE;
 			}
+
+			int len = jsonArray.size();
+			for (int i = 0; i < len; i++) {
+				NodeRef n = koyaNodeService.getNodeRef(jsonArray.get(i)
+						.toString());
+				nodeRefs.add(n);
+			}
+
+			Company c = (Company) koyaNodeService.getFirstParentOfType(
+					nodeRefs.get(0), Company.class);
+
+			NodeRef companyTmpZipDir = companyService.getTmpZipDir(c);
+
+			zipNodeRef = koyaContentService.zip(nodeRefs, zipname, pdf, companyTmpZipDir);
+
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService
+					.getKoyaNode(zipNodeRef));
+
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+			throw new WebScriptException("KoyaError : "
+					+ ex.getErrorCode().toString());
 		} catch (RuntimeException e) {
 			/**
 			 * TODO koya specific exception
@@ -122,7 +120,8 @@ public class ZipContent extends AbstractWebScript {
 			throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST,
 					"Erreur lors de la génération de l'archive.", e);
 		}
-
+		res.setContentEncoding("UTF-8");
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
 	}
-
 }

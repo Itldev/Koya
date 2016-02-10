@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -326,18 +327,84 @@ public class KoyaContentService {
      *
      */
     /**
+    *
+    * @param nodeRefs
+    * @return
+    * @throws KoyaServiceException
+    */
+    @Deprecated
+   public File zip(List<NodeRef> nodeRefs, Boolean pdf)
+           throws KoyaServiceException {
+       File tmpZipFile = null;
+       try {
+           tmpZipFile = TempFileProvider.createTempFile("tmpDL", ".zip");
+           FileOutputStream fos = new FileOutputStream(tmpZipFile);
+           CheckedOutputStream checksum = new CheckedOutputStream(fos,
+                   new Adler32());
+           BufferedOutputStream buff = new BufferedOutputStream(checksum);
+           ZipArchiveOutputStream zipStream = new ZipArchiveOutputStream(buff);
+           // NOTE: This encoding allows us to workaround bug...
+           // http://bugs.sun.com/bugdatabase/view_bug.do;:WuuT?bug_id=4820807
+           zipStream.setEncoding("UTF-8");
+
+           zipStream.setMethod(ZipArchiveOutputStream.DEFLATED);
+           zipStream.setLevel(Deflater.BEST_COMPRESSION);
+
+           zipStream
+                   .setCreateUnicodeExtraFields(ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS);
+           zipStream.setUseLanguageEncodingFlag(true);
+           zipStream.setFallbackToUTF8(true);
+
+           try {
+               addToZip(nodeRefs, pdf, zipStream, "");
+           } catch (IOException e) {
+               logger.error(e.getMessage(), e);
+               throw new WebScriptException(
+                       HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+           } finally {
+               zipStream.close();
+               buff.close();
+               checksum.close();
+               fos.close();
+
+           }
+       } catch (IOException | WebScriptException e) {
+           logger.error(e.getMessage(), e);
+           throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST,
+                   e.getMessage());
+       }
+
+       return tmpZipFile;
+   }
+
+    /**
      *
      * @param nodeRefs
      * @return
      * @throws KoyaServiceException
      */
-    public File zip(List<NodeRef> nodeRefs, Boolean pdf)
+    public NodeRef zip(List<NodeRef> nodeRefs, String zipname, Boolean pdf, NodeRef parent)
             throws KoyaServiceException {
-        File tmpZipFile = null;
+        NodeRef zipNodeRef = null;
         try {
-            tmpZipFile = TempFileProvider.createTempFile("tmpDL", ".zip");
-            FileOutputStream fos = new FileOutputStream(tmpZipFile);
-            CheckedOutputStream checksum = new CheckedOutputStream(fos,
+        	final Map<QName, Serializable> properties = new HashMap<>();
+        	zipname = koyaNodeService.getUniqueValidFileNameFromTitle(zipname);
+            properties.put(ContentModel.PROP_NAME, zipname);
+            ChildAssociationRef car = nodeService.createNode(parent,
+                    ContentModel.ASSOC_CONTAINS, QName.createQName(
+                            NamespaceService.CONTENT_MODEL_1_0_URI, zipname),
+                    ContentModel.TYPE_CONTENT);
+
+            zipNodeRef = car.getChildRef();
+            Map<QName, Serializable> indexProp = new HashMap<>();
+            indexProp.put(ContentModel.PROP_IS_INDEXED, false);
+            indexProp.put(ContentModel.PROP_IS_CONTENT_INDEXED, false);
+            nodeService.addAspect(zipNodeRef, ContentModel.ASPECT_INDEX_CONTROL, indexProp);
+            
+            
+            ContentWriter contentWriter = contentService.getWriter(zipNodeRef, ContentModel.PROP_CONTENT, true);
+            OutputStream os = contentWriter.getContentOutputStream();
+            CheckedOutputStream checksum = new CheckedOutputStream(os,
                     new Adler32());
             BufferedOutputStream buff = new BufferedOutputStream(checksum);
             ZipArchiveOutputStream zipStream = new ZipArchiveOutputStream(buff);
@@ -363,7 +430,7 @@ public class KoyaContentService {
                 zipStream.close();
                 buff.close();
                 checksum.close();
-                fos.close();
+                os.close();
 
             }
         } catch (IOException | WebScriptException e) {
@@ -372,7 +439,7 @@ public class KoyaContentService {
                     e.getMessage());
         }
 
-        return tmpZipFile;
+        return zipNodeRef;
     }
 
     public static final List<String> ZIP_MIMETYPES = Collections
