@@ -19,11 +19,7 @@
 package fr.itldev.koya.services.impl;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,7 +48,6 @@ import fr.itldev.koya.model.json.AlfrescoUploadReturn;
 import fr.itldev.koya.model.json.DiskSizeWrapper;
 import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.model.json.PdfRendition;
-import fr.itldev.koya.model.json.ZipResult;
 import fr.itldev.koya.services.KoyaContentService;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 
