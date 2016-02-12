@@ -222,14 +222,6 @@
 		<property name="companyService" ref="companyService" />
 	</bean>
 	
-	<!-- zip content -->
-	<bean id="webscript.fr.itldev.koya.content.zip.get" class="fr.itldev.koya.webscript.content.GetZipContent"
-		parent="webscript">
-		<property name="koyaContentService" ref="koyaContentService" />
-		<property name="koyaNodeService" ref="koyaNodeService" />
-	</bean>
-
-
 	<!-- import Zip -->
 	<bean id="webscript.fr.itldev.koya.content.importzip.get" class="fr.itldev.koya.webscript.content.ImportZip"
 		parent="webscript">

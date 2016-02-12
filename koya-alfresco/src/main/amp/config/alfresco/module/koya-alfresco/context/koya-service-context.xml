@@ -103,6 +103,7 @@
         <property name="namespaceService" ref="NamespaceService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
         <property name="actionService" ref="ActionService"/>
+        <property name="transactionService" ref="transactionService" />
         <property name="activityPoster" ref="koyaActivityPoster" />
     </bean>
    

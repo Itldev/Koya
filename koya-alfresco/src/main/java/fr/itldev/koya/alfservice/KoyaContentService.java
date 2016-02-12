@@ -19,6 +19,7 @@
 package fr.itldev.koya.alfservice;
 
 import fr.itldev.koya.action.PdfRenderActionExecuter;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,6 +38,8 @@ import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
@@ -54,6 +57,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.Pair;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -83,6 +87,7 @@ public class KoyaContentService {
     protected NamespaceService namespaceService;
     protected FileFolderService fileFolderService;
     protected ActionService actionService;
+    protected TransactionService transactionService;
     private KoyaActivityPoster activityPoster;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
@@ -113,7 +118,11 @@ public class KoyaContentService {
     public void setActionService(ActionService actionService) {
         this.actionService = actionService;
     }
-
+    
+    public void setTransactionService(TransactionService transactionService) {
+		this.transactionService = transactionService;
+	}
+    
     public void setActivityPoster(KoyaActivityPoster activityPoster) {
         this.activityPoster = activityPoster;
     }
@@ -459,8 +468,22 @@ public class KoyaContentService {
             if (pdf) {
                 Action pdfRenderAction = actionService
                         .createAction(PdfRenderActionExecuter.NAME);
-                actionService.executeAction(pdfRenderAction, nodeRef);
+				UserTransaction trx = transactionService
+						.getNonPropagatingUserTransaction(false);
+				try {
+					trx.begin();
+					actionService.executeAction(pdfRenderAction, nodeRef);
+					trx.commit();
+				} catch (Throwable e) {
+					try {
+						trx.rollback();
+					} catch (IllegalStateException | SecurityException
+							| SystemException e1) {
+						;
+					}
+				}
 
+                @SuppressWarnings("unchecked")
                 Map<String, Serializable> result = (Map<String, Serializable>) pdfRenderAction
                         .getParameterValue(PdfRenderActionExecuter.PARAM_RESULT);
                 nodeToAdd = new NodeRef(result
