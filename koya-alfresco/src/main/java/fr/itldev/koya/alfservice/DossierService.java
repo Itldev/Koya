@@ -372,24 +372,36 @@ public class DossierService {
 		if (upDir == null) {
 			upDir = createPublicUploadFolder(dossier);
 		}
+		final NodeRef finalUpDir = upDir;
+		
 
-		String finalFileName = fileName;
+		String realFileName = fileName;
 		boolean exists = true;
 		int uniqueFileCounter = 0;
 		while (exists) {
-			exists = nodeService.getChildByName(upDir,
-					ContentModel.ASSOC_CONTAINS, finalFileName) != null;
+			// run as System to check existance of any file in dir (even other
+			// users files)
+			
+			final String finalFileName = realFileName;
+			exists = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Boolean>() {
+				@Override
+				public Boolean doWork() throws Exception {
+					return nodeService.getChildByName(finalUpDir, ContentModel.ASSOC_CONTAINS,
+							finalFileName) != null;
+				}
+			});
+			
 			if (exists) {
 				// build new filename
 				int dot = fileName.lastIndexOf('.');
-				finalFileName = fileName.substring(0, dot) + "-"
-						+ ++uniqueFileCounter + fileName.substring(dot);
+				realFileName = fileName.substring(0, dot) + "-" + ++uniqueFileCounter
+						+ fileName.substring(dot);
 			}
 		}
 		
 		
 		Pair<NodeRef,Map<String, String>> uploadResult = koyaContentService.createContentNode(
-				upDir, finalFileName, null, content.getMimetype(),
+				upDir, realFileName, null, content.getMimetype(),
 				content.getEncoding(), content.getInputStream(), false);
 		
 		//===== permissions and ownable
