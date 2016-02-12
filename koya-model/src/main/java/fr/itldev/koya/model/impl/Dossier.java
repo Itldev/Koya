@@ -36,6 +36,7 @@ public class Dossier extends Space {
 	private List<Document> childDoc = new ArrayList<>();
 
 	private Date lastModifiedDate;
+	private Integer pendingClassifyFiles;
 
 
 	// <editor-fold defaultstate="collapsed" desc="Getters/Setters">
@@ -81,9 +82,16 @@ public class Dossier extends Space {
 		this.lastModifiedDate = lastModifiedDate;
 	}
 
-	
-	// </editor-fold>
 
+	public Integer getPendingClassifyFiles() {
+		return pendingClassifyFiles;
+	}
+
+	public void setPendingClassifyFiles(Integer pendingClassifyFiles) {
+		this.pendingClassifyFiles = pendingClassifyFiles;
+	}
+
+	// </editor-fold>
 	protected Dossier() {
 		super();
 	}

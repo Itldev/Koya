@@ -119,7 +119,15 @@ public class KoyaNodeBuilder {
 				d.getWorkflows().put(activitiId, status);
 			}
 
+		}		
+		//pending classify files 
+		NodeRef publicUpload = koyaNodeService.getPublicUploadFolder(d);
+		if (publicUpload != null) {
+			d.setPendingClassifyFiles(nodeService.getChildAssocs(publicUpload).size());
+		} else {
+			d.setPendingClassifyFiles(0);
 		}
+		
 		return d;
 	}
 

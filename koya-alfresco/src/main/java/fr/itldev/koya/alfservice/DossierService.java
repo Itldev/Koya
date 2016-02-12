@@ -368,7 +368,7 @@ public class DossierService {
 			org.springframework.extensions.surf.util.Content content,
 			String clientMessage) throws KoyaServiceException {
 
-		NodeRef upDir = getPublicUploadFolder(dossier);
+		NodeRef upDir = koyaNodeService.getPublicUploadFolder(dossier);
 		if (upDir == null) {
 			upDir = createPublicUploadFolder(dossier);
 		}
@@ -445,7 +445,7 @@ public class DossierService {
 	}
 
 	public List<Document> listSiteConsumerDocuments(final Dossier dossier) {
-		NodeRef upDir = getPublicUploadFolder(dossier);
+		NodeRef upDir = koyaNodeService.getPublicUploadFolder(dossier);
 		if (upDir != null) {
 			List<Document> docs = new ArrayList<>();
 
@@ -461,32 +461,6 @@ public class DossierService {
 		}
 	}
 
-	private static String SITECONSUMER_UPLOADDIR_NAME = "siteConsumerUpload";
-
-	private NodeRef getPublicUploadFolder(Dossier dossier) {
-		NodeRef publicUploadFolder = null;
-
-		Company c = koyaNodeService.getFirstParentOfType(dossier.getNodeRef(),
-				Company.class);
-
-		try {
-
-			NodeRef koyaClientUpDir = nodeService.getChildByName(
-					c.getNodeRef(), ContentModel.ASSOC_CONTAINS,
-					SITECONSUMER_UPLOADDIR_NAME);
-
-			if (koyaClientUpDir != null) {
-				publicUploadFolder = nodeService.getChildByName(
-						koyaClientUpDir, ContentModel.ASSOC_CONTAINS,
-						publicUploadFolderName(dossier));
-			}
-
-		} catch (Exception e) {
-
-		}
-		return publicUploadFolder;
-	}
-
 	private NodeRef createPublicUploadFolder(final Dossier dossier) {
 		// create folder if not exists
 		NodeRef upDir = AuthenticationUtil
@@ -500,21 +474,21 @@ public class DossierService {
 						NodeRef companyClientUpDir = nodeService
 								.getChildByName(c.getNodeRef(),
 										ContentModel.ASSOC_CONTAINS,
-										SITECONSUMER_UPLOADDIR_NAME);
+										KoyaNodeService.SITECONSUMER_UPLOADDIR_NAME);
 
 						if (companyClientUpDir == null) {
 							final Map<QName, Serializable> properties = new HashMap<>();
 							properties.put(ContentModel.PROP_NAME,
-									SITECONSUMER_UPLOADDIR_NAME);
+									KoyaNodeService.SITECONSUMER_UPLOADDIR_NAME);
 							properties.put(ContentModel.PROP_TITLE,
-									SITECONSUMER_UPLOADDIR_NAME);
+									KoyaNodeService.SITECONSUMER_UPLOADDIR_NAME);
 
 							ChildAssociationRef car = nodeService.createNode(
 									c.getNodeRef(),
 									ContentModel.ASSOC_CONTAINS,
 									QName.createQName(
 											NamespaceService.CONTENT_MODEL_1_0_URI,
-											SITECONSUMER_UPLOADDIR_NAME),
+											KoyaNodeService.SITECONSUMER_UPLOADDIR_NAME),
 									ContentModel.TYPE_FOLDER, properties);						
 							companyClientUpDir = car.getChildRef();
 						}
@@ -522,7 +496,7 @@ public class DossierService {
 						// create dossier public upload client dir
 						final Map<QName, Serializable> properties = new HashMap<>();
 						properties.put(ContentModel.PROP_NAME,
-								publicUploadFolderName(dossier));
+								koyaNodeService.publicUploadFolderName(dossier));
 						properties.put(ContentModel.PROP_TITLE,
 								dossier.getName());
 
@@ -530,7 +504,7 @@ public class DossierService {
 								companyClientUpDir,
 								ContentModel.ASSOC_CONTAINS, QName.createQName(
 										NamespaceService.CONTENT_MODEL_1_0_URI,
-										publicUploadFolderName(dossier)),
+										koyaNodeService.publicUploadFolderName(dossier)),
 								ContentModel.TYPE_FOLDER, properties);
 
 						spaceAclService.initSingleDossierSiteConsumerUploadDirAcl(
@@ -539,9 +513,5 @@ public class DossierService {
 					}
 				});
 		return upDir;
-	}
-
-	private String publicUploadFolderName(Dossier dossier) {
-		return "dossier-" + dossier.getNodeRef().getId();
-	}
+	}	
 }

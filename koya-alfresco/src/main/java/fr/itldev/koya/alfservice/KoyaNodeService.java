@@ -63,6 +63,7 @@ import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.utils.KoyaNodeBuilder;
 
 /**
@@ -748,5 +749,39 @@ public class KoyaNodeService {
 		} while (!oldTitle.equals(title));
 
 		return title;
+	}
+	
+	/**
+	 * Dossier public upload folder methods
+	 */
+	
+	public static String SITECONSUMER_UPLOADDIR_NAME = "siteConsumerUpload";
+
+	public NodeRef getPublicUploadFolder(Dossier dossier) {
+		NodeRef publicUploadFolder = null;
+
+		Company c = getFirstParentOfType(dossier.getNodeRef(),
+				Company.class);
+
+		try {
+
+			NodeRef koyaClientUpDir = nodeService.getChildByName(
+					c.getNodeRef(), ContentModel.ASSOC_CONTAINS,
+					SITECONSUMER_UPLOADDIR_NAME);
+
+			if (koyaClientUpDir != null) {
+				publicUploadFolder = nodeService.getChildByName(
+						koyaClientUpDir, ContentModel.ASSOC_CONTAINS,
+						publicUploadFolderName(dossier));
+			}
+
+		} catch (Exception e) {
+
+		}
+		return publicUploadFolder;
+	}
+	
+	public String publicUploadFolderName(Dossier dossier) {
+		return "dossier-" + dossier.getNodeRef().getId();
 	}
 }
