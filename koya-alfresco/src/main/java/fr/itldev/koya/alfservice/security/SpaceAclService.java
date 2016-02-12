@@ -515,6 +515,19 @@ public class SpaceAclService {
 		return null;
 
 	}
+	
+	private KoyaPermission getKoyaPermissionFromGroupName(String groupName){
+		Pattern p = Pattern.compile("GROUP_.*_.*_(.*)");
+		try {
+			Matcher m = p.matcher(groupName);
+			if (m.find()) {				
+				return KoyaPermission.valueOf(m.group(1));
+			}
+		} catch (Exception e) {
+		}
+		return null;
+	}
+	
 
 	/**
 	 * List users who have rolename role on space
@@ -892,11 +905,11 @@ public class SpaceAclService {
 	 * @return
 	 */
 	public KoyaPermission getKoyaPermission(Space s,User u){		
+		Set<String> userAuths = authorityService.getAuthoritiesForUser(u.getUserName());
+			
 		for (AccessPermission ap : permissionService.getAllSetPermissions(s.getNodeRef())) {
-			for (KoyaPermission p : KoyaPermission.getAll()) {
-				if (ap.getAuthority().endsWith(p.toString())) {
-					return p;
-				}
+			if(userAuths.contains(ap.getAuthority())){
+				return getKoyaPermissionFromGroupName(ap.getAuthority());
 			}
 		}
 		return null;
