@@ -175,6 +175,16 @@ public interface UserService {
 	 * @throws AlfrescoServiceException
 	 */
 	List<Activity> listActivities(User user) throws AlfrescoServiceException;
+	
+	
+	/**
+	 * List available activities for user
+	 * 
+	 * @param user
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	List<Activity> listActivities(User user,Integer minFeedId) throws AlfrescoServiceException;
 
 
 }

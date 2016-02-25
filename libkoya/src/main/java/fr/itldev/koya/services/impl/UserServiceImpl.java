@@ -59,6 +59,8 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService 
 
 	// ====== user activities
 	private static final String REST_GET_ACTIVITIES = "/s/fr/itldev/koya/activities/feed/user?format=json&alf_ticket={alf_ticket}";
+	private static final String REST_GET_ACTIVITIES_MINFEED = "/s/fr/itldev/koya/activities/feed/user?format=json&minFeedId={minFeedId}&alf_ticket={alf_ticket}";
+
 
 	private CacheManager cacheManager;
 
@@ -395,6 +397,24 @@ public class UserServiceImpl extends AlfrescoRestService implements UserService 
 				getTemplate().getForObject(
 						getAlfrescoServerUrl() + REST_GET_ACTIVITIES,
 						String.class, user.getTicketAlfresco()));
+	}
+
+	
+	/**
+	 * List available activities for user
+	 * 
+	 * @param user
+	 * @return
+	 * @throws AlfrescoServiceException
+	 */
+	public List<Activity> listActivities(User user,Integer minFeedId)
+			throws AlfrescoServiceException {
+		return fromJSON(
+				new TypeReference<List<Activity>>() {
+				},
+				getTemplate().getForObject(
+						getAlfrescoServerUrl() + REST_GET_ACTIVITIES_MINFEED,
+						String.class,minFeedId, user.getTicketAlfresco()));
 	}
 
 }
