@@ -8,6 +8,8 @@ public interface KoyaActivityType {
 
 	public static final String KOYA_SPACESHARED = "fr.itldev.koya.space-shared";
 	public static final String KOYA_SPACEUNUNSHARED = "fr.itldev.koya.space-unshared";
+	
+	public static final String KOYA_DLFILEAVAILABLE = "fr.itldev.koya.dlfileavailable";
 
 	public static final String FOLDER_UPDATED = "org.alfresco.documentlibrary.folder-updated";
 

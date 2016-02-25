@@ -68,7 +68,7 @@ public interface KoyaContentService extends AlfrescoService {
 			throws AlfrescoServiceException;
 
 	KoyaNode getZipKoyaNode(User user, List<KoyaNode> koyaNodes,
-			String zipname, Boolean pdf);
+			String zipname, Boolean pdf,Boolean async);
 
 	void importZipedContent(User user, Document zipFile)
 			throws AlfrescoServiceException;

@@ -93,27 +93,22 @@ public class KoyaActivityPoster implements InitializingBean {
 		PropertyCheck.mandatory(this, "companyAclService", companyAclService);
 	}
 
-	public void postSpaceShared(User invitee, String inviterUserName,
-			Space sharedSpace) {
+	public void postSpaceShared(User invitee, String inviterUserName, Space sharedSpace) {
 		try {
 
 			if (invitee != null && invitee.isEnabled() != null && invitee.isEnabled()) {
 				// TODO test if user still exists : treat invitation deletion
 				// case
-				String siteShortName = siteService.getSiteShortName(sharedSpace
-						.getNodeRef());
+				String siteShortName = siteService.getSiteShortName(sharedSpace.getNodeRef());
 
-				List<Invitation> invitations = companyAclService
-						.getPendingInvite(siteShortName, null,
-								invitee.getUserName());
+				List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName,
+						null, invitee.getUserName());
 
 				if (invitations.isEmpty()) {
-					activityService.postActivity(
-							KoyaActivityType.KOYA_SPACESHARED,
-							siteShortName,
+					activityService.postActivity(KoyaActivityType.KOYA_SPACESHARED, siteShortName,
 							KoyaActivityType.KOYA_APPTOOL,
-							getShareActivityData(invitee, inviterUserName,
-									sharedSpace), invitee.getUserName());
+							getShareActivityData(invitee, inviterUserName, sharedSpace),
+							invitee.getUserName());
 
 				}
 			}
@@ -122,30 +117,26 @@ public class KoyaActivityPoster implements InitializingBean {
 		}
 	}
 
-	public void postSpaceUnshared(String revokedinviteeEmail,
-			String revokerUserName, Space unsharedSpace) {
+	public void postSpaceUnshared(String revokedinviteeEmail, String revokerUserName,
+			Space unsharedSpace) {
 		try {
 
 			User user = userService.getUserByEmail(revokedinviteeEmail);
 			if (user.isEnabled() != null && user.isEnabled()) {
 				// TODO test if user still exists : treat invitation deletion
 				// case
-				String siteShortName = siteService
-						.getSiteShortName(unsharedSpace.getNodeRef());
+				String siteShortName = siteService.getSiteShortName(unsharedSpace.getNodeRef());
 
-				List<Invitation> invitations = companyAclService
-						.getPendingInvite(siteShortName, null,
-								user.getUserName());
+				List<Invitation> invitations = companyAclService.getPendingInvite(siteShortName,
+						null, user.getUserName());
 
 				if (invitations.isEmpty()) {
 					// TODO call action
 					// Posting the according activity
-					activityService.postActivity(
-							KoyaActivityType.KOYA_SPACEUNUNSHARED,
-							siteShortName,
-							KoyaActivityType.KOYA_APPTOOL,
-							getShareActivityData(user, revokerUserName,
-									unsharedSpace), user.getUserName());
+					activityService.postActivity(KoyaActivityType.KOYA_SPACEUNUNSHARED,
+							siteShortName, KoyaActivityType.KOYA_APPTOOL,
+							getShareActivityData(user, revokerUserName, unsharedSpace),
+							user.getUserName());
 
 				}
 			}
@@ -163,13 +154,11 @@ public class KoyaActivityPoster implements InitializingBean {
 
 			if (siteId != null && !siteId.equals("")) {
 				// post only for nodes within sites
-				NodeRef parentNodeRef = nodeService.getPrimaryParent(nodeRef)
-						.getParentRef();
+				NodeRef parentNodeRef = nodeService.getPrimaryParent(nodeRef).getParentRef();
 
 				String path = null;
 				boolean isFolder = isFolder(nodeRef);
-				String name = (String) nodeService.getProperty(nodeRef,
-						ContentModel.PROP_NAME);
+				String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
 
 				if (isFolder) {
 					NodeRef documentLibrary = siteService.getContainer(siteId,
@@ -179,8 +168,8 @@ public class KoyaActivityPoster implements InitializingBean {
 						path = getPathFromNode(documentLibrary, nodeRef);
 					} catch (FileNotFoundException error) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("No " + SiteService.DOCUMENT_LIBRARY
-									+ " container found.");
+							logger.debug(
+									"No " + SiteService.DOCUMENT_LIBRARY + " container found.");
 						}
 					}
 				}
@@ -188,20 +177,18 @@ public class KoyaActivityPoster implements InitializingBean {
 				Company c = null;
 				Dossier d = null;
 				try {
-					c = koyaNodeService.getFirstParentOfType(nodeRef,
-							Company.class);
+					c = koyaNodeService.getFirstParentOfType(nodeRef, Company.class);
 				} catch (KoyaServiceException kse) {
 				}
 
 				try {
-					d = koyaNodeService.getFirstParentOfType(nodeRef,
-							Dossier.class);
+					d = koyaNodeService.getFirstParentOfType(nodeRef, Dossier.class);
 				} catch (KoyaServiceException kse) {
 				}
 
-				postFileFolderActivity((isFolder ? ActivityType.FOLDER_ADDED
-						: ActivityType.FILE_ADDED), path, parentNodeRef,
-						nodeRef, siteId, name, c, d);
+				postFileFolderActivity(
+						(isFolder ? ActivityType.FOLDER_ADDED : ActivityType.FILE_ADDED), path,
+						parentNodeRef, nodeRef, siteId, name, c, d);
 			}
 		}
 	}
@@ -212,28 +199,25 @@ public class KoyaActivityPoster implements InitializingBean {
 			String siteId = (siteInfo != null ? siteInfo.getShortName() : null);
 			if (siteId != null && !siteId.equals("")) {
 				// post only for nodes within sites
-				String fileName = (String) nodeService.getProperty(nodeRef,
-						ContentModel.PROP_NAME);
+				String fileName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
 
 				Company c = null;
 				Dossier d = null;
 				try {
-					c = koyaNodeService.getFirstParentOfType(nodeRef,
-							Company.class);
+					c = koyaNodeService.getFirstParentOfType(nodeRef, Company.class);
 				} catch (KoyaServiceException kse) {
 				}
 
 				try {
-					d = koyaNodeService.getFirstParentOfType(nodeRef,
-							Dossier.class);
+					d = koyaNodeService.getFirstParentOfType(nodeRef, Dossier.class);
 				} catch (KoyaServiceException kse) {
 				}
 
 				// add new event folder-updated
 				postFileFolderActivity(
 						isFolder ? "org.alfresco.documentlibrary.folder-updated"
-								: ActivityType.FILE_UPDATED, null, null,
-						nodeRef, siteId, fileName, c, d);
+								: ActivityType.FILE_UPDATED,
+						null, null, nodeRef, siteId, fileName, c, d);
 			}
 		}
 	}
@@ -244,20 +228,24 @@ public class KoyaActivityPoster implements InitializingBean {
 			postFileFolderActivity(
 					(activityInfo.isFolder() ? ActivityType.FOLDER_DELETED
 							: ActivityType.FILE_DELETED),
-					activityInfo.getParentPath(),
-					activityInfo.getParentNodeRef(), activityInfo.getNodeRef(),
-					activityInfo.getSiteId(), activityInfo.getFileName(),
-					activityInfo.getParentCompany(),
-					activityInfo.getParentDossier());
+					activityInfo.getParentPath(), activityInfo.getParentNodeRef(),
+					activityInfo.getNodeRef(), activityInfo.getSiteId(), activityInfo.getFileName(),
+					activityInfo.getParentCompany(), activityInfo.getParentDossier());
 		}
+	}
+
+	public void postDlFileAvailable(KoyaActivityInfo activityInfo,String fileName) {
+		activityService.postActivity(KoyaActivityType.KOYA_DLFILEAVAILABLE,
+				activityInfo.getSiteId(), KoyaActivityType.KOYA_APPTOOL,
+				"{'fileName':'" + fileName + "', 'nodeRef' : '"
+						+ activityInfo.getNodeRef() + "'}");
 	}
 
 	public KoyaActivityInfo getActivityInfo(NodeRef nodeRef) {
 		SiteInfo siteInfo = siteService.getSite(nodeRef);
 		String siteId = (siteInfo != null ? siteInfo.getShortName() : null);
 		if (siteId != null && !siteId.equals("")) {
-			NodeRef parentNodeRef = nodeService.getPrimaryParent(nodeRef)
-					.getParentRef();
+			NodeRef parentNodeRef = nodeService.getPrimaryParent(nodeRef).getParentRef();
 			FileInfo fileInfo = fileFolderService.getFileInfo(nodeRef);
 			String name = fileInfo.getName();
 			boolean isFolder = fileInfo.isFolder();
@@ -269,27 +257,24 @@ public class KoyaActivityPoster implements InitializingBean {
 				parentPath = getPathFromNode(documentLibrary, parentNodeRef);
 			} catch (FileNotFoundException error) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("No " + SiteService.DOCUMENT_LIBRARY
-							+ " container found.");
+					logger.debug("No " + SiteService.DOCUMENT_LIBRARY + " container found.");
 				}
 			}
 
 			Company c = null;
 			try {
-				c = koyaNodeService
-						.getFirstParentOfType(nodeRef, Company.class);
+				c = koyaNodeService.getFirstParentOfType(nodeRef, Company.class);
 			} catch (KoyaServiceException kse) {
 			}
 
 			Dossier d = null;
 			try {
-				d = koyaNodeService
-						.getFirstParentOfType(nodeRef, Dossier.class);
+				d = koyaNodeService.getFirstParentOfType(nodeRef, Dossier.class);
 			} catch (KoyaServiceException kse) {
 			}
 
-			return new KoyaActivityInfo(nodeRef, parentPath, parentNodeRef,
-					siteId, name, isFolder, c, d);
+			return new KoyaActivityInfo(nodeRef, parentPath, parentNodeRef, siteId, name, isFolder,
+					c, d);
 		} else {
 			return null;
 		}
@@ -299,15 +284,15 @@ public class KoyaActivityPoster implements InitializingBean {
 	 * ===== Private Utils ======
 	 */
 
-	private void postFileFolderActivity(String activityType, String path,
-			NodeRef parentNodeRef, NodeRef nodeRef, String siteId, String name,
-			Company parentCompany, Dossier parentDossier) {
+	private void postFileFolderActivity(String activityType, String path, NodeRef parentNodeRef,
+			NodeRef nodeRef, String siteId, String name, Company parentCompany,
+			Dossier parentDossier) {
 
-		JSONObject json = createActivityJSON(path, parentNodeRef, nodeRef,
-				name, parentCompany, parentDossier);
+		JSONObject json = createActivityJSON(path, parentNodeRef, nodeRef, name, parentCompany,
+				parentDossier);
 
-		activityService.postActivity(activityType, siteId,
-				KoyaActivityType.KOYA_APPTOOL, json.toString());
+		activityService.postActivity(activityType, siteId, KoyaActivityType.KOYA_APPTOOL,
+				json.toString());
 	}
 
 	/**
@@ -320,9 +305,8 @@ public class KoyaActivityPoster implements InitializingBean {
 	 * @throws WebDAVServerException
 	 * @return JSONObject
 	 */
-	private JSONObject createActivityJSON(String path, NodeRef parentNodeRef,
-			NodeRef nodeRef, String fileName, Company parentCompany,
-			Dossier parentDossier) {
+	private JSONObject createActivityJSON(String path, NodeRef parentNodeRef, NodeRef nodeRef,
+			String fileName, Company parentCompany, Dossier parentDossier) {
 		JSONObject json = new JSONObject();
 		try {
 			json.put("nodeRef", nodeRef);
@@ -342,14 +326,12 @@ public class KoyaActivityPoster implements InitializingBean {
 			json.put("title", fileName);
 
 			if (parentCompany != null) {
-				json.put("koyaParentCompanyNodeRef", parentCompany.getNodeRef()
-						.toString());
+				json.put("koyaParentCompanyNodeRef", parentCompany.getNodeRef().toString());
 				json.put("koyaParentCompanyTitle", parentCompany.getTitle());
 			}
 
 			if (parentDossier != null) {
-				json.put("koyaParentDossierNodeRef", parentDossier.getNodeRef()
-						.toString());
+				json.put("koyaParentDossierNodeRef", parentDossier.getNodeRef().toString());
 				json.put("koyaParentDossierTitle", parentDossier.getTitle());
 			}
 
@@ -360,8 +342,8 @@ public class KoyaActivityPoster implements InitializingBean {
 		return json;
 	}
 
-	protected String getShareActivityData(User invitee, String inviter,
-			Space space) throws KoyaServiceException {
+	protected String getShareActivityData(User invitee, String inviter, Space space)
+			throws KoyaServiceException {
 		try {
 
 			JSONObject activityData = new JSONObject();
@@ -388,16 +370,14 @@ public class KoyaActivityPoster implements InitializingBean {
 			throws FileNotFoundException {
 		// Check if the nodes are valid, or equal
 		if (rootNodeRef == null || nodeRef == null)
-			throw new IllegalArgumentException(
-					"Invalid node(s) in getPathFromNode call");
+			throw new IllegalArgumentException("Invalid node(s) in getPathFromNode call");
 
 		// short cut if the path node is the root node
 		if (rootNodeRef.equals(nodeRef))
 			return "";
 
 		// get the path elements
-		List<FileInfo> pathInfos = fileFolderService.getNamePath(rootNodeRef,
-				nodeRef);
+		List<FileInfo> pathInfos = fileFolderService.getNamePath(rootNodeRef, nodeRef);
 
 		// build the path string
 		StringBuilder sb = new StringBuilder(pathInfos.size() * 20);
@@ -407,9 +387,8 @@ public class KoyaActivityPoster implements InitializingBean {
 		}
 		// done
 		if (logger.isDebugEnabled()) {
-			logger.debug("Build name path for node: \n" + "   root: "
-					+ rootNodeRef + "\n" + "   target: " + nodeRef + "\n"
-					+ "   path: " + sb);
+			logger.debug("Build name path for node: \n" + "   root: " + rootNodeRef + "\n"
+					+ "   target: " + nodeRef + "\n" + "   path: " + sb);
 		}
 		return sb.toString();
 	}
@@ -424,9 +403,9 @@ public class KoyaActivityPoster implements InitializingBean {
 		private Company parentCompany;
 		private Dossier parentDossier;
 
-		public KoyaActivityInfo(NodeRef nodeRef, String parentPath,
-				NodeRef parentNodeRef, String siteId, String fileName,
-				boolean isFolder, Company parentCompany, Dossier parentDossier) {
+		public KoyaActivityInfo(NodeRef nodeRef, String parentPath, NodeRef parentNodeRef,
+				String siteId, String fileName, boolean isFolder, Company parentCompany,
+				Dossier parentDossier) {
 			super();
 			this.nodeRef = nodeRef;
 			this.parentPath = parentPath;

@@ -65,6 +65,17 @@
         <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
     </bean>
     
+     <bean id="koyaZip" class="fr.itldev.koya.action.ZipContentActionExecuter">
+      	<property name="nodeService" ref="nodeService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="contentService" ref="contentService" />
+        <property name="actionService" ref="ActionService" />
+        <property name="transactionService" ref="transactionService"/>
+     	<property name="activityPoster" ref="koyaActivityPoster"/> 
+        <property name="dictionaryService" ref="DictionaryService"/>
+        <property name="namespaceService" ref="NamespaceService"/>
+    </bean>
+    
     
       <bean id="copyWorkflowTemplate" 
           class="fr.itldev.koya.action.CopyWorkflowTemplateActionExecuter" parent="action-executer">

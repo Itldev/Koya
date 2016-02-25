@@ -54,7 +54,11 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService, Serializable {
 
 
-    private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
     private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
 
     private static final String REST_GET_LISTCONTENTTREE = "/s/fr/itldev/koya/content/tree/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}&alf_ticket={alf_ticket}";
@@ -193,7 +197,8 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     @Override
-    public KoyaNode getZipKoyaNode(User user, List<KoyaNode> koyaNodes,String zipname, Boolean pdf) {
+    public KoyaNode getZipKoyaNode(User user, List<KoyaNode> koyaNodes,String zipname,
+    		Boolean pdf,Boolean async) {
     	
         Map<String, Serializable> params = new HashMap<>();
         ArrayList<String> selected = new ArrayList<>();
@@ -202,6 +207,7 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
             selected.add(item.getNodeRef().toString());
         }
         params.put("pdf", pdf);
+        params.put("async", async);
         params.put("zipname", zipname);
         
         JSONObject postParams = new JSONObject(params);

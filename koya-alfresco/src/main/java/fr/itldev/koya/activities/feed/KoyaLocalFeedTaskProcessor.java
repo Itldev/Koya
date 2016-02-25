@@ -365,6 +365,12 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 			}
 
 		}
+		
+		if(activityPost.getActivityType().equals(KoyaActivityType.KOYA_DLFILEAVAILABLE)){
+			HashSet<String> userNotified = new HashSet<>();		
+			userNotified.add(activityPost.getUserId()) ;
+			return userNotified;
+		}
 
 		logger.warn("Unhandled Activity type : "
 				+ activityPost.getActivityType());
