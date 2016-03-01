@@ -26,6 +26,7 @@ import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
@@ -236,8 +237,16 @@ public class ZipContentActionExecuter extends ActionExecuterAbstractBase {
 		if (this.dictionaryService.isSubClass(nodeQnameType, ContentModel.TYPE_CONTENT)) {
 			ContentReader reader = contentService.getReader(node, ContentModel.PROP_CONTENT);
 			if (reader != null) {
-				InputStream is = reader.getContentInputStream();
-
+				InputStream is = null;
+				
+				try {
+					is = reader.getContentInputStream();
+				} catch (ContentIOException cioex) {
+					logger.error("Failed to read node content while add to zip (ContentIOException) : Silently return " + node.toString());
+					logger.debug(cioex.toString());
+					return;
+				}
+					
 				String filename = path.isEmpty() ? nodeName : path + '/' + nodeName;
 
 				ZipArchiveEntry entry = new ZipArchiveEntry(filename);
