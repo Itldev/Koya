@@ -202,7 +202,7 @@ public class CompanyService {
 			try {
 				rs = searchService.query(
 						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-						SearchService.LANGUAGE_LUCENE, "TYPE:\"st:site\" ASPECT:\"koya:companySite\"");
+						SearchService.LANGUAGE_FTS_ALFRESCO, "ASPECT:\"koya:companySite\"");
 				for (ResultSetRow r : rs) {
 					companies.add(koyaNodeService.getKoyaNode(r.getNodeRef(),
 							Company.class));
