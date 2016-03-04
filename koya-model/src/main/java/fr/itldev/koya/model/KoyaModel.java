@@ -75,9 +75,12 @@ public class KoyaModel {
 
 	public static final QName ASPECT_CONFIDENTIAL = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "confidential");
-	
+
 	public static final QName ASPECT_BPMSTATUS = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "bpmStatus");
+				NAMESPACE_KOYA_CONTENT_MODEL, "bpmStatus");
+	
+	public static final QName ASPECT_TEMPFILE = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "temp");
 
 	// ================= Aspects Properties
 

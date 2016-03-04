@@ -107,4 +107,12 @@
         <property name="fileFolderService" ref="fileFolderService"/>
         <property name="nodeService" ref="nodeService"/>
     </bean>
+    
+    
+     <bean id="cleanTempFiles" 
+          class="fr.itldev.koya.action.CleanTempFilesActionExecuter" parent="action-executer">
+        <property name="searchService" ref="SearchService"/>
+        <property name="nodeService" ref="nodeService"/>
+        <property name="delDelay" value="${koya.tempfiles.deldelay}" />
+    </bean>
 </beans>

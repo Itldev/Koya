@@ -42,6 +42,7 @@ import org.springframework.extensions.webscripts.WebScriptException;
 
 import fr.itldev.koya.alfservice.KoyaActivityPoster;
 import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.model.KoyaModel;
 
 public class ZipContentActionExecuter extends ActionExecuterAbstractBase {
 
@@ -127,7 +128,9 @@ public class ZipContentActionExecuter extends ActionExecuterAbstractBase {
 			indexProp.put(ContentModel.PROP_IS_INDEXED, false);
 			indexProp.put(ContentModel.PROP_IS_CONTENT_INDEXED, false);
 			nodeService.addAspect(zipNodeRef, ContentModel.ASPECT_INDEX_CONTROL, indexProp);
-
+			
+			nodeService.addAspect(zipNodeRef, KoyaModel.ASPECT_TEMPFILE, null);
+			
 			ContentWriter contentWriter = contentService.getWriter(zipNodeRef,
 					ContentModel.PROP_CONTENT, true);
 			OutputStream os = contentWriter.getContentOutputStream();

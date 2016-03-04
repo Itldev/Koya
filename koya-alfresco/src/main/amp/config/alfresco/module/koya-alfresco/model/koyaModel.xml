@@ -282,6 +282,10 @@
         <aspect name="koya:confidential">
             <title>confidential item</title>
         </aspect>
+        
+         <aspect name="koya:temp">
+            <title>Temporary files</title>
+        </aspect>
                      
         
         <aspect name="koya:bpmStatus">
