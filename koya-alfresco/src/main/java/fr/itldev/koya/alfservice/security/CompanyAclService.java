@@ -408,18 +408,21 @@ public class CompanyAclService {
 	/**
 	 * Checks if current logged user is company manager on specified company.
 	 * 
+	 * If company throws SiteDoesNotExistException, it may not have already been 
+	 * indexed. return current user is admin in this case
+	 * 
 	 * @param companyName
 	 * @return
 	 * @throws fr.itldev.koya.exception.KoyaServiceException
 	 */
-	public Boolean isCompanyManager(String companyName)
-			throws KoyaServiceException {
+	public Boolean isCompanyManager(String companyName) throws KoyaServiceException {
 		try {
-			return SitePermission.MANAGER.equals(siteService.getMembersRole(
-					companyName, authenticationService.getCurrentUserName()));
+			return SitePermission.MANAGER.equals(siteService.getMembersRole(companyName,
+					authenticationService.getCurrentUserName()));
 		} catch (SiteDoesNotExistException ex) {
-			throw new KoyaServiceException(
-					KoyaErrorCodes.COMPANY_SITE_NOT_FOUND);
+			logger.warn("isCompanyManager : company " + companyName
+					+ "doesn't exists or not indexed yet : return isadminauthority");
+			return authorityService.isAdminAuthority(authenticationService.getCurrentUserName());
 		}
 	}
 
