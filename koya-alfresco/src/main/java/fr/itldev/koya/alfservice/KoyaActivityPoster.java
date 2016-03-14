@@ -29,6 +29,7 @@ import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaActivityType;
 import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
@@ -239,6 +240,14 @@ public class KoyaActivityPoster implements InitializingBean {
 				activityInfo.getSiteId(), KoyaActivityType.KOYA_APPTOOL,
 				"{'fileName':'" + fileName + "', 'nodeRef' : '"
 						+ activityInfo.getNodeRef() + "'}");
+	}
+	
+	public void postConsumerUpload(Document document,Dossier dossier, User uploader) {
+		KoyaActivityInfo activityInfo = getActivityInfo(document.getNodeRef());
+		activityService.postActivity(KoyaActivityType.KOYA_CONSUMERUPLOAD, activityInfo.getSiteId(),
+				KoyaActivityType.KOYA_APPTOOL,
+				"{'fileName':'" + document.getName() + "', 'nodeRef' : '" + document.getNodeRef() + 
+				"', 'spaceNodeRef' : '" + dossier.getNodeRef() +"'}");
 	}
 
 	public KoyaActivityInfo getActivityInfo(NodeRef nodeRef) {

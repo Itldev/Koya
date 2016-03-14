@@ -85,6 +85,7 @@ public class DossierService {
 	private UserService userService;
 	private AuthenticationService authenticationService;
 	private OwnableService ownableService;
+	private KoyaActivityPoster activityPoster;
 
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setNodeService(NodeService nodeService) {
@@ -135,6 +136,12 @@ public class DossierService {
 	
 	public void setOwnableService(OwnableService ownableService) {
 		this.ownableService = ownableService;
+	}
+	
+	
+
+	public void setActivityPoster(KoyaActivityPoster activityPoster) {
+		this.activityPoster = activityPoster;
 	}
 
 	// </editor-fold>
@@ -409,38 +416,11 @@ public class DossierService {
 		//no inherence
 		spaceAclService.initConsumerUploadedDocument(dossier, uploadResult.getFirst());
 		
-		
-		//
-		List<User> usersNotified = spaceAclService.listMembership(dossier,
-				KoyaPermissionCollaborator.RESPONSIBLE);
-		Boolean notifyCompanyManager = Boolean.FALSE;
-
-		if (usersNotified.isEmpty()) {
-			// if selected dossier has no responsibles, notify company manager
-			notifyCompanyManager = Boolean.TRUE;
-			Company c = koyaNodeService.getFirstParentOfType(
-					dossier.getNodeRef(), Company.class);
-			usersNotified = companyAclService.listMembers(c.getName(),
-					new ArrayList() {
-						{
-							add(SitePermission.MANAGER);
-						}
-					});
-
-			if (usersNotified.isEmpty()) {
-				logger.warn("No responsible nor Company manager notifiable for client document add. Company :  "
-						+ c.getTitle() + " Dossier " + dossier.getTitle());
-				return uploadResult.getSecond();
-			}
-		}
-
 		Document d = koyaNodeService.getKoyaNode(
 				new NodeRef(uploadResult.getSecond().get("nodeRef")), Document.class);
 		User uploader = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
-		koyaMailService.sendClientUploadAlertMail(dossier, d, uploader,
-				usersNotified, notifyCompanyManager);
-
+		activityPoster.postConsumerUpload(d,dossier, uploader);
 		return uploadResult.getSecond();
 	}
 

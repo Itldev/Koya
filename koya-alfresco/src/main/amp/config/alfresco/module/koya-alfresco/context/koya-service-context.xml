@@ -92,6 +92,7 @@
 		<property name="authenticationService" ref="AuthenticationService" />
 		<property name="companyAclService" ref="companyAclService" />
 		<property name="ownableService" ref="ownableService" />		
+		<property name="activityPoster" ref="koyaActivityPoster" />
 	</bean>
 
     <!--Contents handling service-->

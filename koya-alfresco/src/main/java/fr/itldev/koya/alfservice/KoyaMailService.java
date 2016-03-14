@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -259,51 +260,53 @@ public class KoyaMailService implements InitializingBean {
 				null, false, true);
 
 	}
-
-	public void sendClientUploadAlertMail(final Dossier dossier, final Document document,
-			User clientUploader, List<User> notifiedUsers, Boolean notifyCompanyManagers)
+	
+	public void sendClientUploadAlertMail(Set<String> destUserNames,String uploaderUserName,
+			final NodeRef document,final NodeRef dossier)
 					throws KoyaServiceException {
-
-		final Company c = koyaNodeService.getFirstParentOfType(dossier.getNodeRef(), Company.class);
-
+		
+		User uploader = userService.getUserByUsername(uploaderUserName);
+		final Document doc = koyaNodeService.getKoyaNode(document,Document.class);		
+		final Dossier d= koyaNodeService.getKoyaNode(dossier,Dossier.class);
+		Company c = koyaNodeService.getFirstParentOfType(d.getNodeRef(), Company.class);
+		
 		if (logger.isDebugEnabled()) {
-			logger.debug("Alert Email - Client file Upload : dossier " + dossier.getTitle()
-					+ ";client " + clientUploader.getEmail());
+			logger.debug("Alert Email - Client file Upload : dossier " + d.getTitle()
+					+ ";client " + uploader.getEmail());
 		}
 
 		// set mail dest
 		Map<String, Serializable> paramsMail = new HashMap<>();
 		ArrayList<String> mailDest = new ArrayList<>();
-		for (User u : notifiedUsers) {
-			mailDest.add(u.getEmail());
+		for (String username : destUserNames) {
+			mailDest.add(userService.getUserByUsername(username).getEmail());
 		}
 		paramsMail.put(MailActionExecuter.PARAM_TO_MANY, mailDest);
-
+		
+		
+		
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, TPLNODEREF_MAIL_CLIENTUPLOADALERT);
 
 		Map<String, Object> templateModel = new HashMap<>();
-
 		/**
 		 * Model Objects
 		 */
 
-		templateModel.put("notifyCompanyManagers", notifyCompanyManagers);
+		templateModel.put("notifyCompanyManagers", Boolean.FALSE);//TODO check templates usage
 
 		templateModel.put("clientUploader",
-				new ScriptNode(clientUploader.getNodeRef(), serviceRegistry));
-
+				new ScriptNode(uploader.getNodeRef(), serviceRegistry));
 		templateModel.put("uploadedDoc", new HashMap() {
 			{
-				put("title", document.getTitle());
-				put("name", document.getName());
+				put("title", doc.getTitle());
+				put("name", doc.getName());
 			}
 		});
-
 		templateModel.put("referenceDossier", new HashMap() {
 			{
-				put("url", getDirectLinkUrl(dossier.getNodeRef()));
-				put("nodeRef", dossier.getNodeRef());
-				put("title", dossier.getTitle());
+				put("url", getDirectLinkUrl(d.getNodeRef()));
+				put("nodeRef", d.getNodeRef());
+				put("title", d.getTitle());
 			}
 		});
 		templateModel.put("koyaClient", koyaClientParams);
