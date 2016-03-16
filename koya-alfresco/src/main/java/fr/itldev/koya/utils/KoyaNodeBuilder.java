@@ -21,6 +21,7 @@ import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.DocumentToClassify;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 
@@ -137,8 +138,25 @@ public class KoyaNodeBuilder {
 		return dir;
 	}
 
+	/**
+	 * Return Document or DocumentToClassify 
+	 * 
+	 * @param docNodeRef
+	 * @return
+	 */
 	private Document nodeDocumentBuilder(final NodeRef docNodeRef) {
-		Document doc = Document.newInsance();
+		Document doc = null;
+		NodeRef docParent = nodeService.getParentAssocs(docNodeRef).get(0).getParentRef();
+		if (nodeService.getType(docParent).equals(KoyaModel.TYPE_DOSSIERCLASSIFYFOLDER)) {
+			DocumentToClassify d = DocumentToClassify.newInsance();
+			d.setDossier(nodeDossierBuilder(
+					(NodeRef) nodeService.getProperty(docParent, KoyaModel.PROP_DOSSIERREF)));
+
+			doc = d;
+		} else {
+			doc = Document.newInsance();
+		}
+
 		fillKoyaNodeCommonProperties(doc, docNodeRef);
 		doc.setByteSize(AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Long>() {
 			@Override

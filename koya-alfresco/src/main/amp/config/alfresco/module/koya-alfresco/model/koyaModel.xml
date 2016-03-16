@@ -93,6 +93,16 @@
             </properties> 
         </type> 
         
+        <type name="koya:dossierClassifyFolder">
+            <title>dossierclassifyfolder</title> 
+            <parent>koya:container</parent>   
+            <properties>
+                <property name="koya:dossierRef">
+                    <type>d:noderef</type>
+                </property>            
+            </properties> 
+        </type> 
+        
         
         
         <!--

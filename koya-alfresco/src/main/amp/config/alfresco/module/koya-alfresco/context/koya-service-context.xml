@@ -87,10 +87,8 @@
 		<property name="transactionService" ref="transactionService" />
 		<property name="koyaContentService" ref="koyaContentService" />
 		<property name="spaceAclService" ref="spaceAclService" />
-		<property name="koyaMailService" ref="koyaMailService" />
 		<property name="userService" ref="userService" />
 		<property name="authenticationService" ref="AuthenticationService" />
-		<property name="companyAclService" ref="companyAclService" />
 		<property name="ownableService" ref="ownableService" />		
 		<property name="activityPoster" ref="koyaActivityPoster" />
 	</bean>

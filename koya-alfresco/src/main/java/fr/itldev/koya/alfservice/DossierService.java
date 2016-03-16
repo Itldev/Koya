@@ -50,7 +50,6 @@ import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.springframework.dao.ConcurrencyFailureException;
 
-import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
@@ -61,8 +60,6 @@ import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.permissions.KoyaPermissionCollaborator;
-import fr.itldev.koya.model.permissions.SitePermission;
 
 /**
  * Dossiers Handling Service
@@ -79,9 +76,7 @@ public class DossierService {
 	private NamespacePrefixResolver prefixResolver;
 	private TransactionService transactionService;
 	private SpaceAclService spaceAclService;
-	private CompanyAclService companyAclService;
 	private KoyaContentService koyaContentService;
-	private KoyaMailService koyaMailService;
 	private UserService userService;
 	private AuthenticationService authenticationService;
 	private OwnableService ownableService;
@@ -112,17 +107,11 @@ public class DossierService {
 		this.spaceAclService = spaceAclService;
 	}
 
-	public void setCompanyAclService(CompanyAclService companyAclService) {
-		this.companyAclService = companyAclService;
-	}
 
 	public void setKoyaContentService(KoyaContentService koyaContentService) {
 		this.koyaContentService = koyaContentService;
 	}
 
-	public void setKoyaMailService(KoyaMailService koyaMailService) {
-		this.koyaMailService = koyaMailService;
-	}
 
 	public void setUserService(UserService userService) {
 		this.userService = userService;
@@ -469,7 +458,7 @@ public class DossierService {
 									QName.createQName(
 											NamespaceService.CONTENT_MODEL_1_0_URI,
 											KoyaNodeService.SITECONSUMER_UPLOADDIR_NAME),
-									ContentModel.TYPE_FOLDER, properties);						
+									ContentModel.TYPE_FOLDER, properties);		
 							companyClientUpDir = car.getChildRef();
 						}
 
@@ -479,13 +468,15 @@ public class DossierService {
 								koyaNodeService.publicUploadFolderName(dossier));
 						properties.put(ContentModel.PROP_TITLE,
 								dossier.getName());
+						properties.put(KoyaModel.PROP_DOSSIERREF,
+								dossier.getNodeRef());
 
 						ChildAssociationRef car = nodeService.createNode(
 								companyClientUpDir,
 								ContentModel.ASSOC_CONTAINS, QName.createQName(
 										NamespaceService.CONTENT_MODEL_1_0_URI,
 										koyaNodeService.publicUploadFolderName(dossier)),
-								ContentModel.TYPE_FOLDER, properties);
+								KoyaModel.TYPE_DOSSIERCLASSIFYFOLDER, properties);
 
 						spaceAclService.initSingleDossierSiteConsumerUploadDirAcl(
 								dossier, car.getChildRef());

@@ -13,6 +13,7 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.DocumentToClassify;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Space;
@@ -29,6 +30,7 @@ import fr.itldev.koya.model.json.util.NodeRefDeserializer;
 		@Type(value = Space.class, name = "Space"), @Type(value = Dossier.class, name = "Dossier"),
 		@Type(value = Directory.class, name = "Directory"),
 		@Type(value = Document.class, name = "Document"),
+		@Type(value = DocumentToClassify.class, name = "DocumentToClassify"),
 		@Type(value = SalesOffer.class, name = "Salesoffer"),
 		@Type(value = Template.class, name = "Template"),
 		@Type(value = User.class, name = "User") })
