@@ -59,7 +59,8 @@ public class Permissions {
     /**
      * Koya specific permissions
      */
-    private static final Integer shareWithCustomer = 15;
+    private static final Integer shareWithCustomers = 15;
+    private static final Integer uploadAsConsumer = 16;
     //
     private String username;
     private String nodeRef;
@@ -164,9 +165,15 @@ public class Permissions {
      *
      * === koya specific permissions ===
      */
-    public void canShareWithCustomer(Boolean perm) {
-        perms.put(shareWithCustomer, perm);
+    public void canShareWithCustomers(Boolean perm) {
+        perms.put(shareWithCustomers, perm);
     }
+    
+    public void canUploadAsConsumer(Boolean perm) {
+        perms.put(uploadAsConsumer, perm);
+    }
+    
+    
 
     /*
      *
@@ -273,7 +280,12 @@ public class Permissions {
 
     @JsonIgnore
     public Boolean getCanShareWithCustomers() {
-        return perms.get(shareWithCustomer);
+        return perms.get(shareWithCustomers);
+    }
+    
+    @JsonIgnore
+    public Boolean getCanUploadAsConsumer() {
+        return perms.get(uploadAsConsumer);
     }
 
     @JsonIgnore

@@ -923,30 +923,13 @@ public class SpaceAclService {
 	 * @throws fr.itldev.koya.exception.KoyaServiceException
 	 */
 	public Permissions getPermissions(NodeRef n) throws KoyaServiceException {
-		return getPermissions(
-				userService.getUserByUsername(authenticationService.getCurrentUserName()), n);
-	}
 
-	/**
-	 * Builds Koya permissions on given NodeRef for specified user.
-	 * 
-	 * @param u
-	 * @param n
-	 * @return
-	 * @throws fr.itldev.koya.exception.KoyaServiceException
-	 */
-	public Permissions getPermissions(User u, NodeRef n) throws KoyaServiceException {
-
-		Permissions p = new Permissions(u.getUserName(), n);
-		/**
-		 * TODO get permissions method with user and node parameters search in
-		 * alfresco API
-		 * 
-		 */
+		Permissions p = new Permissions(authenticationService.getCurrentUserName(), n);
+		Set<String> userGroups = authorityService.getAuthoritiesForUser(authenticationService.getCurrentUserName());
 		List<String> userPermissions = new ArrayList<>();
 		for (AccessPermission ap : permissionService.getAllSetPermissions(n)) {
 			try {
-				if (ap.getAuthority().equals(u.getUserName())) {
+				if(ap.getAccessStatus().equals(AccessStatus.ALLOWED) && userGroups.contains(ap.getAuthority())){
 					userPermissions.add(ap.getPermission());
 				}
 			} catch (IllegalArgumentException iex) {
@@ -996,8 +979,11 @@ public class SpaceAclService {
 		/*
 		 * ======= Koya specific permissions ========
 		 */
-		p.canShareWithCustomer(p.getCanChangePermissions()
+		p.canShareWithCustomers(p.getCanChangePermissions()
 				|| userPermissions.contains(KoyaPermissionCollaborator.MEMBER.toString()));
+
+		p.canUploadAsConsumer(userPermissions.contains(KoyaPermissionConsumer.CLIENT.toString()) 
+				|| userPermissions.contains(KoyaPermissionConsumer.PARTNER.toString()));
 
 		return p;
 
