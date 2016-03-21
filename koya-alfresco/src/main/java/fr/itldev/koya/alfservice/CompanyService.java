@@ -359,7 +359,7 @@ public class CompanyService {
 				.replaceAll("ñ", "n").replaceAll("[òóôõö]", "o")
 				.replaceAll("œ", "oe").replaceAll("[ùúûü]", "u")
 				.replaceAll("[ýÿ]", "y").replaceAll("&", "and")
-				.replaceAll("\\s+", "-").toLowerCase();
+				.replaceAll("\\s+", "-").replaceAll("[.]", "").toLowerCase();
 
 		// TODO check invalid characters like €
 
