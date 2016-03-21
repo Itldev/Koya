@@ -214,6 +214,11 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 					sendConsumerUploadNotificationMail(activityPost,recipients);
 				}
 				
+				// Send mail for ansync dl file available
+				if ((activityPost.getActivityType().equals(KoyaActivityType.KOYA_DLFILEAVAILABLE))) {		
+					sendDlNotificationMail(activityPost);					
+				}
+				
 				
 
 			}
@@ -322,6 +327,27 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 				return null;
 			}
 		});
+	}
+	
+	private void sendDlNotificationMail(final ActivityPostEntity activityPost) {
+		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
+			@Override
+			public Void doWork() throws Exception {
+				Map<String, Object> activityPostData = null;
+				try {
+					activityPostData = new ObjectMapper().readValue(activityPost.getActivityData(),
+							Map.class);
+					NodeRef dlFileNodeRef = new NodeRef(activityPostData.get("nodeRef").toString());
+					String fileName = activityPostData.get("fileName").toString();
+					koyaMailService.sendDlFileAvailableAlertMail(activityPost.getUserId(),
+							dlFileNodeRef,fileName);
+				} catch (Exception e) {
+					logger.warn("Failed to send dl File Available alert mail : " + e.toString());
+				}
+				return null;
+			}
+		});
+
 	}
 
 	private static String[] SHARING_ACTIVITIES = {

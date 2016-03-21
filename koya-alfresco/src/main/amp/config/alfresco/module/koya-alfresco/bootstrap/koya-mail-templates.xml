@@ -186,6 +186,24 @@
 					<view:associations></view:associations>
 				</cm:content>
 				
+				<cm:content view:childName="cm:dlfile-available.html.ftl">
+					<view:aspects>
+						<cm:titled />
+						<cm:author />
+						<app:inlineeditable />
+					</view:aspects>
+					<view:properties>
+						<sys:node-uuid>29583f21-d827-4bc4-91e8-d59cb04df92b</sys:node-uuid>
+						<app:editInline>true</app:editInline>
+						<cm:description></cm:description>
+						<cm:content>contentUrl=classpath:alfresco/module/${project.artifactId}/templates/dlfile-available.html.ftl|mimetype=text/plain|size=|encoding=UTF-8</cm:content>
+						<cm:title>dlfile-available.html.ftl</cm:title>
+						<cm:author>Me</cm:author>
+						<cm:name>dlfile-available.html.ftl</cm:name>
+					</view:properties>
+					<view:associations></view:associations>
+				</cm:content>
+				
 				            </cm:contains>
         </view:associations>
     </cm:folder>

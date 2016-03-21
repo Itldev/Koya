@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -61,6 +62,7 @@ public class KoyaMailService implements InitializingBean {
 	private final Logger logger = Logger.getLogger(this.getClass());
 
 	private final static String SHARE_NOTIFICATION_SUBJECT = "koya.share-notification.subject";
+	private final static String DLFILE_AVAILABLE_SUBJECT = "koya.dlfile-notification.subject";
 	private final static String RESET_PASSWORD_SUBJECT = "koya.reset-password.subject";
 	private final static String INACTIVEDOSSIER_NOTIFICATION_SUBJECT = "koya.inactivedossier-notification.subject";
 	private final static String ACTIVITIESEMAIL_SUBJECT = "koya.activities-email.subject";
@@ -76,6 +78,8 @@ public class KoyaMailService implements InitializingBean {
 			+ "/cm:koyamail.properties";
 	private final static String TPL_MAIL_SHARENOTIF = TPL_MAIL_KOYAROOT
 			+ "/cm:share-notification.html.ftl";
+	private final static String TPL_MAIL_DLFILEAVAILBLE = TPL_MAIL_KOYAROOT
+			+ "/cm:dlfile-available.html.ftl";
 	private final static String TPL_MAIL_CLIENTUPLOADALERT = TPL_MAIL_KOYAROOT
 			+ "/cm:clientdoc-upload.html.ftl";
 	private final static String TPL_MAIL_RESET_PWD = TPL_MAIL_KOYAROOT
@@ -86,6 +90,7 @@ public class KoyaMailService implements InitializingBean {
 
 	private final static NodeRef TPLNODEREF_MAIL_I18NSUBJECTS = new NodeRef("workspace://SpacesStore/b6bf4b3d-317d-4145-808e-92b5e3ae5fea");
 	private final static NodeRef TPLNODEREF_MAIL_SHARENOTIF = new NodeRef("workspace://SpacesStore/34c1e5bf-9115-4496-84f1-8e695911020f");
+	private final static NodeRef TPLNODEREF_MAIL_DLFILEAVAILBLE = new NodeRef("workspace://SpacesStore/29583f21-d827-4bc4-91e8-d59cb04df92b");
 	private final static NodeRef TPLNODEREF_MAIL_CLIENTUPLOADALERT = new NodeRef("workspace://SpacesStore/a61ce4cd-6006-4f0b-ad09-6e6b5d3435a4");
 	private final static NodeRef TPLNODEREF_MAIL_RESET_PWD = new NodeRef("workspace://SpacesStore/9d5fbb22-9810-40f3-b461-aa1a253e73bb");
 	public final static NodeRef TPLNODEREF_MAIL_INVITATION = new NodeRef("workspace://SpacesStore/035a2bac-77f8-4747-a25d-e695d9f7651e");
@@ -255,6 +260,58 @@ public class KoyaMailService implements InitializingBean {
 		 */
 		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
 				getI18nSubject(SHARE_NOTIFICATION_SUBJECT, templateModel));
+
+		actionService.executeAction(actionService.createAction(MailActionExecuter.NAME, paramsMail),
+				null, false, true);
+
+	}
+
+	public void sendDlFileAvailableAlertMail(String destUserName, final NodeRef dlFileNodeRef,
+			final String fileName) throws KoyaServiceException {
+
+		User dest = userService.getUserByUsername(destUserName);		
+		final Document dlFile = koyaNodeService.getKoyaNode(dlFileNodeRef, Document.class);
+		final Company c = koyaNodeService.getFirstParentOfType(dlFile.getNodeRef(), Company.class);
+		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Alert Email - DlFileAvailble " + dlFile.getTitle() + ";user " + dest.getEmail());
+		}
+
+		Map<String, Serializable> paramsMail = new HashMap<>();
+		paramsMail.put(MailActionExecuter.PARAM_TO, dest.getEmail());
+
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, TPLNODEREF_MAIL_DLFILEAVAILBLE);
+
+		// TODO i18n templates
+		Map<String, Object> templateModel = new HashMap<>();
+
+		final HashMap<String, String> dlLinkAttributes = new HashMap<>();
+		dlLinkAttributes.put("mode", "dl");
+		dlLinkAttributes.put("fileName", fileName);
+		/**
+		 * Model Objects
+		 */
+		
+		templateModel.put("dlfile", new HashMap() {
+			{
+				put("url", getDirectLinkUrl(dlFile.getNodeRef(),dlLinkAttributes));
+				put("nodeRef", dlFile.getNodeRef());
+				put("title", fileName);
+			}
+		});
+
+		templateModel.put("koyaClient", koyaClientParams);
+
+		templateModel.put(TemplateService.KEY_COMPANY_HOME, repositoryHelper.getCompanyHome());
+		templateModel.put("company", companyPropertiesService.getProperties(c).toHashMap());
+
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
+
+		/**
+		 * Get subject from properties file in repository
+		 */
+		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
+				getI18nSubject(DLFILE_AVAILABLE_SUBJECT, templateModel));
 
 		actionService.executeAction(actionService.createAction(MailActionExecuter.NAME, paramsMail),
 				null, false, true);
@@ -642,6 +699,15 @@ public class KoyaMailService implements InitializingBean {
 
 			return koyaClientServerPath + koyaDirectLinkUrlTemplate.replace("{nodeId}", n.getId());
 		}
+	}
+	public String getDirectLinkUrl(NodeRef n,Map<String,String> attributes) {
+		String url=getDirectLinkUrl(n);		
+		String sep = "?";
+		for(Entry<String, String> e:attributes.entrySet()){
+			url += sep + e.getKey()+"="+e.getValue();
+			sep="&";
+		}
+		return url;
 	}
 
 }
