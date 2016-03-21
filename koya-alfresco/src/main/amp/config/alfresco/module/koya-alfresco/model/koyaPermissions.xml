@@ -37,10 +37,11 @@
         
         <permissionGroup name="KoyaResponsible" allowFullControl="true" expose="true" />
         
-        
+        <!-- TODO : restrict delete permission on container type -->
         <permissionGroup name="KoyaMember" allowFullControl="false" expose="true">
              <includePermissionGroup permissionGroup="Contributor" type="cm:cmobject" />            
              <includePermissionGroup permissionGroup="ChangePermissions" type="sys:base" />
+             <includePermissionGroup permissionGroup="Delete" type="sys:base" />
         </permissionGroup>
         
         

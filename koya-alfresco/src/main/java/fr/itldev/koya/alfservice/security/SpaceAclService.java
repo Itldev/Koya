@@ -958,8 +958,23 @@ public class SpaceAclService {
 		p.canExecuteContent(permissionService.hasPermission(n, PermissionService.EXECUTE_CONTENT)
 				.equals(AccessStatus.ALLOWED));
 		//
-		p.canDeleteNode(permissionService.hasPermission(n, PermissionService.DELETE_NODE)
-				.equals(AccessStatus.ALLOWED));
+		
+		/**
+		 * Specific permissions on containers. KoyaMember can not delete this type of node.
+		 * TODO
+		 * This is a workaround to avoid defining complex permissions. We have to change permissions
+		 * scheme in order to prevent KoyaMember can delete Containers node but can delete child nodes.
+		 */
+		Boolean canDelNode = permissionService.hasPermission(n, PermissionService.DELETE_NODE)
+				.equals(AccessStatus.ALLOWED);
+		if (nodeService.getType(n).equals(KoyaModel.TYPE_DOSSIER)
+				|| nodeService.getType(n).equals(KoyaModel.TYPE_SPACE)) {
+			p.canDeleteNode(canDelNode
+					&& !userPermissions.contains(KoyaPermissionCollaborator.MEMBER.toString()));
+		} else {
+			p.canDeleteNode(canDelNode);
+		}
+		
 		//
 		p.canDeleteAssociations(
 				permissionService.hasPermission(n, PermissionService.DELETE_ASSOCIATIONS)
