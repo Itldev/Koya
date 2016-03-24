@@ -53,6 +53,8 @@ import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.json.MailWrapper;
+import fr.itldev.koya.model.permissions.KoyaPermission;
+import fr.itldev.koya.model.permissions.KoyaPermissionConsumer;
 
 /**
  *
@@ -212,7 +214,9 @@ public class KoyaMailService implements InitializingBean {
 		final Space s = koyaNodeService.getKoyaNode(sharedNodeRef, Space.class);
 		final Company c = koyaNodeService.getFirstParentOfType(sharedNodeRef, Company.class);
 		User dest = userService.getUserByUsername(destUserName);
-
+                final KoyaPermission koyaPermission=spaceAclService.getKoyaPermission(s, dest);
+                
+                
 		if (logger.isDebugEnabled()) {
 			logger.debug("Alert Email - Share : space " + s.getTitle() + ";user " + dest.getEmail());
 		}
@@ -234,7 +238,7 @@ public class KoyaMailService implements InitializingBean {
                 templateModel.put("dest", new ScriptNode(dest.getNodeRef(), serviceRegistry));
 		templateModel.put("sharedItem", new HashMap() {
 			{
-				put("url", getDirectLinkUrl(sharedNodeRef));
+				put("url", (koyaPermission.equals(KoyaPermissionConsumer.PARTNER)?getDirectLinkUrl(c.getNodeRef()):getDirectLinkUrl(sharedNodeRef)));
 				put("nodeRef", s.getNodeRef());
 				put("title", s.getTitle());
 			}
