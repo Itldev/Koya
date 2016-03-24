@@ -30,6 +30,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.TemplateService;
+import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
@@ -87,14 +88,6 @@ public class KoyaMailService implements InitializingBean {
 	public final static String TPL_MAIL_INVITATION = TPL_MAIL_KOYAROOT + "/cm:invite.html.ftl";
 	private final static String TPL_MAIL_INACTIVEDOSSIERNOTIF_ = TPL_MAIL_KOYAROOT
 			+ "/cm:inactive-dossiers.html.ftl";
-
-	private final static NodeRef TPLNODEREF_MAIL_I18NSUBJECTS = new NodeRef("workspace://SpacesStore/b6bf4b3d-317d-4145-808e-92b5e3ae5fea");
-	private final static NodeRef TPLNODEREF_MAIL_SHARENOTIF = new NodeRef("workspace://SpacesStore/34c1e5bf-9115-4496-84f1-8e695911020f");
-	private final static NodeRef TPLNODEREF_MAIL_DLFILEAVAILBLE = new NodeRef("workspace://SpacesStore/29583f21-d827-4bc4-91e8-d59cb04df92b");
-	private final static NodeRef TPLNODEREF_MAIL_CLIENTUPLOADALERT = new NodeRef("workspace://SpacesStore/a61ce4cd-6006-4f0b-ad09-6e6b5d3435a4");
-	private final static NodeRef TPLNODEREF_MAIL_RESET_PWD = new NodeRef("workspace://SpacesStore/9d5fbb22-9810-40f3-b461-aa1a253e73bb");
-	public final static NodeRef TPLNODEREF_MAIL_INVITATION = new NodeRef("workspace://SpacesStore/035a2bac-77f8-4747-a25d-e695d9f7651e");
-	private final static NodeRef TPLNODEREF_MAIL_INACTIVEDOSSIERNOTIF_ = new NodeRef("workspace://SpacesStore/141585d0-0ba8-4cc0-bf85-71e88d038ac2");
 
 	protected NamespaceService namespaceService;
 	protected FileFolderService fileFolderService;
@@ -227,7 +220,10 @@ public class KoyaMailService implements InitializingBean {
 		Map<String, Serializable> paramsMail = new HashMap<>();
 		paramsMail.put(MailActionExecuter.PARAM_TO, dest.getEmail());
 
-		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, TPLNODEREF_MAIL_SHARENOTIF);
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, 
+				getFileTemplateRef(new RepositoryLocation(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						TPL_MAIL_SHARENOTIF, SearchService.LANGUAGE_LUCENE)));
 
 		// TODO i18n templates
 		Map<String, Object> templateModel = new HashMap<>();
@@ -281,7 +277,10 @@ public class KoyaMailService implements InitializingBean {
 		Map<String, Serializable> paramsMail = new HashMap<>();
 		paramsMail.put(MailActionExecuter.PARAM_TO, dest.getEmail());
 
-		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, TPLNODEREF_MAIL_DLFILEAVAILBLE);
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, 
+				getFileTemplateRef(new RepositoryLocation(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						TPL_MAIL_DLFILEAVAILBLE, SearchService.LANGUAGE_LUCENE)));
 
 		// TODO i18n templates
 		Map<String, Object> templateModel = new HashMap<>();
@@ -344,7 +343,10 @@ public class KoyaMailService implements InitializingBean {
 		
 		
 		
-		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, TPLNODEREF_MAIL_CLIENTUPLOADALERT);
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, 
+				getFileTemplateRef(new RepositoryLocation(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						TPL_MAIL_CLIENTUPLOADALERT, SearchService.LANGUAGE_LUCENE)));
 
 		Map<String, Object> templateModel = new HashMap<>();
 		/**
@@ -422,7 +424,10 @@ public class KoyaMailService implements InitializingBean {
 
 		paramsMail.put(MailActionExecuter.PARAM_TO, destMail);
 
-		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, TPLNODEREF_MAIL_RESET_PWD);
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE,
+				getFileTemplateRef(new RepositoryLocation(
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_MAIL_RESET_PWD, SearchService.LANGUAGE_LUCENE)));
 
 		// TODO i18n templates
 		Map<String, Object> templateModel = new HashMap<>();
@@ -451,7 +456,10 @@ public class KoyaMailService implements InitializingBean {
 
 		paramsMail.put(MailActionExecuter.PARAM_TO, dest.getEmail());
 
-		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, TPLNODEREF_MAIL_INACTIVEDOSSIERNOTIF_);
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, 
+				getFileTemplateRef(new RepositoryLocation(
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_MAIL_INACTIVEDOSSIERNOTIF_, SearchService.LANGUAGE_LUCENE)));
 
 		Map<String, Object> templateModel = new HashMap<>();
 		templateModel.put(TemplateService.KEY_COMPANY_HOME, repositoryHelper.getCompanyHome());
@@ -563,13 +571,13 @@ public class KoyaMailService implements InitializingBean {
 		/**
 		 * Get subject and body Templates
 		 */
-		if (wrapper.getTemplateXPath() != null) {
+		if (wrapper.getTemplatePath() != null) {
 			RepositoryLocation templateLoc = new RepositoryLocation();// defaultQuery
 			// language
 			// =
 			// xpath
-			templateLoc.setPath(wrapper.getTemplateXPath());
-
+			templateLoc.setPath(wrapper.getTemplatePath());
+			templateLoc.setQueryLanguage(SearchService.LANGUAGE_LUCENE);
 			// TODO wrapper should only indicate mail template name. Root path
 			// is determniated
 			// by company context (spcific template or koya generic template or
@@ -615,7 +623,10 @@ public class KoyaMailService implements InitializingBean {
 
 	public String getI18nSubject(String propKey, Map<String, Object> templateValues)
 			throws KoyaServiceException {
-		Properties i18n = koyaNodeService.readPropertiesFileContent(TPLNODEREF_MAIL_I18NSUBJECTS);
+		Properties i18n = koyaNodeService.readPropertiesFileContent(
+				getFileTemplateRef(new RepositoryLocation(
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				TPL_MAIL_I18NSUBJECTS, SearchService.LANGUAGE_LUCENE)));
 		if (i18n == null) {
 			throw new KoyaServiceException(KoyaErrorCodes.KOYAMAIL_INVALID_SUBJECT_PROPERTIES_PATH,
 					"Invalid koya Mail subject properties path : ");
@@ -686,7 +697,16 @@ public class KoyaMailService implements InitializingBean {
 			} catch (SearcherException e) {
 				throw new KoyaServiceException(KoyaErrorCodes.KOYAMAIL_CANNOT_FIND_TEMPLATE, e);
 			}
-		} else {
+		} else
+			if(locationType.equals(SearchService.LANGUAGE_LUCENE)) {
+		       ResultSet rs = searchService.query(templateRepoLocation.getStoreRef(), locationType, "PATH:\""+templateRepoLocation.getPath()+"\"");
+
+		       if(rs.length() != 1) {
+				throw new KoyaServiceException(KoyaErrorCodes.KOYAMAIL_CANNOT_FIND_TEMPLATE,
+						rs.length() + " nodes match search");
+			}
+		    return fileFolderService.getLocalizedSibling(rs.getNodeRef(0));
+		}else {
 			throw new KoyaServiceException(
 					KoyaErrorCodes.KOYAMAIL_UNSUPPORTED_TEMPLATE_LOCATION_TYPE,
 					"given type : " + locationType + " expected xpath");
