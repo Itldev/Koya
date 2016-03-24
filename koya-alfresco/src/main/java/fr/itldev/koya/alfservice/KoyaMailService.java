@@ -357,13 +357,13 @@ public class KoyaMailService implements InitializingBean {
 				new ScriptNode(uploader.getNodeRef(), serviceRegistry));
 		templateModel.put("uploadedDoc", new HashMap() {
 			{
+                                put("url", getDirectLinkUrl(doc.getNodeRef()));
 				put("title", doc.getTitle());
 				put("name", doc.getName());
 			}
 		});
 		templateModel.put("referenceDossier", new HashMap() {
 			{
-				put("url", getDirectLinkUrl(d.getNodeRef()));
 				put("nodeRef", d.getNodeRef());
 				put("title", d.getTitle());
 			}
