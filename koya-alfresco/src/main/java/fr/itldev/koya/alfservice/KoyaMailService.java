@@ -218,14 +218,14 @@ public class KoyaMailService implements InitializingBean {
 
 		final Space s = koyaNodeService.getKoyaNode(sharedNodeRef, Space.class);
 		final Company c = koyaNodeService.getFirstParentOfType(sharedNodeRef, Company.class);
-		User u = userService.getUserByUsername(destUserName);
+		User dest = userService.getUserByUsername(destUserName);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Alert Email - Share : space " + s.getTitle() + ";user " + u.getEmail());
+			logger.debug("Alert Email - Share : space " + s.getTitle() + ";user " + dest.getEmail());
 		}
 
 		Map<String, Serializable> paramsMail = new HashMap<>();
-		paramsMail.put(MailActionExecuter.PARAM_TO, u.getEmail());
+		paramsMail.put(MailActionExecuter.PARAM_TO, dest.getEmail());
 
 		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, TPLNODEREF_MAIL_SHARENOTIF);
 
@@ -235,6 +235,7 @@ public class KoyaMailService implements InitializingBean {
 		/**
 		 * Model Objects
 		 */
+                templateModel.put("dest", new ScriptNode(dest.getNodeRef(), serviceRegistry));
 		templateModel.put("sharedItem", new HashMap() {
 			{
 				put("url", getDirectLinkUrl(sharedNodeRef));
@@ -300,6 +301,7 @@ public class KoyaMailService implements InitializingBean {
 			}
 		});
 
+                templateModel.put("dest", new ScriptNode(dest.getNodeRef(), serviceRegistry));
 		templateModel.put("koyaClient", koyaClientParams);
 
 		templateModel.put(TemplateService.KEY_COMPANY_HOME, repositoryHelper.getCompanyHome());
@@ -454,6 +456,7 @@ public class KoyaMailService implements InitializingBean {
 		Map<String, Object> templateModel = new HashMap<>();
 		templateModel.put(TemplateService.KEY_COMPANY_HOME, repositoryHelper.getCompanyHome());
 
+                templateModel.put("dest", new ScriptNode(dest.getNodeRef(), serviceRegistry));
 		templateModel.put("koyaClient", koyaClientParams);
 		List<Map<String, Serializable>> params = CollectionUtils.transform(inactiveDossiers,
 				new Function<NodeRef, Map<String, Serializable>>() {
