@@ -7,6 +7,8 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Stopwatch;
+
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -60,6 +62,7 @@ public class ApplyDefaultAclOnCreate implements
 	@Override
 	public void onCreateNode(ChildAssociationRef childAssocRef) {
 
+		Stopwatch timer = new Stopwatch().start();
 		Space space;
 		try {
 			space = koyaNodeService.getKoyaNode(childAssocRef.getChildRef(),
@@ -72,6 +75,8 @@ public class ApplyDefaultAclOnCreate implements
 
 		spaceAclService.initSpaceAcl(space);
 
+		timer.stop();
+		logger.error("onCreateNode > " + timer.elapsedMillis());
 	}
 
 }

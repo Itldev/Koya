@@ -1,6 +1,9 @@
 package fr.itldev.koya.behaviour;
 
+import java.io.Serializable;
+
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.content.ContentServicePolicies;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.Behaviour;
@@ -13,12 +16,12 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Stopwatch;
+
 import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Dossier;
-import java.io.Serializable;
-import org.alfresco.repo.cache.SimpleCache;
 
 /**
  *
@@ -113,6 +116,9 @@ public class LastModificationDateBehaviour implements
     @Override
     public void onDeleteNode(ChildAssociationRef childAssocRef,
             boolean isNodeArchived) {
+    	
+		Stopwatch timer = new Stopwatch().start();
+
         if (!lastModifiedSharedCache.contains(childAssocRef.getChildRef())
                 && !lastModifiedSharedCache.contains(childAssocRef.getParentRef())) {
 
@@ -136,10 +142,15 @@ public class LastModificationDateBehaviour implements
                 }
             }
         }
+        timer.stop();
+		logger.error("onDeleteNode > " + timer.elapsedMillis());
     }
 
     @Override
     public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
+		Stopwatch timer = new Stopwatch().start();
+
+    	
         if (!lastModifiedSharedCache.contains(nodeRef)) {
             if (existCondition(nodeRef)
                     && (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)
@@ -159,10 +170,15 @@ public class LastModificationDateBehaviour implements
                 }
             }
         }
+        timer.stop();
+		logger.error("onContentUpdate > " + timer.elapsedMillis());
     }
 
     @Override
     public void onAddAspect(NodeRef nodeRef, QName aspectTypeQName) {
+    	
+		Stopwatch timer = new Stopwatch().start();
+
         if (!lastModifiedSharedCache.contains(nodeRef)) {
 
             if (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)) {
@@ -179,6 +195,8 @@ public class LastModificationDateBehaviour implements
                 }
             }
         }
+        timer.stop();
+		logger.error("onAddAspect > " + timer.elapsedMillis());
     }
 
     //Add onCreateNode policy ? folder add ?

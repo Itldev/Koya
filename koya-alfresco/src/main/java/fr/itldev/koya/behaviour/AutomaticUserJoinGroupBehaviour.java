@@ -18,6 +18,8 @@ import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Stopwatch;
+
 /**
  * 
  * If feature is active and current user doesn't belongs to companyName, then
@@ -28,8 +30,7 @@ import org.apache.log4j.Logger;
  * default role on a default company
  * 
  */
-public class AutomaticUserJoinGroupBehaviour implements
-		NodeServicePolicies.OnCreateNodePolicy,
+public class AutomaticUserJoinGroupBehaviour implements NodeServicePolicies.OnCreateNodePolicy,
 		NodeServicePolicies.OnUpdatePropertiesPolicy {
 	private final Logger logger = Logger.getLogger(this.getClass());
 
@@ -70,41 +71,43 @@ public class AutomaticUserJoinGroupBehaviour implements
 	public void init() {
 		// Create behaviours
 
-		this.policyComponent.bindClassBehaviour(
-				NodeServicePolicies.OnCreateNodePolicy.QNAME,
-				ContentModel.TYPE_PERSON, new JavaBehaviour(this,
-						"onCreateNode",
+		this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnCreateNodePolicy.QNAME,
+				ContentModel.TYPE_PERSON, new JavaBehaviour(this, "onCreateNode",
 						Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
 
-		this.policyComponent.bindClassBehaviour(
-				NodeServicePolicies.OnUpdatePropertiesPolicy.QNAME,
-				ContentModel.TYPE_PERSON, new JavaBehaviour(this,
-						"onUpdateProperties",
+		this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnUpdatePropertiesPolicy.QNAME,
+				ContentModel.TYPE_PERSON, new JavaBehaviour(this, "onUpdateProperties",
 						Behaviour.NotificationFrequency.TRANSACTION_COMMIT));
 	}
 
 	@Override
 	public void onCreateNode(ChildAssociationRef childAssocRef) {
+
 		if (active) {
+			Stopwatch timer = new Stopwatch().start();
 			try {
 				final NodeRef person = childAssocRef.getChildRef();
-				joinGroup((String) nodeService.getProperty(person,
-						ContentModel.PROP_USERNAME));
+				joinGroup((String) nodeService.getProperty(person, ContentModel.PROP_USERNAME));
 			} catch (Exception e) {
 
 			}
+			timer.stop();
+			logger.error("onCreateNode > " + timer.elapsedMillis());
 		}
 	}
 
 	@Override
-	public void onUpdateProperties(final NodeRef nodeRef,
-			Map<QName, Serializable> before, Map<QName, Serializable> after) {
+	public void onUpdateProperties(final NodeRef nodeRef, Map<QName, Serializable> before,
+			Map<QName, Serializable> after) {
 		if (active) {
+			Stopwatch timer = new Stopwatch().start();
 			try {
 				joinGroup((String) after.get(ContentModel.PROP_USERNAME));
 			} catch (Exception e) {
 
 			}
+			timer.stop();
+			logger.error("onUpdateProperties > " + timer.elapsedMillis());
 		}
 	}
 
@@ -115,26 +118,24 @@ public class AutomaticUserJoinGroupBehaviour implements
 		}
 
 		// search company and group
-		AuthenticationUtil
-				.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
-					public Void doWork() throws Exception {
-						SiteInfo sInfo = siteService.getSite(companyName);
+		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
+			public Void doWork() throws Exception {
+				SiteInfo sInfo = siteService.getSite(companyName);
 
-						if (sInfo == null) {
-							return null;
-						}
+				if (sInfo == null) {
+					return null;
+				}
 
-						if (!siteService.isMember(companyName, username)) {
+				if (!siteService.isMember(companyName, username)) {
 
-							logger.info(username + " > setMembership company "
-									+ companyName + " -> " + groupName);
+					logger.info(username + " > setMembership company " + companyName + " -> "
+							+ groupName);
 
-							siteService.setMembership(companyName, username,
-									groupName);
-						}
-						return null;
-					}
-				});
+					siteService.setMembership(companyName, username, groupName);
+				}
+				return null;
+			}
+		});
 
 	}
 

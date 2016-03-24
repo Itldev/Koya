@@ -8,6 +8,8 @@ import org.alfresco.repo.security.authority.UnknownAuthorityException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Stopwatch;
+
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
@@ -49,6 +51,7 @@ public class DeleteKoyaGroupsBeforeDelete implements
 
 	@Override
 	public void beforeDeleteNode(NodeRef nodeRef) {
+		Stopwatch timer = new Stopwatch().start();
 		try {
 			Space s = koyaNodeService.getKoyaNode(nodeRef, Space.class);
 			spaceAclService.removeAllKoyaGroups(s);
@@ -57,6 +60,9 @@ public class DeleteKoyaGroupsBeforeDelete implements
 		} catch (UnknownAuthorityException e) {
 			logger.error("Unknown authority trying to del group : " + e.toString());
 		}
+		timer.stop();
+		logger.error("beforeDeleteNode > " + timer.elapsedMillis());
+		
 	}
 
 }
