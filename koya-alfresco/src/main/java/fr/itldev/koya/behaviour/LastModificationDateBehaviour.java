@@ -180,7 +180,7 @@ public class LastModificationDateBehaviour implements
                 }
             }
         }
-        timer.stop();
+//        timer.stop();
 		logger.error("onContentUpdate > " + timer.elapsedMillis());
     }
 

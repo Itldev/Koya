@@ -50,6 +50,8 @@ import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.springframework.dao.ConcurrencyFailureException;
 
+import com.google.common.base.Stopwatch;
+
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
@@ -301,7 +303,7 @@ public class DossierService {
 		if (d == null) {
 			return;
 		}
-
+		final Stopwatch timer = new Stopwatch().start();
 		AuthenticationUtil
 				.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
 					@Override
@@ -319,13 +321,19 @@ public class DossierService {
 								nodeService.addAspect(d.getNodeRef(),
 										KoyaModel.ASPECT_LASTMODIFIED, props);
 							}
+			        		logger.error("aspect check/add > " + timer.elapsedMillis());
+
 
 							nodeService.setProperty(d.getNodeRef(),
 									KoyaModel.PROP_LASTMODIFICATIONDATE,
 									new Date());
 							nodeService.setProperty(d.getNodeRef(),
 									KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
+			        		logger.error("updateLastModificationDate > " + timer.elapsedMillis());
+
 							transaction.commit();
+			        		logger.error("commit > " + timer.elapsedMillis());
+
 							logger.debug("Updated lastModificationDate of dossier : "
 									+ d.getTitle());
 						} catch (ConcurrencyFailureException cex) {
@@ -349,6 +357,8 @@ public class DossierService {
 									+ e.toString());
 							transaction.rollback();
 						}
+		        		logger.error("end > " + timer.elapsedMillis());
+
 						return null;
 					}
 				});
