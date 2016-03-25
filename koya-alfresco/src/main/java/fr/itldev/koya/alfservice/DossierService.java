@@ -308,10 +308,10 @@ public class DossierService {
 				.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
 					@Override
 					public Object doWork() throws Exception {
-//						UserTransaction transaction = transactionService
-//								.getNonPropagatingUserTransaction();
+						UserTransaction transaction = transactionService
+								.getNonPropagatingUserTransaction();
 						try {
-//							transaction.begin();
+							transaction.begin();
 
 							// Add lastModified Aspect if not already
 							// present
@@ -333,7 +333,7 @@ public class DossierService {
 									KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
 			        		logger.error("updateLastModificationDate > " + timer.elapsedMillis());
 
-//							transaction.commit();
+							transaction.commit();
 			        		logger.error("commit > " + timer.elapsedMillis());
 
 							logger.debug("Updated lastModificationDate of dossier : "
@@ -344,7 +344,7 @@ public class DossierService {
 //							 * have update
 //							 */
 							logger.error("ConcurrencyFailureException", cex);
-//							transaction.rollback();
+							transaction.rollback();
 						} catch (InvalidNodeRefException ie) {
 							// Occurs on dossier node creation because if
 							// separated transaction : no need to update this
@@ -353,14 +353,14 @@ public class DossierService {
 									+ d.getTitle()
 									+ " Error writing last Update modification date : InvalidNodeRefException");
 			        		logger.error("InvalidNodeRefException", ie);
-//							transaction.rollback();
+							transaction.rollback();
 						} catch (Throwable e) {
 							logger.warn("Dossier "
 									+ d.getTitle()
 									+ "Error writing last Update modification date : "
 									+ e.toString());
 			        		logger.error("Exception ",e);
-//							transaction.rollback();
+							transaction.rollback();
 						}
 		        		logger.error("end > " + timer.elapsedMillis());
 //
