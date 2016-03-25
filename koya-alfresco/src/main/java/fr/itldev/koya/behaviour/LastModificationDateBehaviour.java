@@ -126,10 +126,14 @@ public class LastModificationDateBehaviour implements
                     && (typeCondition(childAssocRef.getChildRef(),
                             ContentModel.TYPE_CONTENT) || typeCondition(
                             childAssocRef.getChildRef(), ContentModel.TYPE_FOLDER))) {
+        		logger.error("condition check > " + timer.elapsedMillis());
+
                 // failover find first parent of type dossier
                 try {
                     Dossier d = koyaNodeService.getFirstParentOfType(
                             childAssocRef.getChildRef(), Dossier.class);
+            		logger.error("getFirstParentOfType > " + timer.elapsedMillis());
+
                     if (!lastModifiedSharedCache.contains(d.getNodeRef())) {
 
                         lastModifiedSharedCache.put(childAssocRef.getChildRef(), "");
@@ -150,17 +154,23 @@ public class LastModificationDateBehaviour implements
     public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
 		Stopwatch timer = new Stopwatch().start();
 
-    	
+
         if (!lastModifiedSharedCache.contains(nodeRef)) {
             if (existCondition(nodeRef)
                     && (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)
                     || typeCondition(nodeRef, ContentModel.TYPE_CONTENT) || typeCondition(
                             nodeRef, ContentModel.TYPE_FOLDER))) {
+        		logger.error("condition check > " + timer.elapsedMillis());
+
                 // failover find first parent of type dossier
                 try {
                     Dossier d = koyaNodeService.getFirstParentOfType(nodeRef,
                             Dossier.class);
+            		logger.error("getFirstParentOfType > " + timer.elapsedMillis());
+
                     if (!lastModifiedSharedCache.contains(d.getNodeRef())) {
+                		logger.error("cache check > " + timer.elapsedMillis());
+
                         lastModifiedSharedCache.put(nodeRef, "");
                         lastModifiedSharedCache.put(d.getNodeRef(), "");
                         dossierService.updateLastModificationDate(d);
@@ -182,6 +192,7 @@ public class LastModificationDateBehaviour implements
         if (!lastModifiedSharedCache.contains(nodeRef)) {
 
             if (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)) {
+        		logger.error("condition check > " + timer.elapsedMillis());
 
                 try {
                     Dossier d = koyaNodeService.getKoyaNode(nodeRef, Dossier.class);
