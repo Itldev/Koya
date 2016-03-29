@@ -160,7 +160,6 @@ public class LastModificationDateBehaviour implements NodeServicePolicies.OnDele
 		if (!lastModifiedSharedCache.contains(nodeRef)) {
 
 			if (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)) {
-
 				try {
 					Dossier d = koyaNodeService.getKoyaNode(nodeRef, Dossier.class);
 					if (!lastModifiedSharedCache.contains(d.getNodeRef())) {

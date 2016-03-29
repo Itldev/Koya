@@ -26,13 +26,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.transaction.UserTransaction;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.LuceneUtils;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -48,8 +47,8 @@ import org.alfresco.util.Pair;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
 
+import fr.itldev.koya.action.UpdateLastModificationDateActionExecuter;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
@@ -81,6 +80,7 @@ public class DossierService {
 	private AuthenticationService authenticationService;
 	private OwnableService ownableService;
 	private KoyaActivityPoster activityPoster;
+	private ActionService actionService;
 
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
 	public void setNodeService(NodeService nodeService) {
@@ -127,12 +127,13 @@ public class DossierService {
 		this.ownableService = ownableService;
 	}
 	
-	
-
 	public void setActivityPoster(KoyaActivityPoster activityPoster) {
 		this.activityPoster = activityPoster;
 	}
 
+	public void setActionService(ActionService actionService) {
+		this.actionService = actionService;
+	}
 	// </editor-fold>
 	/**
 	 * 
@@ -301,58 +302,8 @@ public class DossierService {
 		if (d == null) {
 			return;
 		}
-
-		AuthenticationUtil
-				.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
-					@Override
-					public Object doWork() throws Exception {
-						UserTransaction transaction = transactionService
-								.getNonPropagatingUserTransaction();
-						try {
-							transaction.begin();
-
-							// Add lastModified Aspect if not already
-							// present
-							if (!nodeService.hasAspect(d.getNodeRef(),
-									KoyaModel.ASPECT_LASTMODIFIED)) {
-								Map<QName, Serializable> props = new HashMap<>();
-								nodeService.addAspect(d.getNodeRef(),
-										KoyaModel.ASPECT_LASTMODIFIED, props);
-							}
-
-							nodeService.setProperty(d.getNodeRef(),
-									KoyaModel.PROP_LASTMODIFICATIONDATE,
-									new Date());
-							nodeService.setProperty(d.getNodeRef(),
-									KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
-							transaction.commit();
-							logger.debug("Updated lastModificationDate of dossier : "
-									+ d.getTitle());
-						} catch (ConcurrencyFailureException cex) {
-							/**
-							 * silent concurency exception If occurs, then node
-							 * have update
-							 */
-							transaction.rollback();
-						} catch (InvalidNodeRefException ie) {
-							// Occurs on dossier node creation because if
-							// separated transaction : no need to update this
-							// date until dossier is empty
-							logger.trace("Dossier "
-									+ d.getTitle()
-									+ " Error writing last Update modification date : InvalidNodeRefException");
-							transaction.rollback();
-						} catch (Exception e) {
-							logger.warn("Dossier "
-									+ d.getTitle()
-									+ "Error writing last Update modification date : "
-									+ e.toString());
-							transaction.rollback();
-						}
-						return null;
-					}
-				});
-
+		Action updateLastModificationDateAction = actionService.createAction(UpdateLastModificationDateActionExecuter.NAME);
+		actionService.executeAction(updateLastModificationDateAction, d.getNodeRef(), false, true);
 	}
 
 	/*
