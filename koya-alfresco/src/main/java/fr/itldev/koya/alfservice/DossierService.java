@@ -31,6 +31,7 @@ import javax.transaction.UserTransaction;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.LuceneUtils;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -308,62 +309,68 @@ public class DossierService {
 				.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
 					@Override
 					public Object doWork() throws Exception {
-						UserTransaction transaction = transactionService
-								.getNonPropagatingUserTransaction();
-						try {
-							transaction.begin();
+//						UserTransaction transaction = transactionService
+//								.getNonPropagatingUserTransaction();
+//						try {
+//							transaction.begin();
+transactionService.getRetryingTransactionHelper().doInTransaction(new RetryingTransactionHelper.RetryingTransactionCallback<Object>() {
+    @Override
+    public Object execute() {
+    	// Add lastModified Aspect if not already
+		// present
+		if (!nodeService.hasAspect(d.getNodeRef(),
+				KoyaModel.ASPECT_LASTMODIFIED)) {
+			Map<QName, Serializable> props = new HashMap<>();
+			nodeService.addAspect(d.getNodeRef(),
+					KoyaModel.ASPECT_LASTMODIFIED, props);
+		}
+		logger.error("aspect check/add > " + timer.elapsedMillis());
 
-							// Add lastModified Aspect if not already
-							// present
-							if (!nodeService.hasAspect(d.getNodeRef(),
-									KoyaModel.ASPECT_LASTMODIFIED)) {
-								Map<QName, Serializable> props = new HashMap<>();
-								nodeService.addAspect(d.getNodeRef(),
-										KoyaModel.ASPECT_LASTMODIFIED, props);
-							}
-			        		logger.error("aspect check/add > " + timer.elapsedMillis());
 
+		nodeService.setProperty(d.getNodeRef(),
+				KoyaModel.PROP_LASTMODIFICATIONDATE,
+				new Date());
+		logger.error("setProperty lastModificationDate > " + timer.elapsedMillis());
 
-							nodeService.setProperty(d.getNodeRef(),
-									KoyaModel.PROP_LASTMODIFICATIONDATE,
-									new Date());
-			        		logger.error("setProperty lastModificationDate > " + timer.elapsedMillis());
+		nodeService.setProperty(d.getNodeRef(),
+				KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
+		logger.error("updateLastModificationDate > " + timer.elapsedMillis());
 
-							nodeService.setProperty(d.getNodeRef(),
-									KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
-			        		logger.error("updateLastModificationDate > " + timer.elapsedMillis());
+//		transaction.commit();
+		logger.error("commit > " + timer.elapsedMillis());
 
-							transaction.commit();
-			        		logger.error("commit > " + timer.elapsedMillis());
-
-							logger.debug("Updated lastModificationDate of dossier : "
-									+ d.getTitle());
-						} catch (ConcurrencyFailureException cex) {
-//							/**
-//							 * silent concurency exception If occurs, then node
-//							 * have update
-//							 */
-							logger.error("ConcurrencyFailureException", cex);
-							transaction.rollback();
-						} catch (InvalidNodeRefException ie) {
-							// Occurs on dossier node creation because if
-							// separated transaction : no need to update this
-							// date until dossier is empty
-							logger.trace("Dossier "
-									+ d.getTitle()
-									+ " Error writing last Update modification date : InvalidNodeRefException");
-			        		logger.error("InvalidNodeRefException", ie);
-							transaction.rollback();
-						} catch (Throwable e) {
-							logger.warn("Dossier "
-									+ d.getTitle()
-									+ "Error writing last Update modification date : "
-									+ e.toString());
-			        		logger.error("Exception ",e);
-							transaction.rollback();
-						}
-		        		logger.error("end > " + timer.elapsedMillis());
+		logger.debug("Updated lastModificationDate of dossier : "
+				+ d.getTitle());
+//	} catch (ConcurrencyFailureException cex) {
+////		/**
+////		 * silent concurency exception If occurs, then node
+////		 * have update
+////		 */
+//		logger.error("ConcurrencyFailureException", cex);
+//		transaction.rollback();
+//	} catch (InvalidNodeRefException ie) {
+//		// Occurs on dossier node creation because if
+//		// separated transaction : no need to update this
+//		// date until dossier is empty
+//		logger.trace("Dossier "
+//				+ d.getTitle()
+//				+ " Error writing last Update modification date : InvalidNodeRefException");
+//		logger.error("InvalidNodeRefException", ie);
+//		transaction.rollback();
+//	} catch (Throwable e) {
+//		logger.warn("Dossier "
+//				+ d.getTitle()
+//				+ "Error writing last Update modification date : "
+//				+ e.toString());
+//		logger.error("Exception ",e);
+////		transaction.rollback();
+//	}
+	logger.error("end > " + timer.elapsedMillis());
 //
+	return null;
+    }
+    }, false, true);
+							
 						return null;
 					}
 				});

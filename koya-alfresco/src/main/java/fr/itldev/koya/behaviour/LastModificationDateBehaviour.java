@@ -125,41 +125,48 @@ public class LastModificationDateBehaviour implements
 	}
 
 	@Override
-    public void onDeleteNode(ChildAssociationRef childAssocRef,
-            boolean isNodeArchived) {
-    	
+	public void onDeleteNode(ChildAssociationRef childAssocRef,
+			boolean isNodeArchived) {
+
 		Stopwatch timer = new Stopwatch().start();
 
-        if (!lastModifiedSharedCache.contains(childAssocRef.getChildRef())
-                && !lastModifiedSharedCache.contains(childAssocRef.getParentRef())) {
+		if (!lastModifiedSharedCache.contains(childAssocRef.getChildRef())
+				&& !lastModifiedSharedCache.contains(childAssocRef
+						.getParentRef())) {
 
-            if (existCondition(childAssocRef.getChildRef())
-                    && (typeCondition(childAssocRef.getChildRef(),
-                            ContentModel.TYPE_CONTENT) || typeCondition(
-                            childAssocRef.getChildRef(), ContentModel.TYPE_FOLDER))) {
-        		logger.error("condition check > " + timer.elapsedMillis());
+			if (existCondition(childAssocRef.getChildRef())
+					&& (typeCondition(childAssocRef.getChildRef(),
+							ContentModel.TYPE_CONTENT) || typeCondition(
+							childAssocRef.getChildRef(),
+							ContentModel.TYPE_FOLDER))) {
+				logger.error("condition check > " + timer.elapsedMillis());
 
-                // failover find first parent of type dossier
-                try {
-                    Dossier d = koyaNodeService.getFirstParentOfType(
-                            childAssocRef.getChildRef(), Dossier.class);
-            		logger.error("getFirstParentOfType > " + timer.elapsedMillis());
+				// failover find first parent of type dossier
+				try {
+					Dossier d = koyaNodeService.getFirstParentOfType(
+							childAssocRef.getChildRef(), Dossier.class);
+					logger.error("getFirstParentOfType > "
+							+ timer.elapsedMillis());
 
-                    if (!isLocked(d.getNodeRef()) && !lastModifiedSharedCache.contains(d.getNodeRef())) {
+					if (!isLocked(d.getNodeRef())
+							&& !lastModifiedSharedCache
+									.contains(d.getNodeRef())) {
 
-                        lastModifiedSharedCache.put(childAssocRef.getChildRef(), "");
-                        lastModifiedSharedCache.put(childAssocRef.getParentRef(), "");
-                        lastModifiedSharedCache.put(d.getNodeRef(), "");
-                        dossierService.updateLastModificationDate(d);
-                    }
-                } catch (Exception e) {
-                    // silently return
-                }
-            }
-        }
-        timer.stop();
+						lastModifiedSharedCache.put(
+								childAssocRef.getChildRef(), "");
+						lastModifiedSharedCache.put(
+								childAssocRef.getParentRef(), "");
+						lastModifiedSharedCache.put(d.getNodeRef(), "");
+						dossierService.updateLastModificationDate(d);
+					}
+				} catch (Exception e) {
+					// silently return
+				}
+			}
+		}
+		timer.stop();
 		logger.error("onDeleteNode > " + timer.elapsedMillis());
-    }
+	}
 
 	@Override
 	public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
@@ -179,7 +186,9 @@ public class LastModificationDateBehaviour implements
 					logger.error("getFirstParentOfType > "
 							+ timer.elapsedMillis());
 
-					if (!isLocked(d.getNodeRef()) && !lastModifiedSharedCache.contains(d.getNodeRef())) {
+					if (!isLocked(d.getNodeRef())
+							&& !lastModifiedSharedCache
+									.contains(d.getNodeRef())) {
 						logger.error("cache check > " + timer.elapsedMillis());
 
 						lastModifiedSharedCache.put(nodeRef, "");
@@ -208,7 +217,9 @@ public class LastModificationDateBehaviour implements
 				try {
 					Dossier d = koyaNodeService.getKoyaNode(nodeRef,
 							Dossier.class);
-					if (!isLocked(d.getNodeRef()) && !lastModifiedSharedCache.contains(d.getNodeRef())) {
+					// if (!isLocked(d.getNodeRef()) &&
+					// !lastModifiedSharedCache.contains(d.getNodeRef())) {
+					if (!lastModifiedSharedCache.contains(d.getNodeRef())) {
 						lastModifiedSharedCache.put(nodeRef, "");
 						lastModifiedSharedCache.put(d.getNodeRef(), "");
 						dossierService.updateLastModificationDate(d);
