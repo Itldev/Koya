@@ -18,8 +18,6 @@ import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 
-import com.google.common.base.Stopwatch;
-
 /**
  * 
  * If feature is active and current user doesn't belongs to companyName, then
@@ -84,15 +82,12 @@ public class AutomaticUserJoinGroupBehaviour implements NodeServicePolicies.OnCr
 	public void onCreateNode(ChildAssociationRef childAssocRef) {
 
 		if (active) {
-			Stopwatch timer = new Stopwatch().start();
 			try {
 				final NodeRef person = childAssocRef.getChildRef();
 				joinGroup((String) nodeService.getProperty(person, ContentModel.PROP_USERNAME));
 			} catch (Exception e) {
 
 			}
-			timer.stop();
-			logger.error("onCreateNode > " + timer.elapsedMillis());
 		}
 	}
 
@@ -100,14 +95,12 @@ public class AutomaticUserJoinGroupBehaviour implements NodeServicePolicies.OnCr
 	public void onUpdateProperties(final NodeRef nodeRef, Map<QName, Serializable> before,
 			Map<QName, Serializable> after) {
 		if (active) {
-			Stopwatch timer = new Stopwatch().start();
 			try {
 				joinGroup((String) after.get(ContentModel.PROP_USERNAME));
 			} catch (Exception e) {
 
 			}
-			timer.stop();
-			logger.error("onUpdateProperties > " + timer.elapsedMillis());
+
 		}
 	}
 

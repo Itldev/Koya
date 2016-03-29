@@ -32,9 +32,6 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Stopwatch;
 
 import fr.itldev.koya.model.KoyaModel;
 
@@ -45,7 +42,6 @@ import fr.itldev.koya.model.KoyaModel;
 public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateNodePolicy,
 		NodeServicePolicies.OnUpdatePropertiesPolicy {
 
-	private final Logger logger = Logger.getLogger(this.getClass());
 
 	private PolicyComponent policyComponent;
 	private NodeService nodeService;
@@ -73,8 +69,6 @@ public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateN
 	@Override
 	public void onCreateNode(ChildAssociationRef childAssocRef) {
 
-		Stopwatch timer = new Stopwatch().start();
-
 		final NodeRef person = childAssocRef.getChildRef();
 
 		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
@@ -94,16 +88,12 @@ public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateN
 				return null;
 			}
 		});
-		timer.stop();
-		logger.error("onCreateNode > " + timer.elapsedMillis());
 
 	}
 
 	@Override
 	public void onUpdateProperties(final NodeRef nodeRef, Map<QName, Serializable> before,
 			Map<QName, Serializable> after) {
-
-		Stopwatch timer = new Stopwatch().start();
 
 		final String mailAfterModif = (String) after.get(ContentModel.PROP_EMAIL);
 
@@ -125,8 +115,7 @@ public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateN
 				return null;
 			}
 		});
-		timer.stop();
-		logger.error("onUpdateProperties > " + timer.elapsedMillis());
+
 	}
 
 }

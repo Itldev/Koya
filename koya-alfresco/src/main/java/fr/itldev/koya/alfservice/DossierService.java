@@ -50,8 +50,6 @@ import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.springframework.dao.ConcurrencyFailureException;
 
-import com.google.common.base.Stopwatch;
-
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
@@ -303,7 +301,7 @@ public class DossierService {
 		if (d == null) {
 			return;
 		}
-		final Stopwatch timer = new Stopwatch().start();
+
 		AuthenticationUtil
 				.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
 					@Override
@@ -321,29 +319,20 @@ public class DossierService {
 								nodeService.addAspect(d.getNodeRef(),
 										KoyaModel.ASPECT_LASTMODIFIED, props);
 							}
-			        		logger.error("aspect check/add > " + timer.elapsedMillis());
-
 
 							nodeService.setProperty(d.getNodeRef(),
 									KoyaModel.PROP_LASTMODIFICATIONDATE,
 									new Date());
-			        		logger.error("setProperty lastModificationDate > " + timer.elapsedMillis());
-
 							nodeService.setProperty(d.getNodeRef(),
 									KoyaModel.PROP_NOTIFIED, Boolean.FALSE);
-			        		logger.error("updateLastModificationDate > " + timer.elapsedMillis());
-
 							transaction.commit();
-			        		logger.error("commit > " + timer.elapsedMillis());
-
 							logger.debug("Updated lastModificationDate of dossier : "
 									+ d.getTitle());
 						} catch (ConcurrencyFailureException cex) {
-//							/**
-//							 * silent concurency exception If occurs, then node
-//							 * have update
-//							 */
-							logger.error("ConcurrencyFailureException", cex);
+							/**
+							 * silent concurency exception If occurs, then node
+							 * have update
+							 */
 							transaction.rollback();
 						} catch (InvalidNodeRefException ie) {
 							// Occurs on dossier node creation because if
@@ -352,18 +341,14 @@ public class DossierService {
 							logger.trace("Dossier "
 									+ d.getTitle()
 									+ " Error writing last Update modification date : InvalidNodeRefException");
-			        		logger.error("InvalidNodeRefException", ie);
 							transaction.rollback();
-						} catch (Throwable e) {
+						} catch (Exception e) {
 							logger.warn("Dossier "
 									+ d.getTitle()
 									+ "Error writing last Update modification date : "
 									+ e.toString());
-			        		logger.error("Exception ",e);
 							transaction.rollback();
 						}
-		        		logger.error("end > " + timer.elapsedMillis());
-//
 						return null;
 					}
 				});

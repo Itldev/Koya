@@ -8,16 +8,13 @@ import org.alfresco.repo.security.authority.UnknownAuthorityException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 
-import com.google.common.base.Stopwatch;
-
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Space;
 
-public class DeleteKoyaGroupsBeforeDelete implements
-		NodeServicePolicies.BeforeDeleteNodePolicy {
+public class DeleteKoyaGroupsBeforeDelete implements NodeServicePolicies.BeforeDeleteNodePolicy {
 
 	private final Logger logger = Logger.getLogger(this.getClass());
 	private Behaviour beforeDeleteNode;
@@ -40,18 +37,15 @@ public class DeleteKoyaGroupsBeforeDelete implements
 	public void init() {
 		this.beforeDeleteNode = new JavaBehaviour(this, "beforeDeleteNode",
 				Behaviour.NotificationFrequency.FIRST_EVENT);
-		this.policyComponent.bindClassBehaviour(
-				NodeServicePolicies.BeforeDeleteNodePolicy.QNAME,
+		this.policyComponent.bindClassBehaviour(NodeServicePolicies.BeforeDeleteNodePolicy.QNAME,
 				KoyaModel.TYPE_DOSSIER, this.beforeDeleteNode);
 
-		this.policyComponent.bindClassBehaviour(
-				NodeServicePolicies.BeforeDeleteNodePolicy.QNAME,
+		this.policyComponent.bindClassBehaviour(NodeServicePolicies.BeforeDeleteNodePolicy.QNAME,
 				KoyaModel.TYPE_SPACE, this.beforeDeleteNode);
 	}
 
 	@Override
 	public void beforeDeleteNode(NodeRef nodeRef) {
-		Stopwatch timer = new Stopwatch().start();
 		try {
 			Space s = koyaNodeService.getKoyaNode(nodeRef, Space.class);
 			spaceAclService.removeAllKoyaGroups(s);
@@ -60,9 +54,7 @@ public class DeleteKoyaGroupsBeforeDelete implements
 		} catch (UnknownAuthorityException e) {
 			logger.error("Unknown authority trying to del group : " + e.toString());
 		}
-		timer.stop();
-		logger.error("beforeDeleteNode > " + timer.elapsedMillis());
-		
+
 	}
 
 }

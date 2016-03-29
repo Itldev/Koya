@@ -10,15 +10,10 @@ import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.Behaviour.NotificationFrequency;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
-import org.alfresco.service.cmr.lock.LockService;
-import org.alfresco.service.cmr.lock.LockStatus;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Stopwatch;
 
 import fr.itldev.koya.alfservice.DossierService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
@@ -26,21 +21,16 @@ import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.impl.Dossier;
 
 /**
- * 
+ *
  * Updates dossier's last modification date on content modification
  */
-public class LastModificationDateBehaviour implements
-		NodeServicePolicies.OnDeleteNodePolicy,
-		NodeServicePolicies.OnAddAspectPolicy,
-		ContentServicePolicies.OnContentUpdatePolicy {
+public class LastModificationDateBehaviour implements NodeServicePolicies.OnDeleteNodePolicy,
+		NodeServicePolicies.OnAddAspectPolicy, ContentServicePolicies.OnContentUpdatePolicy {
 
-	private Logger logger = Logger
-			.getLogger(LastModificationDateBehaviour.class);
 
 	// Dependencies
 	private NodeService nodeService;
 	private PolicyComponent policyComponent;
-	private LockService lockService;
 	private KoyaNodeService koyaNodeService;
 	private DossierService dossierService;
 	/**
@@ -68,14 +58,6 @@ public class LastModificationDateBehaviour implements
 
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
-	}
-
-	public LockService getLockService() {
-		return lockService;
-	}
-
-	public void setLockService(LockService lockService) {
-		this.lockService = lockService;
 	}
 
 	public KoyaNodeService getKoyaNodeService() {
@@ -110,78 +92,57 @@ public class LastModificationDateBehaviour implements
 				NotificationFrequency.TRANSACTION_COMMIT);
 		// Bind behaviours to node policies
 		// Delete behaviour
-		this.policyComponent.bindClassBehaviour(
-				NodeServicePolicies.OnDeleteNodePolicy.QNAME,
+		this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnDeleteNodePolicy.QNAME,
 				ContentModel.ASPECT_AUDITABLE, this.onDeleteNode);
 
 		// Update or create behaviour
-		this.policyComponent.bindClassBehaviour(
-				ContentServicePolicies.OnContentUpdatePolicy.QNAME,
+		this.policyComponent.bindClassBehaviour(ContentServicePolicies.OnContentUpdatePolicy.QNAME,
 				ContentModel.ASPECT_AUDITABLE, this.onContentUpdate);
 
-		this.policyComponent.bindClassBehaviour(
-				NodeServicePolicies.OnAddAspectPolicy.QNAME,
+		this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnAddAspectPolicy.QNAME,
 				ContentModel.ASPECT_AUDITABLE, this.onAddAspect);
 	}
 
 	@Override
-    public void onDeleteNode(ChildAssociationRef childAssocRef,
-            boolean isNodeArchived) {
-    	
-		Stopwatch timer = new Stopwatch().start();
+	public void onDeleteNode(ChildAssociationRef childAssocRef, boolean isNodeArchived) {
 
-        if (!lastModifiedSharedCache.contains(childAssocRef.getChildRef())
-                && !lastModifiedSharedCache.contains(childAssocRef.getParentRef())) {
+		if (!lastModifiedSharedCache.contains(childAssocRef.getChildRef())
+				&& !lastModifiedSharedCache.contains(childAssocRef.getParentRef())) {
 
-            if (existCondition(childAssocRef.getChildRef())
-                    && (typeCondition(childAssocRef.getChildRef(),
-                            ContentModel.TYPE_CONTENT) || typeCondition(
-                            childAssocRef.getChildRef(), ContentModel.TYPE_FOLDER))) {
-        		logger.error("condition check > " + timer.elapsedMillis());
+			if (existCondition(childAssocRef.getChildRef())
+					&& (typeCondition(childAssocRef.getChildRef(), ContentModel.TYPE_CONTENT)
+							|| typeCondition(childAssocRef.getChildRef(),
+									ContentModel.TYPE_FOLDER))) {
+				// failover find first parent of type dossier
+				try {
+					Dossier d = koyaNodeService.getFirstParentOfType(childAssocRef.getChildRef(),
+							Dossier.class);
+					if (!lastModifiedSharedCache.contains(d.getNodeRef())) {
 
-                // failover find first parent of type dossier
-                try {
-                    Dossier d = koyaNodeService.getFirstParentOfType(
-                            childAssocRef.getChildRef(), Dossier.class);
-            		logger.error("getFirstParentOfType > " + timer.elapsedMillis());
+						lastModifiedSharedCache.put(childAssocRef.getChildRef(), "");
+						lastModifiedSharedCache.put(childAssocRef.getParentRef(), "");
+						lastModifiedSharedCache.put(d.getNodeRef(), "");
+						dossierService.updateLastModificationDate(d);
+					}
+				} catch (Exception e) {
+					// silently return
+				}
+			}
+		}
 
-                    if (!isLocked(d.getNodeRef()) && !lastModifiedSharedCache.contains(d.getNodeRef())) {
-
-                        lastModifiedSharedCache.put(childAssocRef.getChildRef(), "");
-                        lastModifiedSharedCache.put(childAssocRef.getParentRef(), "");
-                        lastModifiedSharedCache.put(d.getNodeRef(), "");
-                        dossierService.updateLastModificationDate(d);
-                    }
-                } catch (Exception e) {
-                    // silently return
-                }
-            }
-        }
-        timer.stop();
-		logger.error("onDeleteNode > " + timer.elapsedMillis());
-    }
+	}
 
 	@Override
 	public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
-		Stopwatch timer = new Stopwatch().start();
 
 		if (!lastModifiedSharedCache.contains(nodeRef)) {
-			if (existCondition(nodeRef)
-					&& (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)
-							|| typeCondition(nodeRef, ContentModel.TYPE_CONTENT) || typeCondition(
-								nodeRef, ContentModel.TYPE_FOLDER))) {
-				logger.error("condition check > " + timer.elapsedMillis());
-
+			if (existCondition(nodeRef) && (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)
+					|| typeCondition(nodeRef, ContentModel.TYPE_CONTENT)
+					|| typeCondition(nodeRef, ContentModel.TYPE_FOLDER))) {
 				// failover find first parent of type dossier
 				try {
-					Dossier d = koyaNodeService.getFirstParentOfType(nodeRef,
-							Dossier.class);
-					logger.error("getFirstParentOfType > "
-							+ timer.elapsedMillis());
-
-					if (!isLocked(d.getNodeRef()) && !lastModifiedSharedCache.contains(d.getNodeRef())) {
-						logger.error("cache check > " + timer.elapsedMillis());
-
+					Dossier d = koyaNodeService.getFirstParentOfType(nodeRef, Dossier.class);
+					if (!lastModifiedSharedCache.contains(d.getNodeRef())) {
 						lastModifiedSharedCache.put(nodeRef, "");
 						lastModifiedSharedCache.put(d.getNodeRef(), "");
 						dossierService.updateLastModificationDate(d);
@@ -191,24 +152,18 @@ public class LastModificationDateBehaviour implements
 				}
 			}
 		}
-		// timer.stop();
-		logger.error("onContentUpdate > " + timer.elapsedMillis());
 	}
 
 	@Override
 	public void onAddAspect(NodeRef nodeRef, QName aspectTypeQName) {
 
-		Stopwatch timer = new Stopwatch().start();
-
 		if (!lastModifiedSharedCache.contains(nodeRef)) {
 
 			if (typeCondition(nodeRef, KoyaModel.TYPE_DOSSIER)) {
-				logger.error("condition check > " + timer.elapsedMillis());
 
 				try {
-					Dossier d = koyaNodeService.getKoyaNode(nodeRef,
-							Dossier.class);
-					if (!isLocked(d.getNodeRef()) && !lastModifiedSharedCache.contains(d.getNodeRef())) {
+					Dossier d = koyaNodeService.getKoyaNode(nodeRef, Dossier.class);
+					if (!lastModifiedSharedCache.contains(d.getNodeRef())) {
 						lastModifiedSharedCache.put(nodeRef, "");
 						lastModifiedSharedCache.put(d.getNodeRef(), "");
 						dossierService.updateLastModificationDate(d);
@@ -218,8 +173,7 @@ public class LastModificationDateBehaviour implements
 				}
 			}
 		}
-		timer.stop();
-		logger.error("onAddAspect > " + timer.elapsedMillis());
+
 	}
 
 	// Add onCreateNode policy ? folder add ?
@@ -231,8 +185,4 @@ public class LastModificationDateBehaviour implements
 		return nodeService.getType(n).equals(type);
 	}
 
-	private boolean isLocked(NodeRef nodeRef) {
-		LockStatus status = lockService.getLockStatus(nodeRef);
-		return status == LockStatus.LOCKED || status == LockStatus.LOCK_OWNER;
-	}
 }
