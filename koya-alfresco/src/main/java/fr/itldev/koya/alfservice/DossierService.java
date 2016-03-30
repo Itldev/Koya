@@ -79,7 +79,7 @@ public class DossierService {
 	private UserService userService;
 	private AuthenticationService authenticationService;
 	private OwnableService ownableService;
-	private KoyaActivityPoster activityPoster;
+	private KoyaActivityPoster koyaActivityPoster;
 	private ActionService actionService;
 
 	// <editor-fold defaultstate="collapsed" desc="getters/setters">
@@ -126,9 +126,9 @@ public class DossierService {
 	public void setOwnableService(OwnableService ownableService) {
 		this.ownableService = ownableService;
 	}
-	
-	public void setActivityPoster(KoyaActivityPoster activityPoster) {
-		this.activityPoster = activityPoster;
+
+	public void setKoyaActivityPoster(KoyaActivityPoster koyaActivityPoster) {
+		this.koyaActivityPoster = koyaActivityPoster;
 	}
 
 	public void setActionService(ActionService actionService) {
@@ -360,7 +360,7 @@ public class DossierService {
 				new NodeRef(uploadResult.getSecond().get("nodeRef")), Document.class);
 		User uploader = userService.getUserByUsername(authenticationService
 				.getCurrentUserName());
-		activityPoster.postConsumerUpload(d,dossier, uploader);
+		koyaActivityPoster.postConsumerUpload(d,dossier, uploader);
 		return uploadResult.getSecond();
 	}
 

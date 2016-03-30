@@ -90,7 +90,7 @@
 		<property name="userService" ref="userService" />
 		<property name="authenticationService" ref="AuthenticationService" />
 		<property name="ownableService" ref="ownableService" />		
-		<property name="activityPoster" ref="koyaActivityPoster" />
+		<property name="koyaActivityPoster" ref="koyaActivityPoster" />
 		<property name="actionService" ref="actionService"/>
 	</bean>
 
