@@ -26,16 +26,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.transaction.UserTransaction;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.LuceneUtils;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -51,11 +47,7 @@ import org.alfresco.util.Pair;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
 
-import com.google.common.base.Stopwatch;
-
-import fr.itldev.koya.action.PdfRenderActionExecuter;
 import fr.itldev.koya.action.UpdateLastModificationDateActionExecuter;
 import fr.itldev.koya.alfservice.security.SpaceAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
