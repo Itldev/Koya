@@ -18,34 +18,18 @@
  */
 package fr.itldev.koya.alfservice;
 
-import fr.itldev.koya.action.PdfRenderActionExecuter;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.Adler32;
-import java.util.zip.CheckedOutputStream;
-import java.util.zip.Deflater;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
@@ -53,19 +37,14 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.Pair;
-import org.alfresco.util.TempFileProvider;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.log4j.Logger;
-import org.springframework.extensions.webscripts.WebScriptException;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.KoyaModel;
 import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Directory;
-
-import org.alfresco.service.cmr.action.Action;
 
 /**
  * Koya Specific documents and directories Service.
@@ -76,12 +55,8 @@ public class KoyaContentService {
 
     private NodeService nodeService;
     private KoyaNodeService koyaNodeService;
-
-    protected DictionaryService dictionaryService;
     protected ContentService contentService;
-    protected NamespaceService namespaceService;
     protected FileFolderService fileFolderService;
-    protected ActionService actionService;
     private KoyaActivityPoster activityPoster;
 
     // <editor-fold defaultstate="collapsed" desc="getters/setters">
@@ -93,24 +68,12 @@ public class KoyaContentService {
         this.koyaNodeService = koyaNodeService;
     }
 
-    public void setDictionaryService(DictionaryService dictionaryService) {
-        this.dictionaryService = dictionaryService;
-    }
-
     public void setContentService(ContentService contentService) {
         this.contentService = contentService;
     }
 
-    public void setNamespaceService(NamespaceService namespaceService) {
-        this.namespaceService = namespaceService;
-    }
-
     public void setFileFolderService(FileFolderService fileFolderService) {
         this.fileFolderService = fileFolderService;
-    }
-
-    public void setActionService(ActionService actionService) {
-        this.actionService = actionService;
     }
 
     public void setActivityPoster(KoyaActivityPoster activityPoster) {
@@ -318,193 +281,6 @@ public class KoyaContentService {
 			activityPoster.postFileFolderAdded(createdNode);
 		}
         return new Pair<NodeRef, Map<String,String>>(createdNode, retMap);
-    }
-
-    /**
-     *
-     * TODO execute in an action.
-     *
-     */
-    /**
-     *
-     * @param nodeRefs
-     * @return
-     * @throws KoyaServiceException
-     */
-    public File zip(List<NodeRef> nodeRefs, Boolean pdf)
-            throws KoyaServiceException {
-        File tmpZipFile = null;
-        try {
-            tmpZipFile = TempFileProvider.createTempFile("tmpDL", ".zip");
-            FileOutputStream fos = new FileOutputStream(tmpZipFile);
-            CheckedOutputStream checksum = new CheckedOutputStream(fos,
-                    new Adler32());
-            BufferedOutputStream buff = new BufferedOutputStream(checksum);
-            ZipArchiveOutputStream zipStream = new ZipArchiveOutputStream(buff);
-            // NOTE: This encoding allows us to workaround bug...
-            // http://bugs.sun.com/bugdatabase/view_bug.do;:WuuT?bug_id=4820807
-            zipStream.setEncoding("UTF-8");
-
-            zipStream.setMethod(ZipArchiveOutputStream.DEFLATED);
-            zipStream.setLevel(Deflater.BEST_COMPRESSION);
-
-            zipStream
-                    .setCreateUnicodeExtraFields(ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS);
-            zipStream.setUseLanguageEncodingFlag(true);
-            zipStream.setFallbackToUTF8(true);
-
-            try {
-                addToZip(nodeRefs, pdf, zipStream, "");
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-                throw new WebScriptException(
-                        HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-            } finally {
-                zipStream.close();
-                buff.close();
-                checksum.close();
-                fos.close();
-
-            }
-        } catch (IOException | WebScriptException e) {
-            logger.error(e.getMessage(), e);
-            throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST,
-                    e.getMessage());
-        }
-
-        return tmpZipFile;
-    }
-
-    public static final List<String> ZIP_MIMETYPES = Collections
-            .unmodifiableList(new ArrayList() {
-                {
-                    add(MimetypeMap.MIMETYPE_ZIP);
-                    add("application/x-zip-compressed");
-                    add("application/x-zip");
-                }
-            });
-
-    private void addToZip(List<NodeRef> nodeRefs, Boolean pdf,
-            ZipArchiveOutputStream out, String path) throws IOException {
-        for (NodeRef nodeRef : nodeRefs) {
-            NodeRef nodeToAdd = nodeRef;
-            String nodeName = null;
-            if (pdf) {
-                Action pdfRenderAction = actionService
-                        .createAction(PdfRenderActionExecuter.NAME);
-                actionService.executeAction(pdfRenderAction, nodeRef);
-
-                Map<String, Serializable> result = (Map<String, Serializable>) pdfRenderAction
-                        .getParameterValue(PdfRenderActionExecuter.PARAM_RESULT);
-                nodeToAdd = new NodeRef(result
-                        .get(PdfRenderActionExecuter.RESULT_PARAM_NODEREF).toString());
-                nodeName = (String) result
-                        .get(PdfRenderActionExecuter.RESULT_PARAM_TITLE);
-            }
-            addToZip(nodeToAdd, pdf, nodeName, out, path);
-        }
-    }
-
-    private void addToZip(NodeRef node, Boolean pdf, String nodeName,
-            ZipArchiveOutputStream out, String path) throws IOException {
-        QName nodeQnameType = this.nodeService.getType(node);
-
-        // Special case : links
-        if (this.dictionaryService.isSubClass(nodeQnameType,
-                ApplicationModel.TYPE_FILELINK)) {
-            NodeRef linkDestinationNode = (NodeRef) nodeService.getProperty(
-                    node, ContentModel.PROP_LINK_DESTINATION);
-            if (linkDestinationNode == null) {
-                return;
-            }
-
-            // Duplicate entry: check if link is not in the same space of the
-            // link destination
-            if (nodeService
-                    .getPrimaryParent(node)
-                    .getParentRef()
-                    .equals(nodeService.getPrimaryParent(linkDestinationNode)
-                            .getParentRef())) {
-                return;
-            }
-
-            nodeQnameType = this.nodeService.getType(linkDestinationNode);
-            node = linkDestinationNode;
-        }
-
-        /**
-         * TODO test name/title export result.
-         */
-        if (nodeName == null) {
-            nodeName = (String) nodeService.getProperty(node,
-                    ContentModel.PROP_TITLE);
-        }
-        nodeName = nodeName.replaceAll("([\\\"\\\\*\\\\\\>\\<\\?\\/\\:\\|]+)",
-                "_");
-        // nodeName = noaccent ? unAccent(nodeName) : nodeName;
-
-        if (this.dictionaryService.isSubClass(nodeQnameType,
-                ContentModel.TYPE_CONTENT)) {
-            ContentReader reader = contentService.getReader(node,
-                    ContentModel.PROP_CONTENT);
-            if (reader != null) {
-                InputStream is = reader.getContentInputStream();
-
-                String filename = path.isEmpty() ? nodeName : path + '/'
-                        + nodeName;
-
-                ZipArchiveEntry entry = new ZipArchiveEntry(filename);
-                entry.setTime(((Date) nodeService.getProperty(node,
-                        ContentModel.PROP_MODIFIED)).getTime());
-
-                entry.setSize(reader.getSize());
-                out.putArchiveEntry(entry);
-                try {
-                    byte buffer[] = new byte[8192];
-                    while (true) {
-                        int nRead = is.read(buffer, 0, buffer.length);
-                        if (nRead <= 0) {
-                            break;
-                        }
-
-                        out.write(buffer, 0, nRead);
-                    }
-
-                } catch (Exception exception) {
-                    logger.error(exception.getMessage(), exception);
-                } finally {
-                    is.close();
-                    out.closeArchiveEntry();
-                }
-            } else {
-                logger.warn("Could not read : " + nodeName + "content");
-            }
-        } else if (this.dictionaryService.isSubClass(nodeQnameType,
-                ContentModel.TYPE_FOLDER)
-                && !this.dictionaryService.isSubClass(nodeQnameType,
-                        ContentModel.TYPE_SYSTEM_FOLDER)) {
-            List<ChildAssociationRef> children = nodeService
-                    .getChildAssocs(node);
-            if (children.isEmpty()) {
-                String folderPath = path.isEmpty() ? nodeName + '/' : path
-                        + '/' + nodeName + '/';
-                out.putArchiveEntry(new ZipArchiveEntry(folderPath));
-                out.closeArchiveEntry();
-            } else {
-                List<NodeRef> nodeRefs = new ArrayList<>();
-                for (ChildAssociationRef childAssoc : children) {
-                    NodeRef childNodeRef = childAssoc.getChildRef();
-                    nodeRefs.add(childNodeRef);
-                }
-
-                addToZip(nodeRefs, pdf, out, path.isEmpty() ? nodeName : path
-                        + '/' + nodeName);
-            }
-        } else {
-            logger.info("Unmanaged type: "
-                    + nodeQnameType.getPrefixedQName(this.namespaceService)
-                    + ", filename: " + nodeName);
-        }
     }
 
 }

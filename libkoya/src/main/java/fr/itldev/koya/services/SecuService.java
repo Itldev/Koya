@@ -33,25 +33,25 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public interface SecuService {
 
 	/**
-	 * List available userRoles for a company.
+	 * List available userRoles on KoyaNode.
 	 * 
 	 * @param userLogged
-	 * @param c
+	 * @param k
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	List<UserRole> listAvailableRoles(User userLogged, Company c) throws AlfrescoServiceException;
+	List<UserRole> listAvailableRoles(User userLogged, KoyaNode k) throws AlfrescoServiceException;
 
 	/**
-	 * Get current Role in Company context for specified User.
+	 * Get current Role on KoyaNide for specified User.
 	 * 
 	 * @param userLogged
-	 * @param c
+	 * @param k
 	 * @param userToGetRole
 	 * @return
 	 * @throws AlfrescoServiceException
 	 */
-	UserRole getUserRole(User userLogged, Company c, User userToGetRole)
+	UserRole getUserRole(User userLogged, KoyaNode k, User userToGetRole)
 			throws AlfrescoServiceException;
 
 	/**

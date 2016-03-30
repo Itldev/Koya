@@ -515,6 +515,19 @@ public class SpaceAclService {
 		return null;
 
 	}
+	
+	private KoyaPermission getKoyaPermissionFromGroupName(String groupName){
+		Pattern p = Pattern.compile("GROUP_.*_.*_(.*)");
+		try {
+			Matcher m = p.matcher(groupName);
+			if (m.find()) {				
+				return KoyaPermission.valueOf(m.group(1));
+			}
+		} catch (Exception e) {
+		}
+		return null;
+	}
+	
 
 	/**
 	 * List users who have rolename role on space
@@ -883,7 +896,25 @@ public class SpaceAclService {
 	 * 
 	 * ================= Permissions Getting Methods ==================
 	 */
-
+	
+	
+	/**
+	 * Return user permission set for user on node
+	 * @param s
+	 * @param u
+	 * @return
+	 */
+	public KoyaPermission getKoyaPermission(Space s,User u){		
+		Set<String> userAuths = authorityService.getAuthoritiesForUser(u.getUserName());
+			
+		for (AccessPermission ap : permissionService.getAllSetPermissions(s.getNodeRef())) {
+			if(userAuths.contains(ap.getAuthority())){
+				return getKoyaPermissionFromGroupName(ap.getAuthority());
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Builds Koya permissions on given NodeRef for authenticated user.
 	 * 
@@ -892,30 +923,13 @@ public class SpaceAclService {
 	 * @throws fr.itldev.koya.exception.KoyaServiceException
 	 */
 	public Permissions getPermissions(NodeRef n) throws KoyaServiceException {
-		return getPermissions(
-				userService.getUserByUsername(authenticationService.getCurrentUserName()), n);
-	}
 
-	/**
-	 * Builds Koya permissions on given NodeRef for specified user.
-	 * 
-	 * @param u
-	 * @param n
-	 * @return
-	 * @throws fr.itldev.koya.exception.KoyaServiceException
-	 */
-	public Permissions getPermissions(User u, NodeRef n) throws KoyaServiceException {
-
-		Permissions p = new Permissions(u.getUserName(), n);
-		/**
-		 * TODO get permissions method with user and node parameters search in
-		 * alfresco API
-		 * 
-		 */
+		Permissions p = new Permissions(authenticationService.getCurrentUserName(), n);
+		Set<String> userGroups = authorityService.getAuthoritiesForUser(authenticationService.getCurrentUserName());
 		List<String> userPermissions = new ArrayList<>();
 		for (AccessPermission ap : permissionService.getAllSetPermissions(n)) {
 			try {
-				if (ap.getAuthority().equals(u.getUserName())) {
+				if(ap.getAccessStatus().equals(AccessStatus.ALLOWED) && userGroups.contains(ap.getAuthority())){
 					userPermissions.add(ap.getPermission());
 				}
 			} catch (IllegalArgumentException iex) {
@@ -944,8 +958,23 @@ public class SpaceAclService {
 		p.canExecuteContent(permissionService.hasPermission(n, PermissionService.EXECUTE_CONTENT)
 				.equals(AccessStatus.ALLOWED));
 		//
-		p.canDeleteNode(permissionService.hasPermission(n, PermissionService.DELETE_NODE)
-				.equals(AccessStatus.ALLOWED));
+		
+		/**
+		 * Specific permissions on containers. KoyaMember can not delete this type of node.
+		 * TODO
+		 * This is a workaround to avoid defining complex permissions. We have to change permissions
+		 * scheme in order to prevent KoyaMember can delete Containers node but can delete child nodes.
+		 */
+		Boolean canDelNode = permissionService.hasPermission(n, PermissionService.DELETE_NODE)
+				.equals(AccessStatus.ALLOWED);
+		if (nodeService.getType(n).equals(KoyaModel.TYPE_DOSSIER)
+				|| nodeService.getType(n).equals(KoyaModel.TYPE_SPACE)) {
+			p.canDeleteNode(canDelNode
+					&& !userPermissions.contains(KoyaPermissionCollaborator.MEMBER.toString()));
+		} else {
+			p.canDeleteNode(canDelNode);
+		}
+		
 		//
 		p.canDeleteAssociations(
 				permissionService.hasPermission(n, PermissionService.DELETE_ASSOCIATIONS)
@@ -965,8 +994,11 @@ public class SpaceAclService {
 		/*
 		 * ======= Koya specific permissions ========
 		 */
-		p.canShareWithCustomer(p.getCanChangePermissions()
+		p.canShareWithCustomers(p.getCanChangePermissions()
 				|| userPermissions.contains(KoyaPermissionCollaborator.MEMBER.toString()));
+
+		p.canUploadAsConsumer(userPermissions.contains(KoyaPermissionConsumer.CLIENT.toString()) 
+				|| userPermissions.contains(KoyaPermissionConsumer.PARTNER.toString()));
 
 		return p;
 

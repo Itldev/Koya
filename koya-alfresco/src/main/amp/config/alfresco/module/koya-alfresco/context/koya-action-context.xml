@@ -65,6 +65,17 @@
         <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
     </bean>
     
+     <bean id="koyaZip" class="fr.itldev.koya.action.ZipContentActionExecuter">
+      	<property name="nodeService" ref="nodeService" />
+        <property name="koyaNodeService" ref="koyaNodeService" />
+        <property name="contentService" ref="contentService" />
+        <property name="actionService" ref="ActionService" />
+        <property name="transactionService" ref="transactionService"/>
+     	<property name="activityPoster" ref="koyaActivityPoster"/> 
+        <property name="dictionaryService" ref="DictionaryService"/>
+        <property name="namespaceService" ref="NamespaceService"/>
+    </bean>
+    
     
       <bean id="copyWorkflowTemplate" 
           class="fr.itldev.koya.action.CopyWorkflowTemplateActionExecuter" parent="action-executer">
@@ -95,5 +106,19 @@
         <property name="renditionService" ref="renditionService"/>
         <property name="fileFolderService" ref="fileFolderService"/>
         <property name="nodeService" ref="nodeService"/>
+    </bean>
+    
+    
+     <bean id="cleanTempFiles" 
+          class="fr.itldev.koya.action.CleanTempFilesActionExecuter" parent="action-executer">
+        <property name="searchService" ref="SearchService"/>
+        <property name="nodeService" ref="nodeService"/>
+        <property name="delDelay" value="${koya.tempfiles.deldelay}" />
+    </bean>
+    
+    <bean id="updateLastModificationDate"
+   		 class="fr.itldev.koya.action.UpdateLastModificationDateActionExecuter" parent="action-executer">
+    	<property name="nodeService" ref="nodeService"/>
+    	<property name="transactionService" ref="transactionService"/>
     </bean>
 </beans>

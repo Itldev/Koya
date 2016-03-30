@@ -208,6 +208,18 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 					// TODO Alert for company users
 					sendShareNotificationMail(activityPost);
 				}
+				
+				if ((activityPost.getActivityType().equals(KoyaActivityType.KOYA_CONSUMERUPLOAD))) {
+					// TODO Alert for company users
+					sendConsumerUploadNotificationMail(activityPost,recipients);
+				}
+				
+				// Send mail for ansync dl file available
+				if ((activityPost.getActivityType().equals(KoyaActivityType.KOYA_DLFILEAVAILABLE))) {		
+					sendDlNotificationMail(activityPost);					
+				}
+				
+				
 
 			}
 		} catch (SQLException se) {
@@ -271,7 +283,7 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 										activityPost.getUserId(), null,
 										spaceNodeRef);
 							} catch (Exception e) {
-								logger.warn("Failed to send alert mail : "
+								logger.warn("Failed to send share alert mail : "
 										+ e.toString());
 							}
 							return null;
@@ -279,6 +291,63 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 					});
 
 		}
+	}
+	
+	private void sendConsumerUploadNotificationMail(final ActivityPostEntity activityPost,final Set<String> recipients) {
+		AuthenticationUtil
+		.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public Void doWork() throws Exception {
+				Map<String, Object> activityPostData = null;
+				try {
+					activityPostData = new ObjectMapper()
+							.readValue(
+									activityPost.getActivityData(),
+									Map.class);
+
+					NodeRef spaceNodeRef = new NodeRef(
+							activityPostData.get("spaceNodeRef")
+									.toString());					
+					NodeRef docNodeRef =  new NodeRef(
+							activityPostData.get("nodeRef")
+							.toString());
+				
+
+					if (recipients.isEmpty()) {
+						logger.warn("No responsible for client document add.  Dossier " + spaceNodeRef.toString());			
+					}else{
+						koyaMailService.sendClientUploadAlertMail(recipients,activityPost.getUserId(),docNodeRef,spaceNodeRef);
+					}
+					
+				} catch (Exception e) {
+					logger.warn("Failed to send consumer upload alert mail : "
+							+ e.toString());
+				}
+				return null;
+			}
+		});
+	}
+	
+	private void sendDlNotificationMail(final ActivityPostEntity activityPost) {
+		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
+			@Override
+			public Void doWork() throws Exception {
+				Map<String, Object> activityPostData = null;
+				try {
+					activityPostData = new ObjectMapper().readValue(activityPost.getActivityData(),
+							Map.class);
+					NodeRef dlFileNodeRef = new NodeRef(activityPostData.get("nodeRef").toString());
+					String fileName = activityPostData.get("fileName").toString();
+					koyaMailService.sendDlFileAvailableAlertMail(activityPost.getUserId(),
+							dlFileNodeRef,fileName);
+				} catch (Exception e) {
+					logger.warn("Failed to send dl File Available alert mail : " + e.toString());
+				}
+				return null;
+			}
+		});
+
 	}
 
 	private static String[] SHARING_ACTIVITIES = {
@@ -365,7 +434,36 @@ public class KoyaLocalFeedTaskProcessor extends LocalFeedTaskProcessor {
 			}
 
 		}
-
+		
+		/**
+		 * Select user for Download File Available Activities syndication
+		 */
+		if(activityPost.getActivityType().equals(KoyaActivityType.KOYA_DLFILEAVAILABLE)){
+			HashSet<String> userNotified = new HashSet<>();		
+			userNotified.add(activityPost.getUserId()) ;
+			return userNotified;
+		}
+		
+		/**
+		 * Select users for Space public upload Activities syndication
+		 * 
+		 */
+		if(activityPost.getActivityType().equals(KoyaActivityType.KOYA_CONSUMERUPLOAD)){
+			spaceNodeRef = new NodeRef(activityPostData.get("spaceNodeRef")
+					.toString());
+			
+			List<KoyaPermission> rolesSelector = new ArrayList<KoyaPermission>();
+			rolesSelector.add(KoyaPermissionCollaborator.RESPONSIBLE);
+			rolesSelector.add(KoyaPermissionCollaborator.MEMBER);			
+			Set<String> users = spaceAclService.listUsersAuthorities(
+					spaceNodeRef, rolesSelector);
+			/**
+			 * TODO strategy for empty notifiable users list.
+			 */
+			
+			return users;
+		}
+		
 		logger.warn("Unhandled Activity type : "
 				+ activityPost.getActivityType());
 

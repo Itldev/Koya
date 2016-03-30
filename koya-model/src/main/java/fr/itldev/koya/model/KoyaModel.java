@@ -46,6 +46,9 @@ public class KoyaModel {
 	//
 	public static final QName TYPE_DOSSIER = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "dossier");
+	
+	public static final QName TYPE_DOSSIERCLASSIFYFOLDER = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "dossierClassifyFolder");
 
 	public static final QName TYPE_CONTACTITEM = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "contactItem");
@@ -75,9 +78,12 @@ public class KoyaModel {
 
 	public static final QName ASPECT_CONFIDENTIAL = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "confidential");
-	
+
 	public static final QName ASPECT_BPMSTATUS = QName.createQName(
-			NAMESPACE_KOYA_CONTENT_MODEL, "bpmStatus");
+				NAMESPACE_KOYA_CONTENT_MODEL, "bpmStatus");
+	
+	public static final QName ASPECT_TEMPFILE = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "temp");
 
 	// ================= Aspects Properties
 
@@ -135,6 +141,9 @@ public class KoyaModel {
 
 	public static final QName PROP_ACTIVITIIDS = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "activitiIds");
+	
+	public static final QName PROP_DOSSIERREF = QName.createQName(
+			NAMESPACE_KOYA_CONTENT_MODEL, "dossierRef");
 
 	// ================= Type associations
 	// ===========================================

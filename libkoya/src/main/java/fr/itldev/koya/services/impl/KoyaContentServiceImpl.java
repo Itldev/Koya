@@ -19,11 +19,7 @@
 package fr.itldev.koya.services.impl;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,16 +54,19 @@ import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
 public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaContentService, Serializable {
 
 
-    private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static final String REST_GET_MOVECONTENT = "/s/fr/itldev/koya/content/move/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
     private static final String REST_GET_COPYCONTENT = "/s/fr/itldev/koya/content/copy/{nodeRef}?destNodeRef={destNodeRef}&alf_ticket={alf_ticket}";
 
-    //
     private static final String REST_GET_LISTCONTENTTREE = "/s/fr/itldev/koya/content/tree/{nodeRef}?onlyFolders={onlyFolders}&maxdepth={maxdepth}&alf_ticket={alf_ticket}";
 
     private static final String REST_GET_DISKSIZE = "/s/fr/itldev/koya/global/disksize/{nodeRef}?alf_ticket={alf_ticket}";
     private static final String REST_GET_IMPORTZIP = "/s/fr/itldev/koya/content/importzip/{zipnoderef}?alf_ticket={alf_ticket}";
-    private static final String DOWNLOAD_ZIP_WS_URI = "/s/fr/itldev/koya/content/zip?alf_ticket=";
-
+    private static final String POST_GENERATE_ZIP = "/s/fr/itldev/koya/content/zip?alf_ticket={alf_ticket}";
+    
     private static final String POST_PDFS_RENDER = "/s/fr/itldev/koya/render/pdfrender?alf_ticket={alf_ticket}";
 
     @Override
@@ -198,39 +197,32 @@ public class KoyaContentServiceImpl extends AlfrescoRestService implements KoyaC
     }
 
     @Override
-    public InputStream getZipInputStream(User user, List<KoyaNode> KoyaNodes,
-            Boolean pdf)
-            throws AlfrescoServiceException {
-        HttpURLConnection con;
-
-        try {
-            String urlDownload = getAlfrescoServerUrl() + DOWNLOAD_ZIP_WS_URI
-                    + user.getTicketAlfresco();
-
-            Map<String, Serializable> params = new HashMap<>();
-            ArrayList<String> selected = new ArrayList<>();
-            params.put("nodeRefs", selected);
-            for (KoyaNode item : KoyaNodes) {
-                selected.add(item.getNodeRef().toString());
-            }
-            params.put("pdf", pdf);
-            JSONObject postParams = new JSONObject(params);
-
-            con = (HttpURLConnection) new URL(urlDownload).openConnection();
-            con.setRequestMethod("POST");
-            con.setDoOutput(true);
-            con.setDoInput(true);
-            con.setRequestProperty("Content-Type", "application/json");
-
-            con.getOutputStream().write(postParams.toString().getBytes());
-
-            return con.getInputStream();
-
-        } catch (IOException e) {
-            throw new AlfrescoServiceException(e.getMessage(), e);
+    public KoyaNode getZipKoyaNode(User user, List<KoyaNode> koyaNodes,String zipname,
+    		Boolean pdf,Boolean async) {
+    	
+        Map<String, Serializable> params = new HashMap<>();
+        ArrayList<String> selected = new ArrayList<>();
+        params.put("nodeRefs", selected);
+        for (KoyaNode item : koyaNodes) {
+            selected.add(item.getNodeRef().toString());
         }
-    }
+        params.put("pdf", pdf);
+        params.put("async", async);
+        params.put("zipname", zipname);
+        
+        JSONObject postParams = new JSONObject(params);
+        
+        KoyaNode result= fromJSON(
+                new TypeReference<KoyaNode>() {
+                },
+                getTemplate().postForObject(
+                        getAlfrescoServerUrl() + POST_GENERATE_ZIP,
+                        postParams,
+                        String.class,user.getTicketAlfresco()));
 
+        return result;
+    }
+    
     @Override
     public void importZipedContent(User user, Document zipFile)
             throws AlfrescoServiceException {

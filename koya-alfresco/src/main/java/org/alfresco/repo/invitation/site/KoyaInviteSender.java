@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.MailActionExecuter;
+import org.alfresco.repo.dictionary.RepositoryLocation;
 import org.alfresco.repo.i18n.MessageService;
 import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -33,6 +34,7 @@ import org.alfresco.service.cmr.invitation.InvitationException;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.TemplateService;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PersonService;
@@ -161,7 +163,9 @@ public class KoyaInviteSender extends InviteSender {
 					ModelUtil.getProductName(repoAdminService), getSiteName(properties) });
 
 			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE,
-					KoyaMailService.TPLNODEREF_MAIL_INVITATION);
+					koyaMailService.getFileTemplateRef((new RepositoryLocation(
+							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+							KoyaMailService.TPL_MAIL_INVITATION, SearchService.LANGUAGE_LUCENE))));
 
 			Map<String, Object> templateModel = buildMailTextModel(properties, inviter, invitee);
 			mail.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,

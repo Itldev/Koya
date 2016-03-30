@@ -202,7 +202,7 @@ public class CompanyService {
 			try {
 				rs = searchService.query(
 						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-						SearchService.LANGUAGE_LUCENE, "TYPE:\"st:site\" ASPECT:\"koya:companySite\"");
+						SearchService.LANGUAGE_FTS_ALFRESCO, "ASPECT:\"koya:companySite\"");
 				for (ResultSetRow r : rs) {
 					companies.add(koyaNodeService.getKoyaNode(r.getNodeRef(),
 							Company.class));
@@ -359,7 +359,7 @@ public class CompanyService {
 				.replaceAll("ñ", "n").replaceAll("[òóôõö]", "o")
 				.replaceAll("œ", "oe").replaceAll("[ùúûü]", "u")
 				.replaceAll("[ýÿ]", "y").replaceAll("&", "and")
-				.replaceAll("\\s+", "-").toLowerCase();
+				.replaceAll("\\s+", "-").replaceAll("[.]", "").toLowerCase();
 
 		// TODO check invalid characters like €
 
@@ -459,12 +459,22 @@ public class CompanyService {
 	private static String TMP_SUMMARY_DIR = "tmpDossierSummary";
 
 	public NodeRef getTmpSummaryDir(final Company company) {
+		return getTmpDir(company, TMP_SUMMARY_DIR);
+	}
+	
+	private static String TMP_ZIP_DIR = "tmpDossierZip";
+	
+	public NodeRef getTmpZipDir(final Company company) {
+		return getTmpDir(company, TMP_ZIP_DIR);
+	}
+	
+	public NodeRef getTmpDir(final Company company, final String dirName) {
 
 		NodeRef tmpSummaryDir = null;
 
 		try {
 			tmpSummaryDir = nodeService.getChildByName(company.getNodeRef(),
-					ContentModel.ASSOC_CONTAINS, TMP_SUMMARY_DIR);
+					ContentModel.ASSOC_CONTAINS, dirName);
 		} catch (Exception e) {
 		}
 
@@ -477,16 +487,16 @@ public class CompanyService {
 
 							final Map<QName, Serializable> properties = new HashMap<>();
 							properties.put(ContentModel.PROP_NAME,
-									TMP_SUMMARY_DIR);
+									dirName);
 							properties.put(ContentModel.PROP_TITLE,
-									TMP_SUMMARY_DIR);
+									dirName);
 
 							ChildAssociationRef car = nodeService.createNode(
 									company.getNodeRef(),
 									ContentModel.ASSOC_CONTAINS,
 									QName.createQName(
 											NamespaceService.CONTENT_MODEL_1_0_URI,
-											TMP_SUMMARY_DIR),
+											dirName),
 									ContentModel.TYPE_FOLDER, properties);
 
 							permissionService.setPermission(

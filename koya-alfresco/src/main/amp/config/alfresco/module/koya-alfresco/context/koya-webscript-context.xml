@@ -101,12 +101,7 @@
 	</bean>
 
 
-	<!-- get available roles -->
-	<bean id="webscript.fr.itldev.koya.company.roles.get" class="fr.itldev.koya.webscript.company.GetRoles"
-		parent="webscript">
-		<property name="companyAclService" ref="companyAclService" />
-		<property name="koyaNodeService" ref="koyaNodeService" />
-	</bean>
+	
 
 
 	<!-- Check if user is manager on specified company -->
@@ -222,11 +217,11 @@
 	<!-- zip content -->
 	<bean id="webscript.fr.itldev.koya.content.zip.post" class="fr.itldev.koya.webscript.content.ZipContent"
 		parent="webscript">
-		<property name="koyaContentService" ref="koyaContentService" />
+		<property name="actionService" ref="ActionService" />
 		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="companyService" ref="companyService" />
 	</bean>
-
-
+	
 	<!-- import Zip -->
 	<bean id="webscript.fr.itldev.koya.content.importzip.get" class="fr.itldev.koya.webscript.content.ImportZip"
 		parent="webscript">
@@ -361,15 +356,6 @@
 	</bean>
 
 
-
-	<!-- get user role for a company -->
-	<bean id="webscript.fr.itldev.koya.user.role.get" class="fr.itldev.koya.webscript.user.GetRole"
-		parent="webscript">
-		<property name="koyaNodeService" ref="koyaNodeService" />
-		<property name="userService" ref="userService" />
-		<property name="companyAclService" ref="companyAclService" />
-	</bean>
-
 	<!-- set user role for a company -->
 	<bean id="webscript.fr.itldev.koya.user.setrole.get" class="fr.itldev.koya.webscript.user.SetRole"
 		parent="webscript">
@@ -446,7 +432,7 @@
 
 
 	<!-- ================================================================== 
-	========================== Shares ==============================
+	========================== Shares And Security ==============================
 	================================================================== -->
 
 	<!-- share secured item -->
@@ -481,7 +467,22 @@
 		<property name="spaceAclService" ref="spaceAclService" />
 		<property name="koyaNodeService" ref="koyaNodeService" />
 	</bean>
+	
+	<!-- get user role for a company -->
+	<bean id="webscript.fr.itldev.koya.security.role.get" class="fr.itldev.koya.webscript.security.GetRole"
+		parent="webscript">
+		<property name="koyaNodeService" ref="koyaNodeService" />
+		<property name="userService" ref="userService" />
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="spaceAclService" ref="spaceAclService" />
+	</bean>
 
+	<!-- list available roles on koyaNode -->
+	<bean id="webscript.fr.itldev.koya.security.roles.get" class="fr.itldev.koya.webscript.security.GetRoles"
+		parent="webscript">
+		<property name="companyAclService" ref="companyAclService" />
+		<property name="koyaNodeService" ref="koyaNodeService" />		
+	</bean>
 
 	<!-- ================================================================== 
 	========================== Meta ==============================

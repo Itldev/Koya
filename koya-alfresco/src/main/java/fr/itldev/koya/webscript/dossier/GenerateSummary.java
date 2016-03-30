@@ -26,7 +26,6 @@ import org.alfresco.service.cmr.repository.TemplateService;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
@@ -127,6 +126,7 @@ public class GenerateSummary extends AbstractWebScript implements InitializingBe
 
 		NodeRef htmlSummaryNodeRef;
 		NodeRef pdfSummaryNodeRef;
+		String response;
 
 		try {
 
@@ -245,23 +245,20 @@ public class GenerateSummary extends AbstractWebScript implements InitializingBe
 			transformer.transform(htmlSummaryReader, pdfSummaryWriter);
 			// creates new revision
 			versionService.createVersion(pdfSummaryNodeRef, null);
+			
+			response = KoyaWebscript.getObjectAsJson(koyaNodeService.getKoyaNode(pdfSummaryNodeRef));
 
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
 		}
 
 		res.setContentEncoding("UTF-8");
-		/**
-		 * Stream pdf summary as response
-		 */
-		try {
-			ContentReader reader = contentService.getReader(pdfSummaryNodeRef,
-					ContentModel.PROP_CONTENT);
-			reader.getContent(res.getOutputStream());
-		} catch (Exception ex) {
-			throw new WebScriptException("Unable to stream output");
-		}
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
 	}
+	
+	
+	
 
 	private String getDossierSummaryFileName(Dossier d) {
 		return "dossier-summary-" + d.getNodeRef().getId();
@@ -282,6 +279,7 @@ public class GenerateSummary extends AbstractWebScript implements InitializingBe
 		return new NodeRef(SUMMARY_NODEREF);
 	}
 
+	@SuppressWarnings("unused")
 	private NodeRef getTemplate() {
 
 		if (summarytemplate != null) {

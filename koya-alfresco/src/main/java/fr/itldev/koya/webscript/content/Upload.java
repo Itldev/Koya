@@ -48,6 +48,7 @@ import fr.itldev.koya.webscript.KoyaWebscript;
  */
 public class Upload extends AbstractWebScript {
 
+	@SuppressWarnings("unused")
 	private final Logger logger = Logger.getLogger(Upload.class);
 
 	/* services */

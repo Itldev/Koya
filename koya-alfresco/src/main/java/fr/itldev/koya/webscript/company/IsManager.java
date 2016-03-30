@@ -29,6 +29,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
 
 import fr.itldev.koya.alfservice.security.CompanyAclService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.json.RestConstants;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
@@ -52,9 +53,19 @@ public class IsManager extends AbstractWebScript {
 		String response;
 
 		try {
-			response = KoyaWebscript.getObjectAsJson(companyAclService.isCompanyManager(companyName));
+			response = KoyaWebscript
+					.getObjectAsJson(companyAclService.isCompanyManager(companyName));
 		} catch (KoyaServiceException ex) {
-			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+
+			if (ex.getErrorCode().equals(KoyaErrorCodes.COMPANY_SITE_NOT_FOUND)) {
+				/**
+				 * Company may not be found because index is not up to date if
+				 * company just created.
+				 */
+				response = KoyaWebscript.getObjectAsJson(Boolean.FALSE);
+			} else {
+				throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
+			}
 		}
 
 		res.setContentType("application/json;charset=UTF-8");

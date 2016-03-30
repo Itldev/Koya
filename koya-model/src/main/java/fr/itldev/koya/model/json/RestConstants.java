@@ -2,6 +2,7 @@ package fr.itldev.koya.model.json;
 
 public class RestConstants {
 	public static final String WSCONST_NODEREF = "nodeRef";
+	public static final String WSCONST_NODEID = "nodeId";
 	public static final String WSCONST_DESTNODEREF = "destNodeRef";
 	public static final String WSCONST_NAME = "name";
 	public static final String WSCONST_TITLE = "title";

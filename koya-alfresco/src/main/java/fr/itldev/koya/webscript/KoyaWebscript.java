@@ -19,7 +19,6 @@
 package fr.itldev.koya.webscript;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,22 +69,7 @@ public abstract class KoyaWebscript {
 		Map<String, String> params = new HashMap<>();
 		params.putAll(req.getServiceMatch().getTemplateVars());
 		for (String k : req.getParameterNames()) {
-			String param;
-			try {
-				/**
-				 * Decode double encoded url parameter : ex string with accent
-				 * characters
-				 *
-				 * TODO charset permissive implementation
-				 */
-				param = new String(req.getParameter(k).getBytes("iso-8859-1"), "UTF-8");
-			} catch (UnsupportedEncodingException ex) {
-				param = req.getParameter(k);
-				LOGGER.error(ex.getMessage(), ex);
-
-			}
-
-			params.put(k, param);
+			params.put(k, req.getParameter(k));
 		}
 		return params;
 	}

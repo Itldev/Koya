@@ -32,6 +32,7 @@ import org.alfresco.query.PagingRequest;
 import org.alfresco.query.PagingResults;
 import org.alfresco.repo.node.getchildren.GetChildrenCannedQuery;
 import org.alfresco.repo.nodelocator.AncestorNodeLocator;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.favourites.FavouritesService;
 import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -63,6 +64,7 @@ import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
+import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.utils.KoyaNodeBuilder;
 
 /**
@@ -452,19 +454,48 @@ public class KoyaNodeService {
 	 * @return
 	 * @throws KoyaServiceException
 	 */
-	public KoyaNode copy(NodeRef toCopy, NodeRef dest)
+	public KoyaNode copy(NodeRef toCopy, final NodeRef dest)
 			throws KoyaServiceException {
 		FileInfo fInfo;
 		try {
-			fInfo = fileFolderService.copy(toCopy, dest, (String) nodeService
-					.getProperty(toCopy, ContentModel.PROP_NAME));
+			String name = (String) nodeService.getProperty(toCopy, ContentModel.PROP_TITLE);
+			String realFileName = name;
+			String ext = "";
+			int dot = realFileName.lastIndexOf(".");
+			if(!fileFolderService.getFileInfo(toCopy).isFolder() && dot != -1) {
+				name = realFileName.substring(0,dot);
+				ext = realFileName.substring(dot);
+			}
+			boolean exists = true;
+			int uniqueFileCounter = 0;
+			while (exists) {
+				// run as System to check existance of any node in dir (even other
+				// users files)
+				
+				final String finalFileName = getUniqueValidFileNameFromTitle(realFileName);
+				exists = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Boolean>() {
+					@Override
+					public Boolean doWork() throws Exception {
+						return nodeService.getChildByName(dest, ContentModel.ASSOC_CONTAINS,
+								finalFileName) != null;
+					}
+				});
+				
+				if (exists) {
+					// build new filename
+					realFileName = name + "-" + ++uniqueFileCounter+ ext;
+				}
+			}
+			
+			fInfo = fileFolderService.copy(toCopy, dest, getUniqueValidFileNameFromTitle(realFileName));
+			nodeService.setProperty(fInfo.getNodeRef(), ContentModel.PROP_TITLE, realFileName);
 
-		} catch (FileExistsException fex) {
-			/**
-			 * change errors
-			 */
-			throw new KoyaServiceException(
-					KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
+//		} catch (FileExistsException fex) {
+//			/**
+//			 * change errors
+//			 */
+//			throw new KoyaServiceException(
+//					KoyaErrorCodes.MOVE_DESTINATION_NAME_ALREADY_EXISTS);
 		} catch (FileNotFoundException ex) {
 			throw new KoyaServiceException(KoyaErrorCodes.MOVE_SOURCE_NOT_FOUND);
 		}
@@ -748,5 +779,39 @@ public class KoyaNodeService {
 		} while (!oldTitle.equals(title));
 
 		return title;
+	}
+	
+	/**
+	 * Dossier public upload folder methods
+	 */
+	
+	public static String SITECONSUMER_UPLOADDIR_NAME = "siteConsumerUpload";
+
+	public NodeRef getPublicUploadFolder(Dossier dossier) {
+		NodeRef publicUploadFolder = null;
+
+		Company c = getFirstParentOfType(dossier.getNodeRef(),
+				Company.class);
+
+		try {
+
+			NodeRef koyaClientUpDir = nodeService.getChildByName(
+					c.getNodeRef(), ContentModel.ASSOC_CONTAINS,
+					SITECONSUMER_UPLOADDIR_NAME);
+
+			if (koyaClientUpDir != null) {
+				publicUploadFolder = nodeService.getChildByName(
+						koyaClientUpDir, ContentModel.ASSOC_CONTAINS,
+						publicUploadFolderName(dossier));
+			}
+
+		} catch (Exception e) {
+
+		}
+		return publicUploadFolder;
+	}
+	
+	public String publicUploadFolderName(Dossier dossier) {
+		return "dossier-" + dossier.getNodeRef().getId();
 	}
 }

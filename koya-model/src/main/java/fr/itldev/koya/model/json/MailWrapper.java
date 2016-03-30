@@ -42,7 +42,7 @@ public class MailWrapper {
 	private String subject;
 	private String content;
 	// template body
-	private String templateXPath;
+	private String templatePath;
 	private Map<String, String> templateParams = new HashMap<>();
 	// template subject
 	private String templateKoyaSubjectKey;
@@ -83,12 +83,12 @@ public class MailWrapper {
 		this.content = content;
 	}
 
-	public String getTemplateXPath() {
-		return templateXPath;
+	public String getTemplatePath() {
+		return templatePath;
 	}
 
-	public void setTemplateXPath(String templateXPath) {
-		this.templateXPath = templateXPath;
+	public void setTemplatePath(String templatePath) {
+		this.templatePath = templatePath;
 	}
 
 	public Map<String, String> getTemplateParams() {

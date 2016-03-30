@@ -22,8 +22,7 @@ import fr.itldev.koya.model.impl.Space;
  * importer user
  * 
  */
-public class ApplyDefaultAclOnCreate implements
-		NodeServicePolicies.OnCreateNodePolicy {
+public class ApplyDefaultAclOnCreate implements NodeServicePolicies.OnCreateNodePolicy {
 
 	private final Logger logger = Logger.getLogger(this.getClass());
 	private Behaviour onCreateNode;
@@ -47,12 +46,10 @@ public class ApplyDefaultAclOnCreate implements
 		// Create behaviours
 		this.onCreateNode = new JavaBehaviour(this, "onCreateNode",
 				Behaviour.NotificationFrequency.TRANSACTION_COMMIT);
-		this.policyComponent.bindClassBehaviour(
-				NodeServicePolicies.OnCreateNodePolicy.QNAME,
+		this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnCreateNodePolicy.QNAME,
 				KoyaModel.TYPE_DOSSIER, this.onCreateNode);
 
-		this.policyComponent.bindClassBehaviour(
-				NodeServicePolicies.OnCreateNodePolicy.QNAME,
+		this.policyComponent.bindClassBehaviour(NodeServicePolicies.OnCreateNodePolicy.QNAME,
 				KoyaModel.TYPE_SPACE, this.onCreateNode);
 
 	}
@@ -62,11 +59,9 @@ public class ApplyDefaultAclOnCreate implements
 
 		Space space;
 		try {
-			space = koyaNodeService.getKoyaNode(childAssocRef.getChildRef(),
-					Space.class);
+			space = koyaNodeService.getKoyaNode(childAssocRef.getChildRef(), Space.class);
 		} catch (KoyaServiceException ex) {
-			logger.error("Error Applying default permissions on node creation : "
-					+ ex.toString());
+			logger.error("Error Applying default permissions on node creation : " + ex.toString());
 			return;
 		}
 

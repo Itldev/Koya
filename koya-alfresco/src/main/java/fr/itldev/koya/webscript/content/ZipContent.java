@@ -18,100 +18,121 @@
  */
 package fr.itldev.koya.webscript.content;
 
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_ZIP;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
-import fr.itldev.koya.alfservice.KoyaContentService;
+import fr.itldev.koya.action.ZipContentActionExecuter;
+import fr.itldev.koya.alfservice.CompanyService;
 import fr.itldev.koya.alfservice.KoyaNodeService;
 import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.webscript.KoyaWebscript;
 
 /**
  * Mostly comming from atolcd ZipContents
  * http://github.com/atolcd/alfresco-zip-and-download.git
- *
+ * 
  * http://www.atolcd.com/
  */
 public class ZipContent extends AbstractWebScript {
 
 	private static final String ARG_NODEREFS = "nodeRefs";
 	private static final String ARG_PDF = "pdf";
+	private static final String ARG_ZIPNAME = "zipname";
+	private static final String ARG_ASYNC = "async";
 
-	// private ActionService actionService;
-	private KoyaContentService koyaContentService;
+	private ActionService actionService;
 	private KoyaNodeService koyaNodeService;
+	private CompanyService companyService;
 
-	// public void setActionService(ActionService actionService) {
-	// this.actionService = actionService;
-	// }
-	public void setKoyaContentService(KoyaContentService koyaContentService) {
-		this.koyaContentService = koyaContentService;
+	public void setActionService(ActionService actionService) {
+		this.actionService = actionService;
 	}
 
 	public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
 		this.koyaNodeService = koyaNodeService;
 	}
 
+	public void setCompanyService(CompanyService companyService) {
+		this.companyService = companyService;
+	}
+
 	@Override
 	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-		Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
 
-		ArrayList<NodeRef> nodeRefs = new ArrayList<>();
-		JSONArray jsonArray = (JSONArray) jsonPostMap.get(ARG_NODEREFS);
-		Boolean pdf = (Boolean) jsonPostMap.get(ARG_PDF);
-		if (pdf == null) {
-			pdf = Boolean.FALSE;
-		}
+		String response = null;
 
-		if (jsonArray != null) {
+		try {
+			Map<String, Object> jsonPostMap = KoyaWebscript.getJsonMap(req);
+
+			ArrayList<NodeRef> nodeRefs = new ArrayList<>();
+			JSONArray jsonArray = (JSONArray) jsonPostMap.get(ARG_NODEREFS);
+			Boolean pdf = (Boolean) jsonPostMap.get(ARG_PDF);
+			String zipname = (String) jsonPostMap.get(ARG_ZIPNAME);
+			Boolean async;
+			try {
+				async = (Boolean) jsonPostMap.get(ARG_ASYNC);
+			} catch (Exception e) {
+				async = false;
+			}
+
+			if (pdf == null) {
+				pdf = Boolean.FALSE;
+			}
+
 			int len = jsonArray.size();
 			for (int i = 0; i < len; i++) {
 				NodeRef n = koyaNodeService.getNodeRef(jsonArray.get(i).toString());
 				nodeRefs.add(n);
 			}
-		}
 
-		try {
-			res.setContentType(MIMETYPE_ZIP);
-			res.setHeader("Content-Transfer-Encoding", "binary");
-			res.addHeader("Content-Disposition", "attachment");
+			Company c = (Company) koyaNodeService.getFirstParentOfType(nodeRefs.get(0),
+					Company.class);
+			NodeRef companyTmpZipDir = companyService.getTmpZipDir(c);
 
-			res.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
-			res.setHeader("Pragma", "public");
-			res.setHeader("Expires", "0");
+			try {
+				Map<String, Serializable> paramsZipContent = new HashMap<>();
 
-			File tmpZipFile = koyaContentService.zip(nodeRefs, pdf);
+				paramsZipContent.put(ZipContentActionExecuter.PARAM_NODEREFS, nodeRefs);
+				paramsZipContent.put(ZipContentActionExecuter.PARAM_ZIPNAME, zipname);
+				paramsZipContent.put(ZipContentActionExecuter.PARAM_PDF, pdf);
+				paramsZipContent.put(ZipContentActionExecuter.PARAM_COMPANYTMPZIPDIR,
+						companyTmpZipDir);
+				paramsZipContent.put(ZipContentActionExecuter.PARAM_ASYNC, async);
 
-			OutputStream outputStream = res.getOutputStream();
-			if (nodeRefs.size() > 0) {
-				InputStream in = new FileInputStream(tmpZipFile);
-				try {
-					byte[] buffer = new byte[8192];
-					int len;
+				Action zipContent = actionService.createAction(ZipContentActionExecuter.NAME,
+						paramsZipContent);
 
-					while ((len = in.read(buffer)) > 0) {
-						outputStream.write(buffer, 0, len);
-					}
-				} finally {
-					IOUtils.closeQuietly(in);
+				zipContent.setExecuteAsynchronously(async);
+				actionService.executeAction(zipContent, null);
+
+				if (!async) {
+					response = KoyaWebscript
+							.getObjectAsJson(koyaNodeService.getKoyaNode((NodeRef) zipContent
+									.getParameterValue(ZipContentActionExecuter.PARAM_RESULT)));
+				}else{
+					//TODO return processing message
 				}
+
+			} catch (KoyaServiceException kse) {
+				throw kse;
+			} catch (Exception ex) {
+				throw new KoyaServiceException(KoyaErrorCodes.ZIP_EXTRACTION_PROCESS_ERROR, ex);
 			}
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString());
@@ -122,7 +143,9 @@ public class ZipContent extends AbstractWebScript {
 			throw new WebScriptException(HttpServletResponse.SC_BAD_REQUEST,
 					"Erreur lors de la génération de l'archive.", e);
 		}
-
+		res.setContentEncoding("UTF-8");
+		res.setContentType("application/json;charset=UTF-8");
+		res.getWriter().write(response);
 	}
 
 }

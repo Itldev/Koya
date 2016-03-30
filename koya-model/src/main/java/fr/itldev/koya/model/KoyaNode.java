@@ -1,5 +1,6 @@
 package fr.itldev.koya.model;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
+import fr.itldev.koya.model.impl.DocumentToClassify;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.SalesOffer;
 import fr.itldev.koya.model.impl.Space;
@@ -28,6 +30,7 @@ import fr.itldev.koya.model.json.util.NodeRefDeserializer;
 		@Type(value = Space.class, name = "Space"), @Type(value = Dossier.class, name = "Dossier"),
 		@Type(value = Directory.class, name = "Directory"),
 		@Type(value = Document.class, name = "Document"),
+		@Type(value = DocumentToClassify.class, name = "DocumentToClassify"),
 		@Type(value = SalesOffer.class, name = "Salesoffer"),
 		@Type(value = Template.class, name = "Template"),
 		@Type(value = User.class, name = "User") })
@@ -38,6 +41,9 @@ public abstract class KoyaNode {
 	protected String name;
 	protected String title;
 	private Map<String, String> workflows = new HashMap<>();
+
+	private Date creationDate;
+	private String creatorUsername;
 
 	/*
 	 * ======== Constructors
@@ -93,6 +99,22 @@ public abstract class KoyaNode {
 
 	public void setWorkflows(Map<String, String> workflows) {
 		this.workflows = workflows;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public String getCreatorUsername() {
+		return creatorUsername;
+	}
+
+	public void setCreatorUsername(String creatorUsername) {
+		this.creatorUsername = creatorUsername;
 	}
 
 	/**

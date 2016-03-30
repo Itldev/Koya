@@ -18,35 +18,26 @@
  */
 package fr.itldev.koya.model.impl;
 
-import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.interfaces.KoyaContent;
 
-public class Document extends KoyaNode implements KoyaContent{
+public final class DocumentToClassify extends Document implements KoyaContent {
 
-    private Long byteSize;
-    private String mimeType;
+	private Dossier dossier;
 
-    protected Document() {
-    }
+	private DocumentToClassify() {
 
-    public Long getByteSize() {
-        return byteSize;
-    }
+	}
 
-    public void setByteSize(Long tailleOctets) {
-        this.byteSize = tailleOctets;
-    }
+	public Dossier getDossier() {
+		return dossier;
+	}
 
-    public String getMimeType() {
-        return mimeType;
-    }
+	public void setDossier(Dossier dossier) {
+		this.dossier = dossier;
+	}
 
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
-    }   
-
-    public static Document newInsance() {
-        return new Document();
-    }
+	public static DocumentToClassify newInsance() {
+		return new DocumentToClassify();
+	}
 
 }

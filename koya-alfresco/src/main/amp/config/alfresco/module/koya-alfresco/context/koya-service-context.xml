@@ -87,22 +87,19 @@
 		<property name="transactionService" ref="transactionService" />
 		<property name="koyaContentService" ref="koyaContentService" />
 		<property name="spaceAclService" ref="spaceAclService" />
-		<property name="koyaMailService" ref="koyaMailService" />
 		<property name="userService" ref="userService" />
 		<property name="authenticationService" ref="AuthenticationService" />
-		<property name="companyAclService" ref="companyAclService" />
 		<property name="ownableService" ref="ownableService" />		
+		<property name="activityPoster" ref="koyaActivityPoster" />
+		<property name="actionService" ref="actionService"/>
 	</bean>
 
     <!--Contents handling service-->
     <bean name="koyaContentService" class="fr.itldev.koya.alfservice.KoyaContentService">
         <property name="nodeService" ref="NodeService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="dictionaryService" ref="DictionaryService"/>
         <property name="contentService" ref="contentService"/>
-        <property name="namespaceService" ref="NamespaceService"/>
         <property name="fileFolderService" ref="FileFolderService"/>
-        <property name="actionService" ref="ActionService"/>
         <property name="activityPoster" ref="koyaActivityPoster" />
     </bean>
    
@@ -211,6 +208,23 @@
         </property>                  
     </bean>
 
+   <bean id="dbNodeService" class="fr.itldev.koya.repo.node.db.DbNodeServiceImpl" init-method="init" >
+      <property name="dictionaryService" ref="dictionaryService" />
+      <property name="transactionService" ref="transactionService" />
+      <property name="qnameDAO" ref="qnameDAO" />
+      <property name="nodeDAO" ref="nodeDAO" />
+      <property name="permissionService" ref="permissionServiceImpl" />
+      <property name="policyComponent" ref="policyComponent"/>
+      <property name="storeArchiveMap" ref="storeArchiveMap"/>
+      <property name="avmNodeService" ref="avmNodeService"/>
+      <property name="nodeIndexer" ref="nodeIndexer"/>
+      <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
+      <property name="tenantService" ref="tenantService"/>
+      <property name="storesToIgnorePolicies">
+         <ref bean="storesToIgnorePolicies"/>
+      </property>
+      <property name="enableTimestampPropagation" value="${system.enableTimestampPropagation}" />
+   </bean>
    
    <bean name="fileFolderGetChildrenCannedQueryFactory" class="fr.itldev.koya.repo.model.filefolder.KoyaGetChildrenCannedQuerryFactory">
       <property name="registry" ref="fileFolderCannedQueryRegistry"/>

@@ -83,4 +83,31 @@
         <property name="spaceAclService" ref="spaceAclService" />
         <property name="inactiveFrom" value="${koya.inactivedossiers.duration}" />
     </bean>
+    
+    
+    <!-- Process Temp files -->
+	<!-- Action is called from a classic CronTriggerBean because serach expression is nots based on LUCENE but ALFRESCO-FTS -->
+	<bean id="delTempFilesTrigger" class="org.alfresco.util.CronTriggerBean">
+		<property name="enabled" value="true" />
+		<property name="jobDetail">
+			<bean id="delTempFilesJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass">
+					<value>fr.itldev.koya.scheduledjobs.CleanTempFilesJob</value>
+				</property>
+				<property name="jobDataAsMap">
+					<map>
+						<entry key="actionService">
+							<ref bean="ActionService" />
+						</entry>
+					</map>
+				</property>
+			</bean>
+		</property>
+		<property name="scheduler">
+			<ref bean="schedulerFactory" />
+		</property>
+		<property name="cronExpression">
+			<value>${koya.tempfiles.cron}</value>
+		</property>
+	</bean>
 </beans>

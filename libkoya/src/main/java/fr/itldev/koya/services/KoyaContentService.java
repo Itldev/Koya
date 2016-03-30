@@ -33,44 +33,48 @@ import fr.itldev.koya.model.interfaces.KoyaContent;
 import fr.itldev.koya.model.json.PaginatedContentList;
 import fr.itldev.koya.model.json.PdfRendition;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+
 import java.net.URL;
 
 public interface KoyaContentService extends AlfrescoService {
 
-    Directory createDir(User user, KoyaNode parent, String title)
-            throws AlfrescoServiceException;
+	Directory createDir(User user, KoyaNode parent, String title)
+			throws AlfrescoServiceException;
 
-    Document upload(User user, NodeRef parent, Resource r)
-            throws AlfrescoServiceException;
+	Document upload(User user, NodeRef parent, Resource r)
+			throws AlfrescoServiceException;
 
-    Document upload(User user, NodeRef parent, File f)
-            throws AlfrescoServiceException;
+	Document upload(User user, NodeRef parent, File f)
+			throws AlfrescoServiceException;
 
-    KoyaContent move(User user, NodeRef contentToMove, NodeRef destination)
-            throws AlfrescoServiceException;
+	KoyaContent move(User user, NodeRef contentToMove, NodeRef destination)
+			throws AlfrescoServiceException;
 
-    KoyaContent copy(User user, NodeRef contentToCopy, NodeRef destination)
-            throws AlfrescoServiceException;
+	KoyaContent copy(User user, NodeRef contentToCopy, NodeRef destination)
+			throws AlfrescoServiceException;
 
-    List<KoyaContent> list(User user, NodeRef containerToList,
-            Boolean onlyFolders, Integer depth) throws AlfrescoServiceException;
+	List<KoyaContent> list(User user, NodeRef containerToList,
+			Boolean onlyFolders, Integer depth) throws AlfrescoServiceException;
 
-    PaginatedContentList listPaginatedDirectChild(User user,
-            NodeRef containerToList, Integer skipCount, Integer maxItems,
-            Boolean onlyFolders, String sortField, Boolean ascending) throws AlfrescoServiceException;
+	PaginatedContentList listPaginatedDirectChild(User user,
+			NodeRef containerToList, Integer skipCount, Integer maxItems,
+			Boolean onlyFolders, String sortField, Boolean ascending)
+			throws AlfrescoServiceException;
 
-    Integer countChildren(User user, KoyaNode parent, Boolean onlyFolders)
-            throws AlfrescoServiceException;
+	Integer countChildren(User user, KoyaNode parent, Boolean onlyFolders)
+			throws AlfrescoServiceException;
 
-    Long getDiskSize(User user, KoyaNode koyaNode)
-            throws AlfrescoServiceException;
+	Long getDiskSize(User user, KoyaNode koyaNode)
+			throws AlfrescoServiceException;
 
-    InputStream getZipInputStream(User user, List<KoyaNode> koyaNodes, Boolean pdf)
-            throws AlfrescoServiceException;
+	KoyaNode getZipKoyaNode(User user, List<KoyaNode> koyaNodes,
+			String zipname, Boolean pdf,Boolean async);
 
-    void importZipedContent(User user, Document zipFile)
-            throws AlfrescoServiceException;
+	void importZipedContent(User user, Document zipFile)
+			throws AlfrescoServiceException;
 
-    KoyaNode getContentPdfNode(User user, KoyaNode koyaNode)
-            throws AlfrescoServiceException;
+	KoyaNode getContentPdfNode(User user, KoyaNode koyaNode)
+			throws AlfrescoServiceException;
+
+
 }
