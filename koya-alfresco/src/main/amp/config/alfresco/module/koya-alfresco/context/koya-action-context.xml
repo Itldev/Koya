@@ -115,4 +115,10 @@
         <property name="nodeService" ref="nodeService"/>
         <property name="delDelay" value="${koya.tempfiles.deldelay}" />
     </bean>
+    
+    <bean id="updateLastModificationDate"
+   		 class="fr.itldev.koya.action.UpdateLastModificationDateActionExecuter" parent="action-executer">
+    	<property name="nodeService" ref="nodeService"/>
+    	<property name="transactionService" ref="transactionService"/>
+    </bean>
 </beans>
