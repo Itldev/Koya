@@ -290,17 +290,10 @@
         <aspect name="koya:confidential">
             <title>confidential item</title>
         </aspect>
-<<<<<<< HEAD
-
-
-=======
-
          <aspect name="koya:temp">
             <title>Temporary files</title>
         </aspect>
 
-
->>>>>>> master
         <aspect name="koya:bpmStatus">
 			<title>Koya bpm status</title>
 			<properties>
