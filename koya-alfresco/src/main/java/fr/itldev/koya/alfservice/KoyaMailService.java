@@ -2,6 +2,7 @@ package fr.itldev.koya.alfservice;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +71,15 @@ public class KoyaMailService implements InitializingBean {
 	private final static String INACTIVEDOSSIER_NOTIFICATION_SUBJECT = "koya.inactivedossier-notification.subject";
 	private final static String ACTIVITIESEMAIL_SUBJECT = "koya.activities-email.subject";
 	private final static String CLIENT_UPLOADALERT_EMAIL_SUBJECT = "koya.clientdoc-upload.subject";
+	private final static String TASKEXPIREALERT_EMAIL_SUBJECT = "koya.task-expire-alert.subject";
 
-	/*
-	 * templates locations : TODO restore search by xpath instead of static
-	 * nodeRef reference
+	
+	/**
+	 * TODO Get Theses values as config from properties files
+	 * TODO Split Mail Service as Many Mailer instances : 1 per mail Type
 	 */
+	
+	
 	private final static String TPL_MAIL_KOYAROOT = "//app:company_home/app:dictionary/app:email_templates/cm:koya_templates";
 
 	private final static String TPL_MAIL_I18NSUBJECTS = TPL_MAIL_KOYAROOT
@@ -90,6 +95,7 @@ public class KoyaMailService implements InitializingBean {
 	public final static String TPL_MAIL_INVITATION = TPL_MAIL_KOYAROOT + "/cm:invite.html.ftl";
 	private final static String TPL_MAIL_INACTIVEDOSSIERNOTIF_ = TPL_MAIL_KOYAROOT
 			+ "/cm:inactive-dossiers.html.ftl";
+	public final static String TPL_MAIL_TASKEXPIREALERT = TPL_MAIL_KOYAROOT + "/cm:task-expire-alert.html.ftl";
 
 	protected NamespaceService namespaceService;
 	protected FileFolderService fileFolderService;
@@ -317,6 +323,69 @@ public class KoyaMailService implements InitializingBean {
 		 */
 		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
 				getI18nSubject(DLFILE_AVAILABLE_SUBJECT, templateModel));
+
+		actionService.executeAction(actionService.createAction(MailActionExecuter.NAME, paramsMail),
+				null, false, true);
+
+	}
+	
+	
+	public void sendTaskExpireAlertMail(List<User> dest, final String taskName, final String processName,
+			final Space refSpace, final Integer expDelay, final Date expDate) throws KoyaServiceException {
+		
+		final Company c = koyaNodeService.getFirstParentOfType(refSpace.getNodeRef(), Company.class);
+		        
+		if (logger.isDebugEnabled()) {
+			logger.debug("Alert Email - task "+taskName+"expire in "+expDelay + " days");
+		}
+
+		Map<String, Serializable> paramsMail = new HashMap<>();
+		
+		
+		ArrayList<String> mailDest = new ArrayList<>();
+		for (User u : dest) {
+			mailDest.add(u.getEmail());
+		}
+		paramsMail.put(MailActionExecuter.PARAM_TO_MANY, mailDest);
+
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE, 
+				getFileTemplateRef(new RepositoryLocation(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						TPL_MAIL_TASKEXPIREALERT, SearchService.LANGUAGE_LUCENE)));
+
+		// TODO i18n templates
+		Map<String, Object> templateModel = new HashMap<>();
+
+		/**
+		 * Model Objects
+		 */
+
+		templateModel.put("expireinfos", new HashMap() {
+			{
+				put("taskName",taskName);
+				put("processName",processName);
+				put("delay", expDelay);
+				put("date",expDate);
+				put("spaceNodeRef", refSpace.getNodeRef());
+				put("spaceTitle", refSpace.getTitle());
+				put("spaceUrl",getDirectLinkUrl(refSpace.getNodeRef())); //TODO direct acces to workflow page
+				
+			}
+		});
+
+		templateModel.put("koyaClient", koyaClientParams);
+		
+
+		templateModel.put(TemplateService.KEY_COMPANY_HOME, repositoryHelper.getCompanyHome());
+		templateModel.put("company", companyPropertiesService.getProperties(c).toHashMap());
+
+		paramsMail.put(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateModel);
+
+		/**
+		 * Get subject from properties file in repository
+		 */
+		paramsMail.put(MailActionExecuter.PARAM_SUBJECT,
+				getI18nSubject(TASKEXPIREALERT_EMAIL_SUBJECT, templateModel));
 
 		actionService.executeAction(actionService.createAction(MailActionExecuter.NAME, paramsMail),
 				null, false, true);

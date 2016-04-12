@@ -610,6 +610,10 @@
 	<bean id="webscript.fr.itldev.koya.workflow.task-isassignee.get"
 		class="fr.itldev.koya.webscript.workflow.TaskIsAssignee" parent="abstractWorkflowWebScript">
 	</bean>
-
+	
+	<bean id="webscript.fr.itldev.koya.workflow.firealerts.get" class="fr.itldev.koya.webscript.workflow.FireAlerts"
+	parent="webscript">
+		<property name="actionService" ref="ActionService" />
+	</bean>
 
 </beans>

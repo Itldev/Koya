@@ -110,4 +110,30 @@
 			<value>${koya.tempfiles.cron}</value>
 		</property>
 	</bean>
+	
+	
+	
+	<bean id="workflowAlertsTrigger" class="org.alfresco.util.CronTriggerBean">
+		<property name="enabled" value="true" />
+		<property name="jobDetail">
+			<bean id="wokflowAlertsJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass">
+					<value>fr.itldev.koya.scheduledjobs.WorkflowAlertsJob</value>
+				</property>
+				<property name="jobDataAsMap">
+					<map>
+						<entry key="actionService">
+							<ref bean="ActionService" />
+						</entry>
+					</map>
+				</property>
+			</bean>
+		</property>
+		<property name="scheduler">
+			<ref bean="schedulerFactory" />
+		</property>
+		<property name="cronExpression">
+			<value>${koya.workflowtasksalert.cron}</value>
+		</property>
+	</bean>
 </beans>
