@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model name="koyares:realestatesale-workflow-model" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+	<imports>
+		<import uri="http://www.alfresco.org/model/dictionary/1.0"
+			prefix="d" />
+		<import uri="http://www.alfresco.org/model/bpm/1.0" prefix="bpm" />
+		<import uri="http://www.alfresco.org/model/workflow/1.0"
+			prefix="wf" />
+	</imports>
+
+	<namespaces>
+		<namespace uri="http://www.itldev.fr/model/workflow/succession/1.0"
+			prefix="koyasuc" />
+	</namespaces>
+
+	<types>
+
+	</types>
+
+</model>
