@@ -6,20 +6,20 @@
     <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="parallelgateway1"></sequenceFlow>
     <subProcess id="notoriete" name="Etablissement de l'acte de notoriété" triggeredByEvent="true">
       <startEvent id="startevent2" name="Start"></startEvent>
-      <userTask id="usertask1" name="Validate civil status defunt" activiti:candidateGroups="${taskValidatorGroup}"></userTask>
-      <userTask id="usertask2" name="Validate civil status inheritors" activiti:candidateGroups="${taskValidatorGroup}"></userTask>
-      <userTask id="usertask3" name="Validate testimonial" activiti:candidateGroups="${taskValidatorGroup}"></userTask>
+      <userTask id="usertask1" name="Validate civil status defunt" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyasuc:NAdefunct"></userTask>
+      <userTask id="usertask2" name="Validate civil status inheritors" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyasuc:NAinheritors"></userTask>
+      <userTask id="usertask3" name="Validate testimonial" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="NAtestimonial"></userTask>
       <parallelGateway id="parallelgateway4" name="Parallel Gateway"></parallelGateway>
       <sequenceFlow id="flow13" sourceRef="usertask1" targetRef="parallelgateway4"></sequenceFlow>
       <sequenceFlow id="flow14" sourceRef="usertask2" targetRef="parallelgateway4"></sequenceFlow>
       <sequenceFlow id="flow15" sourceRef="usertask3" targetRef="parallelgateway4"></sequenceFlow>
       <endEvent id="endevent2" name="End"></endEvent>
-      <userTask id="usertask12" name="Last will central file" activiti:candidateGroups="${taskValidatorGroup}"></userTask>
+      <userTask id="usertask12" name="Last will central file" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyasuc:NAlastwill"></userTask>
       <sequenceFlow id="flow38" sourceRef="usertask12" targetRef="parallelgateway4"></sequenceFlow>
-      <userTask id="usertask13" name="Act Writing" activiti:candidateGroups="${taskValidatorGroup}"></userTask>
+      <userTask id="usertask13" name="Act Writing" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyasuc:NAact"></userTask>
       <sequenceFlow id="flow39" sourceRef="parallelgateway4" targetRef="usertask13"></sequenceFlow>
       <sequenceFlow id="flow40" sourceRef="usertask13" targetRef="endevent2"></sequenceFlow>
-      <userTask id="usertask15" name="Genelogist Search" activiti:candidateGroups="${taskValidatorGroup}"></userTask>
+      <userTask id="usertask15" name="Genelogist Search" activiti:candidateGroups="${taskValidatorGroup}" activiti:formKey="koyasuc:NAgenealogist"></userTask>
       <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
       <sequenceFlow id="flow44" sourceRef="exclusivegateway1" targetRef="usertask15"></sequenceFlow>
       <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
