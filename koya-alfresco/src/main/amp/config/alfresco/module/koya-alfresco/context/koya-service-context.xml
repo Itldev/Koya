@@ -216,7 +216,6 @@
       <property name="permissionService" ref="permissionServiceImpl" />
       <property name="policyComponent" ref="policyComponent"/>
       <property name="storeArchiveMap" ref="storeArchiveMap"/>
-      <property name="avmNodeService" ref="avmNodeService"/>
       <property name="nodeIndexer" ref="nodeIndexer"/>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
       <property name="tenantService" ref="tenantService"/>
@@ -267,5 +266,43 @@
             </list>
         </property>
     </bean>
+<!--
+
+    &lt;!&ndash; Global properties used in property expansion throughout the container, overridable via JNDI or System properties &ndash;&gt;
+    <bean id="global-properties" class="org.alfresco.config.JndiPropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:alfresco/repository.properties</value>
+                <value>classpath:alfresco/domain/transaction.properties</value>
+                <value>classpath:alfresco/caches.properties</value>
+                &lt;!&ndash; Enterprise defaults &ndash;&gt;
+                &lt;!&ndash;  Overrides supplied if this is an enterprise install (none exist for community) &ndash;&gt;
+                <value>classpath*:alfresco/enterprise/repository.properties</value>
+                &lt;!&ndash; <value>classpath:alfresco/jndi.properties</value> &ndash;&gt;
+                &lt;!&ndash;  Overrides supplied by modules &ndash;&gt;
+                <value>classpath*:alfresco/module/*/alfresco-global.properties</value>
+                &lt;!&ndash;  Installer or user-provided defaults &ndash;&gt;
+                <value>classpath*:alfresco-global.properties</value>
+                <value>classpath*:alfresco-dev.properties</value>
+
+            </list>
+        </property>
+        <property name="systemPropertiesModeName">
+            <value>SYSTEM_PROPERTIES_MODE_OVERRIDE</value>
+        </property>
+        &lt;!&ndash; Extra properties that have no defaults that we allow to be defined through JNDI or System properties &ndash;&gt;
+        <property name="systemProperties">
+            <list>
+                <value>hibernate.dialect</value>
+                <value>hibernate.query.substitutions</value>
+                <value>hibernate.jdbc.use_get_generated_keys</value>
+                <value>hibernate.default_schema</value>
+            </list>
+        </property>
+        <property name="propertiesPersister">
+            <bean class="org.alfresco.config.AlfrescoPropertiesPersister"/>
+        </property>
+    </bean>
+-->
 
 </beans>

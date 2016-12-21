@@ -27,7 +27,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>${alfresco.groupId}</groupId>
-			<artifactId>alfresco</artifactId>
+ 			<artifactId>${alfresco.repo.artifactId}</artifactId>
+            		<version>${alfresco.version}</version>
 			<type>war</type>
 		</dependency>
 		<!-- Demonstrating the dependency on the repo AMP developed in the 'amp' 
@@ -45,19 +46,19 @@
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<!-- Here is can control the order of overlay of your (WAR, AMP, etc.) 
-						dependencies | NOTE: At least one WAR dependency must be uncompressed first 
-						| NOTE: In order to have a dependency effectively added to the WAR you need 
-						to | explicitly mention it in the overlay section. | NOTE: First-win resource 
-						strategy is used by the WAR plugin -->
-
+                    <!--  Here is can control the order of overlay of your (WAR, AMP, etc.) dependencies
+                        | NOTE: At least one WAR dependency must be uncompressed first
+                        | NOTE: In order to have a dependency effectively added to the WAR you need to 
+                        | explicitly mention it in the overlay section.
+                        | NOTE: First-win resource strategy is used by the WAR plugin
+                         -->
 					<overlays>
 						<!-- Current project customizations -->
 						<overlay />
 						<!-- The Alfresco WAR -->
 						<overlay>
 							<groupId>${alfresco.groupId}</groupId>
-							<artifactId>alfresco</artifactId>
+							<artifactId>${alfresco.repo.artifactId}</artifactId>
 							<type>war</type>
 							<!-- To allow inclusion of META-INF -->
 							<excludes />
@@ -99,6 +100,7 @@
 								</goals>
 								<configuration>
 									<warSourceDirectory>${project.build.directory}/${project.build.finalName}</warSourceDirectory>
+                                                                        <webXml>${project.build.directory}/${project.build.finalName}-nossl/WEB-INF/web.xml</webXml>
 								</configuration>
 							</execution>
 						</executions>
@@ -123,6 +125,7 @@
 								<configuration>
 									<ignoreErrors>true</ignoreErrors>
 									<file>${project.build.directory}/${project.build.finalName}/WEB-INF/web.xml</file>
+                                                                        <outputDir>${project.build.directory}/${project.build.finalName}-nossl/WEB-INF/</outputDir>
 									<preserveDir>false</preserveDir>
 									<replacements>
 										<replacement>
@@ -137,6 +140,7 @@
 								</configuration>
 							</execution>
 
+<!--
 							<execution>
 								<id>dev-addition</id>
 								<phase>prepare-package</phase>
@@ -152,16 +156,24 @@
 										<replacement>
 											<token><![CDATA[<value>classpath*:alfresco-global.properties</value>]]></token>
 											<value><![CDATA[<value>classpath*:alfresco-global.properties</value>
-                 <value>classpath*:alfresco-dev.properties</value>]]></value>
+                                                                                        <value>classpath*:alfresco-dev.properties</value>]]></value>
 										</replacement>
 									</replacements>
 								</configuration>
 							</execution>
+							-->
 						</executions>
 
 					</plugin>
 				</plugins>
 			</build>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.alfresco.maven</groupId>
+                                <artifactId>alfresco-rad</artifactId>
+                                <version>${maven.alfresco.version}</version>
+                            </dependency>
+                        </dependencies>
 		</profile>
 		<profile>
 			<id>mysql</id>

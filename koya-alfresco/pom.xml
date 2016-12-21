@@ -18,6 +18,12 @@
 			<groupId>${alfresco.groupId}</groupId>
 			<artifactId>alfresco-repository</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>${alfresco.groupId}</groupId>
+			<artifactId>alfresco-repository</artifactId>
+			<classifier>h2scripts</classifier>
+			<version>${alfresco.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>${alfresco.groupId}</groupId>

@@ -26,7 +26,6 @@
 		<dependency>
 			<groupId>${alfresco.groupId}</groupId>
 			<artifactId>alfresco-data-model</artifactId>
-			<version>${alfresco.version}</version>
 		</dependency>
 	</dependencies>
 

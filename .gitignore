@@ -17,6 +17,8 @@ rebel.xml
 target
 nbproject
 
+.idea
+*.iml
 
 *.log
 *.log.*
