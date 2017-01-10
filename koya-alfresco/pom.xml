@@ -45,6 +45,7 @@
 	</dependencies>
 
 	<properties>
+
 		<alfresco.client.war>alfresco</alfresco.client.war>
 	</properties>
 	<build>

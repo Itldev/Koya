@@ -160,21 +160,15 @@
         </property>
         <property name="sysAdminParams" ref="sysAdminParams"/>
         <property name="userService" ref="userService" />
-        
-    </bean>
-
-    <bean id="InviteHelper" class="org.alfresco.repo.invitation.KoyaInviteHelper">
         <property name="serviceRegistry" ref="ServiceRegistry"/>
         <property name="repositoryHelper" ref="repositoryHelper"/>
-        <property name="messageService" ref="messageService"/>        
+        <property name="messageService" ref="messageService"/>
         <property name="koyaMailService" ref="koyaMailService"/>
         <property name="koyaNodeService" ref="koyaNodeService"/>
-        <property name="spaceAclService" ref="spaceAclService"/>  
-        <property name="companyService" ref="companyService"/>      
-       	<property name="companyPropertiesService" ref="companyPropertiesService"/>           
-       	<property name="userService" ref="userService"/>                      
+        <property name="spaceAclService" ref="spaceAclService"/>
+        <property name="companyService" ref="companyService"/>
+        <property name="companyPropertiesService" ref="companyPropertiesService"/>
     </bean>
-
 
     <bean id="nameBasedUserNameGenerator" class="fr.itldev.koya.repo.security.authentication.EmailBasedNameGenerator" />
       
@@ -266,22 +260,21 @@
             </list>
         </property>
     </bean>
-<!--
 
-    &lt;!&ndash; Global properties used in property expansion throughout the container, overridable via JNDI or System properties &ndash;&gt;
+    <!-- Global properties used in property expansion throughout the container, overridable via JNDI or System properties -->
     <bean id="global-properties" class="org.alfresco.config.JndiPropertiesFactoryBean">
         <property name="locations">
             <list>
                 <value>classpath:alfresco/repository.properties</value>
                 <value>classpath:alfresco/domain/transaction.properties</value>
                 <value>classpath:alfresco/caches.properties</value>
-                &lt;!&ndash; Enterprise defaults &ndash;&gt;
-                &lt;!&ndash;  Overrides supplied if this is an enterprise install (none exist for community) &ndash;&gt;
+                <!-- Enterprise defaults -->
+                <!--  Overrides supplied if this is an enterprise install (none exist for community) -->
                 <value>classpath*:alfresco/enterprise/repository.properties</value>
-                &lt;!&ndash; <value>classpath:alfresco/jndi.properties</value> &ndash;&gt;
-                &lt;!&ndash;  Overrides supplied by modules &ndash;&gt;
+                <!-- <value>classpath:alfresco/jndi.properties</value> -->
+                <!--  Overrides supplied by modules -->
                 <value>classpath*:alfresco/module/*/alfresco-global.properties</value>
-                &lt;!&ndash;  Installer or user-provided defaults &ndash;&gt;
+                <!--  Installer or user-provided defaults -->
                 <value>classpath*:alfresco-global.properties</value>
                 <value>classpath*:alfresco-dev.properties</value>
 
@@ -290,7 +283,7 @@
         <property name="systemPropertiesModeName">
             <value>SYSTEM_PROPERTIES_MODE_OVERRIDE</value>
         </property>
-        &lt;!&ndash; Extra properties that have no defaults that we allow to be defined through JNDI or System properties &ndash;&gt;
+        <!-- Extra properties that have no defaults that we allow to be defined through JNDI or System properties -->
         <property name="systemProperties">
             <list>
                 <value>hibernate.dialect</value>
@@ -303,6 +296,5 @@
             <bean class="org.alfresco.config.AlfrescoPropertiesPersister"/>
         </property>
     </bean>
--->
 
 </beans>

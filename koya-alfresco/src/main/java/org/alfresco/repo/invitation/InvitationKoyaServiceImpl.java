@@ -18,44 +18,40 @@
  */
 package org.alfresco.repo.invitation;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import fr.itldev.koya.alfservice.*;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.impl.User;
+import fr.itldev.koya.model.permissions.SitePermission;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.i18n.MessageService;
+import org.alfresco.repo.invitation.site.InviteSender;
+import org.alfresco.repo.invitation.site.KoyaInviteSender;
+import org.alfresco.repo.jscript.ScriptNode;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.TransactionalResourceHelper;
 import org.alfresco.repo.workflow.WorkflowModel;
 import org.alfresco.repo.workflow.activiti.ActivitiConstants;
 import org.alfresco.repo.workflow.jbpm.JBPMEngine;
-import org.alfresco.service.cmr.invitation.Invitation;
-import org.alfresco.service.cmr.invitation.InvitationException;
-import org.alfresco.service.cmr.invitation.InvitationExceptionForbidden;
-import org.alfresco.service.cmr.invitation.InvitationExceptionNotFound;
-import org.alfresco.service.cmr.invitation.InvitationExceptionUserError;
-import org.alfresco.service.cmr.invitation.ModeratedInvitation;
-import org.alfresco.service.cmr.invitation.NominatedInvitation;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.invitation.*;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
-import org.alfresco.service.cmr.workflow.WorkflowAdminService;
-import org.alfresco.service.cmr.workflow.WorkflowDefinition;
-import org.alfresco.service.cmr.workflow.WorkflowException;
-import org.alfresco.service.cmr.workflow.WorkflowPath;
-import org.alfresco.service.cmr.workflow.WorkflowTask;
+import org.alfresco.service.cmr.workflow.*;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.GUID;
+import org.alfresco.util.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.impl.User;
-import fr.itldev.koya.model.permissions.SitePermission;
+import java.io.Serializable;
+import java.util.*;
+
+import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.*;
 
 /**
  * @see org.alfresco.repo.invitation.InvitationServiceImpl
@@ -77,18 +73,141 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
     private static final Log logger = LogFactory.getLog(InvitationServiceImpl.class);
 
+    private static final Collection<String> sendInvitePropertyNames = Arrays.asList(wfVarInviteeUserName,//
+            wfVarResourceName,//
+            wfVarInviterUserName,//
+            wfVarInviteeUserName,//
+            wfVarRole,//
+            wfVarInviteeGenPassword,//
+            wfVarResourceName,//
+            wfVarInviteTicket,//
+            wfVarServerPath,//
+            wfVarAcceptUrl,//
+            wfVarRejectUrl,
+            InviteSender.WF_INSTANCE_ID);
+
     private WorkflowAdminService workflowAdminService;
-    
+
+    private NamespaceService namespaceService;
+
     private UserService userService;
-    
+    private Repository repositoryHelper;
+    private ServiceRegistry serviceRegistry;
+    private MessageService messageService;
+
+    private InviteSender inviteSender;
+
+    /**
+     *
+     * Koya specific property
+     */
+    private KoyaMailService koyaMailService;
+    private KoyaNodeService koyaNodeService;
+    private SpaceAclService spaceAclService;
+    private CompanyService companyService;
+    private CompanyPropertiesService companyPropertiesService;
+
+    public void setKoyaMailService(KoyaMailService koyaMailService) {
+        this.koyaMailService = koyaMailService;
+    }
+
+    public void setKoyaNodeService(KoyaNodeService koyaNodeService) {
+        this.koyaNodeService = koyaNodeService;
+    }
+
+    public void setSpaceAclService(SpaceAclService companyAclService) {
+        this.spaceAclService = spaceAclService;
+    }
+
+    public void setCompanyService(CompanyService companyService) {
+        this.companyService = companyService;
+    }
+
+    @Override
+    public void setNamespaceService(NamespaceService namespaceService) {
+        super.setNamespaceService(namespaceService);
+        this.namespaceService = namespaceService;
+    }
+
+    @Override
+    public void setRepositoryHelper(Repository repositoryHelper) {
+        super.setRepositoryHelper(repositoryHelper);
+        this.repositoryHelper = repositoryHelper;
+    }
+
+    @Override
+    public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+        super.setServiceRegistry(serviceRegistry);
+        this.serviceRegistry = serviceRegistry;
+    }
+
+    @Override
+    public void setMessageService(MessageService messageService) {
+        super.setMessageService(messageService);
+        this.messageService = messageService;
+    }
+
+    public void setCompanyPropertiesService(
+            CompanyPropertiesService companyPropertiesService) {
+        this.companyPropertiesService = companyPropertiesService;
+    }
+
     public void setUserService(UserService userService) {
 		this.userService = userService;
 	}
 
 
-
 	private final int maxUserNameGenRetries = MAX_NUM_INVITEE_USER_NAME_GEN_TRIES;
+    private enum InvitationWorkflowType { NOMINATED, NOMINATED_EXTERNAL, MODERATED };
 
+    // The nominated invite workflow definition to use for internal users
+    private String nominatedInvitationWorkflowId =
+            WorkflowModelNominatedInvitation.WORKFLOW_DEFINITION_NAME_ACTIVITI_ADD_DIRECT;
+    // The nominated invite workflow definition to use for external users
+    private String nominatedInvitationExternalWorkflowId =
+            WorkflowModelNominatedInvitation.WORKFLOW_DEFINITION_NAME_ACTIVITI_INVITE;
+    // The nominated invite workflow definition to use for internal users
+    private String moderatedInvitationWorkflowId =
+            WorkflowModelModeratedInvitation.WORKFLOW_DEFINITION_NAME_ACTIVITI;
+    @Override
+    public void init() {
+    this.inviteSender = new KoyaInviteSender(serviceRegistry,
+            repositoryHelper, messageService, koyaMailService,
+            koyaNodeService, spaceAclService, companyService,
+            companyPropertiesService,userService, koyaMailService.getKoyaClientParams());
+}
+    /**
+     * Sets the nominated invite activiti workflow definition for internal users
+     *
+     * @param nominatedInvitationWorkflowId
+     */
+    public void setNominatedInvitationWorkflowId(String nominatedInvitationWorkflowId)
+    {
+        this.nominatedInvitationWorkflowId = nominatedInvitationWorkflowId;
+        super.setNominatedInvitationWorkflowId(nominatedInvitationWorkflowId);
+    }
+
+    /**
+     * Sets the nominated invite activiti workflow definition for external users
+     *
+     * @param nominatedInvitationExternalWorkflowId
+     */
+    public void setNominatedInvitationExternalWorkflowId(String nominatedInvitationExternalWorkflowId)
+    {
+        this.nominatedInvitationExternalWorkflowId = nominatedInvitationExternalWorkflowId;
+        super.setNominatedInvitationExternalWorkflowId(nominatedInvitationExternalWorkflowId);
+    }
+
+    /**
+     * Sets the moderated invite activiti workflow definition
+     *
+     * @param moderatedInvitationWorkflowId
+     */
+    public void setModeratedInvitationWorkflowId(String moderatedInvitationWorkflowId)
+    {
+        this.moderatedInvitationWorkflowId = moderatedInvitationWorkflowId;
+        super.setModeratedInvitationWorkflowId(moderatedInvitationWorkflowId);
+    }
     /**
      * Start the invitation process for a NominatedInvitation
      *
@@ -122,22 +241,20 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         return inviteNominated(firstName, lastName, email, inviteeUserName, resourceType, resourceName, inviteeRole,
                 serverPath, acceptUrl, rejectUrl);
     }
-
     /**
      * Start the invitation process for a NominatedInvitation
      *
-     * @param inviteeFirstName
-     * @param inviteeLastName
-     * @param inviteeEmail
-     * @param resourceType
+     * @param inviteeFirstName String
+     * @param inviteeLastName String
+     * @param inviteeEmail String
+     * @param resourceType resourceType
      * @param resourceName
      * @param inviteeRole
-     * @param serverPath
      * @param acceptUrl
      * @param rejectUrl
      * @return the nominated invitation which will contain the invitationId and
-     * ticket which will uniqely identify this invitation for the rest of the
-     * workflow.
+     *         ticket which will uniqely identify this invitation for the rest
+     *         of the workflow.
      * @throws InvitationException
      * @throws InvitationExceptionUserError
      * @throws InvitationExceptionForbidden
@@ -163,6 +280,56 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         }
 
         throw new InvitationException("unknown resource type");
+    }
+
+    @Override
+    public Invitation accept(String invitationId, String ticket) {
+        WorkflowTask startTask = getStartTask(invitationId);
+        NominatedInvitation invitation = getNominatedInvitation(startTask);
+        if (invitation == null) {
+            throw new InvitationException("State error, accept may only be called on a nominated invitation.");
+        }
+        // Check invitationId and ticket match
+        if (invitation.getTicket().equals(ticket) == false) {
+            //TODO localise msg
+            String msg = "Response to invite has supplied an invalid ticket. The response to the invitation could thus not be processed";
+            throw new InvitationException(msg);
+        }
+        endInvitation(startTask,
+                WorkflowModelNominatedInvitation.WF_TRANSITION_ACCEPT, null,
+                WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING, WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING);
+
+        //MNT-9101 Share: Cancelling an invitation for a disabled user, the user gets deleted in the process.
+        /*
+        
+         KOYA removed Code : fixes invitation by Manager bug
+        
+        
+         NodeRef person = personService.getPersonOrNull(invitation.getInviterUserName());
+         if (person != null && nodeService.hasAspect(person, ContentModel.ASPECT_ANULLABLE)) {            
+         nodeService.removeAspect(person, ContentModel.ASPECT_ANULLABLE);
+         }*/
+        return invitation;
+    }
+
+    private void endInvitation(WorkflowTask startTask, String transition, Map<QName, Serializable> properties, QName... taskTypes) {
+        // Deleting a person can cancel their invitations. Cancelling invitations can delete inactive persons! So prevent infinite looping here
+        if (TransactionalResourceHelper.getSet(getClass().getName()).add(startTask.getPath().getInstance().getId())) {
+            List<WorkflowTask> tasks = getWorkflowService().getTasksForWorkflowPath(startTask.getPath().getId());
+            if (tasks.size() == 1) {
+                WorkflowTask task = tasks.get(0);
+                if (taskTypeMatches(task, taskTypes)) {
+                    if (properties != null) {
+                        getWorkflowService().updateTask(task.getId(), properties, null, null);
+                    }                    
+                    getWorkflowService().endTask(task.getId(), transition);
+                    return;
+                }
+            }
+            // Throw exception if the task not found.
+            Object objs[] = {startTask.getPath().getInstance().getId()};
+            throw new InvitationExceptionUserError("invitation.invite.already_finished", objs);
+        }
     }
 
     /**
@@ -230,6 +397,20 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         return Arrays.asList(types).contains(taskDefName);
     }
 
+    private WorkflowTask getStartTask(String invitationId) {
+        validateInvitationId(invitationId);
+        WorkflowTask startTask = null;
+        try {
+            startTask = getWorkflowService().getStartTask(invitationId);
+        } catch (WorkflowException we) {
+            // Do nothing
+        }
+        if (startTask == null) {
+            Object objs[] = {invitationId};
+            throw new InvitationExceptionNotFound("invitation.error.not_found", objs);
+        }
+        return startTask;
+    }
     /**
      * @param workflowAdminService the workflowAdminService to set
      */
@@ -319,7 +500,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
      * Starts the Invite workflow
      *
      * @param inviteeFirstName first name of invitee
-     * @param inviteeLastNamme last name of invitee
+     * @param inviteeLastName last name of invitee
      * @param inviteeEmail email address of invitee
      * @param siteShortName short name of site that the invitee is being invited
      * to by the inviter
@@ -361,7 +542,7 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
             inviteeUserName = null;
             
             /*
-             * Try de to find user by email
+             * Koya modification : Try de to find user by email
              */
 			User u = null;
 			try {
@@ -416,6 +597,19 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
             throw new InvitationExceptionUserError("invitation.invite.already_member", objs);
         }
 
+
+        /**
+         * throw exception if person is disabled
+         */
+        if (!getPersonService().isEnabled(inviteeUserName))
+        {
+            if (logger.isDebugEnabled())
+                logger.debug("Failed - invitee user is disabled.");
+            
+            Object objs[] = { inviteeUserName, inviteeEmail, siteShortName };
+            throw new InvitationExceptionUserError("invitation.invite.user_disabled", objs);
+        }
+
         //
         // If a user account does not already exist for invitee user name
         // then create a disabled user account for the invitee.
@@ -440,7 +634,16 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         //
         // Start the invite workflow with inviter, invitee and site properties
         //
-        WorkflowDefinition wfDefinition = getWorkflowDefinition(true);
+
+        InvitationWorkflowType type =
+                created ? InvitationWorkflowType.NOMINATED_EXTERNAL : InvitationWorkflowType.NOMINATED;
+        WorkflowDefinition wfDefinition = getWorkflowDefinition(type);
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Using workflow definition " + wfDefinition.getId());
+        }
+
 
         // Get invitee person NodeRef to add as assignee
         NodeRef inviteeNodeRef = getPersonService().getPerson(inviteeUserName);
@@ -502,7 +705,10 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
             logger.debug("Transitioning Invite workflow task...");
         }
         try {
-            getWorkflowService().endTask(startTask.getId(), null);
+            if (startTask != null && startTask.getState() != WorkflowTaskState.COMPLETED)
+            {
+                getWorkflowService().endTask(startTask.getId(), null);
+            }
         } catch (RuntimeException err) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed - caught error during Invite workflow transition: " + err.getMessage());
@@ -516,12 +722,23 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
 
     /**
      * Return Activiti workflow definition unless Activiti engine is disabled.
-     *
-     * @param isNominated TODO
-     * @return
+     * @param type the workflow type
+     * @return WorkflowDefinition
      */
-    private WorkflowDefinition getWorkflowDefinition(boolean isNominated) {
-        String workflowName = isNominated ? getNominatedDefinitionName() : getModeratedDefinitionName();
+    private WorkflowDefinition getWorkflowDefinition(InvitationWorkflowType type) {
+        String workflowName = null;
+        if (type == InvitationWorkflowType.MODERATED)
+        {
+            workflowName = getModeratedDefinitionName();
+        }
+        else if (type == InvitationWorkflowType.NOMINATED_EXTERNAL)
+        {
+            workflowName = getNominatedExternalDefinitionName();
+        }
+        else
+        {
+            workflowName = getNominatedDefinitionName();
+        }
         WorkflowDefinition definition = getWorkflowService().getDefinitionByName(workflowName);
         if (definition == null) {
             // handle workflow definition does not exist
@@ -531,22 +748,43 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         return definition;
     }
 
-    private String getNominatedDefinitionName() {
-        if (workflowAdminService.isEngineEnabled(ActivitiConstants.ENGINE_ID)) {
-            return WorkflowModelNominatedInvitation.WORKFLOW_DEFINITION_NAME_ACTIVITI;
-        } else if (workflowAdminService.isEngineEnabled(JBPMEngine.ENGINE_ID)) {
+    private String getNominatedDefinitionName()
+    {
+        if(workflowAdminService.isEngineEnabled(ActivitiConstants.ENGINE_ID))
+        {
+            return nominatedInvitationWorkflowId;
+        }
+        else if(workflowAdminService.isEngineEnabled(JBPMEngine.ENGINE_ID))
+        {
             return WorkflowModelNominatedInvitation.WORKFLOW_DEFINITION_NAME;
         }
-        throw new IllegalStateException("None of the Workflow engines supported by teh InvitationService are currently enabled!");
+        throw new IllegalStateException("None of the Workflow engines supported by the InvitationService are currently enabled!");
     }
 
-    private String getModeratedDefinitionName() {
-        if (workflowAdminService.isEngineEnabled(ActivitiConstants.ENGINE_ID)) {
-            return WorkflowModelModeratedInvitation.WORKFLOW_DEFINITION_NAME_ACTIVITI;
-        } else if (workflowAdminService.isEngineEnabled(JBPMEngine.ENGINE_ID)) {
+    private String getNominatedExternalDefinitionName()
+    {
+        if(workflowAdminService.isEngineEnabled(ActivitiConstants.ENGINE_ID))
+        {
+            return nominatedInvitationExternalWorkflowId;
+        }
+        else if(workflowAdminService.isEngineEnabled(JBPMEngine.ENGINE_ID))
+        {
+            return WorkflowModelNominatedInvitation.WORKFLOW_DEFINITION_NAME;
+        }
+        throw new IllegalStateException("None of the Workflow engines supported by the InvitationService are currently enabled!");
+    }
+
+    private String getModeratedDefinitionName()
+    {
+        if(workflowAdminService.isEngineEnabled(ActivitiConstants.ENGINE_ID))
+        {
+            return moderatedInvitationWorkflowId;
+        }
+        else if(workflowAdminService.isEngineEnabled(JBPMEngine.ENGINE_ID))
+        {
             return WorkflowModelModeratedInvitation.WORKFLOW_DEFINITION_NAME;
         }
-        throw new IllegalStateException("None of the Workflow engines supported by teh InvitationService are currently enabled!");
+        throw new IllegalStateException("None of the Workflow engines supported by the InvitationService are currently enabled!");
     }
 
     /**
@@ -571,10 +809,6 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         }
     }
 
-    private int getMaxUserNameGenRetries() {
-        return maxUserNameGenRetries;
-    }
-
     /**
      * Validator for invitationId
      *
@@ -589,69 +823,33 @@ public class InvitationKoyaServiceImpl extends InvitationServiceImpl {
         }
     }
 
-    private WorkflowTask getStartTask(String invitationId) {
-        validateInvitationId(invitationId);
-        WorkflowTask startTask = null;
-        try {
-            startTask = getWorkflowService().getStartTask(invitationId);
-        } catch (WorkflowException we) {
-            // Do nothing
-        }
-        if (startTask == null) {
-            Object objs[] = {invitationId};
-            throw new InvitationExceptionNotFound("invitation.error.not_found", objs);
-        }
-        return startTask;
+
+    private int getMaxUserNameGenRetries() {
+        return maxUserNameGenRetries;
     }
 
     @Override
-    public Invitation accept(String invitationId, String ticket) {
-        WorkflowTask startTask = getStartTask(invitationId);
-        NominatedInvitation invitation = getNominatedInvitation(startTask);
-        if (invitation == null) {
-            throw new InvitationException("State error, accept may only be called on a nominated invitation.");
-        }
-        // Check invitationId and ticket match
-        if (invitation.getTicket().equals(ticket) == false) {
-            //TODO localise msg
-            String msg = "Response to invite has supplied an invalid ticket. The response to the invitation could thus not be processed";
-            throw new InvitationException(msg);
-        }
-        endInvitation(startTask,
-                WorkflowModelNominatedInvitation.WF_TRANSITION_ACCEPT, null,
-                WorkflowModelNominatedInvitation.WF_TASK_INVITE_PENDING, WorkflowModelNominatedInvitation.WF_TASK_ACTIVIT_INVITE_PENDING);
+    public void sendNominatedInvitation(String inviteId, String emailTemplateXpath,
+                                        String emailSubjectKey, Map<String, Object> executionVariables)
+    {
+        if (isSendEmails())
+        {
+            Map<String, String> properties = makePropertiesFromContextVariables(executionVariables, sendInvitePropertyNames);
 
-        //MNT-9101 Share: Cancelling an invitation for a disabled user, the user gets deleted in the process.
-        /*
-        
-         KOYA removed Code : fixes invitation by Manager bug
-        
-        
-         NodeRef person = personService.getPersonOrNull(invitation.getInviterUserName());
-         if (person != null && nodeService.hasAspect(person, ContentModel.ASPECT_ANULLABLE)) {            
-         nodeService.removeAspect(person, ContentModel.ASPECT_ANULLABLE);
-         }*/
-        return invitation;
-    }
+            String packageName = WorkflowModel.ASSOC_PACKAGE.toPrefixString(namespaceService).replace(":", "_");
+            ScriptNode packageNode = (ScriptNode) executionVariables.get(packageName);
+            String packageRef = packageNode.getNodeRef().toString();
+            properties.put(InviteSender.WF_PACKAGE, packageRef);
 
-    private void endInvitation(WorkflowTask startTask, String transition, Map<QName, Serializable> properties, QName... taskTypes) {
-        // Deleting a person can cancel their invitations. Cancelling invitations can delete inactive persons! So prevent infinite looping here
-        if (TransactionalResourceHelper.getSet(getClass().getName()).add(startTask.getPath().getInstance().getId())) {
-            List<WorkflowTask> tasks = getWorkflowService().getTasksForWorkflowPath(startTask.getPath().getId());
-            if (tasks.size() == 1) {
-                WorkflowTask task = tasks.get(0);
-                if (taskTypeMatches(task, taskTypes)) {
-                    if (properties != null) {
-                        getWorkflowService().updateTask(task.getId(), properties, null, null);
-                    }                    
-                    getWorkflowService().endTask(task.getId(), transition);
-                    return;
-                }
-            }
-            // Throw exception if the task not found.
-            Object objs[] = {startTask.getPath().getInstance().getId()};
-            throw new InvitationExceptionUserError("invitation.invite.already_finished", objs);
+            properties.put(InviteSender.WF_INSTANCE_ID, inviteId);
+
+            inviteSender.sendMail(emailTemplateXpath, emailSubjectKey, properties);
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private Map<String, String> makePropertiesFromContextVariables(Map<?, ?> executionVariables, Collection<String> propertyNames)
+    {
+        return CollectionUtils.filterKeys((Map<String, String>) executionVariables, CollectionUtils.containsFilter(propertyNames));
+    }
 }

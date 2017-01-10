@@ -51,10 +51,9 @@ public class UniqueMailConstraint extends AbstractConstraint {
             @Override
             public ConstraintException doWork() throws Exception {
                 ResultSet rs = null;
-
                 ConstraintException contraintEx;
                 try {
-                    rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, luceneRequest);
+                    rs = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_FTS_ALFRESCO, luceneRequest);
                     //mail @ should appear only once (ie in user currently created attribute)            
                     if (rs.getNumberFound() > 1) {
                         return new ConstraintException("user email already exists", value);
@@ -74,7 +73,6 @@ public class UniqueMailConstraint extends AbstractConstraint {
         if (contraintEx != null) {
             throw contraintEx;
         }
-
     }
 
 }

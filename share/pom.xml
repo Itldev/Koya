@@ -31,8 +31,30 @@
     <build>
         <plugins>
             <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeTypes>war</includeTypes>
+                            <includeGroupIds>${alfresco.groupId}</includeGroupIds>
+                            <includeArtifactIds>${alfresco.share.artifactId}</includeArtifactIds>
+                            <includes>META-INF/MANIFEST.MF</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifestFile>${project.build.directory}/dependency/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
                     <!-- Here is can control the order of overlay of your (WAR, AMP, etc.) dependencies
                     | NOTE: At least one WAR dependency must be uncompressed first 
                     | NOTE: In order to have a dependency effectively added to the WAR you need to 

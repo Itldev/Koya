@@ -1,29 +1,16 @@
 package org.alfresco.repo.invitation.site;
 
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarAcceptUrl;
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarInviteTicket;
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarInviteeGenPassword;
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarInviteeUserName;
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarInviterUserName;
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarRejectUrl;
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarResourceName;
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarRole;
-import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.wfVarServerPath;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import fr.itldev.koya.alfservice.*;
+import fr.itldev.koya.alfservice.security.SpaceAclService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.KoyaNode;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.model.impl.Dossier;
+import fr.itldev.koya.model.impl.User;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.repo.dictionary.RepositoryLocation;
 import org.alfresco.repo.i18n.MessageService;
-import org.alfresco.repo.invitation.WorkflowModelNominatedInvitation;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -46,17 +33,10 @@ import org.apache.log4j.Logger;
 import org.springframework.extensions.surf.util.ParameterCheck;
 import org.springframework.extensions.surf.util.URLEncoder;
 
-import fr.itldev.koya.alfservice.CompanyPropertiesService;
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.alfservice.KoyaMailService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.alfservice.UserService;
-import fr.itldev.koya.alfservice.security.SpaceAclService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.KoyaNode;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.model.impl.Dossier;
-import fr.itldev.koya.model.impl.User;
+import java.io.Serializable;
+import java.util.*;
+
+import static org.alfresco.repo.invitation.WorkflowModelNominatedInvitation.*;
 
 /**
  * Ovverride invite sender in order to provide custom invite mail subject
@@ -71,7 +51,7 @@ public class KoyaInviteSender extends InviteSender {
 	private KoyaMailService koyaMailService;
 	//
 
-	private static final List<String> expectedProperties = Arrays.asList(wfVarInviteeUserName, //
+/*	private static final List<String> expectedProperties = Arrays.asList(wfVarInviteeUserName, //
 			WorkflowModelNominatedInvitation.wfVarResourceName, //
 			wfVarInviterUserName, //
 			wfVarInviteeUserName, //
@@ -82,6 +62,18 @@ public class KoyaInviteSender extends InviteSender {
 			WorkflowModelNominatedInvitation.wfVarServerPath, //
 			WorkflowModelNominatedInvitation.wfVarAcceptUrl, //
 			WorkflowModelNominatedInvitation.wfVarRejectUrl, WF_INSTANCE_ID, //
+			WF_PACKAGE);*/
+	private static final List<String> expectedProperties = Arrays.asList(wfVarInviteeUserName,//
+			wfVarResourceName,//
+			wfVarInviterUserName,//
+			wfVarInviteeUserName,//
+			wfVarRole,//
+			wfVarInviteeGenPassword,//
+			wfVarResourceName,//
+			wfVarInviteTicket,//
+			wfVarServerPath,//
+			wfVarAcceptUrl,//
+			wfVarRejectUrl, WF_INSTANCE_ID,//
 			WF_PACKAGE);
 
 	private final ActionService actionService;
@@ -212,12 +204,12 @@ public class KoyaInviteSender extends InviteSender {
 
 		String params = buildUrlParamString(properties);
 		final String acceptLink = makeLink(properties.get(wfVarServerPath),
-				properties.get(wfVarAcceptUrl), params);
+				properties.get(wfVarAcceptUrl), params, null);
 		
 		logger.info("invite accept link = "+acceptLink);
 		
 		final String rejectLink = makeLink(properties.get(wfVarServerPath),
-				properties.get(wfVarRejectUrl), params);
+				properties.get(wfVarRejectUrl), params, null);
 
 		model.put("invitation", new HashMap() {
 			{

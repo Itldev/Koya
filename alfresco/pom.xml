@@ -24,6 +24,15 @@
 		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
+    <properties>
+        <!-- During development we set log root level to Debug,
+            this will be applicable to the log configuration in
+            repo/src/main/resources/alfresco/extension/dev-log4j.properties,
+            such as DemoComponent logging. -->
+        <!--<app.log.root.level>DEBUG</app.log.root.level>-->
+		<alfresco.data.location>${project.parent.basedir}/alf_data_dev</alfresco.data.location>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>${alfresco.groupId}</groupId>
@@ -75,6 +84,8 @@
 			</plugin>
 		</plugins>
 	</build>
+
+
 	<profiles>
 		<!-- Overrides the run profile to disable change a few conf files -->
 		<profile>
@@ -90,30 +101,36 @@
 									<goal>exploded</goal>
 								</goals>
 								<phase>prepare-package</phase>
-
 							</execution>
 							<execution>
 								<id>default-war</id>
+<!--
 								<phase>package</phase>
 								<goals>
 									<goal>war</goal>
 								</goals>
+-->
 								<configuration>
+<!--
 									<warSourceDirectory>${project.build.directory}/${project.build.finalName}</warSourceDirectory>
-                                                                        <webXml>${project.build.directory}/${project.build.finalName}-nossl/WEB-INF/web.xml</webXml>
+-->
+                                    <webXml>${project.build.directory}/${project.build.finalName}-nossl/WEB-INF/web.xml</webXml>
 								</configuration>
 							</execution>
 						</executions>
+<!--
 						<configuration>
 							<useCache>true</useCache>
 						</configuration>
-
+-->
 					</plugin>
 					<!-- Replaces web.xml where applicable, commenting out the security-constraints -->
 					<plugin>
 						<groupId>com.google.code.maven-replacer-plugin</groupId>
 						<artifactId>replacer</artifactId>
+<!--
 						<version>1.5.3</version>
+-->
 						<executions>
 							<execution>
 								<id>disable-securecomms</id>
@@ -121,25 +138,23 @@
 								<goals>
 									<goal>replace</goal>
 								</goals>
-								
 								<configuration>
 									<ignoreErrors>true</ignoreErrors>
 									<file>${project.build.directory}/${project.build.finalName}/WEB-INF/web.xml</file>
-                                                                        <outputDir>${project.build.directory}/${project.build.finalName}-nossl/WEB-INF/</outputDir>
+                                    <outputDir>${project.build.directory}/${project.build.finalName}-nossl/WEB-INF/</outputDir>
 									<preserveDir>false</preserveDir>
 									<replacements>
 										<replacement>
-                                    <token><![CDATA[<!-- Toggle securecomms placeholder start -->]]></token>
-                                    <value><![CDATA[<!--]]></value>
+                                            <token><![CDATA[<!-- Toggle securecomms placeholder start -->]]></token>
+                                            <value><![CDATA[<!--]]></value>
 										</replacement>
 										<replacement>
-                                    <token><![CDATA[<!-- Toggle securecomms placeholder end -->]]></token>
-                                    <value><![CDATA[-->]]></value>
+                                            <token><![CDATA[<!-- Toggle securecomms placeholder end -->]]></token>
+                                            <value><![CDATA[-->]]></value>
 										</replacement>
 									</replacements>
 								</configuration>
 							</execution>
-
 <!--
 							<execution>
 								<id>dev-addition</id>
@@ -167,13 +182,13 @@
 					</plugin>
 				</plugins>
 			</build>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.alfresco.maven</groupId>
-                                <artifactId>alfresco-rad</artifactId>
-                                <version>${maven.alfresco.version}</version>
-                            </dependency>
-                        </dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>org.alfresco.maven</groupId>
+                    <artifactId>alfresco-rad</artifactId>
+                    <version>${maven.alfresco.version}</version>
+                </dependency>
+            </dependencies>
 		</profile>
 		<profile>
 			<id>mysql</id>
