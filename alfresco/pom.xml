@@ -155,28 +155,7 @@
 									</replacements>
 								</configuration>
 							</execution>
-<!--
-							<execution>
-								<id>dev-addition</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>replace</goal>
-								</goals>
-								<configuration>
-									<ignoreErrors>false</ignoreErrors>
-									<file>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/alfresco/core-services-context.xml</file>
-									<preserveDir>false</preserveDir>
-									<regex>false</regex>
-									<replacements>
-										<replacement>
-											<token><![CDATA[<value>classpath*:alfresco-global.properties</value>]]></token>
-											<value><![CDATA[<value>classpath*:alfresco-global.properties</value>
-                                                                                        <value>classpath*:alfresco-dev.properties</value>]]></value>
-										</replacement>
-									</replacements>
-								</configuration>
-							</execution>
-							-->
+
 						</executions>
 
 					</plugin>

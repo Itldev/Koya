@@ -500,10 +500,6 @@ public class CompanyAclService {
 			 * 
 			 */
 
-			NominatedInvitation invitation = AuthenticationUtil
-					.runAsSystem(new AuthenticationUtil.RunAsWork<NominatedInvitation>() {
-						@Override
-						public NominatedInvitation doWork() throws Exception {
 							NominatedInvitation invitation = invitationService
 									.inviteNominated(null, userMail, userMail,
 											Invitation.ResourceType.WEB_SITE,
@@ -515,11 +511,6 @@ public class CompanyAclService {
 							koyaMailService.sendInviteMail(invitation
 									.getInviteId());
 							return invitation;
-
-						}
-					});
-
-			return invitation;
 
 		} else {
 			throw new KoyaServiceException(
