@@ -42,8 +42,8 @@
     </namespaces>
 
     <constraints>
-		<constraint name="koya:mailUniqueConstraint"
-			type="fr.itldev.koya.constraint.UniqueMailConstraint" />
+<!--		<constraint name="koya:mailUniqueConstraint"
+			type="fr.itldev.koya.constraint.UniqueMailConstraint" />-->
 
 		<constraint name="koya:contactItemsTypes" type="LIST">
 			<parameter name="allowedValues">
@@ -254,7 +254,7 @@
             </properties>  
         </aspect>        
         
-        <aspect name="koya:mailunique">
+        <!--<aspect name="koya:mailunique">
             <title>Person Mail Unique</title>
             <properties>
                 <property name="koya:mail">
@@ -264,7 +264,7 @@
                     </constraints>  
                 </property>     
             </properties>  
-        </aspect>                     
+        </aspect>               -->
         
          <aspect name="koya:civilTitled">
             <title>Person civil title</title>  

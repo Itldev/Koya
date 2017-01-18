@@ -18,16 +18,15 @@
  */
 package fr.itldev.koya.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.alfresco.repo.site.SiteModel;
-import org.alfresco.service.namespace.QName;
-
 import fr.itldev.koya.model.impl.Company;
 import fr.itldev.koya.model.impl.Dossier;
 import fr.itldev.koya.model.impl.Space;
+import org.alfresco.repo.site.SiteModel;
+import org.alfresco.service.namespace.QName;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Model definition and constants.
@@ -67,8 +66,10 @@ public class KoyaModel {
 	public static final QName ASPECT_ACTIVABLE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "activable");
 
+/*
 	public static final QName ASPECT_MAILUNIQUE = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "mailunique");
+*/
 
 	public static final QName ASPECT_CIVILTITLED = QName.createQName(
 			NAMESPACE_KOYA_CONTENT_MODEL, "civilTitled");

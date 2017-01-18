@@ -45,7 +45,7 @@ public class UniqueMailConstraint extends AbstractConstraint {
 
     @Override
     protected void evaluateSingleValue(final Object value) {
-        final String luceneRequest = "TYPE:\"cm:person\" AND @cm\\:email:\"" + value.toString() + "\" ";
+        final String luceneRequest = "TYPE:\"cm:person\" AND =cm:email:" + value.toString() + " ";
 
         ConstraintException contraintEx = AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork< ConstraintException>() {
             @Override

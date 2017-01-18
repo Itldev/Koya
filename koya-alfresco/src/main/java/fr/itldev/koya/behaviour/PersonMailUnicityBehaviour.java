@@ -18,22 +18,20 @@
  */
 package fr.itldev.koya.behaviour;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.base.Strings;
+import fr.itldev.koya.constraint.UniqueMailConstraint;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 
-import fr.itldev.koya.model.KoyaModel;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Check Mail unicity on creation
@@ -45,6 +43,7 @@ public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateN
 
 	private PolicyComponent policyComponent;
 	private NodeService nodeService;
+	private UniqueMailConstraint uniqueMailConstraint;
 
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
@@ -52,6 +51,10 @@ public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateN
 
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
+	}
+
+	public void setUniqueMailConstraint(UniqueMailConstraint uniqueMailConstraint) {
+		this.uniqueMailConstraint = uniqueMailConstraint;
 	}
 
 	public void init() {
@@ -71,6 +74,8 @@ public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateN
 
 		final NodeRef person = childAssocRef.getChildRef();
 
+		uniqueMailConstraint.evaluate(nodeService.getProperty(person, ContentModel.PROP_EMAIL));
+		/*
 		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
 			@Override
 			public Object doWork() throws Exception {
@@ -88,14 +93,21 @@ public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateN
 				return null;
 			}
 		});
-
+*/
 	}
 
 	@Override
 	public void onUpdateProperties(final NodeRef nodeRef, Map<QName, Serializable> before,
 			Map<QName, Serializable> after) {
 
+		final String mailBeforeModif = (String) before.get(ContentModel.PROP_EMAIL);
 		final String mailAfterModif = (String) after.get(ContentModel.PROP_EMAIL);
+
+		if(!Strings.isNullOrEmpty(mailBeforeModif)
+				&& !Strings.isNullOrEmpty(mailAfterModif)
+				&& !mailBeforeModif.equals(mailAfterModif))
+			uniqueMailConstraint.evaluate(mailAfterModif);
+/*
 
 		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Object>() {
 			@Override
@@ -115,6 +127,7 @@ public class PersonMailUnicityBehaviour implements NodeServicePolicies.OnCreateN
 				return null;
 			}
 		});
+*/
 
 	}
 

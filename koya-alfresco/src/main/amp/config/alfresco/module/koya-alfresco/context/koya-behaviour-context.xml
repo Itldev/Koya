@@ -46,14 +46,12 @@
 	</bean>
 	
       <!-- ====================================================== -->
-    
-    <bean id="PersonMailUnicityBehaviour" class="fr.itldev.koya.behaviour.PersonMailUnicityBehaviour" 
+    <bean id="PersonMailUnicityBehaviour" class="fr.itldev.koya.behaviour.PersonMailUnicityBehaviour"
           init-method="init" depends-on="fr.itldev.koya.dictionaryBootstrap" >        
         <property name="policyComponent" ref="policyComponent" />
         <property name="nodeService" ref="NodeService"/>
+		<property name="uniqueMailConstraint" ref="UniqueMailConstraintInitializer" />
     </bean>
-
-
 
 	<bean name="automaticUserJoinGroupBehaviour"
 		class="fr.itldev.koya.behaviour.AutomaticUserJoinGroupBehaviour"
