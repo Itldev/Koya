@@ -18,14 +18,13 @@
  */
 package fr.itldev.koya.webscript.content;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
-
+import fr.itldev.koya.action.ZipContentActionExecuter;
+import fr.itldev.koya.alfservice.CompanyService;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.impl.Company;
+import fr.itldev.koya.webscript.KoyaWebscript;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -35,13 +34,12 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
-import fr.itldev.koya.action.ZipContentActionExecuter;
-import fr.itldev.koya.alfservice.CompanyService;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
-import fr.itldev.koya.model.impl.Company;
-import fr.itldev.koya.webscript.KoyaWebscript;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Mostly comming from atolcd ZipContents
@@ -93,6 +91,10 @@ public class ZipContent extends AbstractWebScript {
 
 			if (pdf == null) {
 				pdf = Boolean.FALSE;
+			}
+
+			if(zipname != null) {
+				zipname = zipname.replaceAll("'", "_");
 			}
 
 			int len = jsonArray.size();
