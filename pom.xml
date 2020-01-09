@@ -179,15 +179,13 @@
 	</issueManagement>
 
 	<distributionManagement>
-		<repository>
-			<id>itldev-public-releases</id>
-			<name>itldev artifactory</name>
-			<url>http://private.itldev.fr/artifactory/public-releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>itldev-private-snapshots</id>
-			<name>itldev artifactory</name>
-			<url>http://private.itldev.fr/artifactory/private-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+			<repository>
+				<id>itldev-releases</id>
+				<url>https://artifactory.itldev.fr/artifactory/itldev-releases</url>
+			</repository>
+			<snapshotRepository>
+				<id>itldev-snapshots</id>
+				<url>https://artifactory.itldev.fr/artifactory/itldev-snapshots</url>
+			</snapshotRepository>
+		</distributionManagement>
 </project>

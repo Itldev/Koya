@@ -25,3 +25,6 @@ alfresco-dev.properties
 
 temp
 .externalToolBuilders
+
+.idea
+*.iml

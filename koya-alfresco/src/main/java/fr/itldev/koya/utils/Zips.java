@@ -2,25 +2,17 @@ package fr.itldev.koya.utils;
 
 import fr.itldev.koya.exception.KoyaServiceException;
 import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
+import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.log4j.Logger;
+import org.mozilla.universalchardet.UniversalDetector;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipError;
-
-import org.apache.commons.lang.reflect.FieldUtils;
-import org.apache.log4j.Logger;
-import org.mozilla.universalchardet.UniversalDetector;
 
 public class Zips {
 
@@ -57,10 +49,11 @@ public class Zips {
             /* We want to read an existing ZIP File, so we set this to False */
             zipProperties.put("create", "false");
             String charset = determineCharset(zipPath);
-            if (charset != null && charset.toLowerCase().equals("windows-1252")) {
-                // ibm850 (winzip?), is detected as windows-1252)
-                charset = "ibm850";
-            } else if(charset == null ){
+//            if (charset != null && charset.toLowerCase().equals("windows-1252")) {
+//                // ibm850 (winzip?), is detected as windows-1252)
+//                charset = "ibm850";
+//            } else
+                if(charset == null ){
                 charset = defaultCharset;
             }
             final String finalCharset = charset;
