@@ -18,12 +18,12 @@
  */
 package fr.itldev.koya.webscript.content;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.alfresco.repo.action.executer.ImporterActionExecuter;
+import fr.itldev.koya.action.UnzipActionExecuter;
+import fr.itldev.koya.alfservice.KoyaNodeService;
+import fr.itldev.koya.exception.KoyaServiceException;
+import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
+import fr.itldev.koya.model.json.RestConstants;
+import fr.itldev.koya.webscript.KoyaWebscript;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -34,12 +34,10 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
-import fr.itldev.koya.action.UnzipActionExecuter;
-import fr.itldev.koya.alfservice.KoyaNodeService;
-import fr.itldev.koya.exception.KoyaServiceException;
-import fr.itldev.koya.model.exceptions.KoyaErrorCodes;
-import fr.itldev.koya.model.json.RestConstants;
-import fr.itldev.koya.webscript.KoyaWebscript;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -76,8 +74,8 @@ public class ImportZip extends AbstractWebScript {
 
 		try {
 			NodeRef zipNodeRef = koyaNodeService.getNodeRef((String) urlParamsMap.get(RestConstants.WSCONST_NODEREF));
-
-			importZip(zipNodeRef);
+			Boolean deleteExtracted = Boolean.valueOf(urlParamsMap.get(RestConstants.WSCONST_DELETE));
+			importZip(zipNodeRef, deleteExtracted);
 		} catch (KoyaServiceException ex) {
 			throw new WebScriptException("KoyaError : " + ex.getErrorCode().toString(), ex);
 		}
@@ -85,11 +83,13 @@ public class ImportZip extends AbstractWebScript {
 		res.getWriter().write("");
 	}
 
-	private void importZip(NodeRef zipFile) throws KoyaServiceException {
+	private void importZip(NodeRef zipFile, Boolean deleteExtracted) throws KoyaServiceException {
 		try {
 			Map<String, Serializable> paramsImport = new HashMap<>();
-			paramsImport.put(ImporterActionExecuter.PARAM_DESTINATION_FOLDER,
+			paramsImport.put(UnzipActionExecuter.PARAM_DESTINATION_FOLDER,
 					nodeService.getPrimaryParent(zipFile).getParentRef());
+			paramsImport.put(UnzipActionExecuter.PARAM_DELETE_EXTRACTED,
+					deleteExtracted);
 			Action importZip = actionService.createAction(UnzipActionExecuter.NAME, paramsImport);
 			// /**
 			// * Process must be executed synchronously in order to delete
@@ -99,7 +99,7 @@ public class ImportZip extends AbstractWebScript {
 			// delete
 			// * zip.
 			// */
-			importZip.setExecuteAsynchronously(false);
+			importZip.setExecuteAsynchronously(!deleteExtracted);
 			actionService.executeAction(importZip, zipFile);
 		} catch (KoyaServiceException kse) {
 			throw kse;
