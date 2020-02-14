@@ -29,5 +29,6 @@ public class RestConstants {
 	public static final String WSCONST_SPACETEMPLATE = "spacetemplate";
 	public static final String WSCONST_SALESOFFER = "salesoffer";
 	public static final String WSCONST_KOYAPERMISSION = "koyaPermission";
+	public static final String WSCONST_DELETE = "delete";
 
 }

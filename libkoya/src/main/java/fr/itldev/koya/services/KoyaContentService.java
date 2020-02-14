@@ -18,23 +18,18 @@
  */
 package fr.itldev.koya.services;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.List;
-
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.springframework.core.io.Resource;
-
 import fr.itldev.koya.model.KoyaNode;
 import fr.itldev.koya.model.impl.Directory;
 import fr.itldev.koya.model.impl.Document;
 import fr.itldev.koya.model.impl.User;
 import fr.itldev.koya.model.interfaces.KoyaContent;
 import fr.itldev.koya.model.json.PaginatedContentList;
-import fr.itldev.koya.model.json.PdfRendition;
 import fr.itldev.koya.services.exceptions.AlfrescoServiceException;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.springframework.core.io.Resource;
 
-import java.net.URL;
+import java.io.File;
+import java.util.List;
 
 public interface KoyaContentService extends AlfrescoService {
 
@@ -70,7 +65,7 @@ public interface KoyaContentService extends AlfrescoService {
 	KoyaNode getZipKoyaNode(User user, List<KoyaNode> koyaNodes,
 			String zipname, Boolean pdf,Boolean async);
 
-	void importZipedContent(User user, Document zipFile)
+	void importZipedContent(User user, Document zipFile, Boolean delete)
 			throws AlfrescoServiceException;
 
 	KoyaNode getContentPdfNode(User user, KoyaNode koyaNode)
