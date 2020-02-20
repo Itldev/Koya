@@ -9,7 +9,7 @@
     <parent>
         <groupId>fr.itldev</groupId>
         <artifactId>koya</artifactId>
-        <version>1.1.3</version>
+        <version>1.1.4</version>
     </parent>
 
     <properties>
