@@ -23,7 +23,7 @@ echo "============ Push version stable  =============="
 git push origin stable
 git push --tags
 
-MAVEN_CLI_OPTS= "-B -DskipTests=true"
+MAVEN_CLI_OPTS="-B -DskipTests=true"
 
 mvn clean deploy $MAVEN_CLI_OPTS
 

@@ -191,15 +191,15 @@ public class UnzipActionExecuter extends ActionExecuterAbstractBase {
             }
 
             try {
+                // Update the modification date on the parent dossier
+                Dossier d = koyaNodeService.getFirstParentOfType(actionedUponNodeRef,
+                        Dossier.class);
+
+                dossierService.updateLastModificationDate(d);
 
                 if((Boolean)ruleAction.getParameterValue(PARAM_DELETE_EXTRACTED))
                     nodeService.deleteNode(actionedUponNodeRef);
 
-                // Update the modification date on the parent dossier                
-                Dossier d = koyaNodeService.getFirstParentOfType(actionedUponNodeRef,
-						Dossier.class);
-
-                dossierService.updateLastModificationDate(d);
             } catch (Exception ex) {
                 throw new AlfrescoRuntimeException(ex.getMessage(), ex);
             }
